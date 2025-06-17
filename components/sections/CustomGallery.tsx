@@ -1,4 +1,5 @@
 import React from 'react'
+import Image from 'next/image'
 
 type GalleryItem = {
   id: number
@@ -42,10 +43,12 @@ export default function CustomGallery() {
             className="bg-white rounded-xl shadow hover:shadow-md transition"
           >
             <div className="w-full h-56 bg-gray-100 rounded-t-xl overflow-hidden">
-              <img
+              <Image
                 src={item.image}
                 alt={item.title}
                 className="w-full h-full object-cover"
+                width={300}
+                height={300}
               />
             </div>
             <div className="p-4">

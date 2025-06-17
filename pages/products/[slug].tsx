@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router'
 import { products } from '@/data/products'
 import { useCart } from '@/context/CartContext'
+import Image from 'next/image'
 
 export default function ProductDetailPage() {
   const router = useRouter()
@@ -22,10 +23,12 @@ export default function ProductDetailPage() {
   return (
     <div className="max-w-4xl mx-auto py-20 px-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <img
-          src={product.image}
-          alt={product.title}
-          className="w-full h-auto rounded-lg"
+        <Image
+            src={product.image}
+            alt={product.title}
+            className="w-full h-auto rounded-lg"
+            width={300}
+            height={300}
         />
         <div>
           <h1 className="text-3xl font-bold text-stone-800">{product.title}</h1>

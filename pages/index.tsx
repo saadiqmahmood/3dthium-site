@@ -6,6 +6,9 @@ import CustomPrintsCTA from "@/components/sections/CustomPrintsCTA";
 export default function Home() {
   return (
     <section className="p-8">
+      <Head>
+        <title>3Dthium – Custom 3D Prints</title>
+      </Head>
       <div className="text-center space-y-4">
         <HeroSection />
         <FeaturedProducts />

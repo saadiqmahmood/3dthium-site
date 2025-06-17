@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { products, Product } from '@/data/products'
+import { products } from '@/data/products'
 import ProductCard from '@/components/ui/ProductCard'
 
 const categories = [

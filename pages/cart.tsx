@@ -1,5 +1,6 @@
 import { useCart } from '@/context/CartContext'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function CartPage() {
   const { cart, removeFromCart, clearCart } = useCart()
@@ -26,7 +27,7 @@ export default function CartPage() {
         {cart.map((item) => (
           <div key={item.id} className="flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-4">
-              <img src={item.image} alt={item.title} className="w-20 h-20 object-cover rounded" />
+              <Image width={300} height={300} src={item.image} alt={item.title} className="w-20 h-20 object-cover rounded" />
               <div>
                 <h3 className="font-semibold text-gray-800">{item.title}</h3>
                 <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>

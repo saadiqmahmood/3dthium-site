@@ -1,5 +1,7 @@
 import { Product } from '@/data/products'
 import Link from 'next/link'
+import Image from 'next/image'
+
 
 type Props = {
   product: Product
@@ -10,10 +12,12 @@ export default function ProductCard({ product }: Props) {
     <Link href={`/products/${product.slug}`} className="block">
       <div className="bg-white rounded-xl shadow hover:shadow-md transition">
         <div className="w-full h-48 bg-gray-100 rounded-t-xl overflow-hidden">
-          <img
+          <Image
             src={product.image}
             alt={product.title}
             className="w-full h-full object-cover"
+            width={300}
+            height={300}
           />
         </div>
         <div className="p-4">
