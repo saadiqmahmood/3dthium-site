@@ -24,7 +24,7 @@ export default function CustomOrderForm() {
           await new Promise((resolve) => setTimeout(resolve, 1500))
           setStatus('success')
           form.reset()
-        } catch (error) {
+        } catch {
           setStatus('error')
         }
       }

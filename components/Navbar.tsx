@@ -31,13 +31,13 @@ export default function Navbar() {
       )
     return (
       <nav className="bg-white px-6 py-4 flex justify-between items-center">
-          <a href="/" className="text-4xl pl-10 font-bold text-blue-500">3Dthium</a>
+          <Link href="/" className="text-4xl pl-10 font-bold text-blue-500">3Dthium</Link>
           <div className="space-x-7 pr-10 text-sm font-medium text-gray-600 flex items-center">
-            <a href="/" className="hover:text-text-stone-800 text-base">Home</a>
-            <a href="/products" className="hover:text-text-stone-800 text-base">Shop</a>
-            <a href="/custom-order" className="hover:text-text-stone-800 text-base">Custom Order</a>
-            <a href="/about" className="hover:text-text-stone-800 text-base">About</a>
-            <a href="/contact" className="hover:text-text-stone-800 text-base">Contact</a>
+            <Link href="/" className="hover:text-text-stone-800 text-base">Home</Link>
+            <Link href="/products" className="hover:text-text-stone-800 text-base">Shop</Link>
+            <Link href="/custom-order" className="hover:text-text-stone-800 text-base">Custom Order</Link>
+            <Link href="/about" className="hover:text-text-stone-800 text-base">About</Link>
+            <Link href="/contact" className="hover:text-text-stone-800 text-base">Contact</Link>
             <Link href="/cart" className="hover:text-blue-600">
                 <div className="relative w-6 h-6">
                     <CartIcon />

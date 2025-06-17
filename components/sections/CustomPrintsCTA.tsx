@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import React from 'react'
 
 export default function CustomPrintsCTA() {
@@ -10,12 +11,12 @@ export default function CustomPrintsCTA() {
             Request a personalized 3D printed item tailored to your needs.
           </p>
         </div>
-        <a
+        <Link
           href="/custom-order"
           className="bg-white text-blue-600 px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition"
         >
           Learn More
-        </a>
+        </Link>
       </div>
     </section>
   )

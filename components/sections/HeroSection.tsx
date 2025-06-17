@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import React from 'react'
 
 export default function HeroSection() {
@@ -12,18 +13,18 @@ export default function HeroSection() {
             Creative 3D printed products for your home, gifts, and more.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-            <a
+            <Link
               href="/shop"
               className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-500 transition"
             >
               Explore Products
-            </a>
-            <a
+            </Link>
+            <Link
               href="/custom-order"
               className="border border-blue-500 text-blue-500 px-6 py-3 rounded-lg font-medium hover:bg-blue-50 transition"
             >
               Custom Order
-            </a>
+            </Link>
           </div>
         </div>
 
