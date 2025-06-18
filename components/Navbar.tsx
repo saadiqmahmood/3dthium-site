@@ -5,8 +5,22 @@ import { useEffect, useState } from 'react'
 export default function Navbar() {
     const { cart } = useCart()
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
-
+    const [isOpen, setIsOpen] = useState(false)
     const [animate, setAnimate] = useState(false)
+
+    useEffect(() => {
+        const handleResize = () => {
+          if (window.innerWidth >= 768) {
+            setIsOpen(false)
+          }
+        }
+      
+        window.addEventListener('resize', handleResize)
+      
+        return () => {
+          window.removeEventListener('resize', handleResize)
+        }
+      }, [])
 
     useEffect(() => {
         if (totalItems === 0) return
@@ -30,29 +44,101 @@ export default function Navbar() {
         </svg>
       )
     return (
-      <nav className="bg-white px-6 py-4 flex justify-between items-center">
-          <Link href="/" className="text-4xl pl-10 font-bold text-blue-500">3Dthium</Link>
-          <div className="space-x-7 pr-10 text-sm font-medium text-gray-600 flex items-center">
-            <Link href="/" className="hover:text-text-stone-800 text-base">Home</Link>
-            <Link href="/products" className="hover:text-text-stone-800 text-base">Shop</Link>
-            <Link href="/custom-order" className="hover:text-text-stone-800 text-base">Custom Order</Link>
-            <Link href="/about" className="hover:text-text-stone-800 text-base">About</Link>
-            <Link href="/contact" className="hover:text-text-stone-800 text-base">Contact</Link>
-            <Link href="/cart" className="hover:text-blue-600">
-                <div className="relative w-6 h-6">
-                    <CartIcon />
+        <nav className="bg-white px-6 py-4 flex flex-col md:flex-row md:justify-between md:items-center">
+            <div className="flex justify-between items-center w-full">
+                <Link href="/" className="text-4xl pl-5 font-bold text-blue-500">3Dthium</Link>
 
-                    {totalItems > 0 && (
-                        <span
-                            className={`absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'
-                                }`}
+                <div className="flex items-center gap-4">
+                    <Link href="/cart" className="hover:text-blue-600 md:hidden">
+                        <div className="relative w-6 h-6">
+                            <CartIcon />
+
+                            {totalItems > 0 && (
+                                <span
+                                    className={`absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'
+                                        }`}
+                                >
+                                    {totalItems}
+                                </span>
+                            )}
+                        </div>
+                    </Link>
+
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        className={`md:hidden p-2 rounded transition
+                            ${isOpen
+                              ? 'bg-blue-500 text-white'
+                              : 'text-gray-700 hover:text-blue-500 hover:bg-blue-50 active:bg-blue-100'
+                            }`}
+                        aria-label="Toggle Menu"
+                    >
+                        <svg
+                            className="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
                         >
-                            {totalItems}
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div className="hidden md:flex md:flex-row md:space-x-7 pr-20 text-sm font-medium text-gray-600 items-center">
+                <Link href="/" className="text-base hover:text-stone-800">Home</Link>
+                <Link href="/products" className="text-base hover:text-stone-800">Shop</Link>
+                <Link href="/custom-order" className="text-base hover:text-stone-800 whitespace-nowrap">Custom Order</Link>
+                <Link href="/about" className="text-base hover:text-stone-800">About</Link>
+                <Link href="/contact" className="text-base hover:text-stone-800">Contact</Link>
+                <Link href="/cart" className="hover:text-blue-600 hidden md:block">
+                    <div className="relative w-6 h-6">
+                    <CartIcon />
+                    {totalItems > 0 && (
+                        <span className={`absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'}`}>
+                        {totalItems}
                         </span>
                     )}
+                    </div>
+                </Link>
+            </div>
+            {isOpen && (
+            <div
+                className="fixed inset-0 z-50 bg-black/40"
+                onClick={() => setIsOpen(false)}
+            >
+                <div
+                className="bg-white w-4/5 h-full p-6 shadow-lg flex flex-col gap-4"
+                onClick={(e) => e.stopPropagation()}
+                >
+                <button
+                    onClick={() => setIsOpen(false)}
+                    className="self-end text-gray-600 hover:text-blue-500 hover:bg-blue-50 active:bg-blue-100 p-2 rounded transition"
+                    aria-label="Close Menu"
+                    >
+                    <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <Link href="/" className="text-4xl font-bold text-blue-500">3Dthium</Link>
+                <div className="mt-6 flex flex-col divide-y divide-gray-200">
+                <Link href="/" className="py-3 font-medium text-stone-800 hover:text-gray-600 text-base">Home</Link>
+                <Link href="/products" className="py-3 font-medium text-stone-800 hover:text-gray-600 text-base">Shop</Link>
+                <Link href="/custom-order" className="py-3 font-medium text-stone-800 hover:text-gray-600 text-base whitespace-nowrap">Custom Order</Link>
+                <Link href="/about" className="py-3 font-medium text-stone-800 hover:text-gray-600 text-base">About</Link>
+                <Link href="/contact" className="py-3 font-medium text-stone-800 hover:text-gray-600 text-base">Contact</Link>
                 </div>
-            </Link>
-          </div>
-      </nav>
+                </div>
+            </div>
+            )}
+        </nav>
   )
 }
