@@ -13,6 +13,7 @@ export default function ContactPage() {
       setStatus('success')
       ;(e.target as HTMLFormElement).reset()
     } catch (err) {
+      console.error(err)
       setStatus('error')
     }
   }
