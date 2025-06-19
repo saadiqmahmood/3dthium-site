@@ -1,12 +1,16 @@
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+
 
 export default function Navbar() {
     const { cart } = useCart()
+    const isCartEmpty = cart.length === 0
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
     const [isOpen, setIsOpen] = useState(false)
     const [animate, setAnimate] = useState(false)
+    const router = useRouter()
 
     useEffect(() => {
         const handleResize = () => {
@@ -49,20 +53,25 @@ export default function Navbar() {
                 <Link href="/" className="text-4xl pl-5 font-bold text-blue-500">3Dthium</Link>
 
                 <div className="flex items-center gap-4">
-                    <Link href="/cart" className="hover:text-blue-600 md:hidden">
+                {!isCartEmpty ? (
+                    <Link
+                        href={{ pathname: '/cart', query: { from: router.asPath } }}
+                        className="hover:text-blue-600 md:hidden"
+                    >
                         <div className="relative w-6 h-6">
-                            <CartIcon />
-
-                            {totalItems > 0 && (
-                                <span
-                                    className={`absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'
-                                        }`}
-                                >
-                                    {totalItems}
-                                </span>
-                            )}
+                        <CartIcon />
+                        {totalItems > 0 && (
+                            <span className={`absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'}`}>
+                            {totalItems}
+                            </span>
+                        )}
                         </div>
                     </Link>
+                    ) : (
+                    <div className="relative w-6 h-6 cursor-not-allowed opacity-50 md:hidden" title="Cart is empty">
+                        <CartIcon />
+                    </div>
+                    )}
 
                     <button
                         onClick={() => setIsOpen(!isOpen)}
@@ -92,16 +101,25 @@ export default function Navbar() {
                 <Link href="/custom-order" className="text-base hover:text-stone-800 whitespace-nowrap">Custom Order</Link>
                 <Link href="/about" className="text-base hover:text-stone-800">About</Link>
                 <Link href="/contact" className="text-base hover:text-stone-800">Contact</Link>
-                <Link href="/cart" className="hover:text-blue-600 hidden md:block">
-                    <div className="relative w-6 h-6">
-                    <CartIcon />
-                    {totalItems > 0 && (
-                        <span className={`absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'}`}>
-                        {totalItems}
-                        </span>
-                    )}
+                {!isCartEmpty ? (
+                    <Link
+                        href={{ pathname: '/cart', query: { from: router.asPath } }}
+                        className="hover:text-blue-600 hidden md:block"
+                    >
+                        <div className="relative w-6 h-6">
+                        <CartIcon />
+                        {totalItems > 0 && (
+                            <span className={`absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'}`}>
+                            {totalItems}
+                            </span>
+                        )}
+                        </div>
+                    </Link>
+                    ) : (
+                    <div className="relative w-6 h-6 cursor-not-allowed opacity-50 hidden md:block" title="Cart is empty">
+                        <CartIcon />
                     </div>
-                </Link>
+                    )}
             </div>
             {isOpen && (
             <div
@@ -130,11 +148,56 @@ export default function Navbar() {
                 </button>
                 <Link href="/" className="text-4xl font-bold text-blue-500">3Dthium</Link>
                 <div className="mt-6 flex flex-col divide-y divide-gray-200">
-                <Link href="/" className="py-3 font-medium text-stone-800 hover:text-gray-600 text-base">Home</Link>
-                <Link href="/products" className="py-3 font-medium text-stone-800 hover:text-gray-600 text-base">Shop</Link>
-                <Link href="/custom-order" className="py-3 font-medium text-stone-800 hover:text-gray-600 text-base whitespace-nowrap">Custom Order</Link>
-                <Link href="/about" className="py-3 font-medium text-stone-800 hover:text-gray-600 text-base">About</Link>
-                <Link href="/contact" className="py-3 font-medium text-stone-800 hover:text-gray-600 text-base">Contact</Link>
+                    <button
+                        onClick={() => {
+                            setTimeout(() => setIsOpen(false), 250)
+                                router.push('/')
+                            }}
+                        className="text-base py-3 font-medium text-stone-800 hover:text-gray-600 text-left"
+                    >
+                        Home
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            setTimeout(() => setIsOpen(false), 250)
+                                router.push('/products')
+                            }}
+                        className="text-base py-3 font-medium text-stone-800 hover:text-gray-600 text-left"
+                    >
+                        Shop
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            setTimeout(() => setIsOpen(false), 250)
+                                router.push('/custom-order')
+                            }}
+                        className="text-base py-3 font-medium text-stone-800 hover:text-gray-600 text-left"
+                    >
+                        Custom Order
+                    </button>                   
+                
+                    <button
+                        onClick={() => {
+                            setTimeout(() => setIsOpen(false), 250)
+                                router.push('/about')
+                            }}
+                        className="text-base py-3 font-medium text-stone-800 hover:text-gray-600 text-left"
+                    >
+                        About
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            setTimeout(() => setIsOpen(false), 250)
+                                router.push('/contact')
+                            }}
+                        className="text-base py-3 font-medium text-stone-800 hover:text-gray-600 text-left"
+                    >
+                        Contact
+                    </button>
+
                 </div>
                 </div>
             </div>

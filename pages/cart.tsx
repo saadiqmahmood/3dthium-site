@@ -1,26 +1,36 @@
 import { useCart } from '@/context/CartContext'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useEffect } from 'react'
+import { useRouter } from 'next/router'
 
 export default function CartPage() {
   const { cart, removeFromCart, clearCart } = useCart()
-  console.log('Cart:', cart)
-
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0)
+  const router = useRouter()
+  const { from } = router.query
 
-  if (cart.length === 0) {
-    return (
-      <div className="max-w-3xl mx-auto py-20 px-6 text-center">
-        <h1 className="text-3xl font-bold mb-4 text-blue-600">Your Cart is Empty</h1>
-        <Link href="/products" className="text-blue-500 underline">
-          Go back to products
-        </Link>
-      </div>
-    )
-  }
+  useEffect(() => {
+    if (cart.length === 0) {
+      router.replace(from && typeof from === 'string' ? from : '/')
+    }
+  }, [cart, from, router])
 
   return (
     <div className="max-w-4xl mx-auto py-20 px-6">
+        <button
+            onClick={() => {
+                if (from && typeof from === 'string') {
+                router.push(from)
+                } else {
+                router.push('/products') // fallback
+                }
+            }}
+            className="mb-6 text-sm text-blue-600 hover:underline"
+            >
+            ← Back
+            </button>
+
       <h1 className="text-3xl font-bold mb-8 text-blue-600">Your Cart</h1>
 
       <div className="space-y-6">
@@ -56,7 +66,9 @@ export default function CartPage() {
             </button>
           </Link>
           <button
-            onClick={clearCart}
+            onClick={() => {
+                setTimeout(() => clearCart(), 300)
+              }}
             className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
             Clear Cart
