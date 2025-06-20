@@ -2,11 +2,14 @@ import { useRouter } from 'next/router'
 import { products } from '@/data/products'
 import { useCart } from '@/context/CartContext'
 import Image from 'next/image'
+import { useState } from 'react'
 
 export default function ProductDetailPage() {
   const router = useRouter()
   const { slug } = router.query
   const { addToCart } = useCart()
+  const [showMessage, setShowMessage] = useState(false)
+  const [buttonClicked, setButtonClicked] = useState(false)
 
   if (!slug || typeof slug !== 'string') return null
 
@@ -48,22 +51,34 @@ export default function ProductDetailPage() {
 
           <div className="mt-6 flex gap-4">
             <button
-                // onClick={() => addToCart(product)} 
                 onClick={() => {
                     console.log('adding', product)
+                    setButtonClicked(true)
                     addToCart(product)
+                    setShowMessage(true)
+                    setTimeout(() => setButtonClicked(false), 1000)   
+                    setTimeout(() => setShowMessage(false), 5000)
                   }}
-                className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700"
-                
-            >
-              Add to Cart
+                    className={`px-5 py-2 rounded transition font-medium ${
+                      buttonClicked
+                        ? 'bg-green-600 text-white'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}  
+                    >
+              {buttonClicked ? 'Added!' : 'Add to Cart'}    
             </button>
+
             <button className="bg-gray-200 text-gray-800 px-5 py-2 rounded hover:bg-gray-300">
               Buy Now
             </button>
           </div>
         </div>
       </div>
+      {showMessage && (
+        <div className="fixed max-w-5xs md:max-w-none bottom-6 right-6 md:right-6 md:bottom-20 md:left-auto left-1/2 transform -translate-x-1/2 md:translate-x-0 bg-gray-200/50 border-stone-300 text-stone-800 px-4 py-2 shadow-md text-sm md:text-base z-50 transition-opacity duration-300 text-center">
+          Item added to cart
+        </div>
+      )}
     </div>
   )
 }
