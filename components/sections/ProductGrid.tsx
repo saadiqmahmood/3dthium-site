@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { products } from '@/data/products'
+import React, { useState, useEffect } from 'react'
+import { Product } from '@/types'
 import ProductCard from '@/components/ui/ProductCard'
 
 const categories = [
@@ -14,6 +14,17 @@ const categories = [
 
 export default function ProductGrid() {
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const [products, setProducts] = useState<Product[]>([])
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const res = await fetch('/api/test')
+      const data = await res.json()
+      setProducts(data)
+    }
+
+    fetchProducts()
+  }, [])
 
   const filteredProducts =
     selectedCategory === 'All'

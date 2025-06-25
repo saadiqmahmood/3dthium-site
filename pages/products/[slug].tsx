@@ -1,19 +1,18 @@
-import { useRouter } from 'next/router'
-import { products } from '@/data/products'
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
+import { supabase } from '@/lib/supabaseClient'
+import { Product } from '@/types'
 import { useCart } from '@/context/CartContext'
 import Image from 'next/image'
 import { useState } from 'react'
 
-export default function ProductDetailPage() {
-  const router = useRouter()
-  const { slug } = router.query
+type ProductDetailPageProps = {
+  product: Product | null
+}
+
+const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product }) => {
   const { addToCart } = useCart()
   const [showMessage, setShowMessage] = useState(false)
   const [buttonClicked, setButtonClicked] = useState(false)
-
-  if (!slug || typeof slug !== 'string') return null
-
-  const product = products.find((p) => p.slug === slug)
 
   if (!product) {
     return (
@@ -81,4 +80,46 @@ export default function ProductDetailPage() {
       )}
     </div>
   )
+}
+
+export default ProductDetailPage
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const { data: products, error } = await supabase.from('products').select('slug')
+
+  if (error || !products) {
+    return { paths: [], fallback: 'blocking' }
+  }
+
+  const paths = products.map((product) => ({
+    params: { slug: product.slug },
+  }))
+
+  return { paths, fallback: 'blocking' }
+}
+
+export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (context) => {
+  const { slug } = context.params || {}
+
+  if (!slug || typeof slug !== 'string') {
+    return { notFound: true }
+  }
+
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('slug', slug)
+    .single()
+
+  if (error || !data) {
+    console.error('Error fetching product by slug:', error)
+    return { notFound: true }
+  }
+
+  return {
+    props: {
+      product: data,
+    },
+    revalidate: 60, // Re-generate the page every 60 seconds
+  }
 }

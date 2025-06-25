@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import { useAuth } from '@/context/AuthContext'
+
+
 
 
 export default function Navbar() {
@@ -11,6 +14,7 @@ export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
     const [animate, setAnimate] = useState(false)
     const router = useRouter()
+    const { user } = useAuth()
 
     useEffect(() => {
         const handleResize = () => {
@@ -119,6 +123,15 @@ export default function Navbar() {
                     <div className="relative w-6 h-6 cursor-not-allowed opacity-50 hidden md:block" title="Cart is empty">
                         <CartIcon />
                     </div>
+                    )}
+                {!user ? (
+                    <Link href="/auth" className="text-sm font-medium text-blue-600 hover:underline">
+                        Login
+                    </Link>
+                    ) : (
+                    <Link href="/account" className="text-sm font-medium text-stone-700 hover:text-blue-500">
+                        My Account
+                    </Link>
                     )}
             </div>
             {isOpen && (

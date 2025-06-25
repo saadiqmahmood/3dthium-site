@@ -1,0 +1,16 @@
+
+> 3dthium@0.1.0 build
+> next build
+
+   ▲ Next.js 15.3.3
+   - Environments: .env.local
+
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./pages/auth.tsx
+17:10  Error: 'resetMode' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+46:11  Error: 'handlePasswordReset' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
