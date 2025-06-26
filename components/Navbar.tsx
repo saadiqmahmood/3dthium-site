@@ -210,6 +210,27 @@ export default function Navbar() {
                     >
                         Contact
                     </button>
+                    {!user ? (
+                    <button
+                        onClick={() => {
+                        setTimeout(() => setIsOpen(false), 250)
+                        router.push('/auth')
+                        }}
+                        className="text-base py-3 font-medium text-blue-600 hover:text-blue-800 text-left"
+                    >
+                        Login
+                    </button>
+                    ) : (
+                    <button
+                        onClick={() => {
+                        setTimeout(() => setIsOpen(false), 250)
+                        router.push('/account')
+                        }}
+                        className="text-base py-3 font-medium text-stone-700 hover:text-blue-500 text-left"
+                    >
+                        My Account
+                    </button>
+                    )}
 
                 </div>
                 </div>
