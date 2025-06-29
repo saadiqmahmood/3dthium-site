@@ -16,7 +16,8 @@
     "@tailwindcss/postcss": "^4.1.10",
     "next": "^15.3.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "slugify": "^1.6.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

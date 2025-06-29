@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Product } from '@/types'
+import { Product, ProductVariant } from '@/types'
 import ProductCard from '@/components/ui/ProductCard'
 
 const categories = [
@@ -12,9 +12,14 @@ const categories = [
   'Gifts & Custom Items',
 ]
 
+type ProductWithVariants = {
+  product: Product
+  variants: ProductVariant[]
+}
+
 export default function ProductGrid() {
   const [selectedCategory, setSelectedCategory] = useState('All')
-  const [products, setProducts] = useState<Product[]>([])
+  const [products, setProducts] = useState<ProductWithVariants[]>([])
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -29,7 +34,7 @@ export default function ProductGrid() {
   const filteredProducts =
     selectedCategory === 'All'
       ? products
-      : products.filter((product) => product.category === selectedCategory)
+      : products.filter((item) => item.product.category === selectedCategory)
 
   return (
     <section className="py-12">
@@ -53,8 +58,8 @@ export default function ProductGrid() {
 
         {/* Product Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {filteredProducts.map(({ product, variants }) => (
+            <ProductCard key={product.id} product={product} variants={variants} />
           ))}
         </div>
       </div>

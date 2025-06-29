@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 
 export default function CartPage() {
   const { cart, removeFromCart, clearCart } = useCart()
-  const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0)
+  const total = cart.reduce((acc, item) => acc + item.variant.price * item.quantity, 0)
   const router = useRouter()
   const { from } = router.query
 
@@ -35,19 +35,20 @@ export default function CartPage() {
 
       <div className="space-y-6">
         {cart.map((item) => (
-          <div key={item.id} className="flex items-center justify-between border-b pb-4">
+          <div key={item.product.id + '-' + item.variant.id} className="flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-4">
-              <Image width={300} height={300} src={item.image} alt={item.title} className="w-20 h-20 object-cover rounded" />
+              <Image width={100} height={100} src={item.variant.image_url} alt={item.product.title + ' - ' + item.variant.color} className="w-20 h-20 object-cover rounded" />
               <div>
-                <h3 className="font-semibold text-gray-800">{item.title}</h3>
+                <h3 className="font-semibold text-gray-800">{item.product.title}</h3>
+                <p className="text-sm text-gray-500">Color: {item.variant.color}</p>
                 <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
-                <p className="text-sm text-gray-500">Material: {item.material}</p>
+                <p className="text-sm text-gray-500">Customizable: {item.variant.customizable ? 'Yes' : 'No'}</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-gray-700 font-medium">£{(item.price * item.quantity).toFixed(2)}</p>
+              <p className="text-gray-700 font-medium">£{(item.variant.price * item.quantity).toFixed(2)}</p>
               <button
-                onClick={() => removeFromCart(item.id)}
+                onClick={() => removeFromCart(item.product.id, item.variant.id)}
                 className="text-red-500 text-sm hover:underline mt-1"
               >
                 Remove
@@ -65,13 +66,18 @@ export default function CartPage() {
               Continue Shopping
             </button>
           </Link>
+          <Link href="/checkout">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+              Checkout
+            </button>
+          </Link>
           <button
             onClick={() => {
                 setTimeout(() => clearCart(), 300)
               }}
             className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
-            Clear Cart
+            Clear
           </button>
         </div>
       </div>
