@@ -1,14 +1,9 @@
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { useSupabase } from '@/context/SupabaseContext'
 import Image from 'next/image'
 import Link from 'next/link'
-
-const supabaseClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 // Define types for order and order item
 interface Product {
@@ -37,6 +32,7 @@ interface Order {
 export default function AccountPage() {
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
+  const { client: supabaseClient } = useSupabase()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [section, setSection] = useState<'profile' | 'orders'>('profile')
   const [orders, setOrders] = useState<Order[]>([])
