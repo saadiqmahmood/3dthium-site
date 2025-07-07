@@ -51,11 +51,6 @@ const SHIPPO_API_URL = 'https://api.goshippo.com'
 
 // Helper function to create a shipment and get rates using Shippo REST API
 export async function getShippingRates(shipmentData: ShipmentRequest): Promise<ShippingRate[]> {
-  // Debug log for Shippo API key (do not log full key in production)
-  if (typeof window === 'undefined') {
-    const key = SHIPPO_API_KEY;
-    console.log('DEBUG SHIPPO_API_KEY:', key ? key.slice(0, 8) + '...' + key.slice(-4) : 'undefined');
-  }
   const response = await fetch(`${SHIPPO_API_URL}/shipments/`, {
     method: 'POST',
     headers: {
