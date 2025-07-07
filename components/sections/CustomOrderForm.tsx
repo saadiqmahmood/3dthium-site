@@ -1,31 +1,87 @@
 import React, { useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export default function CustomOrderForm() {
     const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>('idle')
     const [fileError, setFileError] = useState<string | null>(null)
-
+    const [formError, setFormError] = useState<string | null>(null)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setStatus('loading')
         setFileError(null)
+        setFormError(null)
       
         const form = e.target as HTMLFormElement
         const fileInput = form.file as HTMLInputElement
         const file = fileInput?.files?.[0]
       
-        if (file && file.size > 20 * 1024 * 1024) {
+        if (!file) {
+          setStatus('idle')
+          setFileError('Please upload a file.')
+          return
+        }
+        if (file.size > 20 * 1024 * 1024) {
           setStatus('idle')
           setFileError('File size must be 20MB or less.')
           return
         }
-      
+
+        // Upload file to Supabase Storage
+        let fileUrl = ''
         try {
-          await new Promise((resolve) => setTimeout(resolve, 1500))
+          const filePath = `${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`
+          const { error: uploadError } = await supabase.storage
+            .from('custom-orders')
+            .upload(filePath, file)
+          if (uploadError) {
+            console.error('Supabase upload error:', uploadError)
+            setStatus('idle')
+            setFileError(uploadError.message || 'File upload failed. Please try again.')
+            return
+          }
+          const { data: publicUrlData } = supabase.storage
+            .from('custom-orders')
+            .getPublicUrl(filePath)
+          fileUrl = publicUrlData.publicUrl
+        } catch (err: unknown) {
+          setStatus('idle')
+          setFileError(err instanceof Error ? err.message : 'File upload failed. Please try again.')
+          return
+        }
+
+        // Gather form data
+        const formData = {
+          name: (form.name as unknown as HTMLInputElement).value,
+          email: (form.email as unknown as HTMLInputElement).value,
+          phone: (form.phone as unknown as HTMLInputElement).value,
+          material: (form.material as unknown as HTMLSelectElement).value,
+          address: (form.address as unknown as HTMLInputElement).value,
+          width: (form.width as unknown as HTMLInputElement).value,
+          height: (form.height as unknown as HTMLInputElement).value,
+          depth: (form.depth as unknown as HTMLInputElement).value,
+          description: (form.description as unknown as HTMLTextAreaElement).value,
+          file_url: fileUrl,
+        }
+
+        // Submit to API
+        try {
+          const res = await fetch('/api/custom-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData),
+          })
+          if (!res.ok) throw new Error('Failed to submit custom order.')
           setStatus('success')
           form.reset()
         } catch {
           setStatus('error')
+          setFormError('Failed to submit custom order. Please try again.')
         }
       }
 
@@ -42,6 +98,16 @@ export default function CustomOrderForm() {
         {status === 'error' && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                 Something went wrong. Please try again.
+            </div>
+        )}
+        {fileError && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                {fileError}
+            </div>
+        )}
+        {formError && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                {formError}
             </div>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -180,9 +246,6 @@ export default function CustomOrderForm() {
             file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
             <p className="text-xs text-gray-500 mt-1">Max size: 20MB per file.</p>
-            {fileError && (
-                <p className="text-sm text-red-600 mt-2">{fileError}</p>
-            )}
         </div>
 
         {/* Submit Button */}

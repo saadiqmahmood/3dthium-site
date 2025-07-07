@@ -14,7 +14,8 @@ export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
     const [animate, setAnimate] = useState(false)
     const router = useRouter()
-    const { user } = useAuth()
+    const { user, isAdmin } = useAuth()
+    const isAccountPage = router.pathname.startsWith('/account');
 
     useEffect(() => {
         const handleResize = () => {
@@ -52,7 +53,7 @@ export default function Navbar() {
         </svg>
       )
     return (
-        <nav className="bg-white px-6 py-4 flex flex-col md:flex-row md:justify-between md:items-center">
+        <nav className={`${isAccountPage ? 'fixed top-0 left-0 w-full z-50' : ''} bg-white px-6 py-4 flex flex-col md:flex-row md:justify-between md:items-center`}>
             <div className="flex justify-between items-center w-full">
                 <Link href="/" className="text-4xl pl-5 font-bold text-blue-500">3Dthium</Link>
 
@@ -129,9 +130,16 @@ export default function Navbar() {
                         Login
                     </Link>
                     ) : (
+                    <>
                     <Link href="/account" className="text-sm font-medium text-stone-700 hover:text-blue-500">
                         My Account
                     </Link>
+                    {isAdmin && (
+                        <Link href="/admin" className="text-sm font-medium text-blue-700 hover:text-blue-900">
+                            Admin
+                        </Link>
+                    )}
+                    </>
                     )}
             </div>
             {isOpen && (
@@ -221,6 +229,7 @@ export default function Navbar() {
                         Login
                     </button>
                     ) : (
+                    <>
                     <button
                         onClick={() => {
                         setTimeout(() => setIsOpen(false), 250)
@@ -230,6 +239,18 @@ export default function Navbar() {
                     >
                         My Account
                     </button>
+                    {isAdmin && (
+                        <button
+                            onClick={() => {
+                                setTimeout(() => setIsOpen(false), 250)
+                                router.push('/admin')
+                            }}
+                            className="text-base py-3 font-medium text-blue-700 hover:text-blue-900 text-left"
+                        >
+                            Admin
+                        </button>
+                    )}
+                    </>
                     )}
 
                 </div>

@@ -1,18 +1,20 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode, useCallback } from 'react'
 import { Product, ProductVariant } from '@/types'
 import { useEffect } from 'react'
 
 export type CartItem = {
     product: Product
     variant: ProductVariant
+    size: string
     quantity: number
 }
 
 type CartContextType = {
     cart: CartItem[]
-    addToCart: (product: Product, variant: ProductVariant) => void
-    removeFromCart: (productId: string, variantId: string) => void
+    addToCart: (product: Product, variant: ProductVariant, size: string) => void
+    removeFromCart: (productId: string, variantId: string, size: string) => void
     clearCart: () => void
+    updateCartItemQuantity: (productId: string, variantId: string, size: string, quantity: number) => void
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -36,32 +38,55 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('cart', JSON.stringify(cart))
     }, [cart])
 
-    const addToCart = (product: Product, variant: ProductVariant) => {
+    const addToCart = useCallback((product: Product, variant: ProductVariant, size: string) => {
         if (!variant) {
             alert('Please select a color/variant before adding to cart.')
             return
         }
+        if (!size) {
+            alert('Please select a size before adding to cart.')
+            return
+        }
         setCart((prev) => {
-            const existing = prev.find((item) => item.product.id === product.id && item.variant.id === variant.id)
+            const existing = prev.find((item) =>
+                item.product.id === product.id &&
+                item.variant.id === variant.id &&
+                item.size === size
+            )
             if (existing) {
                 return prev.map((item) =>
-                    item.product.id === product.id && item.variant.id === variant.id
+                    item.product.id === product.id &&
+                    item.variant.id === variant.id &&
+                    item.size === size
                         ? { ...item, quantity: item.quantity + 1 }
                         : item
                 )
             }
-            return [...prev, { product, variant, quantity: 1 }]
+            return [...prev, { product, variant, size, quantity: 1 }]
         })
-    }
+    }, [])
 
-    const removeFromCart = (productId: string, variantId: string) => {
-        setCart((prev) => prev.filter((item) => !(item.product.id === productId && item.variant.id === variantId)))
-    }
+    const removeFromCart = useCallback((productId: string, variantId: string, size: string) => {
+        setCart((prev) => prev.filter((item) => !(item.product.id === productId && item.variant.id === variantId && item.size === size)))
+    }, [])
 
-    const clearCart = () => setCart([])
+    const clearCart = useCallback(() => setCart([]), [])
+
+    const updateCartItemQuantity = useCallback((productId: string, variantId: string, size: string, quantity: number) => {
+        setCart((prev) => {
+            if (quantity <= 0) {
+                return prev.filter((item) => !(item.product.id === productId && item.variant.id === variantId && item.size === size))
+            }
+            return prev.map((item) =>
+                item.product.id === productId && item.variant.id === variantId && item.size === size
+                    ? { ...item, quantity }
+                    : item
+            )
+        })
+    }, [])
 
     return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, updateCartItemQuantity }}>
             {children}
         </CartContext.Provider>
     )

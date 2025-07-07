@@ -11,11 +11,11 @@ export default function ProductCard({ product, variants }: Props) {
   return (
     <Link href={`/products/${product.slug}`} className="block">
       <div className="bg-white rounded-xl shadow hover:shadow-md transition">
-        <div className="w-full h-48 bg-gray-100 rounded-t-xl overflow-hidden">
+        <div className="w-full h-72 bg-gray-100 rounded-t-xl overflow-hidden">
           <Image
             src={product.thumbnail_url}
             alt={product.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-center"
             width={300}
             height={300}
           />

@@ -13,10 +13,11 @@ type ProductDetailPageProps = {
 }
 
 const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants }) => {
-  const { addToCart } = useCart()
+  const { addToCart, clearCart } = useCart()
   const router = useRouter()
   // null means show thumbnail, otherwise show selected variant
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
+  const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [showMessage, setShowMessage] = useState(false)
   const [buttonClicked, setButtonClicked] = useState(false)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
@@ -43,7 +44,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
       >
         ← Back
       </button>
-      <div className="grid grid-cols-1 md:grid-cols-[450px_1fr] gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-[400px_1fr] gap-8">
         <div>
           <h1 className="text-3xl font-bold text-stone-800 pb-10">{product.title}</h1>
           <Image
@@ -53,47 +54,173 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
             width={1000}
             height={1000}
           />
-          <div className="mt-4 flex flex-wrap gap-2">
-            {/* Dash button for thumbnail */}
-            <button
-              className={`px-3 py-1 rounded-full border ${selectedVariant === null ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-              onClick={() => setSelectedVariant(null)}
-            >
-              -
-            </button>
-            {variants.map((variant) => (
+          {/* Mobile: Variant selector, price, customizable info under image */}
+          <div className="block md:hidden pt-15">
+            <div className="mt-6">
+              <label className="block font-semibold mb-2">Colour</label>
+              <div className="flex flex-wrap gap-2">
+                {/* Dash button for thumbnail */}
+                <button
+                  className={`px-3 py-1 rounded-full border ${selectedVariant === null ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                  onClick={() => setSelectedVariant(null)}
+                >
+                  -
+                </button>
+                {variants.map((variant) => (
+                  <button
+                    key={variant.id}
+                    className={`px-3 py-1 rounded-full border ${selectedVariant?.id === variant.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                    onClick={() => setSelectedVariant(variant)}
+                  >
+                    {variant.color}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p className="mt-4 text-xl font-semibold text-gray-900">£{price.toFixed(2)}</p>
+            <p className="mt-1 text-gray-700">
+              Customizable: <span className="font-medium">{customizable ? 'Yes' : 'No'}</span>
+            </p>
+            {/* Mobile: Size selector */}
+            <div className="mt-6">
+              <label className="block font-semibold mb-2">Size</label>
+              <div className="flex flex-wrap gap-2">
+                {/* Dash button for size deselect */}
+                <button
+                  type="button"
+                  className={`px-3 py-1 rounded-full border ${selectedSize === null ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                  onClick={() => setSelectedSize(null)}
+                >
+                  -
+                </button>
+                {["150mm", "180mm", "210mm", "240mm"].map(size => (
+                  <button
+                    key={size}
+                    type="button"
+                    className={`px-3 py-1 rounded-full border ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-200 text-gray-800 border-gray-300'}`}
+                    onClick={() => setSelectedSize(size)}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Mobile: Action buttons */}
+            <div className="mt-6 flex gap-4">
               <button
-                key={variant.id}
-                className={`px-3 py-1 rounded-full border ${selectedVariant?.id === variant.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-                onClick={() => setSelectedVariant(variant)}
+                onClick={() => {
+                  if (!selectedSize) {
+                    setToast({ message: 'Please select a size before adding to cart.', type: 'error' })
+                    return
+                  }
+                  if (!selectedVariant) {
+                    setToast({ message: 'Please select a color before adding to cart.', type: 'error' })
+                    return
+                  }
+                  setButtonClicked(true)
+                  addToCart(product, selectedVariant, selectedSize)
+                  setShowMessage(true)
+                  setTimeout(() => setButtonClicked(false), 1000)
+                  setTimeout(() => setShowMessage(false), 5000)
+                }}
+                className={`px-5 py-2 rounded transition font-medium ${
+                  buttonClicked
+                    ? 'bg-green-600 text-white'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
               >
-                {variant.color}
+                {buttonClicked ? 'Added!' : 'Add to Cart'}
               </button>
-            ))}
+              <button 
+                onClick={() => {
+                  if (!selectedSize) {
+                    setToast({ message: 'Please select a size before buying.', type: 'error' })
+                    return
+                  }
+                  if (!selectedVariant) {
+                    setToast({ message: 'Please select a color before buying.', type: 'error' })
+                    return
+                  }
+                  // Clear cart and add single item for buy now
+                  clearCart()
+                  addToCart(product, selectedVariant, selectedSize)
+                  // Redirect to checkout
+                  router.push('/checkout')
+                }}
+                className="bg-gray-200 text-gray-800 px-5 py-2 rounded hover:bg-gray-300"
+              >
+                Buy Now
+              </button>
+            </div>
           </div>
         </div>
-        <div className="pt-15">
+        <div className="pt-0 md:pt-15">
           <p className="text-sm text-gray-500 mt-2">{product.category}</p>
-          <div className="mt-4 text-gray-700 whitespace-pre-line">
-            {product.description.split('\n').map((line, idx) => (
-              <div key={idx} className="mb-2">{line}</div>
-            ))}
+          <p className="mt-4 text-gray-700 whitespace-pre-line">{product.description}</p>
+          {/* Desktop: Size selector above Colour selector */}
+          <div className="hidden md:block py-5">
+            <div className="mt-2">
+              <label className="block mb-2 font-medium text-stone-800">Size</label>
+              <div className="flex flex-wrap gap-2 pb-2">
+                {/* Dash button for size deselect */}
+                <button
+                  type="button"
+                  className={`px-3 py-1 rounded-full border ${selectedSize === null ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                  onClick={() => setSelectedSize(null)}
+                >
+                  -
+                </button>
+                {["150mm", "180mm", "210mm", "240mm"].map(size => (
+                  <button
+                    key={size}
+                    type="button"
+                    className={`px-3 py-1 rounded-full border ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-200 text-gray-800 border-gray-300'}`}
+                    onClick={() => setSelectedSize(size)}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="mt-6">
+              <label className="block font-medium text-stone-800 mb-2">Colour</label>
+              <div className="flex flex-wrap gap-2 pb-2">
+                {/* Dash button for thumbnail */}
+                <button
+                  className={`px-3 py-1 rounded-full border ${selectedVariant === null ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                  onClick={() => setSelectedVariant(null)}
+                >
+                  -
+                </button>
+                {variants.map((variant) => (
+                  <button
+                    key={variant.id}
+                    className={`px-3 py-1 rounded-full border ${selectedVariant?.id === variant.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                    onClick={() => setSelectedVariant(variant)}
+                  >
+                    {variant.color}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p className="mt-4 text-xl font-semibold text-gray-900">£{price.toFixed(2)}</p>
+            <p className="mt-1 text-gray-700">
+              Customizable: <span className="font-medium">{customizable ? 'Yes' : 'No'}</span>
+            </p>
           </div>
-          <p className="mt-4 text-xl font-semibold text-gray-900">
-            £{price.toFixed(2)}
-          </p>
-          <p className="mt-1 text-gray-700">
-            Customizable: <span className="font-medium">{customizable ? 'Yes' : 'No'}</span>
-          </p>
           <div className="mt-6 flex gap-4">
             <button
               onClick={() => {
+                if (!selectedSize) {
+                  setToast({ message: 'Please select a size before adding to cart.', type: 'error' })
+                  return
+                }
                 if (!selectedVariant) {
                   setToast({ message: 'Please select a color before adding to cart.', type: 'error' })
                   return
                 }
                 setButtonClicked(true)
-                addToCart(product, selectedVariant)
+                addToCart(product, selectedVariant, selectedSize)
                 setShowMessage(true)
                 setTimeout(() => setButtonClicked(false), 1000)
                 setTimeout(() => setShowMessage(false), 5000)
@@ -105,6 +232,26 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
               }`}
             >
               {buttonClicked ? 'Added!' : 'Add to Cart'}
+            </button>
+            <button 
+              onClick={() => {
+                if (!selectedSize) {
+                  setToast({ message: 'Please select a size before buying.', type: 'error' })
+                  return
+                }
+                if (!selectedVariant) {
+                  setToast({ message: 'Please select a color before buying.', type: 'error' })
+                  return
+                }
+                // Clear cart and add single item for buy now
+                clearCart()
+                addToCart(product, selectedVariant, selectedSize)
+                // Redirect to checkout
+                router.push('/checkout')
+              }}
+              className="bg-gray-200 text-gray-800 px-5 py-2 rounded hover:bg-gray-300"
+            >
+              Buy Now
             </button>
           </div>
         </div>

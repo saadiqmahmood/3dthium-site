@@ -5,6 +5,7 @@ import { Session, User } from '@supabase/supabase-js'
 type AuthContextType = {
   user: User | null
   session: Session | null
+  isAdmin: boolean
   signIn: (email: string, password: string) => Promise<any>
   signUp: (email: string, password: string) => Promise<any>
   signOut: () => Promise<void>
@@ -17,6 +18,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { client } = useSupabase()
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -25,6 +27,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { data: { session } } = await client.auth.getSession()
       setSession(session)
       setUser(session?.user || null)
+      if (session?.user) {
+        // Fetch is_admin from users table
+        const { data, error } = await client
+          .from('users')
+          .select('is_admin')
+          .eq('auth_user_id', session.user.id)
+          .single()
+        setIsAdmin(!!data?.is_admin)
+      } else {
+        setIsAdmin(false)
+      }
       setLoading(false)
     }
 
@@ -35,6 +48,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (event, session) => {
       setSession(session)
       setUser(session?.user || null)
+      if (session?.user) {
+        const { data, error } = await client
+          .from('users')
+          .select('is_admin')
+          .eq('auth_user_id', session.user.id)
+          .single()
+        setIsAdmin(!!data?.is_admin)
+      } else {
+        setIsAdmin(false)
+      }
         setLoading(false)
       }
     )
@@ -62,12 +85,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await client.auth.signOut()
     setSession(null)
     setUser(null)
+    setIsAdmin(false)
   }
 
   return (
     <AuthContext.Provider value={{ 
       user, 
       session, 
+      isAdmin,
       signIn, 
       signUp, 
       signOut, 

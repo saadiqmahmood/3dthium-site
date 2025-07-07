@@ -6,6 +6,8 @@ import { CartProvider } from '@/context/CartContext'
 import { AuthProvider } from '@/context/AuthContext'
 import { createBrowserClient } from '@supabase/ssr'
 import { SupabaseContextProvider } from '@/context/SupabaseContext'
+import { useRouter } from 'next/router'
+import AdminLayout from '@/components/admin/AdminLayout'
 
 const supabaseClient = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,18 +20,28 @@ const schibsted = Schibsted_Grotesk({
 })
 
 export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter();
+  const isAdmin = router.pathname.startsWith('/admin');
+
+  const content = isAdmin ? (
+    <AdminLayout>
+      <Component {...pageProps} />
+    </AdminLayout>
+  ) : (
+    <Layout>
+      <Component {...pageProps} />
+    </Layout>
+  );
+
   return (
     <div className={`${schibsted.variable} font-sans`}>
       <SupabaseContextProvider client={supabaseClient}>
         <AuthProvider>
           <CartProvider>
-            <Layout>
-              <Component {...pageProps} />
-            </Layout>
+            {content}
           </CartProvider>
         </AuthProvider>
       </SupabaseContextProvider>
-
     </div>
-  )
+  );
 }

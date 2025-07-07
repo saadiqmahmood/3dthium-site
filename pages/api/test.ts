@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Group variants by product_id
-  const variantsByProduct: Record<string, any[]> = {}
+  const variantsByProduct: Record<string, unknown[]> = {}
   for (const variant of variants) {
     if (!variantsByProduct[variant.product_id]) {
       variantsByProduct[variant.product_id] = []

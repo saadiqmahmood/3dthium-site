@@ -71,7 +71,7 @@ export default function AuthPage() {
             delete cleaned.reset
             router.replace({ pathname: router.pathname, query: cleaned }, undefined, { shallow: true })
         }
-    }, [router.query])
+    }, [router.query, router])
 
   return (
     <div className="px-4 sm:px-8 py-6">
@@ -144,7 +144,7 @@ export default function AuthPage() {
               <input
                 type="email"
                 id="email"
-                className="mt-1 p-2 w-full border border-gray-300 rounded"
+                className="mt-1 p-2 w-full border border-gray-300 text-stone-800 rounded"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -156,7 +156,7 @@ export default function AuthPage() {
               <input
                 type="password"
                 id="password"
-                className="mt-1 p-2 w-full border border-gray-300 rounded"
+                className="mt-1 p-2 w-full border border-gray-300 text-stone-800 rounded"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
