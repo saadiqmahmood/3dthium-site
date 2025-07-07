@@ -286,8 +286,6 @@ export default function CheckoutPage() {
           <h2 className="text-xl font-semibold mb-6 text-stone-800">Select Shipping Method</h2>
           <div className="space-y-4">
             {shippingRates.map((rate) => {
-              let carrier = rate.provider || ''
-              if (carrier.toLowerCase().includes('hermes')) carrier = 'Evri UK'
               const isSelected = selectedRate && selectedRate.object_id === rate.object_id
               return (
                 <div
@@ -298,7 +296,7 @@ export default function CheckoutPage() {
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="font-semibold text-gray-800">
-                        {carrier ? `${carrier}: ` : ''}{rate.servicelevel.name}
+                        {rate.servicelevel.name}
                       </h3>
                       <p className="text-sm text-gray-500">
                         {rate.days ? `${rate.days} day${rate.days !== 1 ? 's' : ''} delivery` : 'Delivery'}

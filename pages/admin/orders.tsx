@@ -1,12 +1,7 @@
-import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { useEffect, useState, useCallback } from 'react'
 import Image from 'next/image'
 import { ProductVariant } from '@/types'
-
-const supabaseClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { useSupabase } from '@/context/SupabaseContext'
 
 const ORDER_STATUSES = [
   'pending',
@@ -75,9 +70,10 @@ export default function AdminOrdersPage() {
   const [orderStatusInput, setOrderStatusInput] = useState('')
   const [editableOrderItems, setEditableOrderItems] = useState<OrderItem[]>([])
   const [variantsByProduct, setVariantsByProduct] = useState<Record<string, ProductVariant[]>>({})
+  const { client: supabaseClient } = useSupabase()
 
   // --- Fetch Orders ---
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     setOrdersLoading(true)
     const { data } = await supabaseClient
       .from('orders')
@@ -96,11 +92,11 @@ export default function AdminOrdersPage() {
     }
     setOrders((data || []).map((o: Order) => ({ ...o, user_email: o.user_id ? usersMap[o.user_id] : null })))
     setOrdersLoading(false)
-  }
+  }, [supabaseClient])
 
   useEffect(() => {
     fetchOrders()
-  }, [])
+  }, [fetchOrders])
 
   // --- Filtered Orders & Pagination ---
   const filteredOrders = orders.filter(o => {
@@ -180,7 +176,7 @@ export default function AdminOrdersPage() {
       setOrderDetailsLoading(false)
     }
     fetchOrderDetails()
-  }, [selectedOrder])
+  }, [selectedOrder, supabaseClient])
 
   // --- Editable Order Items ---
   useEffect(() => {
@@ -202,7 +198,7 @@ export default function AdminOrdersPage() {
       size: item.size,
       quantity: item.quantity
     })))
-  }, [orderDetails])
+  }, [orderDetails, supabaseClient])
 
   const handleOrderItemChange = (idx: number, field: keyof OrderItem, value: string | number | undefined) => {
     setEditableOrderItems(items => items.map((item, i) => i === idx ? { ...item, [field]: value } : item))
@@ -474,7 +470,7 @@ export default function AdminOrdersPage() {
                           href={orderDetails.shipping_label_url} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline text-sm"
+                          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
                         >
                           View Shipping Label
                         </a>

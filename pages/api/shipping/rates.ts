@@ -72,15 +72,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Get shipping rates
     const rates = await getShippingRates(shipmentData)
 
-    // Filter for DPD UK and Evri (Hermes) UK
-    const ukRates = rates.filter(rate => {
-      const provider = rate.provider?.toLowerCase() || ''
-      const name = rate.servicelevel.name.toLowerCase()
-      return provider.includes('dpd') || provider.includes('hermes') || provider.includes('evri') ||
-        name.includes('dpd') || name.includes('hermes') || name.includes('evri')
-    })
-
-    res.status(200).json({ rates: ukRates })
+    // Return all rates as received from Shippo
+    res.status(200).json({ rates })
   } catch (error) {
     console.error('Error calculating shipping rates:', error)
     res.status(500).json({ error: 'Failed to calculate shipping rates' })

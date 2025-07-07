@@ -179,6 +179,27 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
     console.log('Order created successfully:', order.id)
     // Optionally: send confirmation email, update inventory, etc.
+
+    // AUTOMATE SHIPPING LABEL CREATION
+    if (order.shipping_rate_id && order.id) {
+      try {
+        const labelUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shipping/label`
+        const labelRes = await fetch(labelUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rate_id: order.shipping_rate_id,
+            order_id: order.id,
+          }),
+        })
+        const labelData = await labelRes.json().catch(e => ({ error: 'Invalid JSON', details: e }))
+        if (!labelRes.ok || !labelData.success) {
+          console.error('[AutoLabel] Auto label creation failed:', labelData.error || labelData)
+        }
+      } catch (err) {
+        console.error('[AutoLabel] Error auto-creating shipping label:', err)
+      }
+    }
   } catch (error) {
     console.error('Error processing checkout session:', error)
   }
