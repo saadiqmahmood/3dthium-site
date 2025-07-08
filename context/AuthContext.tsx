@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react'
 import { useSupabase } from './SupabaseContext'
 import { Session, User } from '@supabase/supabase-js'
 
@@ -14,12 +14,16 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+const AUTO_LOGOUT_MINUTES = 60;
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { client } = useSupabase()
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
+
+  const logoutTimer = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     // Get initial session
@@ -65,6 +69,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe()
   }, [client])
 
+  const signOut = async () => {
+    await client.auth.signOut()
+    setSession(null)
+    setUser(null)
+    setIsAdmin(false)
+  }
+
+  // Inactivity auto-logout
+  useEffect(() => {
+    const resetTimer = () => {
+      if (logoutTimer.current) clearTimeout(logoutTimer.current)
+      logoutTimer.current = setTimeout(() => {
+        signOut()
+        // Optionally, show a toast or redirect to login
+      }, AUTO_LOGOUT_MINUTES * 60 * 1000)
+    }
+    window.addEventListener('mousemove', resetTimer)
+    window.addEventListener('keydown', resetTimer)
+    window.addEventListener('scroll', resetTimer)
+    resetTimer()
+    return () => {
+      if (logoutTimer.current) clearTimeout(logoutTimer.current)
+      window.removeEventListener('mousemove', resetTimer)
+      window.removeEventListener('keydown', resetTimer)
+      window.removeEventListener('scroll', resetTimer)
+    }
+  }, [signOut])
+
   const signIn = async (email: string, password: string) => {
     const { data, error } = await client.auth.signInWithPassword({ 
       email, 
@@ -79,13 +111,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password 
     })
     return { data, error }
-  }
-
-  const signOut = async () => {
-    await client.auth.signOut()
-    setSession(null)
-    setUser(null)
-    setIsAdmin(false)
   }
 
   return (

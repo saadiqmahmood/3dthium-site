@@ -1,12 +1,7 @@
-import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { useEffect, useState, useCallback } from 'react'
+import { useSupabase } from '@/context/SupabaseContext'
 import Image from 'next/image'
 import { Product, ProductVariant } from '@/types'
-
-const supabaseClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 const CATEGORIES = [
   'Vases',
@@ -19,6 +14,7 @@ const CATEGORIES = [
 ]
 
 export default function AdminProductsPage() {
+  const { client: supabaseClient } = useSupabase()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
@@ -66,7 +62,7 @@ export default function AdminProductsPage() {
   const paginatedProducts = filteredProducts.slice((currentPage - 1) * PRODUCTS_PER_PAGE, currentPage * PRODUCTS_PER_PAGE);
 
   // Fetch products
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true)
     const { data } = await supabaseClient
       .from('products')
@@ -74,8 +70,8 @@ export default function AdminProductsPage() {
       .order('created_at', { ascending: false })
     setProducts(data || [])
     setLoading(false)
-  }
-  useEffect(() => { fetchProducts() }, [])
+  }, [supabaseClient])
+  useEffect(() => { fetchProducts() }, [fetchProducts])
 
   // Fetch variants for a product
   const fetchVariants = async (productId: string) => {

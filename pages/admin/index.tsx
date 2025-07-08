@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { useSupabase } from '@/context/SupabaseContext'
 
 type Order = {
   id: string;
@@ -28,6 +23,7 @@ type Metrics = {
 };
 
 export default function AdminDashboard() {
+  const { client: supabaseClient } = useSupabase()
   const [metrics, setMetrics] = useState<Metrics>({
     totalOrders: 0,
     totalUsers: 0,
@@ -58,7 +54,7 @@ export default function AdminDashboard() {
       setLoading(false)
     }
     fetchMetrics()
-  }, [])
+  }, [supabaseClient])
 
   // Export helpers
   const exportTable = async (table: string) => {

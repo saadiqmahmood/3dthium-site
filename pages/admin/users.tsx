@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { useSupabase } from '@/context/SupabaseContext'
 
 type User = {
   id: string;
@@ -15,6 +10,7 @@ type User = {
 }
 
 export default function AdminUsersPage() {
+  const { client: supabaseClient } = useSupabase()
   const [users, setUsers] = useState<User[]>([])
   const [usersLoading, setUsersLoading] = useState(false)
   const [search, setSearch] = useState('')
@@ -39,7 +35,7 @@ export default function AdminUsersPage() {
       setUsersLoading(false)
     }
     fetchUsers()
-  }, [])
+  }, [supabaseClient])
 
   const allUsersSelected = filteredUsers.length > 0 && filteredUsers.every(u => selectedUsers.includes(u.id))
   const toggleSelectAllUsers = () => {

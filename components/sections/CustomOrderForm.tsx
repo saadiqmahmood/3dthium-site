@@ -1,15 +1,12 @@
 import React, { useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { useSupabase } from '@/context/SupabaseContext'
 
 export default function CustomOrderForm() {
     const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>('idle')
     const [fileError, setFileError] = useState<string | null>(null)
     const [formError, setFormError] = useState<string | null>(null)
+
+    const { client: supabase } = useSupabase()
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
