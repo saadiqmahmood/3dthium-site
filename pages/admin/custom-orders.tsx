@@ -42,7 +42,7 @@ export default function AdminCustomOrdersPage() {
       setLoading(false)
     }
     fetchOrders()
-  }, [])
+  }, [supabase])
 
   // Bulk select logic
   const allSelected = orders.length > 0 && orders.every(o => selectedOrders.includes(o.id))

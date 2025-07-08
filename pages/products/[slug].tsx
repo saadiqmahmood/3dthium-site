@@ -1,6 +1,5 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
-import { useSupabase } from '@/context/SupabaseContext'
-import { supabase } from '@/lib/supabaseClient'
+import { supabase as staticSupabase } from '@/lib/supabaseClient'
 import { Product, ProductVariant } from '@/types'
 import { useCart } from '@/context/CartContext'
 import Image from 'next/image'
@@ -16,7 +15,6 @@ type ProductDetailPageProps = {
 const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants }) => {
   const { addToCart, clearCart } = useCart()
   const router = useRouter()
-  const { client: supabase } = useSupabase()
   // null means show thumbnail, otherwise show selected variant
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
@@ -273,7 +271,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
 export default ProductDetailPage
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { data: products, error } = await supabase.from('products').select('slug')
+  const { data: products, error } = await staticSupabase.from('products').select('slug')
 
   if (error || !products) {
     return { paths: [], fallback: 'blocking' }
@@ -293,7 +291,7 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
     return { notFound: true }
   }
 
-  const { data: product, error: productError } = await supabase
+  const { data: product, error: productError } = await staticSupabase
     .from('products')
     .select('*')
     .eq('slug', slug)
@@ -301,7 +299,7 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
   if (productError || !product) {
     return { notFound: true }
   }
-  const { data: variants, error: variantsError } = await supabase
+  const { data: variants, error: variantsError } = await staticSupabase
     .from('product_variants')
     .select('*')
     .eq('product_id', product.id)

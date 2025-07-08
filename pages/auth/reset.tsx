@@ -27,7 +27,7 @@ export default function PasswordResetPage() {
     }
 
     checkSession()
-  }, [])
+  }, [supabase])
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
