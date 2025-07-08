@@ -113,6 +113,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { data, error }
   }
 
+  // Re-fetch session on tab visibility change
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        const { data: { session } } = await client.auth.getSession();
+        setSession(session);
+        setUser(session?.user || null);
+        if (session?.user) {
+          const { data } = await client
+            .from('users')
+            .select('is_admin')
+            .eq('auth_user_id', session.user.id)
+            .single();
+          setIsAdmin(!!data?.is_admin);
+        } else {
+          setIsAdmin(false);
+        }
+        setLoading(false);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [client]);
+
   return (
     <AuthContext.Provider value={{ 
       user, 
