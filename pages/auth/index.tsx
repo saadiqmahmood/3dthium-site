@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { useAuth } from '@/context/AuthContext'
 import Toast from '@/components/ui/Toast'
-import { supabase } from '@/lib/supabaseClient' 
+import { useSupabase } from '@/context/SupabaseContext'
 
 export default function AuthPage() {
   const router = useRouter()
   const { signIn, signUp } = useAuth()
+  const { client: supabase } = useSupabase()
 
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')

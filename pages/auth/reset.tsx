@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { supabase } from '@/lib/supabaseClient'
+import { useSupabase } from '@/context/SupabaseContext'
 import Toast from '@/components/ui/Toast'
 
 export default function PasswordResetPage() {
@@ -9,6 +9,7 @@ export default function PasswordResetPage() {
   const [validSession, setValidSession] = useState(false)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
   const router = useRouter()
+  const { client: supabase } = useSupabase()
 
   // Check if session is valid (link not expired)
   useEffect(() => {

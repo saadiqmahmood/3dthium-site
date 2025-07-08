@@ -1,4 +1,5 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
+import { useSupabase } from '@/context/SupabaseContext'
 import { supabase } from '@/lib/supabaseClient'
 import { Product, ProductVariant } from '@/types'
 import { useCart } from '@/context/CartContext'
@@ -15,6 +16,7 @@ type ProductDetailPageProps = {
 const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants }) => {
   const { addToCart, clearCart } = useCart()
   const router = useRouter()
+  const { client: supabase } = useSupabase()
   // null means show thumbnail, otherwise show selected variant
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
