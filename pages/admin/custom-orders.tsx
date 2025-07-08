@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { useSupabase } from '@/context/SupabaseContext'
 
 type CustomOrder = {
   id: number
@@ -33,6 +28,8 @@ export default function AdminCustomOrdersPage() {
   const [orders, setOrders] = useState<CustomOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedOrders, setSelectedOrders] = useState<number[]>([])
+
+  const { client: supabase } = useSupabase()
 
   useEffect(() => {
     const fetchOrders = async () => {
