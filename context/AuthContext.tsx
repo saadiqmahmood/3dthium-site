@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react'
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { useSupabase } from './SupabaseContext'
 import { Session, User } from '@supabase/supabase-js'
 
@@ -14,8 +14,6 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-const AUTO_LOGOUT_MINUTES = 60;
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { client } = useSupabase()
   const [session, setSession] = useState<Session | null>(null)
@@ -23,121 +21,193 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  const logoutTimer = useRef<NodeJS.Timeout | null>(null)
+  // Helper function to check admin status with logging
+  const checkAdminStatus = async (userId: string) => {
+    console.log('🔍 [AuthContext] Checking admin status for user:', userId)
+    try {
+      // Use API route to bypass RLS issues
+      const response = await fetch('/api/auth/check-admin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      })
+      
+      if (!response.ok) {
+        console.error('❌ [AuthContext] Error checking admin status:', response.status)
+        setIsAdmin(false)
+        return
+      }
+      
+      const data = await response.json()
+      console.log('✅ [AuthContext] Admin status result:', data)
+      setIsAdmin(!!data.isAdmin)
+    } catch (err) {
+      console.error('❌ [AuthContext] Exception checking admin status:', err)
+      setIsAdmin(false)
+    }
+  }
 
   useEffect(() => {
+    console.log('🚀 [AuthContext] Initializing AuthProvider')
+    
     // Get initial session
     const getInitialSession = async () => {
-      const { data: { session } } = await client.auth.getSession()
-      setSession(session)
-      setUser(session?.user || null)
-      if (session?.user) {
-        // Fetch is_admin from users table
-        const { data, error } = await client
-          .from('users')
-          .select('is_admin')
-          .eq('auth_user_id', session.user.id)
-          .single()
-        setIsAdmin(!!data?.is_admin)
-      } else {
+      console.log('🔄 [AuthContext] Getting initial session...')
+      try {
+        const { data: { session }, error } = await client.auth.getSession()
+        
+        if (error) {
+          console.error('❌ [AuthContext] Error getting initial session:', error)
+        }
+        
+        console.log('📋 [AuthContext] Initial session:', {
+          hasSession: !!session,
+          userId: session?.user?.id,
+          email: session?.user?.email,
+          expiresAt: session?.expires_at
+        })
+        
+        // Check if session is expired
+        if (session && session.expires_at) {
+          const now = Math.floor(Date.now() / 1000)
+          if (session.expires_at < now) {
+            console.log('⚠️ [AuthContext] Session expired, signing out')
+            await client.auth.signOut()
+            setSession(null)
+            setUser(null)
+            setIsAdmin(false)
+            setLoading(false)
+            return
+          }
+        }
+        
+        setSession(session)
+        setUser(session?.user || null)
+        
+        if (session?.user) {
+          console.log('👤 [AuthContext] User found, checking admin status...')
+          await checkAdminStatus(session.user.id)
+        } else {
+          console.log('👤 [AuthContext] No user in session')
+          setIsAdmin(false)
+        }
+      } catch (error) {
+        console.error('❌ [AuthContext] Exception getting initial session:', error)
         setIsAdmin(false)
+      } finally {
+        console.log('✅ [AuthContext] Initial session setup complete')
+        setLoading(false)
       }
-      setLoading(false)
     }
 
     getInitialSession()
 
     // Listen for auth changes
+    console.log('👂 [AuthContext] Setting up auth state listener...')
     const { data: { subscription } } = client.auth.onAuthStateChange(
       async (event, session) => {
-      setSession(session)
-      setUser(session?.user || null)
-      if (session?.user) {
-        const { data, error } = await client
-          .from('users')
-          .select('is_admin')
-          .eq('auth_user_id', session.user.id)
-          .single()
-        setIsAdmin(!!data?.is_admin)
-      } else {
-        setIsAdmin(false)
-      }
+        console.log('🔄 [AuthContext] Auth state changed:', {
+          event,
+          userId: session?.user?.id,
+          email: session?.user?.email,
+          hasSession: !!session
+        })
+        
+        // Handle session expiry
+        if (session && session.expires_at) {
+          const now = Math.floor(Date.now() / 1000)
+          if (session.expires_at < now) {
+            console.log('⚠️ [AuthContext] Session expired during auth state change')
+            setSession(null)
+            setUser(null)
+            setIsAdmin(false)
+            setLoading(false)
+            return
+          }
+        }
+        
+        setSession(session)
+        setUser(session?.user || null)
+        
+        if (session?.user) {
+          console.log('👤 [AuthContext] User authenticated, checking admin status...')
+          await checkAdminStatus(session.user.id)
+        } else {
+          console.log('👤 [AuthContext] User signed out')
+          setIsAdmin(false)
+        }
         setLoading(false)
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      console.log('🧹 [AuthContext] Cleaning up auth listener')
+      subscription.unsubscribe()
+    }
   }, [client])
 
   const signOut = async () => {
-    await client.auth.signOut()
-    setSession(null)
-    setUser(null)
-    setIsAdmin(false)
+    console.log('🚪 [AuthContext] Signing out...')
+    try {
+      const { error } = await client.auth.signOut()
+      if (error) {
+        console.error('❌ [AuthContext] Error signing out:', error)
+      } else {
+        console.log('✅ [AuthContext] Sign out successful')
+      }
+      setSession(null)
+      setUser(null)
+      setIsAdmin(false)
+    } catch (error) {
+      console.error('❌ [AuthContext] Exception during sign out:', error)
+    }
   }
 
-  // Inactivity auto-logout
-  useEffect(() => {
-    const resetTimer = () => {
-      if (logoutTimer.current) clearTimeout(logoutTimer.current)
-      logoutTimer.current = setTimeout(() => {
-        signOut()
-        // Optionally, show a toast or redirect to login
-      }, AUTO_LOGOUT_MINUTES * 60 * 1000)
-    }
-    window.addEventListener('mousemove', resetTimer)
-    window.addEventListener('keydown', resetTimer)
-    window.addEventListener('scroll', resetTimer)
-    resetTimer()
-    return () => {
-      if (logoutTimer.current) clearTimeout(logoutTimer.current)
-      window.removeEventListener('mousemove', resetTimer)
-      window.removeEventListener('keydown', resetTimer)
-      window.removeEventListener('scroll', resetTimer)
-    }
-  }, [signOut])
-
   const signIn = async (email: string, password: string) => {
+    console.log('�� [AuthContext] Signing in:', email)
     const { data, error } = await client.auth.signInWithPassword({ 
       email, 
       password 
     })
+    
+    if (error) {
+      console.error('❌ [AuthContext] Sign in error:', error)
+    } else {
+      console.log('✅ [AuthContext] Sign in successful:', data.user?.email)
+    }
+    
     return { data, error }
   }
 
   const signUp = async (email: string, password: string) => {
+    console.log('📝 [AuthContext] Signing up:', email)
     const { data, error } = await client.auth.signUp({ 
       email, 
       password 
     })
+    
+    if (error) {
+      console.error('❌ [AuthContext] Sign up error:', error)
+    } else {
+      console.log('✅ [AuthContext] Sign up successful:', data.user?.email)
+    }
+    
     return { data, error }
   }
 
-  // Re-fetch session on tab visibility change
+  // Log state changes
   useEffect(() => {
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible') {
-        const { data: { session } } = await client.auth.getSession();
-        setSession(session);
-        setUser(session?.user || null);
-        if (session?.user) {
-          const { data } = await client
-            .from('users')
-            .select('is_admin')
-            .eq('auth_user_id', session.user.id)
-            .single();
-          setIsAdmin(!!data?.is_admin);
-        } else {
-          setIsAdmin(false);
-        }
-        setLoading(false);
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [client]);
+    console.log('📊 [AuthContext] State updated:', {
+      hasUser: !!user,
+      hasSession: !!session,
+      isAdmin,
+      loading,
+      userId: user?.id,
+      email: user?.email
+    })
+  }, [user, session, isAdmin, loading])
 
   return (
     <AuthContext.Provider value={{ 

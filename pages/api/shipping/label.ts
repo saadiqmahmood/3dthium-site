@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { createShippingLabel } from '@/lib/shippoClient'
-import { supabase } from '@/lib/supabaseClient'
+import { createShippingLabel } from '../../../lib/shippoClient'
+import { getSupabaseAdmin } from '../../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -16,10 +16,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Create shipping label
     const transaction = await createShippingLabel(rate_id)
+    const supabaseAdmin = getSupabaseAdmin()
 
     if (transaction.status === 'SUCCESS') {
       // Update order with tracking information
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseAdmin
         .from('orders')
         .update({
           tracking_number: transaction.tracking_number,

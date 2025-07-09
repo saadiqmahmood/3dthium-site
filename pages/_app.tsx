@@ -4,15 +4,11 @@ import { Schibsted_Grotesk } from 'next/font/google'
 import Layout from '@/components/Layout'
 import { CartProvider } from '@/context/CartContext'
 import { AuthProvider } from '@/context/AuthContext'
-import { createBrowserClient } from '@supabase/ssr'
+import { supabase } from '@/lib/supabaseClient'
 import { SupabaseContextProvider } from '@/context/SupabaseContext'
 import { useRouter } from 'next/router'
 import AdminLayout from '@/components/admin/AdminLayout'
 
-const supabaseClient = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 const schibsted = Schibsted_Grotesk({
   subsets: ['latin'],
   variable: '--font-schibsted',
@@ -35,7 +31,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <div className={`${schibsted.variable} font-sans`}>
-      <SupabaseContextProvider client={supabaseClient}>
+      <SupabaseContextProvider client={supabase}>
         <AuthProvider>
           <CartProvider>
             {content}

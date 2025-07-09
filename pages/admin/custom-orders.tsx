@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useSupabase } from '@/context/SupabaseContext'
 
 type CustomOrder = {
   id: number
@@ -29,20 +28,30 @@ export default function AdminCustomOrdersPage() {
   const [loading, setLoading] = useState(true)
   const [selectedOrders, setSelectedOrders] = useState<number[]>([])
 
-  const { client: supabase } = useSupabase()
-
   useEffect(() => {
     const fetchOrders = async () => {
       setLoading(true)
-      const { data } = await supabase
-        .from('custom_orders')
-        .select('*')
-        .order('created_at', { ascending: false })
-      setOrders(data || [])
-      setLoading(false)
+      try {
+        console.log('🔍 [AdminCustomOrders] Fetching custom orders from API...')
+        const response = await fetch('/api/admin/custom-orders')
+        
+        if (!response.ok) {
+          console.error('❌ [AdminCustomOrders] Error fetching custom orders:', response.status)
+          throw new Error('Failed to fetch custom orders')
+        }
+        
+        const data = await response.json()
+        console.log('✅ [AdminCustomOrders] Custom orders fetched successfully:', data?.length || 0)
+        setOrders(data || [])
+      } catch (error) {
+        console.error('❌ [AdminCustomOrders] Error:', error)
+        alert('Failed to load custom orders')
+      } finally {
+        setLoading(false)
+      }
     }
     fetchOrders()
-  }, [supabase])
+  }, [])
 
   // Bulk select logic
   const allSelected = orders.length > 0 && orders.every(o => selectedOrders.includes(o.id))
@@ -57,11 +66,16 @@ export default function AdminCustomOrdersPage() {
     setSelectedOrders(selectedOrders.includes(id) ? selectedOrders.filter(i => i !== id) : [...selectedOrders, id])
   }
   const handleBulkDelete = async () => {
-    for (const id of selectedOrders) {
-      await supabase.from('custom_orders').delete().eq('id', id)
+    try {
+      for (const id of selectedOrders) {
+        await fetch(`/api/admin/custom-orders/${id}`, { method: 'DELETE' })
+      }
+      setOrders(orders => orders.filter(o => !selectedOrders.includes(o.id)))
+      setSelectedOrders([])
+    } catch (error) {
+      console.error('❌ [AdminCustomOrders] Bulk delete error:', error)
+      alert('Failed to delete custom orders')
     }
-    setOrders(orders => orders.filter(o => !selectedOrders.includes(o.id)))
-    setSelectedOrders([])
   }
 
   return (

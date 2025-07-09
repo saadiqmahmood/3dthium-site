@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react'
 import Navbar from './Navbar'
 import Footer from './Footer'
+import SessionDebug from './SessionDebug'
 
 interface LayoutProps {
   children: ReactNode
@@ -8,10 +9,13 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow" >{children}</main>
+      <main className="flex-grow">
+        {children}
+      </main>
       <Footer />
+      <SessionDebug />
     </div>
   )
 }

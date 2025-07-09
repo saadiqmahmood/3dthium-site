@@ -42,15 +42,20 @@ export default function AuthPage() {
     setLoading(true)
     setError('') // Optional if you're not displaying `error`
   
+    console.log('Attempting auth:', isLogin ? 'signIn' : 'signUp', { email })
+    
     const action = isLogin ? signIn : signUp
     const { error } = await action(email, password)
   
     if (error) {
+      console.error('Auth error:', error)
       setToast({ message: error.message, type: 'error' })
       setLoading(false) // 🔥 ensure button is re-enabled
       return
     }
   
+    console.log('Auth successful:', isLogin ? 'signIn' : 'signUp')
+    
     // ✅ Success
     setToast({
       message: isLogin ? 'Logged in successfully!' : 'Account created successfully!',

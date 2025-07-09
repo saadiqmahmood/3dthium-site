@@ -41,31 +41,64 @@ export default function AccountPage() {
   const [reorderLoading, setReorderLoading] = useState(false)
 
   useEffect(() => {
+    console.log('📄 [AccountPage] Component mounted, checking auth state:', {
+      hasUser: !!user,
+      loading,
+      pathname: router.pathname
+    })
+    
     if (!loading && !user) {
+      console.log('🚫 [AccountPage] No user, redirecting to auth')
       router.push('/auth')
     }
   }, [user, loading, router])
 
   useEffect(() => {
+    console.log('📄 [AccountPage] User or section changed:', {
+      hasUser: !!user,
+      section,
+      userId: user?.id
+    })
+    
     if (user && section === 'orders') {
+      console.log('📄 [AccountPage] Fetching orders for user:', user.id)
       fetchOrders()
     }
     // eslint-disable-next-line
   }, [user, section])
 
   const fetchOrders = async () => {
+    console.log('🔄 [AccountPage] Starting fetchOrders...')
     setOrdersLoading(true)
     try {
-      if (!user) return;
+      if (!user) {
+        console.error('❌ [AccountPage] No authenticated user for fetchOrders')
+        return;
+      }
+      
+      console.log('🔍 [AccountPage] Looking up user record for:', user.id)
       // Look up user record
-      const { data: userRecord } = await supabaseClient
+      const { data: userRecord, error: userError } = await supabaseClient
         .from('users')
         .select('id')
         .eq('auth_user_id', user.id)
         .single()
-      if (!userRecord) return
+        
+      if (userError) {
+        console.error('❌ [AccountPage] Error looking up user record:', userError)
+        return
+      }
+
+      if (!userRecord) {
+        console.error('❌ [AccountPage] User record not found for:', user.id)
+        return
+      }
+      
+      console.log('✅ [AccountPage] User record found:', userRecord.id)
+      
       // Fetch orders
-      const { data: ordersData } = await supabaseClient
+      console.log('🔄 [AccountPage] Fetching orders for user record:', userRecord.id)
+      const { data: ordersData, error: ordersError } = await supabaseClient
         .from('orders')
         .select(`
           id,
@@ -88,6 +121,14 @@ export default function AccountPage() {
         `)
         .eq('user_id', userRecord.id)
         .order('created_at', { ascending: false })
+        
+      if (ordersError) {
+        console.error('❌ [AccountPage] Error fetching orders:', ordersError)
+        return
+      }
+      
+      console.log('✅ [AccountPage] Orders fetched successfully:', ordersData?.length || 0)
+      
       // Transform ordersData to match Order type
       type SupabaseOrderItem = {
         id: string;

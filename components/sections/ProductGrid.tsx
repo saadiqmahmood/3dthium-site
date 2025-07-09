@@ -22,10 +22,23 @@ export default function ProductGrid() {
   const [products, setProducts] = useState<ProductWithVariants[]>([])
 
   useEffect(() => {
+    console.log('🔄 [ProductGrid] Component mounted, fetching products...')
     const fetchProducts = async () => {
-      const res = await fetch('/api/test')
-      const data = await res.json()
-      setProducts(data)
+      try {
+        console.log('🔄 [ProductGrid] Making API call to /api/test...')
+        const res = await fetch('/api/test')
+        
+        if (!res.ok) {
+          console.error('❌ [ProductGrid] API response not ok:', res.status, res.statusText)
+          return
+        }
+        
+        const data = await res.json()
+        console.log('✅ [ProductGrid] Products fetched successfully:', data.length)
+        setProducts(data)
+      } catch (error) {
+        console.error('❌ [ProductGrid] Error fetching products:', error)
+      }
     }
 
     fetchProducts()

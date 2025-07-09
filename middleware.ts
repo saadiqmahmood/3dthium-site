@@ -2,28 +2,27 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase } from './utils/supabase/server'
 
 export async function middleware(req: NextRequest) {
+  console.log('🔄 [Middleware] Processing request:', req.url)
+  
   const res = NextResponse.next()
   const supabase = createServerSupabase(req)
   
   // Refresh session if expired - required for Server Components
-  const { data: { session } } = await supabase.auth.getSession()
+  console.log('🔄 [Middleware] Getting session...')
+  const { data: { session }, error } = await supabase.auth.getSession()
   
-  // If there's a session, set the session cookie
-  if (session) {
-    res.cookies.set('sb-access-token', session.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    })
-    
-    res.cookies.set('sb-refresh-token', session.refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+  if (error) {
+    console.error('❌ [Middleware] Error getting session:', error)
+  } else {
+    console.log('📋 [Middleware] Session status:', {
+      hasSession: !!session,
+      userId: session?.user?.id,
+      email: session?.user?.email
     })
   }
+  
+  // Let Supabase handle its own session management
+  // Don't manually set cookies as it can cause conflicts
   
   return res
 }

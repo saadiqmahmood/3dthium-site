@@ -1,18 +1,26 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { supabase } from '@/lib/supabaseClient'
+import { getSupabaseAdmin } from '../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log('🔄 [API/test] Products API called')
+  const supabaseAdmin = getSupabaseAdmin()
   // Fetch all products
-  const { data: products, error: productsError } = await supabase.from('products').select('*')
+  console.log('🔄 [API/test] Fetching products...')
+  const { data: products, error: productsError } = await supabaseAdmin.from('products').select('*')
   if (productsError) {
+    console.error('❌ [API/test] Error fetching products:', productsError)
     return res.status(500).json({ error: productsError.message })
   }
+  console.log('✅ [API/test] Products fetched:', products?.length || 0)
 
   // Fetch all variants
-  const { data: variants, error: variantsError } = await supabase.from('product_variants').select('*')
+  console.log('🔄 [API/test] Fetching product variants...')
+  const { data: variants, error: variantsError } = await supabaseAdmin.from('product_variants').select('*')
   if (variantsError) {
+    console.error('❌ [API/test] Error fetching variants:', variantsError)
     return res.status(500).json({ error: variantsError.message })
   }
+  console.log('✅ [API/test] Variants fetched:', variants?.length || 0)
 
   // Group variants by product_id
   const variantsByProduct: Record<string, unknown[]> = {}
@@ -29,5 +37,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     variants: variantsByProduct[product.id] || []
   }))
 
+  console.log('✅ [API/test] Returning result with', result.length, 'products')
   res.status(200).json(result)
 }

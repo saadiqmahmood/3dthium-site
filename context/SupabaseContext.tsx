@@ -14,6 +14,8 @@ export const SupabaseContextProvider = ({
   children: ReactNode
   client: SupabaseClient 
 }) => {
+  console.log('🔧 [SupabaseContext] Creating SupabaseContextProvider')
+  
   return (
     <SupabaseContext.Provider value={{ client }}>
       {children}
@@ -24,7 +26,9 @@ export const SupabaseContextProvider = ({
 export const useSupabase = () => {
   const context = useContext(SupabaseContext)
   if (!context) {
+    console.error('❌ [SupabaseContext] useSupabase must be used within a SupabaseContextProvider')
     throw new Error('useSupabase must be used within a SupabaseContextProvider')
   }
+  console.log('🔧 [SupabaseContext] useSupabase called, client available')
   return context
 } 

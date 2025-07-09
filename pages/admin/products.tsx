@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useSupabase } from '@/context/SupabaseContext'
 import Image from 'next/image'
 import { Product, ProductVariant } from '@/types'
 
@@ -14,7 +13,6 @@ const CATEGORIES = [
 ]
 
 export default function AdminProductsPage() {
-  const { client: supabaseClient } = useSupabase()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
@@ -64,19 +62,39 @@ export default function AdminProductsPage() {
   // Fetch products
   const fetchProducts = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabaseClient
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false })
-    setProducts(data || [])
-    setLoading(false)
-  }, [supabaseClient])
+    try {
+      console.log('🔍 [AdminProducts] Fetching products from API...')
+      const response = await fetch('/api/admin/products')
+      
+      if (!response.ok) {
+        console.error('❌ [AdminProducts] Error fetching products:', response.status)
+        throw new Error('Failed to fetch products')
+      }
+      
+      const data = await response.json()
+      console.log('✅ [AdminProducts] Products fetched successfully:', data?.length || 0)
+      setProducts(data || [])
+    } catch (error) {
+      console.error('❌ [AdminProducts] Error:', error)
+      alert('Failed to load products')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   useEffect(() => { fetchProducts() }, [fetchProducts])
 
   // Fetch variants for a product
   const fetchVariants = async (productId: string) => {
-    const { data } = await supabaseClient.from('product_variants').select('*').eq('product_id', productId)
-    setVariants(data || [])
+    try {
+      const response = await fetch(`/api/admin/product-variants/${productId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setVariants(data || [])
+      }
+    } catch (error) {
+      console.error('❌ [AdminProducts] Error fetching variants:', error)
+    }
   }
 
   // Open modal for add/edit
@@ -105,20 +123,47 @@ export default function AdminProductsPage() {
   // Save product
   const handleSave = async () => {
     if (!form.title || !form.slug) return alert('Title and slug are required')
-    if (editingProduct) {
-      await supabaseClient.from('products').update(form).eq('id', editingProduct.id)
-    } else {
-      await supabaseClient.from('products').insert([{ ...form, id: crypto.randomUUID() }])
+    try {
+      const response = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      })
+      if (response.ok) {
+        alert('Product saved successfully!')
+        setShowModal(false)
+        setEditingProduct(null)
+        await fetchProducts()
+      } else {
+        const error = await response.json()
+        alert(`Failed to save product: ${error.message || response.statusText}`)
+      }
+    } catch (error) {
+      console.error('❌ [AdminProducts] Error saving product:', error)
+      alert('Failed to save product')
     }
-    setShowModal(false)
-    setEditingProduct(null)
-    await fetchProducts()
   }
   // Delete product
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this product?')) return
-    await supabaseClient.from('products').delete().eq('id', id)
-    await fetchProducts()
+    try {
+      const response = await fetch(`/api/admin/products/${id}`, {
+        method: 'DELETE',
+      })
+      if (response.ok) {
+        alert('Product deleted successfully!')
+        setProducts(products => products.filter(p => p.id !== id))
+        setSelectedProducts(selectedProducts.filter(s => s !== id))
+      } else {
+        const error = await response.json()
+        alert(`Failed to delete product: ${error.message || response.statusText}`)
+      }
+    } catch (error) {
+      console.error('❌ [AdminProducts] Error deleting product:', error)
+      alert('Failed to delete product')
+    }
   }
 
   const openVariantsModal = async (product: Product) => {
@@ -137,21 +182,27 @@ export default function AdminProductsPage() {
     if (!variantProduct) return
     // No need to check for image_url_manual, just rely on the input/upload handlers
     if (!variantForm.color || !variantForm.image_url || !variantForm.price) return alert('Color, image, and price are required')
-    if (editingVariant) {
-      await supabaseClient.from('product_variants').update({
-        ...variantForm,
-        price: Number(variantForm.price)
-      }).eq('id', editingVariant.id)
-    } else {
-      await supabaseClient.from('product_variants').insert([{
-        ...variantForm,
-        price: Number(variantForm.price),
-        product_id: variantProduct.id
-      }])
+    try {
+      const response = await fetch(`/api/admin/product-variants/${variantProduct.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(variantForm),
+      })
+      if (response.ok) {
+        alert('Variant saved successfully!')
+        setEditingVariant(null)
+        setVariantForm({ color: '', image_url: '', price: '', in_stock: true, customizable: false })
+        await fetchVariants(variantProduct.id)
+      } else {
+        const error = await response.json()
+        alert(`Failed to save variant: ${error.message || response.statusText}`)
+      }
+    } catch (error) {
+      console.error('❌ [AdminProducts] Error saving variant:', error)
+      alert('Failed to save variant')
     }
-    setEditingVariant(null)
-    setVariantForm({ color: '', image_url: '', price: '', in_stock: true, customizable: false })
-    await fetchVariants(variantProduct.id)
   }
 
   const handleEditVariant = (variant: ProductVariant) => {
@@ -168,8 +219,21 @@ export default function AdminProductsPage() {
   const handleDeleteVariant = async (id: string) => {
     if (!variantProduct) return
     if (!confirm('Delete this variant?')) return
-    await supabaseClient.from('product_variants').delete().eq('id', id)
-    await fetchVariants(variantProduct.id)
+    try {
+      const response = await fetch(`/api/admin/product-variants/${variantProduct.id}/${id}`, {
+        method: 'DELETE',
+      })
+      if (response.ok) {
+        alert('Variant deleted successfully!')
+        await fetchVariants(variantProduct.id)
+      } else {
+        const error = await response.json()
+        alert(`Failed to delete variant: ${error.message || response.statusText}`)
+      }
+    } catch (error) {
+      console.error('❌ [AdminProducts] Error deleting variant:', error)
+      alert('Failed to delete variant')
+    }
   }
 
   // Reset to page 1 when filters/search change
@@ -189,21 +253,32 @@ export default function AdminProductsPage() {
   }
   const handleBulkDelete = async () => {
     for (const id of selectedProducts) {
-      await supabaseClient.from('products').delete().eq('id', id)
+      await handleDelete(id)
     }
-    setProducts(products => products.filter(p => !selectedProducts.includes(p.id)))
-    setSelectedProducts([])
   }
 
   // Add image upload helpers
   const uploadImage = async (file: File, folder: string) => {
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${folder}/${crypto.randomUUID()}.${fileExt}`
-    const { error } = await supabaseClient.storage.from('public').upload(fileName, file, { upsert: true })
-    if (error) throw error
-    // Get public URL
-    supabaseClient.storage.from('public').getPublicUrl(fileName)
-    return fileName
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ file, folder }),
+      })
+      if (response.ok) {
+        const data = await response.json()
+        return data.url
+      } else {
+        const error = await response.json()
+        throw new Error(`Failed to upload image: ${error.message || response.statusText}`)
+      }
+    } catch (error) {
+      console.error('❌ [AdminProducts] Error uploading image:', error)
+      alert('Failed to upload image')
+      throw error
+    }
   }
 
   return (

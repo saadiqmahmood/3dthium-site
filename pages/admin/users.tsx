@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useSupabase } from '@/context/SupabaseContext'
 
 type User = {
   id: string;
@@ -10,7 +9,6 @@ type User = {
 }
 
 export default function AdminUsersPage() {
-  const { client: supabaseClient } = useSupabase()
   const [users, setUsers] = useState<User[]>([])
   const [usersLoading, setUsersLoading] = useState(false)
   const [search, setSearch] = useState('')
@@ -27,15 +25,27 @@ export default function AdminUsersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       setUsersLoading(true)
-      const { data } = await supabaseClient
-        .from('users')
-        .select('id, email, created_at, is_admin, auth_user_id')
-        .order('created_at', { ascending: false })
-      setUsers(data || [])
-      setUsersLoading(false)
+      try {
+        console.log('🔍 [AdminUsers] Fetching users from API...')
+        const response = await fetch('/api/admin/users')
+        
+        if (!response.ok) {
+          console.error('❌ [AdminUsers] Error fetching users:', response.status)
+          throw new Error('Failed to fetch users')
+        }
+        
+        const data = await response.json()
+        console.log('✅ [AdminUsers] Users fetched successfully:', data?.length || 0)
+        setUsers(data || [])
+      } catch (error) {
+        console.error('❌ [AdminUsers] Error:', error)
+        alert('Failed to load users')
+      } finally {
+        setUsersLoading(false)
+      }
     }
     fetchUsers()
-  }, [supabaseClient])
+  }, [])
 
   const allUsersSelected = filteredUsers.length > 0 && filteredUsers.every(u => selectedUsers.includes(u.id))
   const toggleSelectAllUsers = () => {
@@ -49,19 +59,35 @@ export default function AdminUsersPage() {
     setSelectedUsers(selectedUsers.includes(id) ? selectedUsers.filter(i => i !== id) : [...selectedUsers, id])
   }
   const handleBulkDeleteUsers = async () => {
-    for (const id of selectedUsers) {
-      await supabaseClient.from('users').delete().eq('id', id)
+    try {
+      for (const id of selectedUsers) {
+        await fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
+      }
+      setUsers(users => users.filter(u => !selectedUsers.includes(u.id)))
+      setSelectedUsers([])
+    } catch (error) {
+      console.error('❌ [AdminUsers] Bulk delete error:', error)
+      alert('Failed to delete users')
     }
-    setUsers(users => users.filter(u => !selectedUsers.includes(u.id)))
-    setSelectedUsers([])
   }
   const handleAction = async (user: User, type: 'toggle') => {
-    if (type === 'toggle') {
-      await supabaseClient
-        .from('users')
-        .update({ is_admin: !user.is_admin })
-        .eq('id', user.id)
-      setUsers(users => users.map(u => u.id === user.id ? { ...u, is_admin: !u.is_admin } : u))
+    try {
+      if (type === 'toggle') {
+        const response = await fetch(`/api/admin/users/${user.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_admin: !user.is_admin })
+        })
+        
+        if (response.ok) {
+          setUsers(users => users.map(u => u.id === user.id ? { ...u, is_admin: !u.is_admin } : u))
+        } else {
+          throw new Error('Failed to update user')
+        }
+      }
+    } catch (error) {
+      console.error('❌ [AdminUsers] Action error:', error)
+      alert('Failed to update user')
     }
   }
 

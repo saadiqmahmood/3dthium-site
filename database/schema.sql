@@ -25,6 +25,11 @@ CREATE TABLE public.checkout_carts (
   guest_email text,
   cart_data jsonb NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
+  shipping_address jsonb,
+  shipping_rate_id text,
+  shipping_cost numeric DEFAULT 0.00,
+  shipping_provider text,
+  shipping_service text,
   CONSTRAINT checkout_carts_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.custom_orders (
@@ -66,6 +71,19 @@ CREATE TABLE public.orders (
   stripe_session_id text UNIQUE,
   stripe_payment_intent_id text,
   stripe_customer_id text,
+  shipping_name text,
+  shipping_address text,
+  shipping_city text,
+  shipping_postcode text,
+  shipping_country text DEFAULT 'GB'::text,
+  shipping_phone text,
+  shipping_method text,
+  shipping_rate_id text,
+  shipping_cost numeric DEFAULT 0.00,
+  tracking_number text,
+  tracking_url text,
+  shipped_at timestamp with time zone,
+  shipping_label_url text,
   CONSTRAINT orders_pkey PRIMARY KEY (id),
   CONSTRAINT orders_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );

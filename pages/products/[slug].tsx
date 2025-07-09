@@ -1,11 +1,22 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
-import { supabase as staticSupabase } from '@/lib/supabaseClient'
+import { createClient } from '@supabase/supabase-js'
 import { Product, ProductVariant } from '@/types'
 import { useCart } from '@/context/CartContext'
 import Image from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Toast from '@/components/ui/Toast'
+
+// Server-side client for static generation
+const supabaseServer = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      persistSession: false
+    }
+  }
+)
 
 type ProductDetailPageProps = {
   product: Product | null
@@ -271,41 +282,75 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
 export default ProductDetailPage
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { data: products, error } = await staticSupabase.from('products').select('slug')
+  console.log('🔄 [ProductDetail] Generating static paths...')
+  
+  const { data: products, error } = await supabaseServer.from('products').select('slug')
 
-  if (error || !products) {
+  if (error) {
+    console.error('❌ [ProductDetail] Error fetching products for static paths:', error)
     return { paths: [], fallback: 'blocking' }
   }
 
-  const paths = products.map((product) => ({
+  if (!products) {
+    console.log('⚠️ [ProductDetail] No products found for static paths')
+    return { paths: [], fallback: 'blocking' }
+  }
+
+  const paths = products.map((product: { slug: string }) => ({
     params: { slug: product.slug },
   }))
 
+  console.log('✅ [ProductDetail] Generated static paths:', paths.length)
   return { paths, fallback: 'blocking' }
 }
 
 export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (context) => {
   const { slug } = context.params || {}
 
+  console.log('🔄 [ProductDetail] Getting static props for slug:', slug)
+
   if (!slug || typeof slug !== 'string') {
+    console.log('❌ [ProductDetail] Invalid slug:', slug)
     return { notFound: true }
   }
 
-  const { data: product, error: productError } = await staticSupabase
+  console.log('🔍 [ProductDetail] Fetching product with slug:', slug)
+  const { data: product, error: productError } = await supabaseServer
     .from('products')
     .select('*')
     .eq('slug', slug)
     .single()
-  if (productError || !product) {
+    
+  if (productError) {
+    console.error('❌ [ProductDetail] Error fetching product:', productError)
     return { notFound: true }
   }
-  const { data: variants, error: variantsError } = await staticSupabase
+  
+  if (!product) {
+    console.log('❌ [ProductDetail] Product not found for slug:', slug)
+    return { notFound: true }
+  }
+
+  console.log('✅ [ProductDetail] Product found:', product.title)
+  console.log('🔍 [ProductDetail] Fetching variants for product:', product.id)
+  
+  const { data: variants, error: variantsError } = await supabaseServer
     .from('product_variants')
     .select('*')
     .eq('product_id', product.id)
-  if (variantsError || !variants || variants.length === 0) {
+    
+  if (variantsError) {
+    console.error('❌ [ProductDetail] Error fetching variants:', variantsError)
     return { notFound: true }
   }
+  
+  if (!variants || variants.length === 0) {
+    console.log('⚠️ [ProductDetail] No variants found for product:', product.id)
+    return { notFound: true }
+  }
+
+  console.log('✅ [ProductDetail] Variants found:', variants.length)
+  
   return {
     props: {
       product,

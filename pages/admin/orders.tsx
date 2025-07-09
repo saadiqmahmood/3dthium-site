@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import Image from 'next/image'
 import { ProductVariant } from '@/types'
-import { useSupabase } from '@/context/SupabaseContext'
 
 const ORDER_STATUSES = [
   'pending',
@@ -70,29 +69,44 @@ export default function AdminOrdersPage() {
   const [orderStatusInput, setOrderStatusInput] = useState('')
   const [editableOrderItems, setEditableOrderItems] = useState<OrderItem[]>([])
   const [variantsByProduct, setVariantsByProduct] = useState<Record<string, ProductVariant[]>>({})
-  const { client: supabaseClient } = useSupabase()
 
   // --- Fetch Orders ---
   const fetchOrders = useCallback(async () => {
     setOrdersLoading(true)
-    const { data } = await supabaseClient
-      .from('orders')
-      .select('id, user_id, guest_email, total_price, status, created_at, shipping_method, shipping_cost, tracking_number')
-      .order('created_at', { ascending: false })
-    let usersMap: Record<string, string> = {}
-    if (data && data.length > 0) {
-      const userIds = Array.from(new Set(data.map((o: Order) => o.user_id).filter(Boolean)))
-      if (userIds.length > 0) {
-        const { data: usersData } = await supabaseClient
-          .from('users')
-          .select('id, email')
-          .in('id', userIds)
-        usersMap = Object.fromEntries((usersData || []).map((u: { id: string; email: string }) => [u.id, u.email]))
+    try {
+      console.log('🔍 [AdminOrders] Fetching orders from API...')
+      const response = await fetch('/api/admin/orders')
+      
+      if (!response.ok) {
+        console.error('❌ [AdminOrders] Error fetching orders:', response.status)
+        throw new Error('Failed to fetch orders')
       }
+      
+      const data = await response.json()
+      console.log('✅ [AdminOrders] Orders fetched successfully:', data?.length || 0)
+      
+      // Fetch user emails for orders with user_id
+      let usersMap: Record<string, string> = {}
+      if (data && data.length > 0) {
+        const userIds = Array.from(new Set(data.map((o: Order) => o.user_id).filter(Boolean)))
+        if (userIds.length > 0) {
+          console.log('🔍 [AdminOrders] Fetching user emails for:', userIds.length, 'users')
+          const usersResponse = await fetch('/api/admin/users')
+          if (usersResponse.ok) {
+            const usersData = await usersResponse.json()
+            usersMap = Object.fromEntries((usersData || []).map((u: { id: string; email: string }) => [u.id, u.email]))
+          }
+        }
+      }
+      
+      setOrders((data || []).map((o: Order) => ({ ...o, user_email: o.user_id ? usersMap[o.user_id] : null })))
+    } catch (error) {
+      console.error('❌ [AdminOrders] Error:', error)
+      alert('Failed to load orders')
+    } finally {
+      setOrdersLoading(false)
     }
-    setOrders((data || []).map((o: Order) => ({ ...o, user_email: o.user_id ? usersMap[o.user_id] : null })))
-    setOrdersLoading(false)
-  }, [supabaseClient])
+  }, [])
 
   useEffect(() => {
     fetchOrders()
@@ -130,7 +144,7 @@ export default function AdminOrdersPage() {
   }
   const handleBulkDelete = async () => {
     for (const id of selectedOrders) {
-      await supabaseClient.from('orders').delete().eq('id', id)
+      await fetch(`/api/admin/orders/${id}`, { method: 'DELETE' })
     }
     setOrders(orders => orders.filter(o => !selectedOrders.includes(o.id)))
     setSelectedOrders([])
@@ -145,12 +159,9 @@ export default function AdminOrdersPage() {
     }
     setOrderDetailsLoading(true)
     const fetchOrderDetails = async () => {
-      const { data } = await supabaseClient
-        .from('orders')
-        .select(`id, user_id, guest_email, total_price, status, created_at, shipping_name, shipping_address, shipping_city, shipping_postcode, shipping_country, shipping_phone, shipping_method, shipping_rate_id, shipping_cost, tracking_number, tracking_url, shipped_at, shipping_label_url, order_items(id, quantity, size, price_at_purchase, products(title, id), product_variants(id, color, image_url))`)
-        .eq('id', selectedOrder.id)
-        .single()
-      if (data) {
+      const response = await fetch(`/api/admin/orders/${selectedOrder.id}`)
+      if (response.ok) {
+        const data = await response.json()
         const mappedData = {
           ...data,
           order_items: data.order_items ? data.order_items.map((item: {
@@ -176,7 +187,7 @@ export default function AdminOrdersPage() {
       setOrderDetailsLoading(false)
     }
     fetchOrderDetails()
-  }, [selectedOrder, supabaseClient])
+  }, [selectedOrder])
 
   // --- Editable Order Items ---
   useEffect(() => {
@@ -185,8 +196,11 @@ export default function AdminOrdersPage() {
       const productIds: string[] = Array.from(new Set((orderDetails.order_items ?? []).map((item: OrderItem) => String(item.products?.id)).filter(Boolean)))
       const variantsMap: Record<string, ProductVariant[]> = {}
       for (const productId of productIds) {
-        const { data: variants } = await supabaseClient.from('product_variants').select('*').eq('product_id', productId)
-        variantsMap[productId] = variants || []
+        const response = await fetch(`/api/admin/product-variants/${productId}`)
+        if (response.ok) {
+          const variants = await response.json()
+          variantsMap[productId] = variants || []
+        }
       }
       setVariantsByProduct(variantsMap)
     }
@@ -198,7 +212,7 @@ export default function AdminOrdersPage() {
       size: item.size,
       quantity: item.quantity
     })))
-  }, [orderDetails, supabaseClient])
+  }, [orderDetails])
 
   const handleOrderItemChange = (idx: number, field: keyof OrderItem, value: string | number | undefined) => {
     setEditableOrderItems(items => items.map((item, i) => i === idx ? { ...item, [field]: value } : item))
@@ -210,21 +224,26 @@ export default function AdminOrdersPage() {
       const variant = (variantsByProduct[String(item.products?.id)] || []).find((v: ProductVariant) => v.id === item.variant_id)
       const price = variant ? Number(variant.price) : Number(item.price_at_purchase)
       newTotal += price * item.quantity
-      await supabaseClient.from('order_items').update({
-        variant_id: item.variant_id,
-        size: item.size,
-        quantity: item.quantity,
-        price_at_purchase: price
-      }).eq('id', item.id)
+      await fetch(`/api/admin/order-items/${item.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          variant_id: item.variant_id,
+          size: item.size,
+          quantity: item.quantity,
+          price_at_purchase: price
+        })
+      })
     }
     if (selectedOrder) {
-      await supabaseClient.from('orders').update({ total_price: newTotal }).eq('id', selectedOrder.id)
-      const { data } = await supabaseClient
-        .from('orders')
-        .select(`id, user_id, guest_email, total_price, status, created_at, order_items(id, quantity, size, price_at_purchase, products(title, id), product_variants(id, color, image_url))`)
-        .eq('id', selectedOrder.id)
-        .single()
-      if (data) {
+      await fetch(`/api/admin/orders/${selectedOrder.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ total_price: newTotal })
+      })
+      const response = await fetch(`/api/admin/orders/${selectedOrder.id}`)
+      if (response.ok) {
+        const data = await response.json()
         const mappedData = {
           ...data,
           order_items: data.order_items ? data.order_items.map((item: {
@@ -254,11 +273,12 @@ export default function AdminOrdersPage() {
   // --- Order Status Update ---
   const handleUpdateOrderStatus = async () => {
     if (!orderDetails) return
-    const { error } = await supabaseClient
-      .from('orders')
-      .update({ status: orderStatusInput })
-      .eq('id', orderDetails.id)
-    if (!error) {
+    const response = await fetch(`/api/admin/orders/${orderDetails.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: orderStatusInput })
+    })
+    if (response.ok) {
       setOrderDetails((od: (Order & { order_items?: OrderItem[] }) | null) => od ? { ...od, status: orderStatusInput } : null)
       setOrders(orders => orders.map(o => o.id === orderDetails.id ? { ...o, status: orderStatusInput } : o))
       setSelectedOrder((so: Order | null) => so ? { ...so, status: orderStatusInput } : so)
@@ -269,14 +289,13 @@ export default function AdminOrdersPage() {
   // --- Delete Order from Modal ---
   const handleDeleteOrderFromModal = async () => {
     if (!orderDetails) return
-    await supabaseClient
-      .from('orders')
-      .delete()
-      .eq('id', orderDetails.id)
-    setOrders(orders => orders.filter(o => o.id !== orderDetails.id))
-    setSelectedOrder(null)
-    setOrderDetails(null)
-    setSelectedOrder(null)
+    const response = await fetch(`/api/admin/orders/${orderDetails.id}`, { method: 'DELETE' })
+    if (response.ok) {
+      setOrders(orders => orders.filter(o => o.id !== orderDetails.id))
+      setSelectedOrder(null)
+      setOrderDetails(null)
+      setSelectedOrder(null)
+    }
   }
 
   // --- Render ---
