@@ -277,6 +277,9 @@ export default function CheckoutPage() {
               </button>
             </div>
           </form>
+          <div className="mt-4 text-center">
+            <span className="text-xs text-gray-500">We care about your privacy. Learn how your information is protected in our <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy.</Link></span>
+          </div>
         </div>
       )}
 

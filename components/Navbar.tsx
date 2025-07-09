@@ -141,6 +141,8 @@ export default function Navbar() {
                     )}
                     </>
                     )}
+                {/** Privacy Policy link (desktop) */}
+                {/* Privacy Policy link removed from desktop */}
             </div>
             {isOpen && (
             <div
@@ -252,7 +254,16 @@ export default function Navbar() {
                     )}
                     </>
                     )}
-
+                    {/** Privacy Policy link (mobile) */}
+                    <button
+                        onClick={() => {
+                            setTimeout(() => setIsOpen(false), 250)
+                            router.push('/privacy')
+                        }}
+                        className="text-base py-3 font-medium text-blue-600 hover:underline text-left"
+                    >
+                        Privacy Policy
+                    </button>
                 </div>
                 </div>
             </div>

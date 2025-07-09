@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useSupabase } from '@/context/SupabaseContext'
+import Link from 'next/link'
 
 export default function CustomOrderForm() {
     const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>('idle')
@@ -83,14 +84,14 @@ export default function CustomOrderForm() {
       }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 px-8 rounded-xl">
+    <div>
+      <form onSubmit={handleSubmit} className="space-y-6 px-8 rounded-xl">
         {/* Success Message */}
         {status === 'success' && (
             <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                 Your request has been submitted successfully!
             </div>
         )}
-
         {/* Error Message */}
         {status === 'error' && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -255,7 +256,10 @@ export default function CustomOrderForm() {
                 {status === 'loading' ? 'Submitting...' : 'Submit Request'}
             </button>
         </div>
-    </form>
-
+      </form>
+      <div className="mt-4 text-center">
+        <Link href="/privacy" className="text-xs text-blue-600 hover:underline">Read our Privacy Policy</Link>
+      </div>
+    </div>
   )
 }

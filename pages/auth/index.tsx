@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { useAuth } from '@/context/AuthContext'
 import Toast from '@/components/ui/Toast'
 import { useSupabase } from '@/context/SupabaseContext'
+import Link from 'next/link'
 
 export default function AuthPage() {
   const router = useRouter()
@@ -182,6 +183,12 @@ export default function AuthPage() {
               {loading ? 'Please wait...' : isLogin ? 'Login' : 'Sign Up'}
             </button>
 
+            {!isLogin && (
+              <p className="text-center text-xs text-gray-500 mt-2">
+                By signing up, you agree to our{' '}
+                <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>.
+              </p>
+            )}
             <p className="text-center text-sm text-gray-600">
               {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
               <button

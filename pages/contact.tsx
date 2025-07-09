@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Head from 'next/head'
+import Link from 'next/link'
 
 export default function ContactPage() {
   const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>('idle')
@@ -100,6 +101,9 @@ export default function ContactPage() {
               </button>
             </div>
           </form>
+          <div className="mt-4 text-center">
+            <Link href="/privacy" className="text-xs text-blue-600 hover:underline">Read our Privacy Policy</Link>
+          </div>
         </div>
       </section>
     </>
