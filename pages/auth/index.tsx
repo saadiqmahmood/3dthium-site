@@ -64,6 +64,21 @@ export default function AuthPage() {
       router.push(redirectTo)
     }, 1500)
   }
+
+  const handleResendConfirmation = async () => {
+    if (!email) {
+      setToast({ message: 'Please enter your email address first.', type: 'error' })
+      return
+    }
+    setLoading(true)
+    const { error } = await supabase.auth.resend({ type: 'signup', email })
+    if (error) {
+      setToast({ message: error.message, type: 'error' })
+    } else {
+      setToast({ message: 'Confirmation email resent! Please check your inbox.', type: 'success' })
+    }
+    setLoading(false)
+  }
     useEffect(() => {
         if (router.query.reset === 'success') {
             setToast({ message: 'Password updated! You can now log in.', type: 'success' })
@@ -165,6 +180,7 @@ export default function AuthPage() {
               />
             </div>
             {isLogin && !resetMode && (
+                <>
                 <p className="text-right text-sm mt-2">
                     <button
                         type="button"
@@ -174,6 +190,20 @@ export default function AuthPage() {
                         Forgot password?
                     </button>
                 </p>
+                {/* Only show resend link if error message indicates email not confirmed */}
+                {email && error && /confirm/i.test(error) && (
+                  <p className="text-right text-xs mt-1">
+                    <button
+                      type="button"
+                      className="text-blue-600 hover:underline"
+                      onClick={handleResendConfirmation}
+                      disabled={loading}
+                    >
+                      Resend confirmation email
+                    </button>
+                  </p>
+                )}
+                </>
             )}
             <button
               type="submit"
