@@ -41,6 +41,24 @@ interface CartItem {
   size: string;
 }
 
+// Helper function for dynamic price calculation
+function getDynamicPrice(variant: { color: string }, size: string): number {
+  let basePrice = 16.99;
+  if (variant.color && variant.color.includes('And')) {
+    basePrice = 17.99;
+  }
+  if (size === '210mm') {
+    return basePrice - 4;
+  } else if (size === '180mm') {
+    return basePrice - 7;
+  } else if (size === '150mm') {
+    return basePrice - 10;
+  } else if (size === '240mm') {
+    return basePrice;
+  }
+  return basePrice;
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -165,7 +183,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       variant_id: item.variant.id,
       quantity: item.quantity,
       size: item.size,
-      price_at_purchase: item.variant.price, // Using price_at_purchase as per schema
+      price_at_purchase: getDynamicPrice(item.variant, item.size), // Use dynamic price
     }))
 
     const { error: itemsError } = await supabase

@@ -4,9 +4,27 @@ import Image from 'next/image'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 
+// Helper function for dynamic price calculation
+function getDynamicPrice(variant: { color: string }, size: string): number {
+  let basePrice = 16.99;
+  if (variant.color && variant.color.includes('And')) {
+    basePrice = 17.99;
+  }
+  if (size === '210mm') {
+    return basePrice - 4;
+  } else if (size === '180mm') {
+    return basePrice - 7;
+  } else if (size === '150mm') {
+    return basePrice - 10;
+  } else if (size === '240mm') {
+    return basePrice;
+  }
+  return basePrice;
+}
+
 export default function CartPage() {
   const { cart, removeFromCart, clearCart, updateCartItemQuantity } = useCart()
-  const total = cart.reduce((acc, item) => acc + item.variant.price * item.quantity, 0)
+  const total = cart.reduce((acc, item) => acc + getDynamicPrice(item.variant, item.size) * item.quantity, 0)
   const router = useRouter()
   const { from } = router.query
 
@@ -64,7 +82,7 @@ export default function CartPage() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-gray-700 font-medium">£{(item.variant.price * item.quantity).toFixed(2)}</p>
+              <p className="text-gray-700 font-medium">£{(getDynamicPrice(item.variant, item.size) * item.quantity).toFixed(2)}</p>
               <button
                 onClick={() => removeFromCart(item.product.id, item.variant.id, item.size)}
                 className="text-red-500 text-sm hover:underline mt-1"

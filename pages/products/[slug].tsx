@@ -42,8 +42,27 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
   }
 
   // Use thumbnail if no variant selected
-  const imageUrl = selectedVariant ? selectedVariant.image_url : product.thumbnail_url
-  const price = selectedVariant ? selectedVariant.price : (variants[0]?.price ?? 0)
+  const imageUrl = selectedVariant ? selectedVariant.image_url : product.thumbnail_url;
+  // Determine base price for selected variant (or first variant)
+  const baseVariant = selectedVariant || variants[0];
+  let basePrice = baseVariant ? baseVariant.price : 0;
+  // If color contains 'And', override base price to 17.99
+  if (baseVariant && baseVariant.color && baseVariant.color.includes('And')) {
+    basePrice = 17.99;
+  } else if (baseVariant) {
+    basePrice = 16.99;
+  }
+  // Calculate price based on selected size
+  let displayPrice = basePrice;
+  if (selectedSize === '210mm') {
+    displayPrice = basePrice - 4;
+  } else if (selectedSize === '180mm') {
+    displayPrice = basePrice - 7;
+  } else if (selectedSize === '150mm') {
+    displayPrice = basePrice - 10;
+  } else if (selectedSize === '240mm') {
+    displayPrice = basePrice;
+  }
   const customizable = selectedVariant ? selectedVariant.customizable : (variants[0]?.customizable ?? false)
 
   return (
@@ -88,7 +107,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
                 ))}
               </div>
             </div>
-            <p className="mt-4 text-xl font-semibold text-gray-900">£{price.toFixed(2)}</p>
+            <p className="mt-4 text-xl font-semibold text-gray-900">£{displayPrice.toFixed(2)}</p>
             <p className="mt-1 text-gray-700">
               Customizable: <span className="font-medium">{customizable ? 'Yes' : 'No'}</span>
             </p>
@@ -214,7 +233,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
                 ))}
               </div>
             </div>
-            <p className="mt-4 text-xl font-semibold text-gray-900">£{price.toFixed(2)}</p>
+            <p className="mt-4 text-xl font-semibold text-gray-900">£{displayPrice.toFixed(2)}</p>
             <p className="mt-1 text-gray-700">
               Customizable: <span className="font-medium">{customizable ? 'Yes' : 'No'}</span>
             </p>

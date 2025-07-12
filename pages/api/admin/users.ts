@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { data: users, error } = await supabaseAdmin
       .from('users')
-      .select('id, email, created_at, is_admin')
+      .select('id, email, created_at, is_admin, auth_user_id')
       .order('created_at', { ascending: false })
 
     if (error) {

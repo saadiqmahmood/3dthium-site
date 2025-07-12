@@ -32,7 +32,25 @@ export default function CheckoutPage() {
     email: ''
   })
 
-  const subtotal = cart.reduce((acc, item) => acc + item.variant.price * item.quantity, 0)
+  // Helper function for dynamic price calculation
+  function getDynamicPrice(variant: { color: string }, size: string): number {
+    let basePrice = 16.99;
+    if (variant.color && variant.color.includes('And')) {
+      basePrice = 17.99;
+    }
+    if (size === '210mm') {
+      return basePrice - 4;
+    } else if (size === '180mm') {
+      return basePrice - 7;
+    } else if (size === '150mm') {
+      return basePrice - 10;
+    } else if (size === '240mm') {
+      return basePrice;
+    }
+    return basePrice;
+  }
+
+  const subtotal = cart.reduce((acc, item) => acc + getDynamicPrice(item.variant, item.size) * item.quantity, 0)
   const shippingCost = selectedRate ? parseFloat(selectedRate.rate) : 0
   const total = subtotal + shippingCost
 
@@ -421,7 +439,7 @@ export default function CheckoutPage() {
                 <p className="text-sm text-gray-500">Customizable: {item.variant.customizable ? 'Yes' : 'No'}</p>
               </div>
               <div className="ml-auto text-right">
-                <p className="text-gray-700 font-medium">£{(item.variant.price * item.quantity).toFixed(2)}</p>
+                <p className="text-gray-700 font-medium">£{(getDynamicPrice(item.variant, item.size) * item.quantity).toFixed(2)}</p>
               </div>
             </div>
           ))}
