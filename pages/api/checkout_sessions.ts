@@ -34,6 +34,24 @@ interface CartItem {
   size: string;
 }
 
+// Helper function for dynamic price calculation
+function getDynamicPrice(variant: { color: string }, size: string): number {
+  let basePrice = 16.99;
+  if (variant.color && variant.color.includes('And')) {
+    basePrice = 17.99;
+  }
+  if (size === '210mm') {
+    return basePrice - 4;
+  } else if (size === '180mm') {
+    return basePrice - 7;
+  } else if (size === '150mm') {
+    return basePrice - 10;
+  } else if (size === '240mm') {
+    return basePrice;
+  }
+  return basePrice;
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -103,7 +121,7 @@ export default async function handler(
           description: `Size: ${item.size}, Customizable: ${item.variant.customizable ? 'Yes' : 'No'}`,
           images: [item.variant.image_url],
         },
-        unit_amount: Math.round(item.variant.price * 100), // Convert to pence
+        unit_amount: Math.round(getDynamicPrice(item.variant, item.size) * 100), // Use dynamic price
       },
       quantity: item.quantity,
     }))
