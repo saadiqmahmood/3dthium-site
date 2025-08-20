@@ -1,6 +1,17 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getShippingRates, ShipmentRequest, ShippingAddress } from '@/lib/shippoClient'
 
+// Helper function to get size multiplier
+function getSizeMultiplier(size: string): number {
+  switch (size) {
+    case '150mm': return 1.0
+    case '180mm': return 1.2
+    case '210mm': return 1.4
+    case '240mm': return 1.6
+    default: return 1.0
+  }
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -76,17 +87,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(200).json({ rates })
   } catch (error) {
     console.error('Error calculating shipping rates:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     res.status(500).json({ error: 'Failed to calculate shipping rates' })
-  }
-}
-
-// Helper function to get size multiplier
-function getSizeMultiplier(size: string): number {
-  switch (size) {
-    case '150mm': return 1.0
-    case '180mm': return 1.2
-    case '210mm': return 1.4
-    case '240mm': return 1.6
-    default: return 1.0
   }
 } 
