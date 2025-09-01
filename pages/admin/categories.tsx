@@ -192,14 +192,14 @@ export default function AdminCategoriesPage() {
             )}
             <div className="flex-1">
               <div className="flex items-center space-x-2">
-                <span className={`font-medium ${level === 0 ? 'text-lg' : 'text-base'}`}>
+                <span className={`font-medium text-gray-900 ${level === 0 ? 'text-lg' : 'text-base'}`}>
                   {category.name}
                 </span>
                 {category.product_count !== undefined && (
                   <span className="text-sm text-gray-500">({category.product_count})</span>
                 )}
                 {!category.is_active && (
-                  <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Inactive</span>
+                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Inactive</span>
                 )}
               </div>
               {category.description && (
@@ -210,13 +210,13 @@ export default function AdminCategoriesPage() {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handleEdit(category)}
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+              className="text-stone-800 border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 transition"
             >
               Edit
             </button>
             <button
               onClick={() => handleDelete(category.id)}
-              className="text-red-600 hover:text-red-800 text-sm font-medium"
+              className="text-stone-800 border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 transition"
             >
               Delete
             </button>
@@ -247,9 +247,9 @@ export default function AdminCategoriesPage() {
   return (
     <div className="w-full mx-auto bg-white p-16">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-stone-800">Category Management</h1>
+        <h1 className="text-2xl font-bold text-stone-800">Category Management</h1>
         <div className="flex space-x-4">
-          <Link href="/admin" className="bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200">
+          <Link href="/admin" className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
             Back to Admin
           </Link>
           <button
@@ -258,7 +258,7 @@ export default function AdminCategoriesPage() {
               setEditingCategory(null)
               resetForm()
             }}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
           >
             Add New Category
           </button>
@@ -268,7 +268,7 @@ export default function AdminCategoriesPage() {
       {/* Category Form */}
       {showForm && (
         <div className="bg-gray-50 rounded-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">
+          <h2 className="text-xl font-semibold mb-4 text-stone-800">
             {editingCategory ? 'Edit Category' : 'Add New Category'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -279,7 +279,7 @@ export default function AdminCategoriesPage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
                   required
                 />
               </div>
@@ -289,7 +289,7 @@ export default function AdminCategoriesPage() {
                   type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
                   required
                 />
               </div>
@@ -298,7 +298,7 @@ export default function AdminCategoriesPage() {
                 <select
                   value={formData.parent_id || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, parent_id: e.target.value || null }))}
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
                 >
                   <option value="">No Parent (Top Level)</option>
                   {categories
@@ -314,7 +314,7 @@ export default function AdminCategoriesPage() {
                   type="number"
                   value={formData.sort_order}
                   onChange={(e) => setFormData(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
                 />
               </div>
             </div>
@@ -324,7 +324,7 @@ export default function AdminCategoriesPage() {
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 rows={3}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
               />
             </div>
             <div>
@@ -333,7 +333,7 @@ export default function AdminCategoriesPage() {
                 type="url"
                 value={formData.image_url}
                 onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
                 placeholder="https://example.com/image.jpg"
               />
             </div>
@@ -351,7 +351,7 @@ export default function AdminCategoriesPage() {
             <div className="flex space-x-4">
               <button
                 type="submit"
-                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+                className="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300"
               >
                 {editingCategory ? 'Update Category' : 'Create Category'}
               </button>
@@ -373,7 +373,7 @@ export default function AdminCategoriesPage() {
 
       {/* Categories List */}
       <div className="bg-white rounded-lg border">
-        <div className="px-6 py-4 border-b bg-gray-50">
+        <div className="px-6 py-4 border-b bg-gray-100">
           <h3 className="text-lg font-medium text-gray-900">Categories ({categories.length})</h3>
         </div>
         <div className="divide-y divide-gray-200">
