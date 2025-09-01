@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 
 const SECTIONS = [
   { key: 'dashboard', label: 'Dashboard', href: '/admin' },
+  { key: 'categories', label: 'Categories', href: '/admin/categories' },
   { key: 'users', label: 'Users', href: '/admin/users' },
   { key: 'orders', label: 'Orders', href: '/admin/orders' },
   { key: 'products', label: 'Products', href: '/admin/products' },
