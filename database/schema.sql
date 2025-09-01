@@ -2,38 +2,37 @@
 -- Table order and constraints may not be valid for execution.
 
 CREATE TABLE public.cart_items (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
   cart_id uuid,
   variant_id uuid,
   quantity integer NOT NULL CHECK (quantity > 0),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   size text,
   CONSTRAINT cart_items_pkey PRIMARY KEY (id),
   CONSTRAINT cart_items_cart_id_fkey FOREIGN KEY (cart_id) REFERENCES public.carts(id),
   CONSTRAINT cart_items_variant_id_fkey FOREIGN KEY (variant_id) REFERENCES public.product_variants(id)
 );
 CREATE TABLE public.carts (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
   CONSTRAINT carts_pkey PRIMARY KEY (id),
   CONSTRAINT carts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
 CREATE TABLE public.checkout_carts (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  user_id uuid,
-  guest_email text,
-  cart_data jsonb NOT NULL,
-  created_at timestamp with time zone DEFAULT now(),
   shipping_address jsonb,
   shipping_rate_id text,
   shipping_cost numeric DEFAULT 0.00,
   shipping_provider text,
   shipping_service text,
+  user_id uuid,
+  guest_email text,
+  cart_data jsonb NOT NULL,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT checkout_carts_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.custom_orders (
-  id integer NOT NULL DEFAULT nextval('custom_orders_id_seq'::regclass),
   name character varying NOT NULL,
   email character varying NOT NULL,
   phone character varying,
@@ -44,38 +43,35 @@ CREATE TABLE public.custom_orders (
   depth integer,
   description text NOT NULL,
   file_url text NOT NULL,
+  id integer NOT NULL DEFAULT nextval('custom_orders_id_seq'::regclass),
   status character varying DEFAULT 'pending'::character varying,
   created_at timestamp without time zone DEFAULT now(),
   CONSTRAINT custom_orders_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.order_items (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
   order_id uuid,
   variant_id uuid,
   quantity integer NOT NULL,
   price_at_purchase numeric NOT NULL,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   size text,
   product_id uuid,
   CONSTRAINT order_items_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_product FOREIGN KEY (product_id) REFERENCES public.products(id),
   CONSTRAINT order_items_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id),
-  CONSTRAINT order_items_variant_id_fkey FOREIGN KEY (variant_id) REFERENCES public.product_variants(id),
-  CONSTRAINT fk_product FOREIGN KEY (product_id) REFERENCES public.products(id)
+  CONSTRAINT order_items_variant_id_fkey FOREIGN KEY (variant_id) REFERENCES public.product_variants(id)
 );
 CREATE TABLE public.orders (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid,
   total_price numeric NOT NULL,
-  status USER-DEFINED NOT NULL DEFAULT 'pending'::order_status,
-  created_at timestamp with time zone DEFAULT now(),
-  guest_email text,
-  stripe_session_id text UNIQUE,
-  stripe_payment_intent_id text,
-  stripe_customer_id text,
   shipping_name text,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   shipping_address text,
   shipping_city text,
+  status USER-DEFINED NOT NULL DEFAULT 'pending'::order_status,
   shipping_postcode text,
   shipping_country text DEFAULT 'GB'::text,
+  created_at timestamp with time zone DEFAULT now(),
   shipping_phone text,
   shipping_method text,
   shipping_rate_id text,
@@ -84,14 +80,18 @@ CREATE TABLE public.orders (
   tracking_url text,
   shipped_at timestamp with time zone,
   shipping_label_url text,
+  guest_email text,
+  stripe_session_id text UNIQUE,
+  stripe_payment_intent_id text,
+  stripe_customer_id text,
   CONSTRAINT orders_pkey PRIMARY KEY (id),
   CONSTRAINT orders_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
 CREATE TABLE public.product_variants (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
   product_id uuid,
   color text NOT NULL,
   image_url text NOT NULL,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   price numeric NOT NULL DEFAULT 0,
   in_stock boolean DEFAULT true,
   customizable boolean DEFAULT false,
@@ -109,10 +109,10 @@ CREATE TABLE public.products (
   CONSTRAINT products_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.users (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  is_admin boolean NOT NULL DEFAULT false,
   auth_user_id uuid UNIQUE,
   email text,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   created_at timestamp with time zone DEFAULT now(),
-  is_admin boolean NOT NULL DEFAULT false,
   CONSTRAINT users_pkey PRIMARY KEY (id)
 );
