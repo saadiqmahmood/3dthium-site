@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
 import Link from 'next/link'
+import { useAuth } from '@/context/AuthContext'
 
 interface Category {
   id: string
@@ -27,6 +27,7 @@ interface CategoryFormData {
 }
 
 export default function AdminCategoriesPage() {
+  const { user, isAdmin, loading: authLoading } = useAuth()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -41,11 +42,6 @@ export default function AdminCategoriesPage() {
     is_active: true
   })
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
-  const router = useRouter()
-
-  useEffect(() => {
-    fetchCategories()
-  }, [])
 
   const fetchCategories = async () => {
     try {
@@ -71,6 +67,41 @@ export default function AdminCategoriesPage() {
         ...cat,
         children: buildCategoryTree(categories, cat.id)
       }))
+  }
+
+  // Redirect if not authenticated or not admin
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user) {
+        window.location.href = '/auth'
+        return
+      }
+      if (!isAdmin) {
+        window.location.href = '/'
+        return
+      }
+    }
+  }, [user, isAdmin, authLoading])
+
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render if not authenticated or not admin
+  if (!user || !isAdmin) {
+    return null
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

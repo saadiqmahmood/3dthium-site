@@ -8,33 +8,104 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     switch (req.method) {
       case 'GET':
         console.log('🔍 [API/admin/products] Fetching products...')
-        const { data, error } = await supabaseAdmin
-          .from('products')
-          .select('*')
+        
+        const { data: products, error: productsError } = await supabaseAdmin
+          .from('products_new')
+          .select(`
+            id,
+            name,
+            description,
+            category_id,
+            base_price,
+            thumbnail_url,
+            slug,
+            is_active,
+            customizable,
+            attributes,
+            images,
+            created_at,
+            updated_at,
+            categories!inner(name, slug)
+          `)
           .order('created_at', { ascending: false })
 
-        if (error) {
-          console.error('❌ [API/admin/products] Error fetching products:', error)
+        if (productsError) {
+          console.error('❌ [API/admin/products] Error fetching products:', productsError)
           return res.status(500).json({ error: 'Failed to fetch products' })
         }
 
-        console.log('✅ [API/admin/products] Products fetched successfully:', data?.length || 0)
-        res.status(200).json(data || [])
+        console.log('✅ [API/admin/products] Products fetched successfully:', products?.length || 0)
+        res.status(200).json(products || [])
         break
 
       case 'POST':
-        console.log('🔍 [API/admin/products] Creating product...')
-        const { error: createError } = await supabaseAdmin
-          .from('products')
-          .insert([req.body])
+        console.log('🔍 [API/admin/products] Creating new product...')
+        const { 
+          name, 
+          description, 
+          category_id, 
+          base_price, 
+          thumbnail_url, 
+          slug, 
+          is_active, 
+          customizable, 
+          attributes,
+          images
+        } = req.body
+
+        if (!name || !description || !category_id || !slug) {
+          return res.status(400).json({ error: 'Name, description, category, and slug are required' })
+        }
+
+        if (base_price <= 0) {
+          return res.status(400).json({ error: 'Base price must be greater than 0' })
+        }
+
+        if (!images || images.length === 0) {
+          return res.status(400).json({ error: 'At least one product image is required' })
+        }
+
+        // Check if slug already exists
+        const { data: existingProduct, error: checkError } = await supabaseAdmin
+          .from('products_new')
+          .select('id')
+          .eq('slug', slug)
+          .single()
+
+        if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+          console.error('❌ [API/admin/products] Error checking slug uniqueness:', checkError)
+          return res.status(500).json({ error: 'Failed to check slug uniqueness' })
+        }
+
+        if (existingProduct) {
+          return res.status(400).json({ error: 'Slug already exists' })
+        }
+
+        // Create the product
+        const { data: newProduct, error: createError } = await supabaseAdmin
+          .from('products_new')
+          .insert([{
+            name,
+            description,
+            category_id,
+            base_price,
+            thumbnail_url: thumbnail_url || images[0], // Use first image as thumbnail if not specified
+            slug,
+            is_active: is_active !== undefined ? is_active : true,
+            customizable: customizable !== undefined ? customizable : false,
+            attributes: attributes || {},
+            images: images || []
+          }])
+          .select()
+          .single()
 
         if (createError) {
           console.error('❌ [API/admin/products] Error creating product:', createError)
           return res.status(500).json({ error: 'Failed to create product' })
         }
 
-        console.log('✅ [API/admin/products] Product created successfully')
-        res.status(200).json({ success: true })
+        console.log('✅ [API/admin/products] Product created successfully:', newProduct.id)
+        res.status(201).json(newProduct)
         break
 
       default:
