@@ -1,7 +1,7 @@
-import Head from "next/head";
-import HeroSection from '@/components/sections/HeroSection'
+import Head from 'next/head'
+import CustomPrintsCTA from '@/components/sections/CustomPrintsCTA'
 import FeaturedProducts from '@/components/sections/FeaturedProducts'
-import CustomPrintsCTA from "@/components/sections/CustomPrintsCTA";
+import HeroSection from '@/components/sections/HeroSection'
 
 export default function Home() {
   return (
@@ -12,7 +12,7 @@ export default function Home() {
       <div className="text-center space-y-4">
         <HeroSection />
         <FeaturedProducts />
-        <CustomPrintsCTA/>
+        <CustomPrintsCTA />
       </div>
     </section>
   )

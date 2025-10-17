@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useAuth } from '@/context/AuthContext'
+import { useEffect, useState } from 'react'
 
 interface Category {
   id: string
@@ -27,7 +26,6 @@ interface CategoryFormData {
 }
 
 export default function AdminCategoriesPage() {
-  const { user, isAdmin, loading: authLoading } = useAuth()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -39,7 +37,7 @@ export default function AdminCategoriesPage() {
     description: '',
     image_url: '',
     sort_order: 0,
-    is_active: true
+    is_active: true,
   })
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
 
@@ -59,65 +57,37 @@ export default function AdminCategoriesPage() {
     }
   }
 
-  const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
+  const buildCategoryTree = (
+    categories: Category[],
+    parentId: string | null = null
+  ): Category[] => {
     return categories
-      .filter(cat => cat.parent_id === parentId)
+      .filter((cat) => cat.parent_id === parentId)
       .sort((a, b) => a.sort_order - b.sort_order)
-      .map(cat => ({
+      .map((cat) => ({
         ...cat,
-        children: buildCategoryTree(categories, cat.id)
+        children: buildCategoryTree(categories, cat.id),
       }))
   }
-
-  // Redirect if not authenticated or not admin
-  useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        window.location.href = '/auth'
-        return
-      }
-      if (!isAdmin) {
-        window.location.href = '/'
-        return
-      }
-    }
-  }, [user, isAdmin, authLoading])
 
   useEffect(() => {
     fetchCategories()
   }, [])
 
-  // Show loading while checking auth
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Checking authentication...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Don't render if not authenticated or not admin
-  if (!user || !isAdmin) {
-    return null
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     try {
-      const url = editingCategory 
+      const url = editingCategory
         ? `/api/admin/categories/${editingCategory.id}`
         : '/api/admin/categories'
-      
+
       const method = editingCategory ? 'PUT' : 'POST'
-      
+
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       })
 
       if (response.ok) {
@@ -144,7 +114,7 @@ export default function AdminCategoriesPage() {
       description: category.description || '',
       image_url: category.image_url || '',
       sort_order: category.sort_order,
-      is_active: category.is_active
+      is_active: category.is_active,
     })
     setShowForm(true)
   }
@@ -156,7 +126,7 @@ export default function AdminCategoriesPage() {
 
     try {
       const response = await fetch(`/api/admin/categories/${categoryId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       })
 
       if (response.ok) {
@@ -179,7 +149,7 @@ export default function AdminCategoriesPage() {
       description: '',
       image_url: '',
       sort_order: 0,
-      is_active: true
+      is_active: true,
     })
   }
 
@@ -201,17 +171,19 @@ export default function AdminCategoriesPage() {
   }
 
   const handleNameChange = (name: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       name,
-      slug: generateSlug(name)
+      slug: generateSlug(name),
     }))
   }
 
   const renderCategoryTree = (categories: Category[], level: number = 0) => {
-    return categories.map(category => (
+    return categories.map((category) => (
       <div key={category.id} className="border-l-2 border-gray-200 ml-4">
-        <div className={`flex items-center justify-between p-3 hover:bg-gray-50 ${level > 0 ? 'ml-4' : ''}`}>
+        <div
+          className={`flex items-center justify-between p-3 hover:bg-gray-50 ${level > 0 ? 'ml-4' : ''}`}
+        >
           <div className="flex items-center space-x-3">
             {category.children && category.children.length > 0 && (
               <button
@@ -223,14 +195,18 @@ export default function AdminCategoriesPage() {
             )}
             <div className="flex-1">
               <div className="flex items-center space-x-2">
-                <span className={`font-medium text-gray-900 ${level === 0 ? 'text-lg' : 'text-base'}`}>
+                <span
+                  className={`font-medium text-gray-900 ${level === 0 ? 'text-lg' : 'text-base'}`}
+                >
                   {category.name}
                 </span>
                 {category.product_count !== undefined && (
                   <span className="text-sm text-gray-500">({category.product_count})</span>
                 )}
                 {!category.is_active && (
-                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Inactive</span>
+                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                    Inactive
+                  </span>
                 )}
               </div>
               {category.description && (
@@ -253,11 +229,11 @@ export default function AdminCategoriesPage() {
             </button>
           </div>
         </div>
-        {category.children && category.children.length > 0 && expandedCategories.has(category.id) && (
-          <div className="ml-4">
-            {renderCategoryTree(category.children, level + 1)}
-          </div>
-        )}
+        {category.children &&
+          category.children.length > 0 &&
+          expandedCategories.has(category.id) && (
+            <div className="ml-4">{renderCategoryTree(category.children, level + 1)}</div>
+          )}
       </div>
     ))
   }
@@ -280,7 +256,10 @@ export default function AdminCategoriesPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-stone-800">Category Management</h1>
         <div className="flex space-x-4">
-          <Link href="/admin" className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
+          <Link
+            href="/admin"
+            className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+          >
             Back to Admin
           </Link>
           <button
@@ -319,23 +298,29 @@ export default function AdminCategoriesPage() {
                 <input
                   type="text"
                   value={formData.slug}
-                  onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Parent Category</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Parent Category
+                </label>
                 <select
                   value={formData.parent_id || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, parent_id: e.target.value || null }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, parent_id: e.target.value || null }))
+                  }
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
                 >
                   <option value="">No Parent (Top Level)</option>
                   {categories
-                    .filter(cat => cat.parent_id === null)
-                    .map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    .filter((cat) => cat.parent_id === null)
+                    .map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
                     ))}
                 </select>
               </div>
@@ -344,7 +329,9 @@ export default function AdminCategoriesPage() {
                 <input
                   type="number"
                   value={formData.sort_order}
-                  onChange={(e) => setFormData(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))
+                  }
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
                 />
               </div>
@@ -353,7 +340,7 @@ export default function AdminCategoriesPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                 rows={3}
                 className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
               />
@@ -363,7 +350,7 @@ export default function AdminCategoriesPage() {
               <input
                 type="url"
                 value={formData.image_url}
-                onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, image_url: e.target.value }))}
                 className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
                 placeholder="https://example.com/image.jpg"
               />
@@ -373,7 +360,9 @@ export default function AdminCategoriesPage() {
                 <input
                   type="checkbox"
                   checked={formData.is_active}
-                  onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, is_active: e.target.checked }))
+                  }
                   className="mr-2"
                 />
                 <span className="text-sm text-gray-700">Active</span>
@@ -419,4 +408,4 @@ export default function AdminCategoriesPage() {
       </div>
     </div>
   )
-} 
+}

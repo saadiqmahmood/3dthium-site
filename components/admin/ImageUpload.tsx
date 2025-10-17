@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { useCallback, useState } from 'react'
 
 interface ImageUploadProps {
   categorySlug: string
@@ -9,12 +9,12 @@ interface ImageUploadProps {
   maxImages?: number
 }
 
-export default function ImageUpload({ 
-  categorySlug, 
-  productSlug, 
-  onImagesChange, 
-  initialImages = [], 
-  maxImages = 10 
+export default function ImageUpload({
+  categorySlug,
+  productSlug,
+  onImagesChange,
+  initialImages = [],
+  maxImages = 10,
 }: ImageUploadProps) {
   const [images, setImages] = useState<string[]>(initialImages)
   const [uploading, setUploading] = useState(false)
@@ -30,21 +30,19 @@ export default function ImageUpload({
     const fileName = `${Date.now()}.${fileExt}`
     const filePath = `${categorySlug}/${productSlug}/${fileName}`
 
-    const { error } = await supabase.storage
-      .from('products')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      })
+    const { error } = await supabase.storage.from('products').upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false,
+    })
 
     if (error) {
       throw new Error(`Upload failed: ${error.message}`)
     }
 
     // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('products')
-      .getPublicUrl(filePath)
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('products').getPublicUrl(filePath)
 
     return publicUrl
   }
@@ -61,7 +59,7 @@ export default function ImageUpload({
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
-        
+
         // Validate file type
         if (!file.type.startsWith('image/')) {
           alert(`${file.name} is not an image file`)
@@ -92,9 +90,9 @@ export default function ImageUpload({
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
+    if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true)
-    } else if (e.type === "dragleave") {
+    } else if (e.type === 'dragleave') {
       setDragActive(false)
     }
   }, [])
@@ -128,9 +126,7 @@ export default function ImageUpload({
       {/* Upload Area */}
       <div
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          dragActive 
-            ? 'border-blue-500 bg-blue-50' 
-            : 'border-gray-300 hover:border-gray-400'
+          dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -153,10 +149,8 @@ export default function ImageUpload({
           </svg>
           <div className="text-gray-600">
             <label htmlFor="file-upload" className="cursor-pointer">
-              <span className="font-medium text-blue-600 hover:text-blue-500">
-                Click to upload
-              </span>
-              {' '}or drag and drop
+              <span className="font-medium text-blue-600 hover:text-blue-500">Click to upload</span>{' '}
+              or drag and drop
             </label>
             <input
               id="file-upload"
@@ -239,4 +233,4 @@ export default function ImageUpload({
       )}
     </div>
   )
-} 
+}

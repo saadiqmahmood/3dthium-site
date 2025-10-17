@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           tracking_number: transaction.tracking_number,
           tracking_url: transaction.tracking_url,
           shipping_label_url: transaction.label_url,
-          shipped_at: new Date().toISOString()
+          shipped_at: new Date().toISOString(),
         })
         .eq('id', order_id)
 
@@ -39,16 +39,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         success: true,
         tracking_number: transaction.tracking_number,
         tracking_url: transaction.tracking_url,
-        label_url: transaction.label_url
+        label_url: transaction.label_url,
       })
     } else {
-      res.status(400).json({ 
+      res.status(400).json({
         error: 'Failed to create shipping label',
-        details: transaction.messages 
+        details: transaction.messages,
       })
     }
   } catch (error) {
     console.error('Error creating shipping label:', error)
     res.status(500).json({ error: 'Failed to create shipping label' })
   }
-} 
+}

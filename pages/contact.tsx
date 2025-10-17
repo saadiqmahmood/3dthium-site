@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import { useState } from 'react'
 
 export default function ContactPage() {
   const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>('idle')
@@ -34,7 +34,10 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6 px-8 rounded-xl bg-white py-10 shadow-sm">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6 px-8 rounded-xl bg-white py-10 shadow-sm"
+          >
             {status === 'success' && (
               <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
                 Your message was sent successfully!
@@ -102,7 +105,9 @@ export default function ContactPage() {
             </div>
           </form>
           <div className="mt-4 text-center">
-            <Link href="/privacy" className="text-xs text-blue-600 hover:underline">Read our Privacy Policy</Link>
+            <Link href="/privacy" className="text-xs text-blue-600 hover:underline">
+              Read our Privacy Policy
+            </Link>
           </div>
         </div>
       </section>

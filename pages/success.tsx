@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import React, { useEffect, useState } from 'react'
 import { useCart } from '../context/CartContext'
 
 export default function SuccessPage() {
@@ -16,8 +16,8 @@ export default function SuccessPage() {
       setSessionId(session_id)
       // Fetch promo code/discount from backend
       fetch(`/api/stripe/session?session_id=${session_id}`)
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           setPromoCode(data.promo_code || null)
           setDiscount(data.discount || null)
         })
@@ -53,12 +53,24 @@ export default function SuccessPage() {
       <div className="bg-white rounded-xl shadow p-8 max-w-lg mx-auto">
         <div className="mb-6">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="w-8 h-8 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
-          <p className="text-gray-600">Thank you for your order. We&apos;ll send you a confirmation email shortly.</p>
+          <p className="text-gray-600">
+            Thank you for your order. We&apos;ll send you a confirmation email shortly.
+          </p>
         </div>
 
         {sessionId && (
@@ -73,10 +85,14 @@ export default function SuccessPage() {
               </p>
             </div>
             {promoCode && (
-              <p className="text-green-700 text-sm mt-2">Promo code: <span className="font-mono font-semibold">{promoCode}</span></p>
+              <p className="text-green-700 text-sm mt-2">
+                Promo code: <span className="font-mono font-semibold">{promoCode}</span>
+              </p>
             )}
             {discount && (
-              <p className="text-green-700 text-sm">Discount: -£{parseFloat(discount).toFixed(2)}</p>
+              <p className="text-green-700 text-sm">
+                Discount: -£{parseFloat(discount).toFixed(2)}
+              </p>
             )}
           </div>
         )}
@@ -98,4 +114,4 @@ export default function SuccessPage() {
       </div>
     </div>
   )
-} 
+}

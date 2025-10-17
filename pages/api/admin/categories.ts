@@ -6,9 +6,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     switch (req.method) {
-      case 'GET':
+      case 'GET': {
         console.log('🔍 [API/admin/categories] Fetching categories...')
-        
+
         // Fetch all categories with product counts
         const { data: categories, error: categoriesError } = await supabaseAdmin
           .from('categories')
@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Calculate product counts
         const categoryCounts: Record<string, number> = {}
         if (productCounts) {
-          productCounts.forEach(product => {
+          productCounts.forEach((product) => {
             if (product.category_id) {
               categoryCounts[product.category_id] = (categoryCounts[product.category_id] || 0) + 1
             }
@@ -54,16 +54,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Add product counts to categories
-        const categoriesWithCounts = categories?.map(category => ({
-          ...category,
-          product_count: categoryCounts[category.id] || 0
-        })) || []
+        const categoriesWithCounts =
+          categories?.map((category) => ({
+            ...category,
+            product_count: categoryCounts[category.id] || 0,
+          })) || []
 
-        console.log('✅ [API/admin/categories] Categories fetched successfully:', categoriesWithCounts.length)
+        console.log(
+          '✅ [API/admin/categories] Categories fetched successfully:',
+          categoriesWithCounts.length
+        )
         res.status(200).json(categoriesWithCounts)
         break
+      }
 
-      case 'POST':
+      case 'POST': {
         console.log('🔍 [API/admin/categories] Creating new category...')
         const { name, slug, parent_id, description, image_url, sort_order, is_active } = req.body
 
@@ -78,7 +83,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .eq('slug', slug)
           .single()
 
-        if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+        if (checkError && checkError.code !== 'PGRST116') {
+          // PGRST116 = no rows returned
           console.error('❌ [API/admin/categories] Error checking slug uniqueness:', checkError)
           return res.status(500).json({ error: 'Failed to check slug uniqueness' })
         }
@@ -90,15 +96,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Create the category
         const { data: newCategory, error: createError } = await supabaseAdmin
           .from('categories')
-          .insert([{
-            name,
-            slug,
-            parent_id: parent_id || null,
-            description: description || null,
-            image_url: image_url || null,
-            sort_order: sort_order || 0,
-            is_active: is_active !== undefined ? is_active : true
-          }])
+          .insert([
+            {
+              name,
+              slug,
+              parent_id: parent_id || null,
+              description: description || null,
+              image_url: image_url || null,
+              sort_order: sort_order || 0,
+              is_active: is_active !== undefined ? is_active : true,
+            },
+          ])
           .select()
           .single()
 
@@ -110,6 +118,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log('✅ [API/admin/categories] Category created successfully:', newCategory.id)
         res.status(201).json(newCategory)
         break
+      }
 
       default:
         res.status(405).json({ error: 'Method not allowed' })
@@ -118,4 +127,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('❌ [API/admin/categories] Error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
-} 
+}

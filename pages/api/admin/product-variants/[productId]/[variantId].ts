@@ -15,7 +15,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const supabaseAdmin = getSupabaseAdmin()
 
   try {
-    console.log('🔍 [API/admin/product-variants/[productId]/[variantId]] Deleting variant:', variantId, 'from product:', productId)
+    console.log(
+      '🔍 [API/admin/product-variants/[productId]/[variantId]] Deleting variant:',
+      variantId,
+      'from product:',
+      productId
+    )
     const { error } = await supabaseAdmin
       .from('product_variants')
       .delete()
@@ -23,14 +28,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .eq('product_id', productId)
 
     if (error) {
-      console.error('❌ [API/admin/product-variants/[productId]/[variantId]] Error deleting variant:', error)
+      console.error(
+        '❌ [API/admin/product-variants/[productId]/[variantId]] Error deleting variant:',
+        error
+      )
       return res.status(500).json({ error: 'Failed to delete variant' })
     }
 
-    console.log('✅ [API/admin/product-variants/[productId]/[variantId]] Variant deleted successfully')
+    console.log(
+      '✅ [API/admin/product-variants/[productId]/[variantId]] Variant deleted successfully'
+    )
     res.status(200).json({ success: true })
   } catch (error) {
     console.error('❌ [API/admin/product-variants/[productId]/[variantId]] Error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
-} 
+}

@@ -1,33 +1,33 @@
-import { useEffect, useState, useCallback } from 'react'
-import { useAuth } from '@/context/AuthContext'
-import { useRouter } from 'next/router'
-import { useSupabase } from '@/context/SupabaseContext'
 import Image from 'next/image'
+import { useRouter } from 'next/router'
+import { useCallback, useEffect, useState } from 'react'
+import { useAuth } from '@/context/AuthContext'
+import { useSupabase } from '@/context/SupabaseContext'
 
 interface Product {
-  title: string;
+  title: string
 }
 
 interface ProductVariant {
-  color: string;
-  image_url: string;
+  color: string
+  image_url: string
 }
 
 interface OrderItem {
-  id: string;
-  quantity: number;
-  size: string;
-  price_at_purchase: number;
-  products?: Product;
-  product_variants?: ProductVariant;
+  id: string
+  quantity: number
+  size: string
+  price_at_purchase: number
+  products?: Product
+  product_variants?: ProductVariant
 }
 
 interface Order {
-  id: string;
-  total_price: number;
-  status: string;
-  created_at: string;
-  order_items: OrderItem[];
+  id: string
+  total_price: number
+  status: string
+  created_at: string
+  order_items: OrderItem[]
 }
 
 export default function OrdersPage() {
@@ -92,26 +92,33 @@ export default function OrdersPage() {
       }
 
       const transformed: Order[] = (ordersData || []).map((order: unknown) => {
-        const o = order as Record<string, unknown>;
+        const o = order as Record<string, unknown>
         return {
           id: o.id as string,
           total_price: o.total_price as number,
           status: o.status as string,
           created_at: o.created_at as string,
           order_items: (Array.isArray(o.order_items) ? o.order_items : []).map((item: unknown) => {
-            const i = item as Record<string, unknown>;
+            const i = item as Record<string, unknown>
             return {
               id: i.id as string,
               quantity: i.quantity as number,
               size: i.size as string,
               price_at_purchase: i.price_at_purchase as number,
-              products: i.products ? { title: (i.products as Record<string, unknown>).title as string } : undefined,
-              product_variants: i.product_variants ? { color: (i.product_variants as Record<string, unknown>).color as string, image_url: (i.product_variants as Record<string, unknown>).image_url as string } : undefined,
-            };
+              products: i.products
+                ? { title: (i.products as Record<string, unknown>).title as string }
+                : undefined,
+              product_variants: i.product_variants
+                ? {
+                    color: (i.product_variants as Record<string, unknown>).color as string,
+                    image_url: (i.product_variants as Record<string, unknown>).image_url as string,
+                  }
+                : undefined,
+            }
           }),
-        };
-      });
-      setOrders(transformed);
+        }
+      })
+      setOrders(transformed)
     } catch (error) {
       console.error('Error fetching orders:', error)
       setOrders([])
@@ -137,7 +144,7 @@ export default function OrdersPage() {
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     })
   }
 
@@ -182,8 +189,18 @@ export default function OrdersPage() {
       ) : orders.length === 0 ? (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            <svg
+              className="w-8 h-8 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+              />
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No orders yet</h3>
@@ -207,10 +224,14 @@ export default function OrdersPage() {
                   <p className="text-sm text-gray-500">{formatDate(order.created_at)}</p>
                 </div>
                 <div className="text-right">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                  <span
+                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}
+                  >
                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                   </span>
-                  <p className="text-lg font-bold text-blue-600 mt-1">£{order.total_price.toFixed(2)}</p>
+                  <p className="text-lg font-bold text-blue-600 mt-1">
+                    £{order.total_price.toFixed(2)}
+                  </p>
                 </div>
               </div>
 
@@ -231,7 +252,9 @@ export default function OrdersPage() {
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-gray-900">£{(item.price_at_purchase * item.quantity).toFixed(2)}</p>
+                      <p className="font-medium text-gray-900">
+                        £{(item.price_at_purchase * item.quantity).toFixed(2)}
+                      </p>
                     </div>
                   </div>
                 ))}

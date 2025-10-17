@@ -39,11 +39,11 @@ export interface ShipmentRequest {
 }
 
 export interface ShippoTransaction {
-  status: string;
-  tracking_number?: string;
-  tracking_url?: string;
-  label_url?: string;
-  messages?: unknown;
+  status: string
+  tracking_number?: string
+  tracking_url?: string
+  label_url?: string
+  messages?: unknown
 }
 
 const SHIPPO_API_KEY = process.env.SHIPPO_API_KEY || ''
@@ -54,7 +54,7 @@ export async function getShippingRates(shipmentData: ShipmentRequest): Promise<S
   const response = await fetch(`${SHIPPO_API_URL}/shipments/`, {
     method: 'POST',
     headers: {
-      'Authorization': `ShippoToken ${SHIPPO_API_KEY}`,
+      Authorization: `ShippoToken ${SHIPPO_API_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(shipmentData),
@@ -66,28 +66,30 @@ export async function getShippingRates(shipmentData: ShipmentRequest): Promise<S
   }
   const shipment = await response.json()
   if (shipment.rates && shipment.rates.length > 0) {
-    return shipment.rates.map((rate: {
-      object_id: string;
-      amount: string;
-      currency: string;
-      servicelevel: { name: string; token: string };
-      estimated_days: number;
-      arrives_by?: string;
-      duration_terms?: string;
-      provider?: string;
-    }) => ({
-      object_id: rate.object_id,
-      rate: rate.amount,
-      currency: rate.currency,
-      servicelevel: {
-        name: rate.servicelevel.name,
-        token: rate.servicelevel.token
-      },
-      days: rate.estimated_days,
-      arrives_by: rate.arrives_by,
-      duration_terms: rate.duration_terms,
-      provider: rate.provider
-    }))
+    return shipment.rates.map(
+      (rate: {
+        object_id: string
+        amount: string
+        currency: string
+        servicelevel: { name: string; token: string }
+        estimated_days: number
+        arrives_by?: string
+        duration_terms?: string
+        provider?: string
+      }) => ({
+        object_id: rate.object_id,
+        rate: rate.amount,
+        currency: rate.currency,
+        servicelevel: {
+          name: rate.servicelevel.name,
+          token: rate.servicelevel.token,
+        },
+        days: rate.estimated_days,
+        arrives_by: rate.arrives_by,
+        duration_terms: rate.duration_terms,
+        provider: rate.provider,
+      })
+    )
   }
   return []
 }
@@ -97,13 +99,13 @@ export async function createShippingLabel(rateId: string): Promise<ShippoTransac
   const response = await fetch(`${SHIPPO_API_URL}/transactions/`, {
     method: 'POST',
     headers: {
-      'Authorization': `ShippoToken ${SHIPPO_API_KEY}`,
+      Authorization: `ShippoToken ${SHIPPO_API_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       rate: rateId,
       label_file_type: 'PDF',
-      async: false
+      async: false,
     }),
   })
   if (!response.ok) {
@@ -112,4 +114,4 @@ export async function createShippingLabel(rateId: string): Promise<ShippoTransac
     throw new Error('Failed to create shipping label')
   }
   return response.json()
-} 
+}

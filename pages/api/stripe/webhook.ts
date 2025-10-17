@@ -1,14 +1,14 @@
-import { buffer } from 'micro';
+import { buffer } from 'micro'
 
 export const config = {
   api: {
     bodyParser: false,
   },
-};
+}
 
+import { createClient } from '@supabase/supabase-js'
 import { NextApiRequest, NextApiResponse } from 'next'
 import Stripe from 'stripe'
-import { createClient } from '@supabase/supabase-js'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-05-28.basil',
@@ -22,54 +22,51 @@ const supabase = createClient(
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
 interface Product {
-  id: string;
-  title: string;
+  id: string
+  title: string
 }
 
 interface Variant {
-  id: string;
-  color: string;
-  price: number;
-  image_url: string;
-  customizable?: boolean;
+  id: string
+  color: string
+  price: number
+  image_url: string
+  customizable?: boolean
 }
 
 interface CartItem {
-  product: Product;
-  variant: Variant;
-  quantity: number;
-  size: string;
+  product: Product
+  variant: Variant
+  quantity: number
+  size: string
 }
 
 // Helper function for dynamic price calculation
 function getDynamicPrice(variant: { color: string }, size: string): number {
-  let basePrice = 16.99;
+  let basePrice = 16.99
   if (variant.color && variant.color.includes('And')) {
-    basePrice = 17.99;
+    basePrice = 17.99
   }
   if (size === '210mm') {
-    return basePrice - 4;
+    return basePrice - 4
   } else if (size === '180mm') {
-    return basePrice - 7;
+    return basePrice - 7
   } else if (size === '150mm') {
-    return basePrice - 10;
+    return basePrice - 10
   } else if (size === '240mm') {
-    return basePrice;
+    return basePrice
   }
-  return basePrice;
+  return basePrice
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
-  const buf = await buffer(req);
-  const sig = req.headers['stripe-signature'] as string;
-  let event: Stripe.Event;
+  const buf = await buffer(req)
+  const sig = req.headers['stripe-signature'] as string
+  let event: Stripe.Event
 
   try {
     event = stripe.webhooks.constructEvent(buf, sig, endpointSecret)
@@ -83,11 +80,11 @@ export default async function handler(
       case 'checkout.session.completed':
         await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session)
         break
-      
+
       case 'payment_intent.succeeded':
         await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent)
         break
-      
+
       default:
         console.log(`Unhandled event type: ${event.type}`)
     }
@@ -122,7 +119,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   const cartItems = checkoutCart.cart_data
   const auth_user_id = checkoutCart.user_id || null
-  const guest_email = !auth_user_id ? (checkoutCart.guest_email || session.customer_email || null) : null
+  const guest_email = !auth_user_id
+    ? checkoutCart.guest_email || session.customer_email || null
+    : null
   const shippingAddress = checkoutCart.shipping_address
   const shippingRateId = checkoutCart.shipping_rate_id
   const shippingCost = checkoutCart.shipping_cost || 0
@@ -155,8 +154,8 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         total_price: session.amount_total ? session.amount_total / 100 : 0, // Convert from pence
         guest_email: guest_email,
         stripe_session_id: session.id,
-        stripe_payment_intent_id: session.payment_intent as string || null,
-        stripe_customer_id: session.customer as string || null,
+        stripe_payment_intent_id: (session.payment_intent as string) || null,
+        stripe_customer_id: (session.customer as string) || null,
         // Shipping information
         shipping_name: shippingAddress?.name || null,
         shipping_address: shippingAddress?.street1 || null,
@@ -164,7 +163,8 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         shipping_postcode: shippingAddress?.zip || null,
         shipping_country: shippingAddress?.country || 'GB',
         shipping_phone: shippingAddress?.phone || null,
-        shipping_method: (shippingProvider && shippingService) ? `${shippingProvider}: ${shippingService}` : null,
+        shipping_method:
+          shippingProvider && shippingService ? `${shippingProvider}: ${shippingService}` : null,
         shipping_rate_id: shippingRateId || null,
         shipping_cost: shippingCost,
       })
@@ -186,9 +186,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       price_at_purchase: getDynamicPrice(item.variant, item.size), // Use dynamic price
     }))
 
-    const { error: itemsError } = await supabase
-      .from('order_items')
-      .insert(orderItems)
+    const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
 
     if (itemsError) {
       console.error('Error creating order items:', itemsError)
@@ -210,7 +208,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
             order_id: order.id,
           }),
         })
-        const labelData = await labelRes.json().catch(e => ({ error: 'Invalid JSON', details: e }))
+        const labelData = await labelRes
+          .json()
+          .catch((e) => ({ error: 'Invalid JSON', details: e }))
         if (!labelRes.ok || !labelData.success) {
           console.error('[AutoLabel] Auto label creation failed:', labelData.error || labelData)
         }
@@ -226,4 +226,4 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   console.log('Payment intent succeeded:', paymentIntent.id)
   // Additional payment success logic if needed
-} 
+}

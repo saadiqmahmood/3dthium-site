@@ -1,5 +1,5 @@
-import { createContext, useContext, ReactNode } from 'react'
 import { SupabaseClient } from '@supabase/supabase-js'
+import { createContext, ReactNode, useContext } from 'react'
 
 type SupabaseContextType = {
   client: SupabaseClient
@@ -7,20 +7,16 @@ type SupabaseContextType = {
 
 const SupabaseContext = createContext<SupabaseContextType | undefined>(undefined)
 
-export const SupabaseContextProvider = ({ 
-  children, 
-  client 
-}: { 
+export const SupabaseContextProvider = ({
+  children,
+  client,
+}: {
   children: ReactNode
-  client: SupabaseClient 
+  client: SupabaseClient
 }) => {
   console.log('🔧 [SupabaseContext] Creating SupabaseContextProvider')
-  
-  return (
-    <SupabaseContext.Provider value={{ client }}>
-      {children}
-    </SupabaseContext.Provider>
-  )
+
+  return <SupabaseContext.Provider value={{ client }}>{children}</SupabaseContext.Provider>
 }
 
 export const useSupabase = () => {
@@ -31,4 +27,4 @@ export const useSupabase = () => {
   }
   console.log('🔧 [SupabaseContext] useSupabase called, client available')
   return context
-} 
+}

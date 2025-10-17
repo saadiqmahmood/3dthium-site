@@ -3,9 +3,7 @@ import { NextPageContext } from 'next'
 function Error({ statusCode }: { statusCode?: number }) {
   return (
     <p className="text-center py-20 text-red-600">
-      {statusCode
-        ? `An error ${statusCode} occurred on server`
-        : 'An error occurred on client'}
+      {statusCode ? `An error ${statusCode} occurred on server` : 'An error occurred on client'}
     </p>
   )
 }

@@ -16,10 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     console.log('🔍 [API/admin/custom-orders/[id]] Deleting custom order:', id)
-    const { error } = await supabaseAdmin
-      .from('custom_orders')
-      .delete()
-      .eq('id', parseInt(id))
+    const { error } = await supabaseAdmin.from('custom_orders').delete().eq('id', parseInt(id))
 
     if (error) {
       console.error('❌ [API/admin/custom-orders/[id]] Error deleting custom order:', error)
@@ -32,4 +29,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('❌ [API/admin/custom-orders/[id]] Error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
-} 
+}

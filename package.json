@@ -6,7 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "ci": "biome ci .",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:pull": "drizzle-kit pull",
+    "db:studio": "drizzle-kit studio",
+    "db:migrate": "tsx drizzle/migrate.ts",
+    "db:seed": "tsx drizzle/seed.ts",
+    "db:reset": "npm run db:push && npm run db:seed"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^3.7.0",
@@ -16,8 +27,13 @@
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.50.1",
     "@tailwindcss/postcss": "^4.1.10",
+    "@types/formidable": "^3.4.5",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.44.6",
+    "formidable": "^3.5.4",
     "micro": "^10.0.1",
     "next": "^15.3.3",
+    "postgres": "^3.4.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "shippo": "^2.15.0",
@@ -26,16 +42,19 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.2.6",
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.21",
+    "drizzle-kit": "^0.31.5",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "postcss": "^8.5.5",
     "tailwindcss": "^4.1.10",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }

@@ -15,4 +15,4 @@ export function getSupabaseAdmin() {
     throw new Error('Supabase service role key or URL is missing in environment variables.')
   }
   return createClient(url, key)
-} 
+}

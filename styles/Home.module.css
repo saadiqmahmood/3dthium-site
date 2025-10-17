@@ -55,7 +55,6 @@ a.secondary {
 }
 
 @media (max-width: 600px) {
-
   a.secondary {
     min-width: auto;
   }

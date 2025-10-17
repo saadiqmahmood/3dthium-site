@@ -1,5 +1,5 @@
-import { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '@supabase/supabase-js'
+import { NextApiRequest, NextApiResponse } from 'next'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -49,7 +49,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Check min order value
   if (promo.min_order_value !== null && orderTotal < promo.min_order_value) {
-    return res.status(400).json({ valid: false, message: `Minimum order value for this code is £${promo.min_order_value}` })
+    return res.status(400).json({
+      valid: false,
+      message: `Minimum order value for this code is £${promo.min_order_value}`,
+    })
   }
 
   // Calculate discount
@@ -81,6 +84,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     message: 'Promo code applied',
     code: promo.code,
     promoId: promo.id,
-    ...(apply ? { applied: true } : {})
+    ...(apply ? { applied: true } : {}),
   })
-} 
+}

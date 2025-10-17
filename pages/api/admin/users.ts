@@ -26,4 +26,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('❌ [API/admin/users] Error:', error)
     res.status(500).json({ error: 'Failed to fetch users' })
   }
-} 
+}

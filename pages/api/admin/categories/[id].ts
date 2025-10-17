@@ -12,9 +12,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     switch (req.method) {
-      case 'GET':
+      case 'GET': {
         console.log('🔍 [API/admin/categories/[id]] Fetching category:', id)
-        
+
         const { data: category, error: fetchError } = await supabaseAdmin
           .from('categories')
           .select('*')
@@ -33,8 +33,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log('✅ [API/admin/categories/[id]] Category fetched successfully')
         res.status(200).json(category)
         break
+      }
 
-      case 'PUT':
+      case 'PUT': {
         console.log('🔍 [API/admin/categories/[id]] Updating category:', id)
         const { name, slug, parent_id, description, image_url, sort_order, is_active } = req.body
 
@@ -50,8 +51,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .neq('id', id)
           .single()
 
-        if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
-          console.error('❌ [API/admin/categories/[id]] Error checking slug uniqueness:', checkError)
+        if (checkError && checkError.code !== 'PGRST116') {
+          // PGRST116 = no rows returned
+          console.error(
+            '❌ [API/admin/categories/[id]] Error checking slug uniqueness:',
+            checkError
+          )
           return res.status(500).json({ error: 'Failed to check slug uniqueness' })
         }
 
@@ -74,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             description: description || null,
             image_url: image_url || null,
             sort_order: sort_order || 0,
-            is_active: is_active !== undefined ? is_active : true
+            is_active: is_active !== undefined ? is_active : true,
           })
           .eq('id', id)
           .select()
@@ -88,10 +93,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log('✅ [API/admin/categories/[id]] Category updated successfully')
         res.status(200).json(updatedCategory)
         break
+      }
 
-      case 'DELETE':
+      case 'DELETE': {
         console.log('🔍 [API/admin/categories/[id]] Deleting category:', id)
-        
+
         // Check if category has products
         const { data: products, error: productsError } = await supabaseAdmin
           .from('products_new')
@@ -105,8 +111,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         if (products && products.length > 0) {
-          return res.status(400).json({ 
-            error: 'Cannot delete category with existing products. Please reassign or delete products first.' 
+          return res.status(400).json({
+            error:
+              'Cannot delete category with existing products. Please reassign or delete products first.',
           })
         }
 
@@ -118,21 +125,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .limit(1)
 
         if (subcategoriesError) {
-          console.error('❌ [API/admin/categories/[id]] Error checking subcategories:', subcategoriesError)
+          console.error(
+            '❌ [API/admin/categories/[id]] Error checking subcategories:',
+            subcategoriesError
+          )
           return res.status(500).json({ error: 'Failed to check category subcategories' })
         }
 
         if (subcategories && subcategories.length > 0) {
-          return res.status(400).json({ 
-            error: 'Cannot delete category with subcategories. Please delete subcategories first.' 
+          return res.status(400).json({
+            error: 'Cannot delete category with subcategories. Please delete subcategories first.',
           })
         }
 
         // Delete the category
-        const { error: deleteError } = await supabaseAdmin
-          .from('categories')
-          .delete()
-          .eq('id', id)
+        const { error: deleteError } = await supabaseAdmin.from('categories').delete().eq('id', id)
 
         if (deleteError) {
           console.error('❌ [API/admin/categories/[id]] Error deleting category:', deleteError)
@@ -142,6 +149,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log('✅ [API/admin/categories/[id]] Category deleted successfully')
         res.status(200).json({ success: true })
         break
+      }
 
       default:
         res.status(405).json({ error: 'Method not allowed' })
@@ -150,4 +158,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('❌ [API/admin/categories/[id]] Error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
-} 
+}

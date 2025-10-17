@@ -10,15 +10,16 @@ const titleCase = (str) =>
   str.replace(/\w\S*/g, (txt) => txt[0].toUpperCase() + txt.slice(1).toLowerCase())
 
 const getVariantImageFiles = (folderPath) => {
-  return fs.readdirSync(folderPath).filter(file => {
-    const ext = path.extname(file).toLowerCase()
-    const base = path.basename(file).toLowerCase()
-    return (
-      (ext === '.png' || ext === '.jpg') &&
-      !base.startsWith('dsc') &&
-      !base.includes('group')
-    )
-  }).sort()
+  return fs
+    .readdirSync(folderPath)
+    .filter((file) => {
+      const ext = path.extname(file).toLowerCase()
+      const base = path.basename(file).toLowerCase()
+      return (
+        (ext === '.png' || ext === '.jpg') && !base.startsWith('dsc') && !base.includes('group')
+      )
+    })
+    .sort()
 }
 
 const extractVariantImagesFromSQL = (sqlContent) => {
@@ -40,15 +41,15 @@ const generateSQLForFolder = (folder) => {
   const folderPath = path.join(BASE_PATH, folder)
 
   // Read description file
-  const descriptionFile = fs.readdirSync(folderPath).find(f => f.endsWith('.txt'))
+  const descriptionFile = fs.readdirSync(folderPath).find((f) => f.endsWith('.txt'))
   const description = descriptionFile
     ? fs.readFileSync(path.join(folderPath, descriptionFile), 'utf-8').replace(/'/g, "''")
     : ''
 
   // Find Group.png for thumbnail, fallback to first variant image if not found
-  let groupImage = fs.readdirSync(folderPath).find(f =>
-    f.toLowerCase().startsWith('group') && /\.(png|jpg|jpeg)$/i.test(f)
-  )
+  let groupImage = fs
+    .readdirSync(folderPath)
+    .find((f) => f.toLowerCase().startsWith('group') && /\.(png|jpg|jpeg)$/i.test(f))
   if (!groupImage) {
     const variantImages = getVariantImageFiles(folderPath)
     if (variantImages.length > 0) {
@@ -69,7 +70,7 @@ VALUES ('${productUUID}', '${slug}', '${title}', '${description}', 'Vases', '${t
 
   // Variants
   const imageFiles = getVariantImageFiles(folderPath)
-  const variantSQLs = imageFiles.map(image => {
+  const variantSQLs = imageFiles.map((image) => {
     const color = titleCase(path.basename(image, path.extname(image)).replace(/_/g, ' '))
     const imageUrl = `${BASE_URL}/${encodeURIComponent(folder)}/${encodeURIComponent(image)}`
     return `INSERT INTO product_variants (product_id, color, image_url, price, in_stock, customizable)
@@ -85,12 +86,12 @@ VALUES ('${productUUID}', '${color}', '${imageUrl}', 14.99, true, false);`
 }
 
 const batchProcessVases = () => {
-  const folders = fs.readdirSync(BASE_PATH).filter(f => {
+  const folders = fs.readdirSync(BASE_PATH).filter((f) => {
     const fullPath = path.join(BASE_PATH, f)
     return fs.statSync(fullPath).isDirectory()
   })
 
-  folders.forEach(folder => {
+  folders.forEach((folder) => {
     const slug = slugify(folder, { lower: true })
     const outputPath = `./scripts/output/${slug}.sql`
     const folderPath = path.join(BASE_PATH, folder)
@@ -99,7 +100,7 @@ const batchProcessVases = () => {
     if (fs.existsSync(outputPath)) {
       const sqlContent = fs.readFileSync(outputPath, 'utf-8')
       const prevImages = extractVariantImagesFromSQL(sqlContent)
-      const currImages = imageFiles.map(f => f.toLowerCase()).sort()
+      const currImages = imageFiles.map((f) => f.toLowerCase()).sort()
       const changed = JSON.stringify(prevImages) !== JSON.stringify(currImages)
       if (!changed) {
         console.log(`⏩ Skipped ${folder} (no variant changes)`)

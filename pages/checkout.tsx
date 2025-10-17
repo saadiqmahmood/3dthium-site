@@ -1,9 +1,9 @@
-import { useCart } from '@/context/CartContext'
-import { useAuth } from '@/context/AuthContext'
-import { useState } from 'react'
 import Image from 'next/image'
-import { useRouter } from 'next/router'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
+import { useAuth } from '@/context/AuthContext'
+import { useCart } from '@/context/CartContext'
 import { ShippingAddress, ShippingRate } from '@/types'
 
 export default function CheckoutPage() {
@@ -18,7 +18,7 @@ export default function CheckoutPage() {
   const [selectedRate, setSelectedRate] = useState<ShippingRate | null>(null)
   const [isLoadingRates, setIsLoadingRates] = useState(false)
   const router = useRouter()
-  
+
   // Shipping address form
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
     name: '',
@@ -29,28 +29,31 @@ export default function CheckoutPage() {
     zip: '',
     country: 'GB',
     phone: '',
-    email: ''
+    email: '',
   })
 
   // Helper function for dynamic price calculation
   function getDynamicPrice(variant: { color: string }, size: string): number {
-    let basePrice = 16.99;
+    let basePrice = 16.99
     if (variant.color && variant.color.includes('And')) {
-      basePrice = 17.99;
+      basePrice = 17.99
     }
     if (size === '210mm') {
-      return basePrice - 4;
+      return basePrice - 4
     } else if (size === '180mm') {
-      return basePrice - 7;
+      return basePrice - 7
     } else if (size === '150mm') {
-      return basePrice - 10;
+      return basePrice - 10
     } else if (size === '240mm') {
-      return basePrice;
+      return basePrice
     }
-    return basePrice;
+    return basePrice
   }
 
-  const subtotal = cart.reduce((acc, item) => acc + getDynamicPrice(item.variant, item.size) * item.quantity, 0)
+  const subtotal = cart.reduce(
+    (acc, item) => acc + getDynamicPrice(item.variant, item.size) * item.quantity,
+    0
+  )
   const shippingCost = selectedRate ? parseFloat(selectedRate.rate) : 0
   const total = subtotal + shippingCost
 
@@ -90,7 +93,12 @@ export default function CheckoutPage() {
 
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!shippingAddress.name || !shippingAddress.street1 || !shippingAddress.city || !shippingAddress.zip) {
+    if (
+      !shippingAddress.name ||
+      !shippingAddress.street1 ||
+      !shippingAddress.city ||
+      !shippingAddress.zip
+    ) {
       alert('Please fill in all required fields')
       return
     }
@@ -188,22 +196,38 @@ export default function CheckoutPage() {
       {/* Checkout Progress */}
       <div className="mb-8">
         <div className="flex items-center justify-center space-x-4">
-          <div className={`flex items-center ${shippingStep === 'address' ? 'text-blue-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'address' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
+          <div
+            className={`flex items-center ${shippingStep === 'address' ? 'text-blue-600' : 'text-gray-400'}`}
+          >
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'address' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+            >
               1
             </div>
             <span className="ml-2">Address</span>
           </div>
-          <div className={`w-8 h-0.5 ${shippingStep === 'rates' || shippingStep === 'payment' ? 'bg-blue-600' : 'bg-gray-200'}`}></div>
-          <div className={`flex items-center ${shippingStep === 'rates' ? 'text-blue-600' : shippingStep === 'payment' ? 'text-green-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'rates' ? 'bg-blue-600 text-white' : shippingStep === 'payment' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
+          <div
+            className={`w-8 h-0.5 ${shippingStep === 'rates' || shippingStep === 'payment' ? 'bg-blue-600' : 'bg-gray-200'}`}
+          ></div>
+          <div
+            className={`flex items-center ${shippingStep === 'rates' ? 'text-blue-600' : shippingStep === 'payment' ? 'text-green-600' : 'text-gray-400'}`}
+          >
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'rates' ? 'bg-blue-600 text-white' : shippingStep === 'payment' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
+            >
               2
             </div>
             <span className="ml-2">Shipping</span>
           </div>
-          <div className={`w-8 h-0.5 ${shippingStep === 'payment' ? 'bg-green-600' : 'bg-gray-200'}`}></div>
-          <div className={`flex items-center ${shippingStep === 'payment' ? 'text-green-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'payment' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>
+          <div
+            className={`w-8 h-0.5 ${shippingStep === 'payment' ? 'bg-green-600' : 'bg-gray-200'}`}
+          ></div>
+          <div
+            className={`flex items-center ${shippingStep === 'payment' ? 'text-green-600' : 'text-gray-400'}`}
+          >
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'payment' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
+            >
               3
             </div>
             <span className="ml-2">Payment</span>
@@ -223,27 +247,35 @@ export default function CheckoutPage() {
                   type="text"
                   className="w-full border border-gray-300 text-stone-800 rounded p-3"
                   value={shippingAddress.name}
-                  onChange={e => setShippingAddress({...shippingAddress, name: e.target.value})}
+                  onChange={(e) => setShippingAddress({ ...shippingAddress, name: e.target.value })}
                   required
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Address Line 1 *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Address Line 1 *
+                </label>
                 <input
                   type="text"
                   className="w-full border border-gray-300 text-stone-800 rounded p-3"
                   value={shippingAddress.street1}
-                  onChange={e => setShippingAddress({...shippingAddress, street1: e.target.value})}
+                  onChange={(e) =>
+                    setShippingAddress({ ...shippingAddress, street1: e.target.value })
+                  }
                   required
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Address Line 2</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Address Line 2
+                </label>
                 <input
                   type="text"
                   className="w-full border border-gray-300 text-stone-800 rounded p-3"
                   value={shippingAddress.street2}
-                  onChange={e => setShippingAddress({...shippingAddress, street2: e.target.value})}
+                  onChange={(e) =>
+                    setShippingAddress({ ...shippingAddress, street2: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -252,7 +284,7 @@ export default function CheckoutPage() {
                   type="text"
                   className="w-full border border-gray-300 text-stone-800 rounded p-3"
                   value={shippingAddress.city}
-                  onChange={e => setShippingAddress({...shippingAddress, city: e.target.value})}
+                  onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
                   required
                 />
               </div>
@@ -262,7 +294,7 @@ export default function CheckoutPage() {
                   type="text"
                   className="w-full border border-gray-300 text-stone-800 rounded p-3"
                   value={shippingAddress.zip}
-                  onChange={e => setShippingAddress({...shippingAddress, zip: e.target.value})}
+                  onChange={(e) => setShippingAddress({ ...shippingAddress, zip: e.target.value })}
                   required
                 />
               </div>
@@ -272,7 +304,9 @@ export default function CheckoutPage() {
                   type="tel"
                   className="w-full border border-gray-300 text-stone-800 rounded p-3"
                   value={shippingAddress.phone}
-                  onChange={e => setShippingAddress({...shippingAddress, phone: e.target.value})}
+                  onChange={(e) =>
+                    setShippingAddress({ ...shippingAddress, phone: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -281,7 +315,9 @@ export default function CheckoutPage() {
                   type="email"
                   className="w-full border border-gray-300 text-stone-800 rounded p-3"
                   value={shippingAddress.email}
-                  onChange={e => setShippingAddress({...shippingAddress, email: e.target.value})}
+                  onChange={(e) =>
+                    setShippingAddress({ ...shippingAddress, email: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -296,7 +332,12 @@ export default function CheckoutPage() {
             </div>
           </form>
           <div className="mt-4 text-center">
-            <span className="text-xs text-gray-500">We care about your privacy. Learn how your information is protected in our <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy.</Link></span>
+            <span className="text-xs text-gray-500">
+              We care about your privacy. Learn how your information is protected in our{' '}
+              <Link href="/privacy" className="text-blue-600 hover:underline">
+                Privacy Policy.
+              </Link>
+            </span>
           </div>
         </div>
       )}
@@ -316,16 +357,18 @@ export default function CheckoutPage() {
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="font-semibold text-gray-800">
-                        {rate.servicelevel.name}
-                      </h3>
+                      <h3 className="font-semibold text-gray-800">{rate.servicelevel.name}</h3>
                       <p className="text-sm text-gray-500">
-                        {rate.days ? `${rate.days} day${rate.days !== 1 ? 's' : ''} delivery` : 'Delivery'}
+                        {rate.days
+                          ? `${rate.days} day${rate.days !== 1 ? 's' : ''} delivery`
+                          : 'Delivery'}
                         {rate.arrives_by && ` • Arrives by ${rate.arrives_by}`}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-gray-800">£{parseFloat(rate.rate).toFixed(2)}</p>
+                      <p className="font-semibold text-gray-800">
+                        £{parseFloat(rate.rate).toFixed(2)}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -351,100 +394,117 @@ export default function CheckoutPage() {
       )}
 
       {/* Checkout Options for non-logged-in users */}
-      {!user && shippingStep === 'payment' && (checkoutMode === 'choice' ? (
-        // User not logged in - show options
-        <div className="bg-white rounded-xl shadow p-8 max-w-lg mx-auto mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6 text-center">How would you like to checkout?</h3>
-          
-          <div className="space-y-4">
-            <Link
-              href="/auth"
-              className="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition text-center"
-            >
-              Sign In / Create Account
-            </Link>
-            
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">or</span>
-              </div>
-            </div>
-            
-            <button
-              onClick={() => setCheckoutMode('guest')}
-              className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition"
-            >
-              Checkout as Guest
-            </button>
-          </div>
-        </div>
-      ) : (
-        // Guest checkout form
-        <div className="bg-white rounded-xl shadow p-8 max-w-lg mx-auto mb-8">
-          <div className="text-center mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Guest Checkout</h3>
-            <p className="text-sm text-gray-600">Enter your email to receive order updates</p>
-          </div>
-          
-          <form onSubmit={handleGuestCheckout}>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-            <input
-              type="email"
-              className="w-full border border-gray-300 text-stone-800 rounded p-3 mb-2"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              disabled={isLoading}
-              placeholder="your@email.com"
-            />
-            {emailError && <p className="text-red-500 text-sm mb-4">{emailError}</p>}
-            
-            <div className="space-y-3">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
+      {!user &&
+        shippingStep === 'payment' &&
+        (checkoutMode === 'choice' ? (
+          // User not logged in - show options
+          <div className="bg-white rounded-xl shadow p-8 max-w-lg mx-auto mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6 text-center">
+              How would you like to checkout?
+            </h3>
+
+            <div className="space-y-4">
+              <Link
+                href="/auth"
+                className="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition text-center"
               >
-                {isLoading ? 'Processing...' : 'Complete Purchase'}
-              </button>
-              
+                Sign In / Create Account
+              </Link>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">or</span>
+                </div>
+              </div>
+
               <button
-                type="button"
-                onClick={() => setCheckoutMode('choice')}
-                disabled={isLoading}
-                className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition disabled:bg-gray-300"
+                onClick={() => setCheckoutMode('guest')}
+                className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition"
               >
-                Back to Options
+                Checkout as Guest
               </button>
             </div>
-          </form>
-        </div>
-      ))}
+          </div>
+        ) : (
+          // Guest checkout form
+          <div className="bg-white rounded-xl shadow p-8 max-w-lg mx-auto mb-8">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Guest Checkout</h3>
+              <p className="text-sm text-gray-600">Enter your email to receive order updates</p>
+            </div>
+
+            <form onSubmit={handleGuestCheckout}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <input
+                type="email"
+                className="w-full border border-gray-300 text-stone-800 rounded p-3 mb-2"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+                placeholder="your@email.com"
+              />
+              {emailError && <p className="text-red-500 text-sm mb-4">{emailError}</p>}
+
+              <div className="space-y-3">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Processing...' : 'Complete Purchase'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCheckoutMode('choice')}
+                  disabled={isLoading}
+                  className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition disabled:bg-gray-300"
+                >
+                  Back to Options
+                </button>
+              </div>
+            </form>
+          </div>
+        ))}
 
       {/* Order Summary - Always show */}
       <div className="bg-gray-50 rounded-xl p-8 mb-8">
         <h2 className="text-xl font-semibold mb-6 text-stone-800">Order Summary</h2>
         <div className="space-y-6">
           {cart.map((item) => (
-            <div key={item.product.id + '-' + item.variant.id} className="flex items-center gap-4 border-b pb-6">
-              <Image width={80} height={80} src={item.variant.image_url} alt={item.product.title + ' - ' + item.variant.color} className="w-16 h-16 object-cover rounded" />
+            <div
+              key={item.product.id + '-' + item.variant.id}
+              className="flex items-center gap-4 border-b pb-6"
+            >
+              <Image
+                width={80}
+                height={80}
+                src={item.variant.image_url}
+                alt={item.product.title + ' - ' + item.variant.color}
+                className="w-16 h-16 object-cover rounded"
+              />
               <div>
                 <h3 className="font-semibold text-gray-800">{item.product.title}</h3>
                 <p className="text-sm text-gray-500">Size: {item.size}</p>
                 <p className="text-sm text-gray-500">Color: {item.variant.color}</p>
                 <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
-                <p className="text-sm text-gray-500">Customizable: {item.variant.customizable ? 'Yes' : 'No'}</p>
+                <p className="text-sm text-gray-500">
+                  Customizable: {item.variant.customizable ? 'Yes' : 'No'}
+                </p>
               </div>
               <div className="ml-auto text-right">
-                <p className="text-gray-700 font-medium">£{(getDynamicPrice(item.variant, item.size) * item.quantity).toFixed(2)}</p>
+                <p className="text-gray-700 font-medium">
+                  £{(getDynamicPrice(item.variant, item.size) * item.quantity).toFixed(2)}
+                </p>
               </div>
             </div>
           ))}
         </div>
-        
+
         {/* Shipping Information */}
         {selectedRate && (
           <div className="mt-6 pt-6 border-t border-gray-200">
@@ -454,14 +514,14 @@ export default function CheckoutPage() {
             </div>
           </div>
         )}
-        
+
         <div className="mt-6 pt-6 border-t border-gray-200 flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
           <div>
             <p className="text-lg font-semibold text-gray-900">Total:</p>
           </div>
           <p className="text-xl font-bold text-blue-600">£{total.toFixed(2)}</p>
         </div>
-        
+
         {/* Complete Purchase button for logged-in users */}
         {user && shippingStep === 'payment' && (
           <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row gap-4 justify-center">
@@ -483,4 +543,4 @@ export default function CheckoutPage() {
       </div>
     </div>
   )
-} 
+}

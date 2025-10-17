@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { useSupabase } from '@/context/SupabaseContext'
+import { useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
+import { useSupabase } from '@/context/SupabaseContext'
 
 export default function PasswordResetPage() {
   const [newPassword, setNewPassword] = useState('')
@@ -43,7 +43,7 @@ export default function PasswordResetPage() {
 
     setToast({ message: 'Password updated successfully!', type: 'success' })
     setTimeout(() => router.push('/auth?reset=success'), 2000)
-}
+  }
 
   if (loading) {
     return <p className="text-center py-10 text-gray-600">Checking session...</p>

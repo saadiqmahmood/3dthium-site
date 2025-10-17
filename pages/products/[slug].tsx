@@ -1,11 +1,11 @@
-import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import { createClient } from '@supabase/supabase-js'
-import { Product, ProductVariant } from '@/types'
-import { useCart } from '@/context/CartContext'
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Image from 'next/image'
-import { useState } from 'react'
 import { useRouter } from 'next/router'
+import { useState } from 'react'
 import Toast from '@/components/ui/Toast'
+import { useCart } from '@/context/CartContext'
+import { Product, ProductVariant } from '@/types'
 
 // Server-side client for static generation
 const supabaseServer = createClient(
@@ -13,8 +13,8 @@ const supabaseServer = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
   {
     auth: {
-      persistSession: false
-    }
+      persistSession: false,
+    },
   }
 )
 
@@ -42,28 +42,30 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
   }
 
   // Use thumbnail if no variant selected
-  const imageUrl = selectedVariant ? selectedVariant.image_url : product.thumbnail_url;
+  const imageUrl = selectedVariant ? selectedVariant.image_url : product.thumbnail_url
   // Determine base price for selected variant (or first variant)
-  const baseVariant = selectedVariant || variants[0];
-  let basePrice = baseVariant ? baseVariant.price : 0;
+  const baseVariant = selectedVariant || variants[0]
+  let basePrice = baseVariant ? baseVariant.price : 0
   // If color contains 'And', override base price to 17.99
   if (baseVariant && baseVariant.color && baseVariant.color.includes('And')) {
-    basePrice = 17.99;
+    basePrice = 17.99
   } else if (baseVariant) {
-    basePrice = 16.99;
+    basePrice = 16.99
   }
   // Calculate price based on selected size
-  let displayPrice = basePrice;
+  let displayPrice = basePrice
   if (selectedSize === '210mm') {
-    displayPrice = basePrice - 4;
+    displayPrice = basePrice - 4
   } else if (selectedSize === '180mm') {
-    displayPrice = basePrice - 7;
+    displayPrice = basePrice - 7
   } else if (selectedSize === '150mm') {
-    displayPrice = basePrice - 10;
+    displayPrice = basePrice - 10
   } else if (selectedSize === '240mm') {
-    displayPrice = basePrice;
+    displayPrice = basePrice
   }
-  const customizable = selectedVariant ? selectedVariant.customizable : (variants[0]?.customizable ?? false)
+  const customizable = selectedVariant
+    ? selectedVariant.customizable
+    : (variants[0]?.customizable ?? false)
 
   return (
     <div className="max-w-7xl mx-auto py-20 px-6">
@@ -123,7 +125,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
                 >
                   -
                 </button>
-                {["150mm", "180mm", "210mm", "240mm"].map(size => (
+                {['150mm', '180mm', '210mm', '240mm'].map((size) => (
                   <button
                     key={size}
                     type="button"
@@ -140,11 +142,17 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
               <button
                 onClick={() => {
                   if (!selectedSize) {
-                    setToast({ message: 'Please select a size before adding to cart.', type: 'error' })
+                    setToast({
+                      message: 'Please select a size before adding to cart.',
+                      type: 'error',
+                    })
                     return
                   }
                   if (!selectedVariant) {
-                    setToast({ message: 'Please select a color before adding to cart.', type: 'error' })
+                    setToast({
+                      message: 'Please select a color before adding to cart.',
+                      type: 'error',
+                    })
                     return
                   }
                   setButtonClicked(true)
@@ -161,7 +169,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
               >
                 {buttonClicked ? 'Added!' : 'Add to Cart'}
               </button>
-              <button 
+              <button
                 onClick={() => {
                   if (!selectedSize) {
                     setToast({ message: 'Please select a size before buying.', type: 'error' })
@@ -200,7 +208,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
                 >
                   -
                 </button>
-                {["150mm", "180mm", "210mm", "240mm"].map(size => (
+                {['150mm', '180mm', '210mm', '240mm'].map((size) => (
                   <button
                     key={size}
                     type="button"
@@ -242,11 +250,17 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
             <button
               onClick={() => {
                 if (!selectedSize) {
-                  setToast({ message: 'Please select a size before adding to cart.', type: 'error' })
+                  setToast({
+                    message: 'Please select a size before adding to cart.',
+                    type: 'error',
+                  })
                   return
                 }
                 if (!selectedVariant) {
-                  setToast({ message: 'Please select a color before adding to cart.', type: 'error' })
+                  setToast({
+                    message: 'Please select a color before adding to cart.',
+                    type: 'error',
+                  })
                   return
                 }
                 setButtonClicked(true)
@@ -263,7 +277,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
             >
               {buttonClicked ? 'Added!' : 'Add to Cart'}
             </button>
-            <button 
+            <button
               onClick={() => {
                 if (!selectedSize) {
                   setToast({ message: 'Please select a size before buying.', type: 'error' })
@@ -291,9 +305,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
           Item added to cart
         </div>
       )}
-      {toast && (
-        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }
@@ -302,7 +314,7 @@ export default ProductDetailPage
 
 export const getStaticPaths: GetStaticPaths = async () => {
   console.log('🔄 [ProductDetail] Generating static paths...')
-  
+
   const { data: products, error } = await supabaseServer.from('products').select('slug')
 
   if (error) {
@@ -339,12 +351,12 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
     .select('*')
     .eq('slug', slug)
     .single()
-    
+
   if (productError) {
     console.error('❌ [ProductDetail] Error fetching product:', productError)
     return { notFound: true }
   }
-  
+
   if (!product) {
     console.log('❌ [ProductDetail] Product not found for slug:', slug)
     return { notFound: true }
@@ -352,24 +364,24 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
 
   console.log('✅ [ProductDetail] Product found:', product.title)
   console.log('🔍 [ProductDetail] Fetching variants for product:', product.id)
-  
+
   const { data: variants, error: variantsError } = await supabaseServer
     .from('product_variants')
     .select('*')
     .eq('product_id', product.id)
-    
+
   if (variantsError) {
     console.error('❌ [ProductDetail] Error fetching variants:', variantsError)
     return { notFound: true }
   }
-  
+
   if (!variants || variants.length === 0) {
     console.log('⚠️ [ProductDetail] No variants found for product:', product.id)
     return { notFound: true }
   }
 
   console.log('✅ [ProductDetail] Variants found:', variants.length)
-  
+
   return {
     props: {
       product,

@@ -15,7 +15,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Fetch all variants
   console.log('🔄 [API/test] Fetching product variants...')
-  const { data: variants, error: variantsError } = await supabaseAdmin.from('product_variants').select('*')
+  const { data: variants, error: variantsError } = await supabaseAdmin
+    .from('product_variants')
+    .select('*')
   if (variantsError) {
     console.error('❌ [API/test] Error fetching variants:', variantsError)
     return res.status(500).json({ error: variantsError.message })
@@ -34,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Return array of { product, variants }
   const result = products.map((product) => ({
     product,
-    variants: variantsByProduct[product.id] || []
+    variants: variantsByProduct[product.id] || [],
   }))
 
   console.log('✅ [API/test] Returning result with', result.length, 'products')

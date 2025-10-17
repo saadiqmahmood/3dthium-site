@@ -16,10 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     console.log('🔍 [API/admin/order-items/[id]] Updating order item:', id)
-    const { error } = await supabaseAdmin
-      .from('order_items')
-      .update(req.body)
-      .eq('id', id)
+    const { error } = await supabaseAdmin.from('order_items').update(req.body).eq('id', id)
 
     if (error) {
       console.error('❌ [API/admin/order-items/[id]] Error updating order item:', error)
@@ -32,4 +29,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('❌ [API/admin/order-items/[id]] Error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
-} 
+}

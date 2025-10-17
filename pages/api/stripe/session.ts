@@ -22,4 +22,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch {
     res.status(500).json({ message: 'Failed to fetch session' })
   }
-} 
+}

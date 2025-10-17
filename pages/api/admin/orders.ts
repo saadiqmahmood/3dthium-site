@@ -12,7 +12,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { data: orders, error } = await supabaseAdmin
       .from('orders')
-      .select('id, user_id, guest_email, total_price, status, created_at, shipping_method, shipping_cost, tracking_number')
+      .select(
+        'id, user_id, guest_email, total_price, status, created_at, shipping_method, shipping_cost, tracking_number'
+      )
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -26,4 +28,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('❌ [API/admin/orders] Error:', error)
     res.status(500).json({ error: 'Failed to fetch orders' })
   }
-} 
+}

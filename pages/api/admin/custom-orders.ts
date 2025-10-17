@@ -20,10 +20,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Failed to fetch custom orders' })
     }
 
-    console.log('✅ [API/admin/custom-orders] Custom orders fetched successfully:', customOrders?.length || 0)
+    console.log(
+      '✅ [API/admin/custom-orders] Custom orders fetched successfully:',
+      customOrders?.length || 0
+    )
     res.status(200).json(customOrders || [])
   } catch (error) {
     console.error('❌ [API/admin/custom-orders] Error:', error)
     res.status(500).json({ error: 'Failed to fetch custom orders' })
   }
-} 
+}

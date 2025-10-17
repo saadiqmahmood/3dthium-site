@@ -1,5 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '@supabase/supabase-js'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,18 +11,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const {
-    name,
-    email,
-    phone,
-    material,
-    address,
-    width,
-    height,
-    depth,
-    description,
-    file_url,
-  } = req.body
+  const { name, email, phone, material, address, width, height, depth, description, file_url } =
+    req.body
 
   if (!name || !email || !material || !address || !description || !file_url) {
     return res.status(400).json({ error: 'Missing required fields' })
@@ -49,4 +39,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   return res.status(200).json({ success: true })
-} 
+}

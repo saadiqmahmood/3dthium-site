@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { useAuth } from '@/context/AuthContext'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import ImageManager from '@/components/admin/ImageManager'
+import Toast from '@/components/ui/Toast'
 
 interface Category {
   id: string
@@ -36,13 +36,11 @@ interface ProductFormData {
   is_active: boolean
   customizable: boolean
   attributes: Record<string, string | number | boolean | string[]>
-  galleryImages: File[]
+  galleryImages: string[] // URLs of uploaded images
 }
 
 export default function CreateProductPage() {
-  const { user, isAdmin, loading: authLoading } = useAuth()
   const router = useRouter()
-  
   const [categories, setCategories] = useState<Category[]>([])
   const [categoryAttributes, setCategoryAttributes] = useState<CategoryAttribute[]>([])
   const [loading, setLoading] = useState(false)
@@ -56,9 +54,10 @@ export default function CreateProductPage() {
     is_active: true,
     customizable: false,
     attributes: {},
-    galleryImages: []
+    galleryImages: [],
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   // Define functions before using them in useEffect
   const fetchCategories = async () => {
@@ -79,7 +78,7 @@ export default function CreateProductPage() {
       if (response.ok) {
         const data = await response.json()
         setCategoryAttributes(data)
-        
+
         // Initialize attributes with default values
         const initialAttributes: Record<string, string | number | boolean | string[]> = {}
         data.forEach((attr: CategoryAttribute) => {
@@ -93,10 +92,10 @@ export default function CreateProductPage() {
             initialAttributes[attr.name] = ''
           }
         })
-        
-        setFormData(prev => ({
+
+        setFormData((prev) => ({
           ...prev,
-          attributes: { ...prev.attributes, ...initialAttributes }
+          attributes: { ...prev.attributes, ...initialAttributes },
         }))
       }
     } catch (error) {
@@ -115,37 +114,6 @@ export default function CreateProductPage() {
     }
   }, [formData.category_id])
 
-  // Redirect if not authenticated or not admin
-  useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        router.push('/auth')
-        return
-      }
-      if (!isAdmin) {
-        router.push('/')
-        return
-      }
-    }
-  }, [user, isAdmin, authLoading, router])
-
-  // Show loading while checking auth
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Checking authentication...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Don't render if not authenticated or not admin
-  if (!user || !isAdmin) {
-    return null
-  }
-
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -154,29 +122,32 @@ export default function CreateProductPage() {
   }
 
   const handleNameChange = (name: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       name,
-      slug: generateSlug(name)
+      slug: generateSlug(name),
     }))
   }
 
-  const handleAttributeChange = (attributeName: string, value: string | number | boolean | string[]) => {
-    setFormData(prev => ({
+  const handleAttributeChange = (
+    attributeName: string,
+    value: string | number | boolean | string[]
+  ) => {
+    setFormData((prev) => ({
       ...prev,
       attributes: {
         ...prev.attributes,
-        [attributeName]: value
-      }
+        [attributeName]: value,
+      },
     }))
   }
 
-  const handleGalleryChange = (galleryImages: File[]) => {
+  const handleGalleryChange = (galleryImages: string[]) => {
     console.log('🖼️ Gallery images updated:', galleryImages)
     console.log('🖼️ Previous gallery state:', formData.galleryImages)
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      galleryImages: galleryImages
+      galleryImages: galleryImages,
     }))
   }
 
@@ -191,12 +162,13 @@ export default function CreateProductPage() {
 
     if (step === 2) {
       if (!formData.description.trim()) newErrors.description = 'Description is required'
-      if (formData.galleryImages.length === 0) newErrors.galleryImages = 'At least one gallery image is required'
+      if (formData.galleryImages.length === 0)
+        newErrors.galleryImages = 'At least one gallery image is required'
     }
 
     if (step === 3) {
       // Validate required attributes
-      categoryAttributes.forEach(attr => {
+      categoryAttributes.forEach((attr) => {
         if (attr.required) {
           const value = formData.attributes[attr.name]
           if (!value || (Array.isArray(value) && value.length === 0)) {
@@ -212,59 +184,32 @@ export default function CreateProductPage() {
 
   const nextStep = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 4))
+      setCurrentStep((prev) => Math.min(prev + 1, 4))
     }
   }
 
   const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1))
+    setCurrentStep((prev) => Math.max(prev - 1, 1))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateStep(currentStep)) {
       return
     }
 
     setLoading(true)
-    
+
     try {
-      // First, upload all images to storage
-      const uploadedImageUrls: string[] = []
-      
-      if (formData.galleryImages.length > 0) {
-        const category = categories.find(c => c.id === formData.category_id)
-        if (!category) {
-          throw new Error('Category not found')
-        }
+      // Images are already uploaded to Supabase Storage via ImageManager
+      // formData.galleryImages contains the URLs
 
-        // Upload each image to the proper folder structure
-        for (const file of formData.galleryImages) {
-          const fileExt = file.name.split('.').pop()
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-          const filePath = `${category.slug}/${formData.slug}/gallery/${fileName}`
-
-          // Create FormData for this specific file upload
-          const imageFormData = new FormData()
-          imageFormData.append('file', file)
-          imageFormData.append('path', filePath)
-
-          const uploadResponse = await fetch('/api/admin/upload-image', {
-            method: 'POST',
-            body: imageFormData
-          })
-
-          if (!uploadResponse.ok) {
-            throw new Error(`Failed to upload image: ${file.name}`)
-          }
-
-          const uploadResult = await uploadResponse.json()
-          uploadedImageUrls.push(uploadResult.url)
-        }
+      if (formData.galleryImages.length === 0) {
+        throw new Error('Please upload at least one image')
       }
 
-      // Now create the product with the uploaded image URLs
+      // Create the product with the uploaded image URLs
       const productData = {
         name: formData.name,
         description: formData.description,
@@ -274,26 +219,35 @@ export default function CreateProductPage() {
         is_active: formData.is_active,
         customizable: formData.customizable,
         attributes: formData.attributes,
-        images: uploadedImageUrls // Use the uploaded URLs
+        images: formData.galleryImages, // URLs from ImageManager
+        thumbnail_url: formData.galleryImages[0], // First image is thumbnail
+        gallery_images: formData.galleryImages.slice(1), // Rest are gallery
       }
+
+      console.log('📤 Submitting product:', productData)
 
       const response = await fetch('/api/admin/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(productData)
+        body: JSON.stringify(productData),
       })
 
       if (response.ok) {
-        await response.json()
-        alert('Product created successfully!')
-        router.push(`/admin/products`)
+        const newProduct = await response.json()
+        console.log('✅ Product created:', newProduct)
+        setToast({ message: 'Product created successfully!', type: 'success' })
+        // Redirect after a short delay to show the toast
+        setTimeout(() => {
+          router.push(`/admin/products`)
+        }, 1500)
       } else {
         const error = await response.json()
-        alert(`Error: ${error.message || 'Failed to create product'}`)
+        console.error('❌ Product creation failed:', error)
+        setToast({ message: error.message || 'Failed to create product', type: 'error' })
       }
     } catch (error) {
-      console.error('Error creating product:', error)
-      alert('Failed to create product: ' + error)
+      console.error('❌ Error creating product:', error)
+      setToast({ message: 'Failed to create product: ' + error, type: 'error' })
     } finally {
       setLoading(false)
     }
@@ -332,7 +286,9 @@ export default function CreateProductPage() {
             <input
               type="number"
               value={String(value)}
-              onChange={(e) => handleAttributeChange(attribute.name, parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                handleAttributeChange(attribute.name, parseFloat(e.target.value) || 0)
+              }
               className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
                 error ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -373,8 +329,10 @@ export default function CreateProductPage() {
               }`}
             >
               <option value="">Select {attribute.name}</option>
-              {attribute.options?.map(option => (
-                <option key={option} value={option}>{option}</option>
+              {attribute.options?.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
               ))}
             </select>
             {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
@@ -388,7 +346,7 @@ export default function CreateProductPage() {
               {attribute.name} {attribute.required && <span className="text-red-500">*</span>}
             </label>
             <div className="space-y-2">
-              {attribute.options?.map(option => (
+              {attribute.options?.map((option) => (
                 <label key={option} className="flex items-center">
                   <input
                     type="checkbox"
@@ -398,7 +356,10 @@ export default function CreateProductPage() {
                       if (e.target.checked) {
                         handleAttributeChange(attribute.name, [...currentValues, option])
                       } else {
-                        handleAttributeChange(attribute.name, currentValues.filter(v => v !== option))
+                        handleAttributeChange(
+                          attribute.name,
+                          currentValues.filter((v) => v !== option)
+                        )
                       }
                     }}
                     className="mr-2"
@@ -420,16 +381,19 @@ export default function CreateProductPage() {
     { number: 1, title: 'Basic Info', description: 'Product name, category, and pricing' },
     { number: 2, title: 'Description & Media', description: 'Product description and images' },
     { number: 3, title: 'Attributes', description: 'Category-specific attributes' },
-    { number: 4, title: 'Review & Create', description: 'Review and create product' }
+    { number: 4, title: 'Review & Create', description: 'Review and create product' },
   ]
 
-  const selectedCategory = categories.find(c => c.id === formData.category_id)
+  const selectedCategory = categories.find((c) => c.id === formData.category_id)
 
   return (
     <div className="w-full mx-auto bg-white p-16">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-stone-800">Create New Product</h1>
-        <Link href="/admin/products" className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
+        <Link
+          href="/admin/products"
+          className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+        >
           Back to Products
         </Link>
       </div>
@@ -439,25 +403,31 @@ export default function CreateProductPage() {
         <div className="flex items-center justify-between">
           {steps.map((step, index) => (
             <div key={step.number} className="flex items-center">
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
-                currentStep >= step.number 
-                  ? 'bg-blue-600 border-blue-600 text-white' 
-                  : 'border-gray-300 text-gray-500'
-              }`}>
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
+                  currentStep >= step.number
+                    ? 'bg-blue-600 border-blue-600 text-white'
+                    : 'border-gray-300 text-gray-500'
+                }`}
+              >
                 {step.number}
               </div>
               <div className="ml-3">
-                <div className={`text-sm font-medium ${
-                  currentStep >= step.number ? 'text-blue-600' : 'text-gray-500'
-                }`}>
+                <div
+                  className={`text-sm font-medium ${
+                    currentStep >= step.number ? 'text-blue-600' : 'text-gray-500'
+                  }`}
+                >
                   {step.title}
                 </div>
                 <div className="text-xs text-gray-400">{step.description}</div>
               </div>
               {index < steps.length - 1 && (
-                <div className={`w-16 h-0.5 mx-4 ${
-                  currentStep > step.number ? 'bg-blue-600' : 'bg-gray-300'
-                }`} />
+                <div
+                  className={`w-16 h-0.5 mx-4 ${
+                    currentStep > step.number ? 'bg-blue-600' : 'bg-gray-300'
+                  }`}
+                />
               )}
             </div>
           ))}
@@ -489,7 +459,7 @@ export default function CreateProductPage() {
                 <input
                   type="text"
                   value={formData.slug}
-                  onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
                   className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
                     errors.slug ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -501,19 +471,25 @@ export default function CreateProductPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
                 <select
                   value={formData.category_id}
-                  onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, category_id: e.target.value }))
+                  }
                   className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
                     errors.category_id ? 'border-red-500' : 'border-gray-300'
                   }`}
                 >
                   <option value="">Select Category</option>
                   {categories
-                    .filter(cat => cat.is_active)
-                    .map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    .filter((cat) => cat.is_active)
+                    .map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
                     ))}
                 </select>
-                {errors.category_id && <p className="text-red-500 text-sm mt-1">{errors.category_id}</p>}
+                {errors.category_id && (
+                  <p className="text-red-500 text-sm mt-1">{errors.category_id}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Base Price *</label>
@@ -522,13 +498,20 @@ export default function CreateProductPage() {
                   step="0.01"
                   min="0"
                   value={formData.base_price}
-                  onChange={(e) => setFormData(prev => ({ ...prev, base_price: parseFloat(e.target.value) || 0 }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      base_price: parseFloat(e.target.value) || 0,
+                    }))
+                  }
                   className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
                     errors.base_price ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="0.00"
                 />
-                {errors.base_price && <p className="text-red-500 text-sm mt-1">{errors.base_price}</p>}
+                {errors.base_price && (
+                  <p className="text-red-500 text-sm mt-1">{errors.base_price}</p>
+                )}
               </div>
             </div>
           </div>
@@ -540,45 +523,52 @@ export default function CreateProductPage() {
             <h2 className="text-xl font-semibold mb-4 text-stone-800">Description & Media</h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description *
+                </label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, description: e.target.value }))
+                  }
                   rows={4}
                   className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
                     errors.description ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="Describe your product..."
                 />
-                {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+                {errors.description && (
+                  <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                )}
               </div>
-              
+
               {/* Image Management Component */}
               {selectedCategory && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Product Images *</label>
-                  {/* Debug info */}
-                  <div className="text-xs text-gray-500 mb-2">
-                    Debug - Gallery: {formData.galleryImages.length} images
-                    {formData.galleryImages.length > 0 && (
-                      <span> - First URL: {formData.galleryImages[0].name.substring(0, 50)}...</span>
-                    )}
-                  </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Product Images *
+                  </label>
                   <ImageManager
+                    categorySlug={selectedCategory.slug}
+                    productSlug={formData.slug || 'temp'}
                     galleryImages={formData.galleryImages}
                     onGalleryChange={handleGalleryChange}
                     maxGalleryImages={9}
                   />
-                  {errors.galleryImages && <p className="text-red-500 text-sm mt-1">{errors.galleryImages}</p>}
+                  {errors.galleryImages && (
+                    <p className="text-red-500 text-sm mt-1">{errors.galleryImages}</p>
+                  )}
                 </div>
               )}
-              
+
               <div className="flex items-center space-x-4">
                 <label className="flex items-center">
                   <input
                     type="checkbox"
                     checked={formData.is_active}
-                    onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, is_active: e.target.checked }))
+                    }
                     className="mr-2"
                   />
                   <span className="text-sm text-gray-700">Active</span>
@@ -587,7 +577,9 @@ export default function CreateProductPage() {
                   <input
                     type="checkbox"
                     checked={formData.customizable}
-                    onChange={(e) => setFormData(prev => ({ ...prev, customizable: e.target.checked }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, customizable: e.target.checked }))
+                    }
                     className="mr-2"
                   />
                   <span className="text-sm text-gray-700">Customizable</span>
@@ -607,7 +599,8 @@ export default function CreateProductPage() {
               </div>
             ) : (
               <p className="text-gray-500 text-center py-8">
-                No attributes defined for this category. You can add attributes in the category management.
+                No attributes defined for this category. You can add attributes in the category
+                management.
               </p>
             )}
           </div>
@@ -621,43 +614,68 @@ export default function CreateProductPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-medium text-gray-900">Basic Information</h3>
-                  <p><strong>Name:</strong> {formData.name}</p>
-                  <p><strong>Category:</strong> {categories.find(c => c.id === formData.category_id)?.name}</p>
-                  <p><strong>Base Price:</strong> ${formData.base_price}</p>
-                  <p><strong>Slug:</strong> {formData.slug}</p>
+                  <p>
+                    <strong>Name:</strong> {formData.name}
+                  </p>
+                  <p>
+                    <strong>Category:</strong>{' '}
+                    {categories.find((c) => c.id === formData.category_id)?.name}
+                  </p>
+                  <p>
+                    <strong>Base Price:</strong> ${formData.base_price}
+                  </p>
+                  <p>
+                    <strong>Slug:</strong> {formData.slug}
+                  </p>
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">Settings</h3>
-                  <p><strong>Active:</strong> {formData.is_active ? 'Yes' : 'No'}</p>
-                  <p><strong>Customizable:</strong> {formData.customizable ? 'Yes' : 'No'}</p>
-                  <p><strong>Description:</strong> {formData.description.substring(0, 100)}...</p>
+                  <p>
+                    <strong>Active:</strong> {formData.is_active ? 'Yes' : 'No'}
+                  </p>
+                  <p>
+                    <strong>Customizable:</strong> {formData.customizable ? 'Yes' : 'No'}
+                  </p>
+                  <p>
+                    <strong>Description:</strong> {formData.description.substring(0, 100)}...
+                  </p>
                 </div>
               </div>
-              
+
               {/* Gallery Preview */}
               {formData.galleryImages.length > 0 && (
                 <div>
-                  <h3 className="font-medium text-gray-900">Gallery Images ({formData.galleryImages.length})</h3>
+                  <h3 className="font-medium text-gray-900">
+                    Gallery Images ({formData.galleryImages.length})
+                  </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
-                    {formData.galleryImages.map((image, index) => (
+                    {formData.galleryImages.map((imageUrl, index) => (
                       <div key={index} className="relative">
                         <img
-                          src={URL.createObjectURL(image)}
+                          src={imageUrl}
                           alt={`Gallery image ${index + 1}`}
                           className="w-full h-16 object-cover rounded border"
                         />
+                        {index === 0 && (
+                          <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1 rounded">
+                            Thumbnail
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-              
+
               {Object.keys(formData.attributes).length > 0 && (
                 <div>
                   <h3 className="font-medium text-gray-900">Attributes</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {Object.entries(formData.attributes).map(([key, value]) => (
-                      <p key={key}><strong>{key}:</strong> {Array.isArray(value) ? value.join(', ') : String(value)}</p>
+                      <p key={key}>
+                        <strong>{key}:</strong>{' '}
+                        {Array.isArray(value) ? value.join(', ') : String(value)}
+                      </p>
                     ))}
                   </div>
                 </div>
@@ -676,7 +694,7 @@ export default function CreateProductPage() {
           >
             Previous
           </button>
-          
+
           {currentStep < 4 ? (
             <button
               type="button"
@@ -696,6 +714,9 @@ export default function CreateProductPage() {
           )}
         </div>
       </form>
+
+      {/* Toast Notification */}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
-} 
+}

@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/router'
-import { useAuth } from '@/context/AuthContext'
-import Toast from '@/components/ui/Toast'
-import { useSupabase } from '@/context/SupabaseContext'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+import Toast from '@/components/ui/Toast'
+import { useAuth } from '@/context/AuthContext'
+import { useSupabase } from '@/context/SupabaseContext'
 
 export default function AuthPage() {
   const router = useRouter()
@@ -41,27 +41,27 @@ export default function AuthPage() {
     e.preventDefault()
     setLoading(true)
     setError('') // Optional if you're not displaying `error`
-  
+
     console.log('Attempting auth:', isLogin ? 'signIn' : 'signUp', { email })
-    
+
     const action = isLogin ? signIn : signUp
     const { error } = await action(email, password)
-  
+
     if (error) {
       console.error('Auth error:', error)
       setToast({ message: error.message, type: 'error' })
       setLoading(false) // 🔥 ensure button is re-enabled
       return
     }
-  
+
     console.log('Auth successful:', isLogin ? 'signIn' : 'signUp')
-    
+
     // ✅ Success
     setToast({
       message: isLogin ? 'Logged in successfully!' : 'Account created successfully!',
       type: 'success',
     })
-  
+
     // ✅ Delay redirect to show toast
     const redirectTo = (router.query.from as string) || '/'
     setTimeout(() => {
@@ -84,16 +84,16 @@ export default function AuthPage() {
     }
     setLoading(false)
   }
-    useEffect(() => {
-        if (router.query.reset === 'success') {
-            setToast({ message: 'Password updated! You can now log in.', type: 'success' })
+  useEffect(() => {
+    if (router.query.reset === 'success') {
+      setToast({ message: 'Password updated! You can now log in.', type: 'success' })
 
-            // Optionally remove the query from the URL after showing the toast
-            const cleaned = { ...router.query }
-            delete cleaned.reset
-            router.replace({ pathname: router.pathname, query: cleaned }, undefined, { shallow: true })
-        }
-    }, [router.query, router])
+      // Optionally remove the query from the URL after showing the toast
+      const cleaned = { ...router.query }
+      delete cleaned.reset
+      router.replace({ pathname: router.pathname, query: cleaned }, undefined, { shallow: true })
+    }
+  }, [router.query, router])
 
   return (
     <div className="px-4 sm:px-8 py-6">
@@ -111,10 +111,14 @@ export default function AuthPage() {
         </h1>
         {resetMode ? (
           <form onSubmit={handlePasswordReset} className="space-y-6 bg-white p-8 rounded-xl shadow">
-            <h2 className="text-xl font-semibold text-center text-stone-800">Reset Your Password</h2>
+            <h2 className="text-xl font-semibold text-center text-stone-800">
+              Reset Your Password
+            </h2>
 
             <div>
-              <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700">Email</label>
+              <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
               <input
                 type="email"
                 id="reset-email"
@@ -162,7 +166,9 @@ export default function AuthPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
               <input
                 type="email"
                 id="email"
@@ -174,7 +180,9 @@ export default function AuthPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
               <input
                 type="password"
                 id="password"
@@ -185,15 +193,15 @@ export default function AuthPage() {
               />
             </div>
             {isLogin && !resetMode && (
-                <>
+              <>
                 <p className="text-right text-sm mt-2">
-                    <button
-                        type="button"
-                        className="text-blue-600 hover:underline"
-                        onClick={() => setResetMode(true)}
-                    >
-                        Forgot password?
-                    </button>
+                  <button
+                    type="button"
+                    className="text-blue-600 hover:underline"
+                    onClick={() => setResetMode(true)}
+                  >
+                    Forgot password?
+                  </button>
                 </p>
                 {/* Only show resend link if error message indicates email not confirmed */}
                 {email && error && /confirm/i.test(error) && (
@@ -208,7 +216,7 @@ export default function AuthPage() {
                     </button>
                   </p>
                 )}
-                </>
+              </>
             )}
             <button
               type="submit"
@@ -221,11 +229,14 @@ export default function AuthPage() {
             {!isLogin && (
               <p className="text-center text-xs text-gray-500 mt-2">
                 By signing up, you agree to our{' '}
-                <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>.
+                <Link href="/privacy" className="text-blue-600 hover:underline">
+                  Privacy Policy
+                </Link>
+                .
               </p>
             )}
             <p className="text-center text-sm text-gray-600">
-              {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
+              {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
               <button
                 type="button"
                 className="text-blue-600 hover:underline"
@@ -237,11 +248,7 @@ export default function AuthPage() {
           </form>
         )}
         {toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
-          />
+          <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
         )}
       </div>
     </div>

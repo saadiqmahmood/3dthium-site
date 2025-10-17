@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import { Product, ProductVariant } from '@/types'
+import React, { useEffect, useState } from 'react'
 import ProductCard from '@/components/ui/ProductCard'
+import { Product, ProductVariant } from '@/types'
 
 const categories = [
   'All',
@@ -27,12 +27,12 @@ export default function ProductGrid() {
       try {
         console.log('🔄 [ProductGrid] Making API call to /api/test...')
         const res = await fetch('/api/test')
-        
+
         if (!res.ok) {
           console.error('❌ [ProductGrid] API response not ok:', res.status, res.statusText)
           return
         }
-        
+
         const data = await res.json()
         console.log('✅ [ProductGrid] Products fetched successfully:', data.length)
         setProducts(data)

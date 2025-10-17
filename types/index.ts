@@ -1,21 +1,29 @@
 export type Product = {
-    id: string
-    slug: string
-    title: string
-    description: string
-    category: string
-    thumbnail_url: string
+  id: string
+  slug: string
+  title?: string // Legacy schema
+  name?: string // New schema
+  description: string
+  category?: string // Legacy schema
+  category_id?: string // New schema
+  thumbnail_url: string
+  base_price?: number // New schema
+  images?: string[] // New schema
+  gallery_images?: string[] // New schema
+  is_active?: boolean // New schema
+  customizable?: boolean // New schema
+  attributes?: Record<string, any> // New schema
 }
 
 export type ProductVariant = {
-    id: string
-    product_id: string
-    color: string
-    image_url: string
-    price: number
-    in_stock: boolean
-    customizable: boolean
-  }
+  id: string
+  product_id: string
+  color: string
+  image_url: string
+  price: number
+  in_stock: boolean
+  customizable: boolean
+}
 
 export type ShippingAddress = {
   name: string
@@ -66,4 +74,4 @@ export type Order = {
   tracking_url?: string
   shipped_at?: string
   shipping_label_url?: string
-} 
+}

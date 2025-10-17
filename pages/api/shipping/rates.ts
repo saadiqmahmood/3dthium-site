@@ -4,11 +4,16 @@ import { getShippingRates, ShipmentRequest, ShippingAddress } from '@/lib/shippo
 // Helper function to get size multiplier
 function getSizeMultiplier(size: string): number {
   switch (size) {
-    case '150mm': return 1.0
-    case '180mm': return 1.2
-    case '210mm': return 1.4
-    case '240mm': return 1.6
-    default: return 1.0
+    case '150mm':
+      return 1.0
+    case '180mm':
+      return 1.2
+    case '210mm':
+      return 1.4
+    case '240mm':
+      return 1.6
+    default:
+      return 1.0
   }
 }
 
@@ -18,10 +23,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { 
-      address_to, 
-      cart_items 
-    }: { 
+    const {
+      address_to,
+      cart_items,
+    }: {
       address_to: ShippingAddress
       cart_items: Array<{
         product: import('@/types').Product
@@ -37,13 +42,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const address_from: ShippingAddress = {
       name: '3Dthium',
-      street1: '49 Stonecross House', 
+      street1: '49 Stonecross House',
       city: 'Bolton',
       state: 'Manchester',
       zip: 'BL1 1HU',
       country: 'GB',
       phone: '+447585814347',
-      email: 'alsousky@gmail.com'
+      email: 'alsousky@gmail.com',
     }
 
     // Calculate total weight and dimensions
@@ -52,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let maxWidth = 0
     let maxHeight = 0
 
-    cart_items.forEach(item => {
+    cart_items.forEach((item) => {
       // Estimate weight and dimensions based on size
       const sizeMultiplier = getSizeMultiplier(item.size)
       const itemWeight = 0.5 * sizeMultiplier // Base weight 500g
@@ -70,14 +75,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const shipmentData: ShipmentRequest = {
       address_from,
       address_to,
-      parcels: [{
-        length: maxLength.toString(),
-        width: maxWidth.toString(),
-        height: maxHeight.toString(),
-        distance_unit: 'cm',
-        weight: totalWeight.toString(),
-        mass_unit: 'kg'
-      }]
+      parcels: [
+        {
+          length: maxLength.toString(),
+          width: maxWidth.toString(),
+          height: maxHeight.toString(),
+          distance_unit: 'cm',
+          weight: totalWeight.toString(),
+          mass_unit: 'kg',
+        },
+      ],
     }
 
     // Get shipping rates
@@ -89,8 +96,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('Error calculating shipping rates:', error)
     console.error('Error details:', {
       message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
+      stack: error instanceof Error ? error.stack : undefined,
     })
     res.status(500).json({ error: 'Failed to calculate shipping rates' })
   }
-} 
+}

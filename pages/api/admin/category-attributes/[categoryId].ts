@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     console.log('🔍 [API/admin/category-attributes] Fetching attributes for category:', categoryId)
-    
+
     const { data: attributes, error } = await supabaseAdmin
       .from('category_attributes')
       .select('*')
@@ -28,10 +28,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Failed to fetch category attributes' })
     }
 
-    console.log('✅ [API/admin/category-attributes] Attributes fetched successfully:', attributes?.length || 0)
+    console.log(
+      '✅ [API/admin/category-attributes] Attributes fetched successfully:',
+      attributes?.length || 0
+    )
     res.status(200).json(attributes || [])
   } catch (error) {
     console.error('❌ [API/admin/category-attributes] Error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
-} 
+}

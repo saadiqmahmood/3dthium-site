@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const [
       { count: orderCount, data: orders },
       { count: userCount, data: users },
-      { data: products }
+      { data: products },
     ] = await Promise.all([
       supabaseAdmin
         .from('orders')
@@ -26,9 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .select('id, email, created_at', { count: 'exact' })
         .order('created_at', { ascending: false })
         .limit(5),
-      supabaseAdmin
-        .from('products')
-        .select('id')
+      supabaseAdmin.from('products').select('id'),
     ])
 
     // Calculate total revenue from recent orders
@@ -49,4 +47,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('❌ [API/admin/metrics] Error fetching metrics:', error)
     res.status(500).json({ error: 'Failed to fetch metrics' })
   }
-} 
+}

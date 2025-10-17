@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     switch (req.method) {
-      case 'PUT':
+      case 'PUT': {
         console.log('🔍 [API/admin/users/[id]] Updating user:', id)
         const { error: updateError } = await supabaseAdmin
           .from('users')
@@ -27,13 +27,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log('✅ [API/admin/users/[id]] User updated successfully')
         res.status(200).json({ success: true })
         break
+      }
 
-      case 'DELETE':
+      case 'DELETE': {
         console.log('🔍 [API/admin/users/[id]] Deleting user:', id)
-        const { error: deleteError } = await supabaseAdmin
-          .from('users')
-          .delete()
-          .eq('id', id)
+        const { error: deleteError } = await supabaseAdmin.from('users').delete().eq('id', id)
 
         if (deleteError) {
           console.error('❌ [API/admin/users/[id]] Error deleting user:', deleteError)
@@ -43,6 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log('✅ [API/admin/users/[id]] User deleted successfully')
         res.status(200).json({ success: true })
         break
+      }
 
       default:
         res.status(405).json({ error: 'Method not allowed' })
@@ -51,4 +50,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('❌ [API/admin/users/[id]] Error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
-} 
+}

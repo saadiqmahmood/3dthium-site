@@ -1,5 +1,5 @@
-import React from 'react'
 import Image from 'next/image'
+import React from 'react'
 
 type GalleryItem = {
   id: number
@@ -38,10 +38,7 @@ export default function CustomGallery() {
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 ">
         {galleryItems.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white rounded-xl shadow hover:shadow-md transition"
-          >
+          <div key={item.id} className="bg-white rounded-xl shadow hover:shadow-md transition">
             <div className="w-full h-56 bg-gray-100 rounded-t-xl overflow-hidden">
               <Image
                 src={item.image}
@@ -52,9 +49,7 @@ export default function CustomGallery() {
               />
             </div>
             <div className="p-4">
-              <h3 className="text-md font-semibold text-gray-700">
-                {item.title}
-              </h3>
+              <h3 className="text-md font-semibold text-gray-700">{item.title}</h3>
             </div>
           </div>
         ))}

@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { useSupabase } from './SupabaseContext'
 import { Session, User } from '@supabase/supabase-js'
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
+import { useSupabase } from './SupabaseContext'
 
 type AuthContextType = {
   user: User | null
@@ -33,13 +33,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
         body: JSON.stringify({ userId }),
       })
-      
+
       if (!response.ok) {
         console.error('❌ [AuthContext] Error checking admin status:', response.status)
         setIsAdmin(false)
         return
       }
-      
+
       const data = await response.json()
       console.log('✅ [AuthContext] Admin status result:', data)
       setIsAdmin(!!data.isAdmin)
@@ -51,24 +51,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     console.log('🚀 [AuthContext] Initializing AuthProvider')
-    
+
     // Get initial session
     const getInitialSession = async () => {
       console.log('🔄 [AuthContext] Getting initial session...')
       try {
-        const { data: { session }, error } = await client.auth.getSession()
-        
+        const {
+          data: { session },
+          error,
+        } = await client.auth.getSession()
+
         if (error) {
           console.error('❌ [AuthContext] Error getting initial session:', error)
         }
-        
+
         console.log('📋 [AuthContext] Initial session:', {
           hasSession: !!session,
           userId: session?.user?.id,
           email: session?.user?.email,
-          expiresAt: session?.expires_at
+          expiresAt: session?.expires_at,
         })
-        
+
         // Check if session is expired
         if (session && session.expires_at) {
           const now = Math.floor(Date.now() / 1000)
@@ -82,10 +85,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             return
           }
         }
-        
+
         setSession(session)
         setUser(session?.user || null)
-        
+
         if (session?.user) {
           console.log('👤 [AuthContext] User found, checking admin status...')
           await checkAdminStatus(session.user.id)
@@ -106,41 +109,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Listen for auth changes
     console.log('👂 [AuthContext] Setting up auth state listener...')
-    const { data: { subscription } } = client.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('🔄 [AuthContext] Auth state changed:', {
-          event,
-          userId: session?.user?.id,
-          email: session?.user?.email,
-          hasSession: !!session
-        })
-        
-        // Handle session expiry
-        if (session && session.expires_at) {
-          const now = Math.floor(Date.now() / 1000)
-          if (session.expires_at < now) {
-            console.log('⚠️ [AuthContext] Session expired during auth state change')
-            setSession(null)
-            setUser(null)
-            setIsAdmin(false)
-            setLoading(false)
-            return
-          }
-        }
-        
-        setSession(session)
-        setUser(session?.user || null)
-        
-        if (session?.user) {
-          console.log('👤 [AuthContext] User authenticated, checking admin status...')
-          await checkAdminStatus(session.user.id)
-        } else {
-          console.log('👤 [AuthContext] User signed out')
+    const {
+      data: { subscription },
+    } = client.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 [AuthContext] Auth state changed:', {
+        event,
+        userId: session?.user?.id,
+        email: session?.user?.email,
+        hasSession: !!session,
+      })
+
+      // Handle session expiry
+      if (session && session.expires_at) {
+        const now = Math.floor(Date.now() / 1000)
+        if (session.expires_at < now) {
+          console.log('⚠️ [AuthContext] Session expired during auth state change')
+          setSession(null)
+          setUser(null)
           setIsAdmin(false)
+          setLoading(false)
+          return
         }
-        setLoading(false)
       }
-    )
+
+      setSession(session)
+      setUser(session?.user || null)
+
+      if (session?.user) {
+        console.log('👤 [AuthContext] User authenticated, checking admin status...')
+        await checkAdminStatus(session.user.id)
+      } else {
+        console.log('👤 [AuthContext] User signed out')
+        setIsAdmin(false)
+      }
+      setLoading(false)
+    })
 
     return () => {
       console.log('🧹 [AuthContext] Cleaning up auth listener')
@@ -167,33 +170,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     console.log('�� [AuthContext] Signing in:', email)
-    const { data, error } = await client.auth.signInWithPassword({ 
-      email, 
-      password 
+    const { data, error } = await client.auth.signInWithPassword({
+      email,
+      password,
     })
-    
+
     if (error) {
       console.error('❌ [AuthContext] Sign in error:', error)
     } else {
       console.log('✅ [AuthContext] Sign in successful:', data.user?.email)
     }
-    
+
     return { data, error }
   }
 
   const signUp = async (email: string, password: string) => {
     console.log('📝 [AuthContext] Signing up:', email)
-    const { data, error } = await client.auth.signUp({ 
-      email, 
-      password 
+    const { data, error } = await client.auth.signUp({
+      email,
+      password,
     })
-    
+
     if (error) {
       console.error('❌ [AuthContext] Sign up error:', error)
     } else {
       console.log('✅ [AuthContext] Sign up successful:', data.user?.email)
     }
-    
+
     return { data, error }
   }
 
@@ -205,20 +208,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isAdmin,
       loading,
       userId: user?.id,
-      email: user?.email
+      email: user?.email,
     })
   }, [user, session, isAdmin, loading])
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      session, 
-      isAdmin,
-      signIn, 
-      signUp, 
-      signOut, 
-      loading 
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        isAdmin,
+        signIn,
+        signUp,
+        signOut,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

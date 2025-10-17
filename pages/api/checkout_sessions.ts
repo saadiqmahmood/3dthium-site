@@ -1,7 +1,7 @@
+import { createClient } from '@supabase/supabase-js'
 import { NextApiRequest, NextApiResponse } from 'next'
 import Stripe from 'stripe'
-import { createClient } from '@supabase/supabase-js'
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-05-28.basil',
@@ -13,76 +13,84 @@ const supabase = createClient(
 )
 
 interface Product {
-  id: string;
-  title: string;
+  id: string
+  title: string
   // add other fields as needed
 }
 
 interface Variant {
-  id: string;
-  color: string;
-  price: number;
-  image_url: string;
-  customizable?: boolean;
+  id: string
+  color: string
+  price: number
+  image_url: string
+  customizable?: boolean
   // add other fields as needed
 }
 
 interface CartItem {
-  product: Product;
-  variant: Variant;
-  quantity: number;
-  size: string;
+  product: Product
+  variant: Variant
+  quantity: number
+  size: string
 }
 
 // Helper function for dynamic price calculation
 function getDynamicPrice(variant: { color: string }, size: string): number {
-  let basePrice = 16.99;
+  let basePrice = 16.99
   if (variant.color && variant.color.includes('And')) {
-    basePrice = 17.99;
+    basePrice = 17.99
   }
   if (size === '210mm') {
-    return basePrice - 4;
+    return basePrice - 4
   } else if (size === '180mm') {
-    return basePrice - 7;
+    return basePrice - 7
   } else if (size === '150mm') {
-    return basePrice - 10;
+    return basePrice - 10
   } else if (size === '240mm') {
-    return basePrice;
+    return basePrice
   }
-  return basePrice;
+  return basePrice
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
   try {
-    const { cart, email, user_id, discount, promo_code, shipping_address, shipping_rate_id, shipping_cost, shipping_provider, shipping_service } = req.body as {
-      cart: CartItem[];
-      email: string;
-      user_id?: string;
-      discount?: number;
-      promo_code?: string;
+    const {
+      cart,
+      email,
+      user_id,
+      discount,
+      promo_code,
+      shipping_address,
+      shipping_rate_id,
+      shipping_cost,
+      shipping_provider,
+      shipping_service,
+    } = req.body as {
+      cart: CartItem[]
+      email: string
+      user_id?: string
+      discount?: number
+      promo_code?: string
       shipping_address?: {
-        name: string;
-        street1: string;
-        street2?: string;
-        city: string;
-        state: string;
-        zip: string;
-        country: string;
-        phone?: string;
-        email?: string;
-      };
-      shipping_rate_id?: string;
-      shipping_cost?: number;
-      shipping_provider?: string;
-      shipping_service?: string;
-    };
+        name: string
+        street1: string
+        street2?: string
+        city: string
+        state: string
+        zip: string
+        country: string
+        phone?: string
+        email?: string
+      }
+      shipping_rate_id?: string
+      shipping_cost?: number
+      shipping_provider?: string
+      shipping_service?: string
+    }
 
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
       return res.status(400).json({ message: 'Cart is required and cannot be empty' })
@@ -94,19 +102,17 @@ export default async function handler(
 
     // Store cart in checkout_carts table
     const checkout_cart_id = uuidv4()
-    const { error: insertError } = await supabase
-      .from('checkout_carts')
-      .insert({
-        id: checkout_cart_id,
-        user_id: user_id || null,
-        guest_email: user_id ? null : email,
-        cart_data: cart,
-        shipping_address: shipping_address || null,
-        shipping_rate_id: shipping_rate_id || null,
-        shipping_cost: shipping_cost || 0,
-        shipping_provider: shipping_provider || null,
-        shipping_service: shipping_service || null,
-      })
+    const { error: insertError } = await supabase.from('checkout_carts').insert({
+      id: checkout_cart_id,
+      user_id: user_id || null,
+      guest_email: user_id ? null : email,
+      cart_data: cart,
+      shipping_address: shipping_address || null,
+      shipping_rate_id: shipping_rate_id || null,
+      shipping_cost: shipping_cost || 0,
+      shipping_provider: shipping_provider || null,
+      shipping_service: shipping_service || null,
+    })
     if (insertError) {
       console.error('Error saving checkout cart:', insertError)
       return res.status(500).json({ message: 'Failed to save checkout cart' })
@@ -143,7 +149,7 @@ export default async function handler(
     }
 
     // Debug: log all line items before sending to Stripe
-    console.log('Line items for Stripe:', JSON.stringify(lineItems, null, 2));
+    console.log('Line items for Stripe:', JSON.stringify(lineItems, null, 2))
     // Validate all unit_amounts
     for (const item of lineItems) {
       if (
@@ -152,7 +158,7 @@ export default async function handler(
         item.price_data.unit_amount === 0 ||
         isNaN(item.price_data.unit_amount)
       ) {
-        throw new Error(`Invalid unit_amount in line item: ${JSON.stringify(item)}`);
+        throw new Error(`Invalid unit_amount in line item: ${JSON.stringify(item)}`)
       }
     }
 
@@ -180,8 +186,8 @@ export default async function handler(
 
     res.status(200).json({ sessionId: session.id, url: session.url })
   } catch (error) {
-    const errMsg = error instanceof Error ? error.message : String(error);
-    console.error('Error creating checkout session:', error);
-    res.status(500).json({ message: errMsg || 'Error creating checkout session' });
+    const errMsg = error instanceof Error ? error.message : String(error)
+    console.error('Error creating checkout session:', error)
+    res.status(500).json({ message: errMsg || 'Error creating checkout session' })
   }
 }

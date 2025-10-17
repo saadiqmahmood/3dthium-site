@@ -1,6 +1,6 @@
+import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useSupabase } from '@/context/SupabaseContext'
-import { useState } from 'react'
 
 type DebugInfo = {
   data?: unknown
@@ -24,14 +24,14 @@ export default function SessionDebug() {
       console.log('❌ [SessionDebug] No user to test query with')
       return
     }
-    
+
     console.log('🔍 [SessionDebug] Testing user query...')
     const { data, error } = await client
       .from('users')
       .select('*')
       .eq('auth_user_id', user.id)
       .single()
-    
+
     console.log('📋 [SessionDebug] User query result:', { data, error })
     setDebugInfo({ data, error })
   }
@@ -58,22 +58,16 @@ export default function SessionDebug() {
           <div>Session Expires: {new Date(session.expires_at! * 1000).toLocaleString()}</div>
         )}
       </div>
-      
+
       <div className="mt-3 space-y-1">
-        <button 
-          onClick={checkSession}
-          className="bg-blue-600 px-2 py-1 rounded text-xs mr-2"
-        >
+        <button onClick={checkSession} className="bg-blue-600 px-2 py-1 rounded text-xs mr-2">
           Check Session
         </button>
-        <button 
-          onClick={testUserQuery}
-          className="bg-green-600 px-2 py-1 rounded text-xs"
-        >
+        <button onClick={testUserQuery} className="bg-green-600 px-2 py-1 rounded text-xs">
           Test Query
         </button>
       </div>
-      
+
       {debugInfo && (
         <div className="mt-2 p-2 bg-gray-800 rounded text-xs">
           <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
@@ -81,4 +75,4 @@ export default function SessionDebug() {
       )}
     </div>
   )
-} 
+}
