@@ -35,7 +35,7 @@ interface ProductFormData {
   slug: string
   is_active: boolean
   customizable: boolean
-  attributes: Record<string, any>
+  attributes: Record<string, unknown>
   galleryImages: string[]
 }
 
@@ -670,6 +670,7 @@ export default function EditProductPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
                     {formData.galleryImages.map((imageUrl, index) => (
                       <div key={index} className="relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={imageUrl}
                           alt={`Gallery image ${index + 1}`}

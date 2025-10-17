@@ -1,6 +1,5 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 
@@ -22,7 +21,7 @@ interface Product {
   gallery_images: string[]
   is_active: boolean
   customizable: boolean
-  attributes: Record<string, any>
+  attributes: Record<string, unknown>
   created_at: string
   updated_at: string
   categories?: {

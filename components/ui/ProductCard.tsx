@@ -14,14 +14,14 @@ export default function ProductCard({ product, variants }: Props) {
         <div className="w-full h-72 bg-gray-100 rounded-t-xl overflow-hidden">
           <Image
             src={product.thumbnail_url}
-            alt={product.title}
+            alt={product.title || product.name || 'Product'}
             className="w-full h-full object-cover object-center"
             width={300}
             height={300}
           />
         </div>
         <div className="p-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-1">{product.title}</h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-1">{product.title || product.name}</h3>
           <p className="text-sm text-gray-500">{product.category}</p>
           {variants[0] && variants[0].customizable && (
             <p className="text-xs text-blue-500 mt-1">Customizable</p>

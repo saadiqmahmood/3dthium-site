@@ -248,6 +248,7 @@ export default function ImageManager({
                 <div key={`gallery-${index}`} className="space-y-2">
                   {/* Image Preview */}
                   <div className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={imageUrl}
                       alt={`Gallery ${index + 1}`}
@@ -260,12 +261,6 @@ export default function ImageManager({
                       onError={(e) => {
                         console.error('Gallery image load error:', imageUrl)
                         e.currentTarget.style.display = 'none'
-                        e.currentTarget.parentElement!.innerHTML = `
-                          <div style="width: 128px; height: 128px;" 
-                               class="flex items-center justify-center bg-red-50 border-2 border-red-300 rounded">
-                            <span class="text-red-500 text-sm">Failed to load</span>
-                          </div>
-                        `
                       }}
                       onLoad={() => {
                         console.log(`✅ Image ${index + 1} loaded:`, imageUrl.substring(0, 50))
@@ -334,7 +329,7 @@ export default function ImageManager({
               />
             </svg>
             <p className="mt-2 text-sm text-gray-600">No images uploaded yet</p>
-            <p className="text-xs text-gray-500">Click "Upload Images" to add product photos</p>
+            <p className="text-xs text-gray-500">Click &quot;Upload Images&quot; to add product photos</p>
           </div>
         )}
       </div>

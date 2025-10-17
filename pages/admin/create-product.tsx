@@ -651,6 +651,7 @@ export default function CreateProductPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
                     {formData.galleryImages.map((imageUrl, index) => (
                       <div key={index} className="relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={imageUrl}
                           alt={`Gallery image ${index + 1}`}

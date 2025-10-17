@@ -105,7 +105,7 @@ export default function ImageUpload({
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileUpload(e.dataTransfer.files)
     }
-  }, [])
+  }, [handleFileUpload])
 
   const removeImage = (index: number) => {
     const updatedImages = images.filter((_, i) => i !== index)
@@ -184,6 +184,7 @@ export default function ImageUpload({
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {images.map((image, index) => (
               <div key={index} className="relative group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={image}
                   alt={`Product image ${index + 1}`}

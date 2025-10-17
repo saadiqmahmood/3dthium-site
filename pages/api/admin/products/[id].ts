@@ -50,7 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       case 'PUT': {
         console.log('🔍 [API/admin/products/[id]] Updating product:', id)
 
-        const updateData: any = {}
+        const updateData: Record<string, unknown> = {}
 
         // Only update fields that are provided in the request body
         if (req.body.name !== undefined) updateData.name = req.body.name
