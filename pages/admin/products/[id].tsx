@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import ImageManager from '@/components/admin/ImageManager'
+import VariantManager from '@/components/admin/VariantManager'
 import Toast from '@/components/ui/Toast'
 
 interface Category {
@@ -425,7 +426,8 @@ export default function EditProductPage() {
             { num: 1, label: 'Basic Info' },
             { num: 2, label: 'Images & Description' },
             { num: 3, label: 'Attributes' },
-            { num: 4, label: 'Review' },
+            { num: 4, label: 'Variants' },
+            { num: 5, label: 'Review' },
           ].map((step, index) => (
             <div key={step.num} className="flex items-center">
               <div className="flex flex-col items-center">
@@ -438,7 +440,7 @@ export default function EditProductPage() {
                 </div>
                 <span className="text-xs mt-1 text-gray-600">{step.label}</span>
               </div>
-              {index < 3 && (
+              {index < 4 && (
                 <div
                   className={`w-16 h-1 mx-2 ${
                     currentStep > step.num ? 'bg-blue-600' : 'bg-gray-200'
@@ -626,8 +628,19 @@ export default function EditProductPage() {
           </div>
         )}
 
-        {/* Step 4: Review */}
-        {currentStep === 4 && (
+        {/* Step 4: Variants */}
+        {currentStep === 4 && id && (
+          <div className="bg-gray-50 rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4 text-stone-800">Product Variants</h2>
+            <p className="text-gray-600 mb-6">
+              Add size, color, and material variations for this product. Each variant can have its own price adjustment.
+            </p>
+            <VariantManager productId={id as string} basePrice={formData.base_price} />
+          </div>
+        )}
+
+        {/* Step 5: Review */}
+        {currentStep === 5 && (
           <div className="bg-gray-50 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 text-stone-800">Review Changes</h2>
             <div className="space-y-4">
@@ -715,7 +728,7 @@ export default function EditProductPage() {
             Previous
           </button>
 
-          {currentStep < 4 ? (
+          {currentStep < 5 ? (
             <button
               type="button"
               onClick={nextStep}
