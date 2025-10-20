@@ -632,7 +632,7 @@ export default function EditProductPage() {
         {currentStep === 4 && id && (
           <div className="bg-gray-50 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 text-stone-800">Product Variants</h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-stone-800 mb-6">
               Add size, color, and material variations for this product. Each variant can have its own price adjustment.
             </p>
             <VariantManager productId={id as string} basePrice={formData.base_price} />
