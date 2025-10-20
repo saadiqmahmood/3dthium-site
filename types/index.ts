@@ -15,6 +15,7 @@ export type Product = {
   attributes?: Record<string, any> // New schema
 }
 
+// Legacy variant type (for old products table)
 export type ProductVariant = {
   id: string
   product_id: string
@@ -23,6 +24,49 @@ export type ProductVariant = {
   price: number
   in_stock: boolean
   customizable: boolean
+}
+
+// New variant type for products_new table
+export type ProductVariantNew = {
+  id: string
+  product_id: string
+
+  // Variant attributes (at least one required)
+  size?: string // "150mm", "180mm", "210mm", "240mm"
+  color?: string // "White", "Black", "Red", "Blue"
+  material?: string // "PLA", "PETG", "Resin"
+
+  // Pricing (final price = base_price + price_adjustment)
+  price_adjustment: number
+
+  // Optional fields
+  sku?: string
+  image_url?: string
+  stock_quantity: number // 0 = print-on-demand
+  is_available: boolean
+
+  // Timestamps
+  created_at: string
+  updated_at: string
+}
+
+// Variant option for UI selection
+export type VariantOption = {
+  attribute: 'size' | 'color' | 'material'
+  value: string
+  priceAdjustment: number
+  available: boolean
+}
+
+// Matrix cell for bulk variant creation
+export type VariantMatrixCell = {
+  size?: string
+  color?: string
+  material?: string
+  variantId?: string
+  price?: number
+  exists: boolean
+  is_available?: boolean
 }
 
 export type ShippingAddress = {
