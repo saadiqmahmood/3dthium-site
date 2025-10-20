@@ -76,12 +76,23 @@ export const productsNew = pgTable('products_new', {
 
 export const productVariantsNew = pgTable('product_variants_new', {
   id: uuid('id').defaultRandom().primaryKey(),
-  productId: uuid('product_id'),
-  name: text('name').notNull(),
-  imageUrl: text('image_url'),
+  productId: uuid('product_id').notNull(),
+  
+  // Variant attributes (at least one required)
+  size: varchar('size', { length: 50 }),
+  color: varchar('color', { length: 50 }),
+  material: varchar('material', { length: 50 }),
+  
+  // Pricing
   priceAdjustment: numeric('price_adjustment').default('0').notNull(),
-  inStock: boolean('in_stock').default(true).notNull(),
-  customizable: boolean('customizable').default(false).notNull(),
+  
+  // Optional fields
+  sku: varchar('sku', { length: 100 }).unique(),
+  imageUrl: text('image_url'),
+  stockQuantity: integer('stock_quantity').default(0).notNull(),
+  isAvailable: boolean('is_available').default(true).notNull(),
+  
+  // Timestamps
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
