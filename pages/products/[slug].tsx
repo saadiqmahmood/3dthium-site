@@ -5,6 +5,18 @@ import { useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useCart } from '@/context/CartContext'
 import { ProductVariantNew } from '@/types'
+import { createClient } from '@supabase/supabase-js'
+
+// Server-side client for static generation
+const supabaseServer = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      persistSession: false,
+    },
+  }
+)
 
 // New product type from products_new API
 type ProductNew = {
@@ -18,13 +30,18 @@ type ProductNew = {
   gallery_images: string[]
   customizable: boolean
   attributes: Record<string, unknown>
+  created_at: string
+  updated_at: string
+  categories: {
+    id: string
+    name: string
+    slug: string
+  }[]
   category: {
     id: string
     name: string
     slug: string
   }
-  created_at: string
-  updated_at: string
 }
 
 type ProductDetailPageProps = {
@@ -345,6 +362,7 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
         customizable,
         attributes,
         created_at,
+        updated_at,
         categories!category_id(
           id,
           name,
@@ -383,22 +401,22 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
     // Calculate price range
     let minPrice = product.base_price
     let maxPrice = product.base_price
-    let hasVariants = variants && variants.length > 0
+    const hasVariants = variants && variants.length > 0
 
     if (hasVariants) {
-      const variantPrices = variants.map((v: any) => product.base_price + v.price_adjustment)
+      const variantPrices = variants.map((v: { price_adjustment: number }) => product.base_price + v.price_adjustment)
       minPrice = Math.min(...variantPrices)
       maxPrice = Math.max(...variantPrices)
     }
 
     // Extract unique options for display
-    const uniqueSizes = Array.from(new Set(variants?.map((v: any) => v.size).filter(Boolean) || []))
-    const uniqueColors = Array.from(new Set(variants?.map((v: any) => v.color).filter(Boolean) || []))
-    const uniqueMaterials = Array.from(new Set(variants?.map((v: any) => v.material).filter(Boolean) || []))
+    const uniqueSizes = Array.from(new Set(variants?.map((v: { size?: string }) => v.size).filter(Boolean) || [])) as string[]
+    const uniqueColors = Array.from(new Set(variants?.map((v: { color?: string }) => v.color).filter(Boolean) || [])) as string[]
+    const uniqueMaterials = Array.from(new Set(variants?.map((v: { material?: string }) => v.material).filter(Boolean) || [])) as string[]
 
     return {
       props: {
-        product: { ...product, category: product.categories }, // Flatten category
+        product: { ...product, category: product.categories[0] }, // Flatten category
         variants: variants || [],
         variantOptions: {
           sizes: uniqueSizes,

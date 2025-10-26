@@ -75,8 +75,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       message: 'Product found with category'
     })
 
-  } catch (error: any) {
-    console.error('❌ [TEST API] Unexpected error:', error.message)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred.'
+    console.error('❌ [TEST API] Unexpected error:', errorMessage)
     return res.status(500).json({ error: 'An unexpected error occurred.' })
   }
 }
