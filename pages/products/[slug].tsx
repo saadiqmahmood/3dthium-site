@@ -328,11 +328,27 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
   }
 
   try {
-    // Fetch product data from our new API
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    // Determine the correct base URL based on environment
+    const getBaseUrl = () => {
+      // In production (Vercel), use the Vercel URL
+      if (process.env.VERCEL_URL) {
+        return `https://${process.env.VERCEL_URL}`
+      }
+      // If NEXT_PUBLIC_SITE_URL is set, use it
+      if (process.env.NEXT_PUBLIC_SITE_URL) {
+        return process.env.NEXT_PUBLIC_SITE_URL
+      }
+      // Fallback to localhost for development
+      return 'http://localhost:3000'
+    }
+
+    const baseUrl = getBaseUrl()
+    console.log(`[getStaticProps] Fetching product data from: ${baseUrl}/api/products/${slug}`)
+    
     const response = await fetch(`${baseUrl}/api/products/${slug}`)
 
     if (!response.ok) {
+      console.error(`[getStaticProps] API response not ok: ${response.status} ${response.statusText}`)
       return { notFound: true }
     }
 
