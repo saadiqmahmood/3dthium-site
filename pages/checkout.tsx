@@ -32,11 +32,7 @@ export default function CheckoutPage() {
     email: '',
   })
 
-
-  const subtotal = cart.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  )
+  const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0)
   const shippingCost = selectedRate ? parseFloat(selectedRate.rate) : 0
   const total = subtotal + shippingCost
 
@@ -473,7 +469,8 @@ export default function CheckoutPage() {
               <div>
                 <h3 className="font-semibold text-gray-800">{item.name}</h3>
                 <p className="text-sm text-gray-500">
-                  {[item.size, item.color, item.material].filter(Boolean).join(' • ') || 'Base product'}
+                  {[item.size, item.color, item.material].filter(Boolean).join(' • ') ||
+                    'Base product'}
                 </p>
                 <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
               </div>

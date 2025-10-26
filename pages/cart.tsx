@@ -4,13 +4,9 @@ import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { useCart } from '@/context/CartContext'
 
-
 export default function CartPage() {
   const { cart, removeFromCart, clearCart, updateCartItemQuantity } = useCart()
-  const total = cart.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  )
+  const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0)
   const router = useRouter()
   const { from } = router.query
 
@@ -54,7 +50,8 @@ export default function CartPage() {
               <div>
                 <h3 className="font-semibold text-gray-800">{item.name}</h3>
                 <p className="text-sm text-gray-500">
-                  {[item.size, item.color, item.material].filter(Boolean).join(' • ') || 'Base product'}
+                  {[item.size, item.color, item.material].filter(Boolean).join(' • ') ||
+                    'Base product'}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
                   <button

@@ -172,8 +172,8 @@ export default function Home() {
               What Our <span className="text-yellow-400">Customers</span> Say
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Don&apos;t just take our word for it. Here&apos;s what our satisfied customers have to say about
-              their experience.
+              Don&apos;t just take our word for it. Here&apos;s what our satisfied customers have to
+              say about their experience.
             </p>
           </div>
 
@@ -183,8 +183,8 @@ export default function Home() {
             >
               <div className="text-yellow-400 text-2xl mb-4">⭐⭐⭐⭐⭐</div>
               <p className="text-gray-300 mb-6 text-lg">
-                &quot;Amazing quality and attention to detail! The custom phone case I ordered exceeded
-                my expectations.&quot;
+                &quot;Amazing quality and attention to detail! The custom phone case I ordered
+                exceeded my expectations.&quot;
               </p>
               <div className="font-semibold text-white">- Sarah M.</div>
             </div>
