@@ -374,7 +374,8 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
       .single()
 
     if (productError) {
-      console.error(`[getStaticProps] Supabase error:`, productError)
+      console.error(`[getStaticProps] Supabase error for slug ${slug}:`, productError)
+      console.error(`[getStaticProps] Error details:`, JSON.stringify(productError, null, 2))
       return { notFound: true }
     }
 
@@ -394,7 +395,8 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
       .order('created_at', { ascending: true })
 
     if (variantsError) {
-      console.error(`[getStaticProps] Variants error:`, variantsError)
+      console.error(`[getStaticProps] Variants error for product ${product.id}:`, variantsError)
+      console.error(`[getStaticProps] Variants error details:`, JSON.stringify(variantsError, null, 2))
       return { notFound: true }
     }
 
