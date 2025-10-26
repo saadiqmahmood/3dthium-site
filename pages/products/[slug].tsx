@@ -328,38 +328,88 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
   }
 
   try {
-    // Determine the correct base URL based on environment
-    const getBaseUrl = () => {
-      // In production (Vercel), use the Vercel URL
-      if (process.env.VERCEL_URL) {
-        return `https://${process.env.VERCEL_URL}`
-      }
-      // If NEXT_PUBLIC_SITE_URL is set, use it
-      if (process.env.NEXT_PUBLIC_SITE_URL) {
-        return process.env.NEXT_PUBLIC_SITE_URL
-      }
-      // Fallback to localhost for development
-      return 'http://localhost:3000'
-    }
-
-    const baseUrl = getBaseUrl()
-    console.log(`[getStaticProps] Fetching product data from: ${baseUrl}/api/products/${slug}`)
+    console.log(`[getStaticProps] Fetching product data directly from Supabase for slug: ${slug}`)
     
-    const response = await fetch(`${baseUrl}/api/products/${slug}`)
+    // Use Supabase client directly instead of API call
+    const { data: product, error: productError } = await supabaseServer
+      .from('products_new')
+      .select(`
+        id,
+        name,
+        description,
+        slug,
+        base_price,
+        thumbnail_url,
+        images,
+        gallery_images,
+        customizable,
+        attributes,
+        created_at,
+        categories!category_id(
+          id,
+          name,
+          slug
+        )
+      `)
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single()
 
-    if (!response.ok) {
-      console.error(`[getStaticProps] API response not ok: ${response.status} ${response.statusText}`)
+    if (productError) {
+      console.error(`[getStaticProps] Supabase error:`, productError)
       return { notFound: true }
     }
 
-    const data = await response.json()
+    if (!product) {
+      console.log(`[getStaticProps] Product not found for slug: ${slug}`)
+      return { notFound: true }
+    }
+
+    console.log(`[getStaticProps] Product found: ${product.name}`)
+
+    // Fetch variants for the product
+    const { data: variants, error: variantsError } = await supabaseServer
+      .from('product_variants_new')
+      .select('*')
+      .eq('product_id', product.id)
+      .eq('is_available', true)
+      .order('created_at', { ascending: true })
+
+    if (variantsError) {
+      console.error(`[getStaticProps] Variants error:`, variantsError)
+      return { notFound: true }
+    }
+
+    // Calculate price range
+    let minPrice = product.base_price
+    let maxPrice = product.base_price
+    let hasVariants = variants && variants.length > 0
+
+    if (hasVariants) {
+      const variantPrices = variants.map((v: any) => product.base_price + v.price_adjustment)
+      minPrice = Math.min(...variantPrices)
+      maxPrice = Math.max(...variantPrices)
+    }
+
+    // Extract unique options for display
+    const uniqueSizes = Array.from(new Set(variants?.map((v: any) => v.size).filter(Boolean) || []))
+    const uniqueColors = Array.from(new Set(variants?.map((v: any) => v.color).filter(Boolean) || []))
+    const uniqueMaterials = Array.from(new Set(variants?.map((v: any) => v.material).filter(Boolean) || []))
 
     return {
       props: {
-        product: data.product,
-        variants: data.variants,
-        variantOptions: data.variant_options,
-        priceRange: data.price_range,
+        product: { ...product, category: product.categories }, // Flatten category
+        variants: variants || [],
+        variantOptions: {
+          sizes: uniqueSizes,
+          colors: uniqueColors,
+          materials: uniqueMaterials,
+        },
+        priceRange: {
+          min: minPrice,
+          max: maxPrice,
+          has_variants: hasVariants,
+        },
       },
       revalidate: 60, // Revalidate every minute
     }
