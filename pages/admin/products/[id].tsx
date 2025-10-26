@@ -299,7 +299,6 @@ export default function EditProductPage() {
           <div key={attribute.id}>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {attribute.name} {attribute.required && <span className="text-red-500">*</span>}
-              {attribute.unit && <span className="text-gray-500 text-xs"> ({attribute.unit})</span>}
             </label>
             <input
               type="number"
@@ -633,7 +632,8 @@ export default function EditProductPage() {
           <div className="bg-gray-50 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 text-stone-800">Product Variants</h2>
             <p className="text-stone-800 mb-6">
-              Add size, color, and material variations for this product. Each variant can have its own price adjustment.
+              Add size, color, and material variations for this product. Each variant can have its
+              own price adjustment.
             </p>
             <VariantManager productId={id as string} basePrice={formData.base_price} />
           </div>

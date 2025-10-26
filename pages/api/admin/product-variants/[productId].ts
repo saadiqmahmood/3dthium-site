@@ -1,5 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '@supabase/supabase-js'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 // Admin client with elevated privileges
 const supabaseAdmin = createClient(

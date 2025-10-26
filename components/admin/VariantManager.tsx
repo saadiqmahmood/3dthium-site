@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
-import type { ProductVariantNew } from '@/types'
+import { useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
+import type { ProductVariantNew } from '@/types'
 
 interface VariantManagerProps {
   productId: string
@@ -195,7 +195,9 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Size */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-stone-800">Size (optional)</label>
+              <label className="block text-sm font-medium mb-1 text-stone-800">
+                Size (optional)
+              </label>
               <input
                 type="text"
                 value={formData.size}
@@ -207,7 +209,9 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
 
             {/* Color */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-stone-800">Color (optional)</label>
+              <label className="block text-sm font-medium mb-1 text-stone-800">
+                Color (optional)
+              </label>
               <input
                 type="text"
                 value={formData.color}
@@ -219,7 +223,9 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
 
             {/* Material */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-stone-800">Material (optional)</label>
+              <label className="block text-sm font-medium mb-1 text-stone-800">
+                Material (optional)
+              </label>
               <input
                 type="text"
                 value={formData.material}
@@ -237,7 +243,9 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
                 Price Adjustment (£)
                 <span className="text-stone-700 text-xs ml-2">
                   Base: £{basePrice.toFixed(2)} → Final: £
-                  {calculateFinalPrice(Number.parseFloat(formData.price_adjustment || '0')).toFixed(2)}
+                  {calculateFinalPrice(Number.parseFloat(formData.price_adjustment || '0')).toFixed(
+                    2
+                  )}
                 </span>
               </label>
               <input
@@ -248,7 +256,9 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
                 placeholder="0.00"
                 className="w-full border rounded px-3 py-2 placeholder:text-stone-600"
               />
-              <p className="text-xs text-stone-700 mt-1">Positive = more expensive, negative = cheaper</p>
+              <p className="text-xs text-stone-700 mt-1">
+                Positive = more expensive, negative = cheaper
+              </p>
             </div>
 
             {/* SKU */}
@@ -309,13 +319,25 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
               <thead className="bg-gray-100">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">Size</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">Color</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">Material</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">Adjustment</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">Final Price</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">
+                    Color
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">
+                    Material
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">
+                    Adjustment
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">
+                    Final Price
+                  </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">SKU</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">Status</th>
-                  <th className="px-4 py-3 text-right text-sm font-semibold text-stone-800">Actions</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-right text-sm font-semibold text-stone-800">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -418,7 +440,9 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
                       <>
                         <td className="px-4 py-3 text-sm text-stone-800">{variant.size || '-'}</td>
                         <td className="px-4 py-3 text-sm text-stone-800">{variant.color || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-stone-800">{variant.material || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-stone-800">
+                          {variant.material || '-'}
+                        </td>
                         <td className="px-4 py-3 text-sm text-stone-800">
                           {variant.price_adjustment >= 0 ? '+' : ''}£
                           {variant.price_adjustment.toFixed(2)}
@@ -470,4 +494,3 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
     </div>
   )
 }
-
