@@ -1,5 +1,6 @@
-import { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '@supabase/supabase-js'
+import { NextApiRequest, NextApiResponse } from 'next'
+import { ProductVariantNew } from '@/types'
 
 // Public client for frontend consumption
 const supabase = createClient(
@@ -55,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('✅ [API/products] Products fetched:', products.length)
 
     // Fetch variants for all products
-    const productIds = products.map(p => p.id)
+    const productIds = products.map((p) => p.id)
     const { data: variants, error: variantsError } = await supabase
       .from('product_variants_new')
       .select(`
@@ -79,34 +80,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('✅ [API/products] Variants fetched:', variants?.length || 0)
 
     // Group variants by product_id
-    const variantsByProduct: Record<string, any[]> = {}
+    const variantsByProduct: Record<string, ProductVariantNew[]> = {}
     if (variants) {
       for (const variant of variants) {
         if (!variantsByProduct[variant.product_id]) {
           variantsByProduct[variant.product_id] = []
         }
-        
-        // Calculate final price
-        const product = products.find(p => p.id === variant.product_id)
-        const finalPrice = product ? product.base_price + variant.price_adjustment : 0
-        
-        variantsByProduct[variant.product_id].push({
-          ...variant,
-          final_price: finalPrice
-        })
+
+        variantsByProduct[variant.product_id].push(variant as ProductVariantNew)
       }
     }
 
     // Combine products with their variants
-    const result = products.map(product => {
+    const result = products.map((product) => {
       const productVariants = variantsByProduct[product.id] || []
-      
+
       // Calculate price range
       let minPrice = product.base_price
       let maxPrice = product.base_price
-      
+
       if (productVariants.length > 0) {
-        const prices = productVariants.map(v => v.final_price)
+        const prices = productVariants.map((v) => product.base_price + v.price_adjustment)
         minPrice = Math.min(...prices)
         maxPrice = Math.max(...prices)
       }
@@ -124,9 +118,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         price_range: {
           min: minPrice,
           max: maxPrice,
-          has_variants: productVariants.length > 0
+          has_variants: productVariants.length > 0,
         },
-        created_at: product.created_at
+        created_at: product.created_at,
       }
     })
 
@@ -134,9 +128,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Set cache headers for better performance
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
-    
-    return res.status(200).json({ products: result })
 
+    return res.status(200).json({ products: result })
   } catch (error) {
     console.error('❌ [API/products] Unexpected error:', error)
     return res.status(500).json({ error: 'Internal server error' })

@@ -1,5 +1,5 @@
-import { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '@supabase/supabase-js'
+import { NextApiRequest, NextApiResponse } from 'next'
 
 // Public client for frontend consumption
 const supabase = createClient(
@@ -77,15 +77,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('✅ [API/products/[slug]/variants] Variants fetched:', variants?.length || 0)
 
     // Process variants with final prices
-    const processedVariants = variants?.map(variant => ({
-      ...variant,
-      final_price: product.base_price + variant.price_adjustment
-    })) || []
+    const processedVariants =
+      variants?.map((variant) => ({
+        ...variant,
+        final_price: product.base_price + variant.price_adjustment,
+      })) || []
 
     // Get unique attribute values for variant selectors
-    const sizeOptions = [...new Set(processedVariants.map(v => v.size).filter(Boolean))]
-    const colorOptions = [...new Set(processedVariants.map(v => v.color).filter(Boolean))]
-    const materialOptions = [...new Set(processedVariants.map(v => v.material).filter(Boolean))]
+    const sizeOptions = [...new Set(processedVariants.map((v) => v.size).filter(Boolean))]
+    const colorOptions = [...new Set(processedVariants.map((v) => v.color).filter(Boolean))]
+    const materialOptions = [...new Set(processedVariants.map((v) => v.material).filter(Boolean))]
 
     const result = {
       variants: processedVariants,
@@ -93,17 +94,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       variant_options: {
         sizes: sizeOptions,
         colors: colorOptions,
-        materials: materialOptions
-      }
+        materials: materialOptions,
+      },
     }
 
     console.log('✅ [API/products/[slug]/variants] Returning', processedVariants.length, 'variants')
 
     // Set cache headers for better performance
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
-    
-    return res.status(200).json(result)
 
+    return res.status(200).json(result)
   } catch (error) {
     console.error('❌ [API/products/[slug]/variants] Unexpected error:', error)
     return res.status(500).json({ error: 'Internal server error' })

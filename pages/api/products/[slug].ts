@@ -1,5 +1,5 @@
-import { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '@supabase/supabase-js'
+import { NextApiRequest, NextApiResponse } from 'next'
 
 // Public client for frontend consumption
 const supabase = createClient(
@@ -98,25 +98,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('✅ [API/products/[slug]] Variants fetched:', variants?.length || 0)
 
     // Process variants with final prices
-    const processedVariants = variants?.map(variant => ({
-      ...variant,
-      final_price: product.base_price + variant.price_adjustment
-    })) || []
+    const processedVariants =
+      variants?.map((variant) => ({
+        ...variant,
+        final_price: product.base_price + variant.price_adjustment,
+      })) || []
 
     // Calculate price range
     let minPrice = product.base_price
     let maxPrice = product.base_price
-    
+
     if (processedVariants.length > 0) {
-      const prices = processedVariants.map(v => v.final_price)
+      const prices = processedVariants.map((v) => v.final_price)
       minPrice = Math.min(...prices)
       maxPrice = Math.max(...prices)
     }
 
     // Get unique attribute values for variant selectors
-    const sizeOptions = [...new Set(processedVariants.map(v => v.size).filter(Boolean))]
-    const colorOptions = [...new Set(processedVariants.map(v => v.color).filter(Boolean))]
-    const materialOptions = [...new Set(processedVariants.map(v => v.material).filter(Boolean))]
+    const sizeOptions = [...new Set(processedVariants.map((v) => v.size).filter(Boolean))]
+    const colorOptions = [...new Set(processedVariants.map((v) => v.color).filter(Boolean))]
+    const materialOptions = [...new Set(processedVariants.map((v) => v.material).filter(Boolean))]
 
     const result = {
       product: {
@@ -132,28 +133,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         attributes: product.attributes || {},
         category: product.categories,
         created_at: product.created_at,
-        updated_at: product.updated_at
+        updated_at: product.updated_at,
       },
       variants: processedVariants,
       price_range: {
         min: minPrice,
         max: maxPrice,
-        has_variants: processedVariants.length > 0
+        has_variants: processedVariants.length > 0,
       },
       variant_options: {
         sizes: sizeOptions,
         colors: colorOptions,
-        materials: materialOptions
-      }
+        materials: materialOptions,
+      },
     }
 
-    console.log('✅ [API/products/[slug]] Returning product with', processedVariants.length, 'variants')
+    console.log(
+      '✅ [API/products/[slug]] Returning product with',
+      processedVariants.length,
+      'variants'
+    )
 
     // Set cache headers for better performance
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
-    
-    return res.status(200).json(result)
 
+    return res.status(200).json(result)
   } catch (error) {
     console.error('❌ [API/products/[slug]] Unexpected error:', error)
     return res.status(500).json({ error: 'Internal server error' })
