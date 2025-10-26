@@ -31,7 +31,7 @@ type Props = {
 
 export default function ProductCard({ product, variants }: Props) {
   // Calculate display price
-  const displayPrice = product.price_range.has_variants 
+  const displayPrice = product.price_range.has_variants
     ? product.price_range.min === product.price_range.max
       ? `£${product.price_range.min.toFixed(2)}`
       : `£${product.price_range.min.toFixed(2)} - £${product.price_range.max.toFixed(2)}`
@@ -39,9 +39,10 @@ export default function ProductCard({ product, variants }: Props) {
 
   // Count available variants
   const variantCount = variants.length
-  const variantText = variantCount > 0 
-    ? `${variantCount} variant${variantCount > 1 ? 's' : ''} available`
-    : 'No variants'
+  const variantText =
+    variantCount > 0
+      ? `${variantCount} variant${variantCount > 1 ? 's' : ''} available`
+      : 'No variants'
 
   return (
     <Link href={`/products/${product.slug}`} className="block">
@@ -58,17 +59,13 @@ export default function ProductCard({ product, variants }: Props) {
         <div className="p-4">
           <h3 className="text-lg font-semibold text-gray-800 mb-1">{product.name}</h3>
           <p className="text-sm text-gray-500">{product.category.name}</p>
-          
+
           {/* Customizable badge */}
-          {product.customizable && (
-            <p className="text-xs text-blue-500 mt-1">Customizable</p>
-          )}
-          
+          {product.customizable && <p className="text-xs text-blue-500 mt-1">Customizable</p>}
+
           {/* Price display */}
-          <p className="text-md text-gray-800 mt-2 font-semibold">
-            {displayPrice}
-          </p>
-          
+          <p className="text-md text-gray-800 mt-2 font-semibold">{displayPrice}</p>
+
           {/* Variant info */}
           {product.price_range.has_variants && (
             <p className="text-xs text-gray-500 mt-1">{variantText}</p>

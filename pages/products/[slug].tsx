@@ -1,7 +1,7 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useCart } from '@/context/CartContext'
 import { ProductVariantNew } from '@/types'
@@ -17,7 +17,7 @@ type ProductNew = {
   images: string[]
   gallery_images: string[]
   customizable: boolean
-  attributes: Record<string, any>
+  attributes: Record<string, unknown>
   category: {
     id: string
     name: string
@@ -42,15 +42,15 @@ type ProductDetailPageProps = {
   }
 }
 
-const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ 
-  product, 
-  variants, 
-  variantOptions, 
-  priceRange 
+const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
+  product,
+  variants,
+  variantOptions,
+  priceRange,
 }) => {
   const { addToCart } = useCart()
   const router = useRouter()
-  
+
   // Variant selection state
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<string | null>(null)
@@ -64,10 +64,11 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
     if (!variants.length) return
 
     // Find matching variant
-    const matchingVariant = variants.find(variant => 
-      variant.size === selectedSize &&
-      variant.color === selectedColor &&
-      variant.material === selectedMaterial
+    const matchingVariant = variants.find(
+      (variant) =>
+        variant.size === selectedSize &&
+        variant.color === selectedColor &&
+        variant.material === selectedMaterial
     )
 
     setSelectedVariant(matchingVariant || null)
@@ -82,7 +83,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   }
 
   // Calculate display price
-  const displayPrice = selectedVariant 
+  const displayPrice = selectedVariant
     ? product.base_price + selectedVariant.price_adjustment
     : product.base_price
 
@@ -104,7 +105,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
       material: selectedMaterial,
       price: displayPrice,
       name: product.name,
-      image_url: displayImage
+      image_url: displayImage,
     }
 
     addToCart(cartItem)
@@ -145,7 +146,9 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                     className="w-full h-20 object-cover rounded cursor-pointer hover:opacity-75"
                     width={100}
                     height={100}
-                    onClick={() => {/* TODO: Implement gallery modal */}}
+                    onClick={() => {
+                      /* TODO: Implement gallery modal */
+                    }}
                   />
                 ))}
               </div>
@@ -156,14 +159,10 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
         {/* Product Details */}
         <div className="space-y-6">
           {/* Category */}
-          <div className="text-sm text-gray-500">
-            {product.category.name}
-          </div>
+          <div className="text-sm text-gray-500">{product.category.name}</div>
 
           {/* Description */}
-          <div className="text-gray-700 leading-relaxed">
-            {product.description}
-          </div>
+          <div className="text-gray-700 leading-relaxed">{product.description}</div>
 
           {/* Variant Selectors */}
           {variants.length > 0 && (
@@ -272,17 +271,15 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
             className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
             disabled={variants.length > 0 && !selectedVariant}
           >
-            {variants.length > 0 && !selectedVariant 
-              ? 'Select Options' 
-              : 'Add to Cart'
-            }
+            {variants.length > 0 && !selectedVariant ? 'Select Options' : 'Add to Cart'}
           </button>
 
           {/* Customizable Badge */}
           {product.customizable && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-blue-800 text-sm">
-                <span className="font-semibold">Customizable:</span> This product can be personalized with your own text or design.
+                <span className="font-semibold">Customizable:</span> This product can be
+                personalized with your own text or design.
               </p>
             </div>
           )}
@@ -291,7 +288,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
           {selectedVariant && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
               <p className="text-gray-700 text-sm">
-                <span className="font-semibold">Selected:</span> 
+                <span className="font-semibold">Selected:</span>
                 {selectedVariant.size && ` ${selectedVariant.size}`}
                 {selectedVariant.color && ` ${selectedVariant.color}`}
                 {selectedVariant.material && ` ${selectedVariant.material}`}
@@ -319,7 +316,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   // In production, you might want to pre-generate popular product pages
   return {
     paths: [],
-    fallback: 'blocking'
+    fallback: 'blocking',
   }
 }
 
@@ -334,7 +331,7 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
     // Fetch product data from our new API
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
     const response = await fetch(`${baseUrl}/api/products/${slug}`)
-    
+
     if (!response.ok) {
       return { notFound: true }
     }
@@ -346,9 +343,9 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
         product: data.product,
         variants: data.variants,
         variantOptions: data.variant_options,
-        priceRange: data.price_range
+        priceRange: data.price_range,
       },
-      revalidate: 60 // Revalidate every minute
+      revalidate: 60, // Revalidate every minute
     }
   } catch (error) {
     console.error('Error fetching product:', error)

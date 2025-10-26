@@ -17,7 +17,11 @@ type CartContextType = {
   addToCart: (item: CartItem) => void
   removeFromCart: (productId: string, variantId?: string) => void
   clearCart: () => void
-  updateCartItemQuantity: (productId: string, variantId: string | undefined, quantity: number) => void
+  updateCartItemQuantity: (
+    productId: string,
+    variantId: string | undefined,
+    quantity: number
+  ) => void
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -45,7 +49,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCart((prev) => {
       const existing = prev.find(
         (cartItem) =>
-          cartItem.product_id === item.product_id && 
+          cartItem.product_id === item.product_id &&
           cartItem.variant_id === item.variant_id &&
           cartItem.size === item.size &&
           cartItem.color === item.color &&
@@ -53,7 +57,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       )
       if (existing) {
         return prev.map((cartItem) =>
-          cartItem.product_id === item.product_id && 
+          cartItem.product_id === item.product_id &&
           cartItem.variant_id === item.variant_id &&
           cartItem.size === item.size &&
           cartItem.color === item.color &&
@@ -68,10 +72,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const removeFromCart = useCallback((productId: string, variantId?: string) => {
     setCart((prev) =>
-      prev.filter(
-        (item) =>
-          !(item.product_id === productId && item.variant_id === variantId)
-      )
+      prev.filter((item) => !(item.product_id === productId && item.variant_id === variantId))
     )
   }, [])
 
@@ -82,8 +83,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       setCart((prev) => {
         if (quantity <= 0) {
           return prev.filter(
-            (item) =>
-              !(item.product_id === productId && item.variant_id === variantId)
+            (item) => !(item.product_id === productId && item.variant_id === variantId)
           )
         }
         return prev.map((item) =>

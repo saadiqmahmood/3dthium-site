@@ -4,28 +4,11 @@ import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { useCart } from '@/context/CartContext'
 
-// Helper function for dynamic price calculation
-function getDynamicPrice(variant: { color: string }, size: string): number {
-  let basePrice = 16.99
-  if (variant.color && variant.color.includes('And')) {
-    basePrice = 17.99
-  }
-  if (size === '210mm') {
-    return basePrice - 4
-  } else if (size === '180mm') {
-    return basePrice - 7
-  } else if (size === '150mm') {
-    return basePrice - 10
-  } else if (size === '240mm') {
-    return basePrice
-  }
-  return basePrice
-}
 
 export default function CartPage() {
   const { cart, removeFromCart, clearCart, updateCartItemQuantity } = useCart()
   const total = cart.reduce(
-    (acc, item) => acc + getDynamicPrice(item.variant, item.size) * item.quantity,
+    (acc, item) => acc + item.price * item.quantity,
     0
   )
   const router = useRouter()
@@ -57,30 +40,30 @@ export default function CartPage() {
       <div className="space-y-6">
         {cart.map((item) => (
           <div
-            key={item.product.id + '-' + item.variant.id}
+            key={item.product_id + '-' + (item.variant_id || 'base')}
             className="flex items-center justify-between border-b pb-4"
           >
             <div className="flex items-center gap-4">
               <Image
                 width={100}
                 height={100}
-                src={item.variant.image_url}
-                alt={item.product.title + ' - ' + item.variant.color}
+                src={item.image_url}
+                alt={item.name}
                 className="w-20 h-20 object-cover rounded"
               />
               <div>
-                <h3 className="font-semibold text-gray-800">{item.product.title}</h3>
-                <p className="text-sm text-gray-500">Size: {item.size}</p>
-                <p className="text-sm text-gray-500">Color: {item.variant.color}</p>
+                <h3 className="font-semibold text-gray-800">{item.name}</h3>
+                <p className="text-sm text-gray-500">
+                  {[item.size, item.color, item.material].filter(Boolean).join(' • ') || 'Base product'}
+                </p>
                 <div className="flex items-center gap-2 mt-1">
                   <button
                     aria-label="Decrease quantity"
                     className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-gray-700"
                     onClick={() =>
                       updateCartItemQuantity(
-                        item.product.id,
-                        item.variant.id,
-                        item.size,
+                        item.product_id,
+                        item.variant_id || undefined,
                         item.quantity - 1
                       )
                     }
@@ -96,9 +79,8 @@ export default function CartPage() {
                     className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-gray-700"
                     onClick={() =>
                       updateCartItemQuantity(
-                        item.product.id,
-                        item.variant.id,
-                        item.size,
+                        item.product_id,
+                        item.variant_id || undefined,
                         item.quantity + 1
                       )
                     }
@@ -106,17 +88,14 @@ export default function CartPage() {
                     +
                   </button>
                 </div>
-                <p className="text-sm text-gray-500">
-                  Customizable: {item.variant.customizable ? 'Yes' : 'No'}
-                </p>
               </div>
             </div>
             <div className="text-right">
               <p className="text-gray-700 font-medium">
-                £{(getDynamicPrice(item.variant, item.size) * item.quantity).toFixed(2)}
+                £{(item.price * item.quantity).toFixed(2)}
               </p>
               <button
-                onClick={() => removeFromCart(item.product.id, item.variant.id, item.size)}
+                onClick={() => removeFromCart(item.product_id, item.variant_id || undefined)}
                 className="text-red-500 text-sm hover:underline mt-1"
               >
                 Remove

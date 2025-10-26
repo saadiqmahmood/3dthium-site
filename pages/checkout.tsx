@@ -32,26 +32,9 @@ export default function CheckoutPage() {
     email: '',
   })
 
-  // Helper function for dynamic price calculation
-  function getDynamicPrice(variant: { color: string }, size: string): number {
-    let basePrice = 16.99
-    if (variant.color && variant.color.includes('And')) {
-      basePrice = 17.99
-    }
-    if (size === '210mm') {
-      return basePrice - 4
-    } else if (size === '180mm') {
-      return basePrice - 7
-    } else if (size === '150mm') {
-      return basePrice - 10
-    } else if (size === '240mm') {
-      return basePrice
-    }
-    return basePrice
-  }
 
   const subtotal = cart.reduce(
-    (acc, item) => acc + getDynamicPrice(item.variant, item.size) * item.quantity,
+    (acc, item) => acc + item.price * item.quantity,
     0
   )
   const shippingCost = selectedRate ? parseFloat(selectedRate.rate) : 0
@@ -477,28 +460,26 @@ export default function CheckoutPage() {
         <div className="space-y-6">
           {cart.map((item) => (
             <div
-              key={item.product.id + '-' + item.variant.id}
+              key={item.product_id + '-' + (item.variant_id || 'base')}
               className="flex items-center gap-4 border-b pb-6"
             >
               <Image
                 width={80}
                 height={80}
-                src={item.variant.image_url}
-                alt={item.product.title + ' - ' + item.variant.color}
+                src={item.image_url}
+                alt={item.name}
                 className="w-16 h-16 object-cover rounded"
               />
               <div>
-                <h3 className="font-semibold text-gray-800">{item.product.title}</h3>
-                <p className="text-sm text-gray-500">Size: {item.size}</p>
-                <p className="text-sm text-gray-500">Color: {item.variant.color}</p>
-                <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                <h3 className="font-semibold text-gray-800">{item.name}</h3>
                 <p className="text-sm text-gray-500">
-                  Customizable: {item.variant.customizable ? 'Yes' : 'No'}
+                  {[item.size, item.color, item.material].filter(Boolean).join(' • ') || 'Base product'}
                 </p>
+                <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
               </div>
               <div className="ml-auto text-right">
                 <p className="text-gray-700 font-medium">
-                  £{(getDynamicPrice(item.variant, item.size) * item.quantity).toFixed(2)}
+                  £{(item.price * item.quantity).toFixed(2)}
                 </p>
               </div>
             </div>
