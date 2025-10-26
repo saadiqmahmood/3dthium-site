@@ -385,6 +385,7 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
         attributes,
         created_at,
         updated_at,
+        category_id,
         categories!category_id(
           id,
           name,
@@ -434,10 +435,16 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
     const uniqueMaterials = Array.from(new Set(variants?.map((v: { material?: string }) => v.material).filter(Boolean) || [])) as string[]
 
     console.log(`[getStaticProps] Returning data for: ${product.name}`)
+    console.log(`[getStaticProps] Product categories:`, product.categories)
+
+    // Handle category data safely
+    const categoryData = product.categories && Array.isArray(product.categories) && product.categories.length > 0 
+      ? product.categories[0] 
+      : { id: null, name: 'Uncategorized', slug: 'uncategorized' }
 
     return {
       props: {
-        product: { ...product, category: product.categories[0] }, // Flatten category
+        product: { ...product, category: categoryData }, // Flatten category
         variants: variants || [],
         variantOptions: {
           sizes: uniqueSizes,
