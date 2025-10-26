@@ -14,6 +14,9 @@ export default function Navbar() {
   const { user, isAdmin } = useAuth()
   const isAccountPage = router.pathname.startsWith('/account')
 
+  // Check if current page has a colorful hero section
+  const hasColorfulHero = router.pathname === '/' || router.pathname === '/products'
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -36,17 +39,26 @@ export default function Navbar() {
   }, [totalItems])
 
   const CartIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-6 h-6 fill-gray-600">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 32 32"
+      className={`w-6 h-6 ${hasColorfulHero ? 'fill-white' : 'fill-gray-600'}`}
+    >
       <path d="M29.74 8.32A1 1 0 0 0 29 8H13a1 1 0 0 0 0 2h14.91l-.81 9.48a1.87 1.87 0 0 1-2 1.52H12.88a1.87 1.87 0 0 1-2-1.52L10 8.92v-.16L9.33 6.2A3.89 3.89 0 0 0 7 3.52L3.37 2.07a1 1 0 0 0-.74 1.86l3.62 1.45a1.89 1.89 0 0 1 1.14 1.3L8 9.16l.9 10.49a3.87 3.87 0 0 0 4 3.35h.1v2.18a3 3 0 1 0 2 0V23h8v2.18a3 3 0 1 0 2 0V23h.12a3.87 3.87 0 0 0 4-3.35L30 9.08a1 1 0 0 0-.26-.76zM14 29a1 1 0 1 1 1-1 1 1 0 0 1-1 1zm10 0a1 1 0 1 1 1-1 1 1 0 0 1-1 1z" />
       <path d="M15 18v-5a1 1 0 0 0-2 0v5a1 1 0 0 0 2 0zM20 18v-5a1 1 0 0 0-2 0v5a1 1 0 0 0 2 0zM25 18v-5a1 1 0 0 0-2 0v5a1 1 0 0 0 2 0z" />
     </svg>
   )
   return (
     <nav
-      className={`${isAccountPage ? 'fixed top-0 left-0 w-full z-50' : ''} bg-white px-6 py-4 flex flex-col md:flex-row md:justify-between md:items-center`}
+      className={`${isAccountPage ? 'fixed top-0 left-0 w-full z-50' : ''} ${
+        hasColorfulHero ? 'absolute top-0 left-0 w-full z-50 bg-transparent' : 'bg-white'
+      } px-6 py-4 flex flex-col md:flex-row md:justify-between md:items-center transition-all duration-300`}
     >
-      <div className="flex justify-between items-center w-full">
-        <Link href="/" className="text-4xl pl-5 font-bold text-blue-500">
+      <div className="flex justify-between items-center w-full relative z-10">
+        <Link
+          href="/"
+          className={`text-4xl pl-5 font-bold ${hasColorfulHero ? 'text-white' : 'text-blue-500'}`}
+        >
           3Dthium
         </Link>
 
@@ -82,7 +94,9 @@ export default function Navbar() {
                             ${
                               isOpen
                                 ? 'bg-blue-500 text-white'
-                                : 'text-gray-700 hover:text-blue-500 hover:bg-blue-50 active:bg-blue-100'
+                                : hasColorfulHero
+                                  ? 'text-white hover:text-blue-300 hover:bg-white/10'
+                                  : 'text-gray-700 hover:text-blue-500 hover:bg-blue-50 active:bg-blue-100'
                             }`}
             aria-label="Toggle Menu"
           >
@@ -99,26 +113,45 @@ export default function Navbar() {
           </button>
         </div>
       </div>
-      <div className="hidden md:flex md:flex-row md:space-x-7 pr-20 text-sm font-medium text-gray-600 items-center">
-        <Link href="/" className="text-base hover:text-stone-800">
+      <div
+        className={`hidden md:flex md:flex-row md:space-x-7 pr-20 text-sm font-medium items-center ${
+          hasColorfulHero ? 'text-white' : 'text-gray-600'
+        }`}
+      >
+        <Link
+          href="/"
+          className={`text-base ${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-stone-800'}`}
+        >
           Home
         </Link>
-        <Link href="/products" className="text-base hover:text-stone-800">
+        <Link
+          href="/products"
+          className={`text-base ${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-stone-800'}`}
+        >
           Shop
         </Link>
-        <Link href="/custom-order" className="text-base hover:text-stone-800 whitespace-nowrap">
+        <Link
+          href="/custom-order"
+          className={`text-base whitespace-nowrap ${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-stone-800'}`}
+        >
           Custom Order
         </Link>
-        <Link href="/about" className="text-base hover:text-stone-800">
+        <Link
+          href="/about"
+          className={`text-base ${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-stone-800'}`}
+        >
           About
         </Link>
-        <Link href="/contact" className="text-base hover:text-stone-800">
+        <Link
+          href="/contact"
+          className={`text-base ${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-stone-800'}`}
+        >
           Contact
         </Link>
         {!isCartEmpty ? (
           <Link
             href={{ pathname: '/cart', query: { from: router.asPath } }}
-            className="hover:text-blue-600 hidden md:block"
+            className={`hidden md:block ${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-blue-600'}`}
           >
             <div className="relative w-6 h-6">
               <CartIcon />
@@ -140,19 +173,25 @@ export default function Navbar() {
           </div>
         )}
         {!user ? (
-          <Link href="/auth" className="text-sm font-medium text-blue-600 hover:underline">
+          <Link
+            href="/auth"
+            className={`text-sm font-medium ${hasColorfulHero ? 'text-white hover:text-blue-300 hover:underline' : 'text-blue-600 hover:underline'}`}
+          >
             Login
           </Link>
         ) : (
           <>
             <Link
               href="/account"
-              className="text-sm font-medium text-stone-700 hover:text-blue-500"
+              className={`text-sm font-medium ${hasColorfulHero ? 'text-white hover:text-blue-300' : 'text-stone-700 hover:text-blue-500'}`}
             >
               My Account
             </Link>
             {isAdmin && (
-              <Link href="/admin" className="text-sm font-medium text-blue-700 hover:text-blue-900">
+              <Link
+                href="/admin"
+                className={`text-sm font-medium ${hasColorfulHero ? 'text-white hover:text-blue-300' : 'text-blue-700 hover:text-blue-900'}`}
+              >
                 Admin
               </Link>
             )}
@@ -162,14 +201,31 @@ export default function Navbar() {
         {/* Privacy Policy link removed from desktop */}
       </div>
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setIsOpen(false)}>
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-all duration-300"
+          onClick={() => setIsOpen(false)}
+          style={{
+            animation: 'fadeIn 0.3s ease-out',
+          }}
+        >
           <div
-            className="bg-white w-4/5 h-full p-6 shadow-lg flex flex-col gap-4"
+            className={`${
+              hasColorfulHero
+                ? 'bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900'
+                : 'bg-white'
+            } w-4/5 h-full p-6 shadow-2xl flex flex-col gap-4 transition-all duration-300 transform`}
             onClick={(e) => e.stopPropagation()}
+            style={{
+              animation: 'slideInLeft 0.4s ease-out',
+            }}
           >
             <button
               onClick={() => setIsOpen(false)}
-              className="self-end text-gray-600 hover:text-blue-500 hover:bg-blue-50 active:bg-blue-100 p-2 rounded transition"
+              className={`self-end p-3 rounded-full transition-all duration-200 hover:scale-110 ${
+                hasColorfulHero
+                  ? 'text-white hover:text-blue-300 hover:bg-white/10'
+                  : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
+              }`}
               aria-label="Close Menu"
             >
               <svg
@@ -183,16 +239,53 @@ export default function Navbar() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <Link href="/" className="text-4xl font-bold text-blue-500">
+            <Link
+              href="/"
+              className={`text-4xl font-bold ${hasColorfulHero ? 'text-white' : 'text-blue-500'}`}
+            >
               3Dthium
             </Link>
-            <div className="mt-6 flex flex-col divide-y divide-gray-200">
+
+            {/* Cart Section */}
+            {!isCartEmpty && (
+              <div
+                className={`mt-4 p-4 rounded-lg ${hasColorfulHero ? 'bg-white/10' : 'bg-gray-50'}`}
+              >
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`text-sm font-medium ${hasColorfulHero ? 'text-white' : 'text-gray-700'}`}
+                  >
+                    Cart ({totalItems} item{totalItems > 1 ? 's' : ''})
+                  </span>
+                  <Link
+                    href={{ pathname: '/cart', query: { from: router.asPath } }}
+                    className={`text-sm font-semibold px-3 py-1 rounded-full transition-all duration-200 hover:scale-105 ${
+                      hasColorfulHero
+                        ? 'bg-white text-slate-900 hover:bg-white/90'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    View Cart
+                  </Link>
+                </div>
+              </div>
+            )}
+            <div
+              className={`mt-8 flex flex-col space-y-2 ${
+                hasColorfulHero ? 'divide-y divide-white/20' : 'divide-y divide-gray-200'
+              }`}
+            >
               <button
                 onClick={() => {
                   setTimeout(() => setIsOpen(false), 250)
                   router.push('/')
                 }}
-                className="text-base py-3 font-medium text-stone-800 hover:text-gray-600 text-left"
+                className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
+                  hasColorfulHero
+                    ? 'text-white hover:text-blue-300 hover:bg-white/10'
+                    : 'text-stone-800 hover:text-gray-600 hover:bg-gray-50'
+                }`}
               >
                 Home
               </button>
@@ -202,7 +295,11 @@ export default function Navbar() {
                   setTimeout(() => setIsOpen(false), 250)
                   router.push('/products')
                 }}
-                className="text-base py-3 font-medium text-stone-800 hover:text-gray-600 text-left"
+                className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
+                  hasColorfulHero
+                    ? 'text-white hover:text-blue-300 hover:bg-white/10'
+                    : 'text-stone-800 hover:text-gray-600 hover:bg-gray-50'
+                }`}
               >
                 Shop
               </button>
@@ -212,7 +309,11 @@ export default function Navbar() {
                   setTimeout(() => setIsOpen(false), 250)
                   router.push('/custom-order')
                 }}
-                className="text-base py-3 font-medium text-stone-800 hover:text-gray-600 text-left"
+                className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
+                  hasColorfulHero
+                    ? 'text-white hover:text-blue-300 hover:bg-white/10'
+                    : 'text-stone-800 hover:text-gray-600 hover:bg-gray-50'
+                }`}
               >
                 Custom Order
               </button>
@@ -222,7 +323,11 @@ export default function Navbar() {
                   setTimeout(() => setIsOpen(false), 250)
                   router.push('/about')
                 }}
-                className="text-base py-3 font-medium text-stone-800 hover:text-gray-600 text-left"
+                className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
+                  hasColorfulHero
+                    ? 'text-white hover:text-blue-300 hover:bg-white/10'
+                    : 'text-stone-800 hover:text-gray-600 hover:bg-gray-50'
+                }`}
               >
                 About
               </button>
@@ -232,7 +337,11 @@ export default function Navbar() {
                   setTimeout(() => setIsOpen(false), 250)
                   router.push('/contact')
                 }}
-                className="text-base py-3 font-medium text-stone-800 hover:text-gray-600 text-left"
+                className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
+                  hasColorfulHero
+                    ? 'text-white hover:text-blue-300 hover:bg-white/10'
+                    : 'text-stone-800 hover:text-gray-600 hover:bg-gray-50'
+                }`}
               >
                 Contact
               </button>
@@ -253,7 +362,11 @@ export default function Navbar() {
                       setTimeout(() => setIsOpen(false), 250)
                       router.push('/account')
                     }}
-                    className="text-base py-3 font-medium text-stone-700 hover:text-blue-500 text-left"
+                    className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
+                      hasColorfulHero
+                        ? 'text-white hover:text-blue-300 hover:bg-white/10'
+                        : 'text-stone-700 hover:text-blue-500 hover:bg-gray-50'
+                    }`}
                   >
                     My Account
                   </button>
@@ -263,7 +376,11 @@ export default function Navbar() {
                         setTimeout(() => setIsOpen(false), 250)
                         router.push('/admin')
                       }}
-                      className="text-base py-3 font-medium text-blue-700 hover:text-blue-900 text-left"
+                      className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
+                        hasColorfulHero
+                          ? 'text-white hover:text-blue-300 hover:bg-white/10'
+                          : 'text-blue-700 hover:text-blue-900 hover:bg-blue-50'
+                      }`}
                     >
                       Admin
                     </button>
@@ -276,7 +393,11 @@ export default function Navbar() {
                   setTimeout(() => setIsOpen(false), 250)
                   router.push('/privacy')
                 }}
-                className="text-base py-3 font-medium text-blue-600 hover:underline text-left"
+                className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
+                  hasColorfulHero
+                    ? 'text-white hover:text-blue-300 hover:bg-white/10'
+                    : 'text-blue-600 hover:text-blue-800 hover:bg-blue-50'
+                }`}
               >
                 Privacy Policy
               </button>
