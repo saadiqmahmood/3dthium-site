@@ -345,9 +345,31 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
   }
 
   try {
-    console.log(`[getStaticProps] Fetching product data directly from Supabase for slug: ${slug}`)
+    console.log(`[getStaticProps] Starting for slug: ${slug}`)
+    console.log(`[getStaticProps] Supabase URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL}`)
+    console.log(`[getStaticProps] Anon key exists: ${!!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`)
     
-    // Use Supabase client directly instead of API call
+    // Test basic connection first
+    const { data: testData, error: testError } = await supabaseServer
+      .from('products_new')
+      .select('id, name, slug')
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single()
+
+    if (testError) {
+      console.error(`[getStaticProps] Basic query error:`, testError)
+      return { notFound: true }
+    }
+
+    if (!testData) {
+      console.log(`[getStaticProps] Product not found for slug: ${slug}`)
+      return { notFound: true }
+    }
+
+    console.log(`[getStaticProps] Basic query successful for: ${testData.name}`)
+
+    // Now try the full query
     const { data: product, error: productError } = await supabaseServer
       .from('products_new')
       .select(`
@@ -374,19 +396,13 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
       .single()
 
     if (productError) {
-      console.error(`[getStaticProps] Supabase error for slug ${slug}:`, productError)
-      console.error(`[getStaticProps] Error details:`, JSON.stringify(productError, null, 2))
+      console.error(`[getStaticProps] Full query error:`, productError)
       return { notFound: true }
     }
 
-    if (!product) {
-      console.log(`[getStaticProps] Product not found for slug: ${slug}`)
-      return { notFound: true }
-    }
+    console.log(`[getStaticProps] Full query successful for: ${product.name}`)
 
-    console.log(`[getStaticProps] Product found: ${product.name}`)
-
-    // Fetch variants for the product
+    // Fetch variants
     const { data: variants, error: variantsError } = await supabaseServer
       .from('product_variants_new')
       .select('*')
@@ -395,10 +411,11 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
       .order('created_at', { ascending: true })
 
     if (variantsError) {
-      console.error(`[getStaticProps] Variants error for product ${product.id}:`, variantsError)
-      console.error(`[getStaticProps] Variants error details:`, JSON.stringify(variantsError, null, 2))
-      return { notFound: true }
+      console.error(`[getStaticProps] Variants error:`, variantsError)
+      // Don't return notFound for variants error, just use empty array
     }
+
+    console.log(`[getStaticProps] Variants query completed, found: ${variants?.length || 0} variants`)
 
     // Calculate price range
     let minPrice = product.base_price
@@ -415,6 +432,8 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
     const uniqueSizes = Array.from(new Set(variants?.map((v: { size?: string }) => v.size).filter(Boolean) || [])) as string[]
     const uniqueColors = Array.from(new Set(variants?.map((v: { color?: string }) => v.color).filter(Boolean) || [])) as string[]
     const uniqueMaterials = Array.from(new Set(variants?.map((v: { material?: string }) => v.material).filter(Boolean) || [])) as string[]
+
+    console.log(`[getStaticProps] Returning data for: ${product.name}`)
 
     return {
       props: {
