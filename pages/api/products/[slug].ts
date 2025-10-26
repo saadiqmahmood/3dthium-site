@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         attributes,
         created_at,
         updated_at,
-        categories!inner(
+        categories!category_id(
           id,
           name,
           slug

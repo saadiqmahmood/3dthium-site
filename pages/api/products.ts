@@ -35,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         is_active,
         customizable,
         created_at,
-        categories!inner(
+        categories!category_id(
           name,
           slug
         )
