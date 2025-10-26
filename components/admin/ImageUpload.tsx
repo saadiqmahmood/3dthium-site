@@ -97,15 +97,18 @@ export default function ImageUpload({
     }
   }, [])
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setDragActive(false)
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileUpload(e.dataTransfer.files)
-    }
-  }, [handleFileUpload])
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFileUpload(e.dataTransfer.files)
+      }
+    },
+    [handleFileUpload]
+  )
 
   const removeImage = (index: number) => {
     const updatedImages = images.filter((_, i) => i !== index)

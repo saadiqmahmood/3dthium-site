@@ -329,7 +329,9 @@ export default function ImageManager({
               />
             </svg>
             <p className="mt-2 text-sm text-gray-600">No images uploaded yet</p>
-            <p className="text-xs text-gray-500">Click &quot;Upload Images&quot; to add product photos</p>
+            <p className="text-xs text-gray-500">
+              Click &quot;Upload Images&quot; to add product photos
+            </p>
           </div>
         )}
       </div>
