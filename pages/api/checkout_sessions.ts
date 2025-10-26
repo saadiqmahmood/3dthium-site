@@ -12,44 +12,16 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-interface Product {
-  id: string
-  title: string
-  // add other fields as needed
-}
-
-interface Variant {
-  id: string
-  color: string
-  price: number
-  image_url: string
-  customizable?: boolean
-  // add other fields as needed
-}
-
 interface CartItem {
-  product: Product
-  variant: Variant
+  product_id: string
+  variant_id?: string | null
   quantity: number
-  size: string
-}
-
-// Helper function for dynamic price calculation
-function getDynamicPrice(variant: { color: string }, size: string): number {
-  let basePrice = 16.99
-  if (variant.color && variant.color.includes('And')) {
-    basePrice = 17.99
-  }
-  if (size === '210mm') {
-    return basePrice - 4
-  } else if (size === '180mm') {
-    return basePrice - 7
-  } else if (size === '150mm') {
-    return basePrice - 10
-  } else if (size === '240mm') {
-    return basePrice
-  }
-  return basePrice
+  size?: string | null
+  color?: string | null
+  material?: string | null
+  price: number
+  name: string
+  image_url: string
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -123,11 +95,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       price_data: {
         currency: 'gbp',
         product_data: {
-          name: `${item.product.title} - ${item.variant.color}`,
-          description: `Size: ${item.size}, Customizable: ${item.variant.customizable ? 'Yes' : 'No'}`,
-          images: [item.variant.image_url],
+          name: item.name,
+          description: `Size: ${item.size || 'N/A'}, Color: ${item.color || 'N/A'}, Material: ${item.material || 'N/A'}`,
+          images: [item.image_url],
         },
-        unit_amount: Math.round(getDynamicPrice(item.variant, item.size) * 100), // Use dynamic price
+        unit_amount: Math.round(item.price * 100), // Use stored price
       },
       quantity: item.quantity,
     }))
