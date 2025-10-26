@@ -1,37 +1,77 @@
-import { createClient } from '@supabase/supabase-js'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useCart } from '@/context/CartContext'
-import { Product, ProductVariant } from '@/types'
+import { ProductVariantNew } from '@/types'
 
-// Server-side client for static generation
-const supabaseServer = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      persistSession: false,
-    },
+// New product type from products_new API
+type ProductNew = {
+  id: string
+  name: string
+  description: string
+  slug: string
+  base_price: number
+  thumbnail_url: string
+  images: string[]
+  gallery_images: string[]
+  customizable: boolean
+  attributes: Record<string, any>
+  category: {
+    id: string
+    name: string
+    slug: string
   }
-)
-
-type ProductDetailPageProps = {
-  product: Product | null
-  variants: ProductVariant[]
+  created_at: string
+  updated_at: string
 }
 
-const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants }) => {
-  const { addToCart, clearCart } = useCart()
+type ProductDetailPageProps = {
+  product: ProductNew | null
+  variants: ProductVariantNew[]
+  variantOptions: {
+    sizes: string[]
+    colors: string[]
+    materials: string[]
+  }
+  priceRange: {
+    min: number
+    max: number
+    has_variants: boolean
+  }
+}
+
+const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ 
+  product, 
+  variants, 
+  variantOptions, 
+  priceRange 
+}) => {
+  const { addToCart } = useCart()
   const router = useRouter()
-  // null means show thumbnail, otherwise show selected variant
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
+  
+  // Variant selection state
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
-  const [showMessage, setShowMessage] = useState(false)
-  const [buttonClicked, setButtonClicked] = useState(false)
+  const [selectedColor, setSelectedColor] = useState<string | null>(null)
+  const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null)
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariantNew | null>(null)
+  const [quantity, setQuantity] = useState(1)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
+
+  // Update selected variant when selections change
+  useEffect(() => {
+    if (!variants.length) return
+
+    // Find matching variant
+    const matchingVariant = variants.find(variant => 
+      variant.size === selectedSize &&
+      variant.color === selectedColor &&
+      variant.material === selectedMaterial
+    )
+
+    setSelectedVariant(matchingVariant || null)
+  }, [selectedSize, selectedColor, selectedMaterial, variants])
 
   if (!product) {
     return (
@@ -41,34 +81,39 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
     )
   }
 
-  // Use thumbnail if no variant selected
-  const imageUrl = selectedVariant ? selectedVariant.image_url : product.thumbnail_url
-  // Determine base price for selected variant (or first variant)
-  const baseVariant = selectedVariant || variants[0]
-  let basePrice = baseVariant ? baseVariant.price : 0
-  // If color contains 'And', override base price to 17.99
-  if (baseVariant && baseVariant.color && baseVariant.color.includes('And')) {
-    basePrice = 17.99
-  } else if (baseVariant) {
-    basePrice = 16.99
+  // Calculate display price
+  const displayPrice = selectedVariant 
+    ? product.base_price + selectedVariant.price_adjustment
+    : product.base_price
+
+  // Get display image
+  const displayImage = selectedVariant?.image_url || product.thumbnail_url || ''
+
+  const handleAddToCart = () => {
+    if (!selectedVariant && variants.length > 0) {
+      setToast({ message: 'Please select a variant', type: 'error' })
+      return
+    }
+
+    const cartItem = {
+      product_id: product.id,
+      variant_id: selectedVariant?.id || null,
+      quantity,
+      size: selectedSize,
+      color: selectedColor,
+      material: selectedMaterial,
+      price: displayPrice,
+      name: product.name,
+      image_url: displayImage
+    }
+
+    addToCart(cartItem)
+    setToast({ message: 'Added to cart!', type: 'success' })
   }
-  // Calculate price based on selected size
-  let displayPrice = basePrice
-  if (selectedSize === '210mm') {
-    displayPrice = basePrice - 4
-  } else if (selectedSize === '180mm') {
-    displayPrice = basePrice - 7
-  } else if (selectedSize === '150mm') {
-    displayPrice = basePrice - 10
-  } else if (selectedSize === '240mm') {
-    displayPrice = basePrice
-  }
-  const customizable = selectedVariant
-    ? selectedVariant.customizable
-    : (variants[0]?.customizable ?? false)
 
   return (
     <div className="max-w-7xl mx-auto py-20 px-6">
+      {/* Back button */}
       <button
         type="button"
         onClick={() => router.back()}
@@ -76,317 +121,239 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({ product, variants
       >
         ← Back
       </button>
+
       <div className="grid grid-cols-1 md:grid-cols-[400px_1fr] gap-8">
+        {/* Product Image */}
         <div>
-          <h1 className="text-3xl font-bold text-stone-800 pb-10">{product.title}</h1>
-          <Image
-            src={imageUrl}
-            alt={product.title + (selectedVariant ? ' - ' + selectedVariant.color : '')}
-            className="w-full h-auto rounded-lg"
-            width={1000}
-            height={1000}
-          />
-          {/* Mobile: Variant selector, price, customizable info under image */}
-          <div className="block md:hidden pt-15">
-            <div className="mt-6">
-              <label className="block font-semibold mb-2">Colour</label>
-              <div className="flex flex-wrap gap-2">
-                {/* Dash button for thumbnail */}
-                <button
-                  className={`px-3 py-1 rounded-full border ${selectedVariant === null ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-                  onClick={() => setSelectedVariant(null)}
-                >
-                  -
-                </button>
-                {variants.map((variant) => (
-                  <button
-                    key={variant.id}
-                    className={`px-3 py-1 rounded-full border ${selectedVariant?.id === variant.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-                    onClick={() => setSelectedVariant(variant)}
-                  >
-                    {variant.color}
-                  </button>
+          <h1 className="text-3xl font-bold text-stone-800 pb-10">{product.name}</h1>
+          <div className="relative">
+            <Image
+              src={displayImage}
+              alt={product.name}
+              className="w-full h-auto rounded-lg"
+              width={1000}
+              height={1000}
+            />
+            {/* Gallery images */}
+            {product.gallery_images && product.gallery_images.length > 0 && (
+              <div className="mt-4 grid grid-cols-4 gap-2">
+                {product.gallery_images.slice(0, 4).map((image, index) => (
+                  <Image
+                    key={index}
+                    src={image}
+                    alt={`${product.name} gallery ${index + 1}`}
+                    className="w-full h-20 object-cover rounded cursor-pointer hover:opacity-75"
+                    width={100}
+                    height={100}
+                    onClick={() => {/* TODO: Implement gallery modal */}}
+                  />
                 ))}
               </div>
-            </div>
-            <p className="mt-4 text-xl font-semibold text-gray-900">£{displayPrice.toFixed(2)}</p>
-            <p className="mt-1 text-gray-700">
-              Customizable: <span className="font-medium">{customizable ? 'Yes' : 'No'}</span>
-            </p>
-            {/* Mobile: Size selector */}
-            <div className="mt-6">
-              <label className="block font-semibold mb-2">Size</label>
-              <div className="flex flex-wrap gap-2">
-                {/* Dash button for size deselect */}
-                <button
-                  type="button"
-                  className={`px-3 py-1 rounded-full border ${selectedSize === null ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-                  onClick={() => setSelectedSize(null)}
-                >
-                  -
-                </button>
-                {['150mm', '180mm', '210mm', '240mm'].map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    className={`px-3 py-1 rounded-full border ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-200 text-gray-800 border-gray-300'}`}
-                    onClick={() => setSelectedSize(size)}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {/* Mobile: Action buttons */}
-            <div className="mt-6 flex gap-4">
-              <button
-                onClick={() => {
-                  if (!selectedSize) {
-                    setToast({
-                      message: 'Please select a size before adding to cart.',
-                      type: 'error',
-                    })
-                    return
-                  }
-                  if (!selectedVariant) {
-                    setToast({
-                      message: 'Please select a color before adding to cart.',
-                      type: 'error',
-                    })
-                    return
-                  }
-                  setButtonClicked(true)
-                  addToCart(product, selectedVariant, selectedSize)
-                  setShowMessage(true)
-                  setTimeout(() => setButtonClicked(false), 1000)
-                  setTimeout(() => setShowMessage(false), 5000)
-                }}
-                className={`px-5 py-2 rounded transition font-medium ${
-                  buttonClicked
-                    ? 'bg-green-600 text-white'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              >
-                {buttonClicked ? 'Added!' : 'Add to Cart'}
-              </button>
-              <button
-                onClick={() => {
-                  if (!selectedSize) {
-                    setToast({ message: 'Please select a size before buying.', type: 'error' })
-                    return
-                  }
-                  if (!selectedVariant) {
-                    setToast({ message: 'Please select a color before buying.', type: 'error' })
-                    return
-                  }
-                  // Clear cart and add single item for buy now
-                  clearCart()
-                  addToCart(product, selectedVariant, selectedSize)
-                  // Redirect to checkout
-                  router.push('/checkout')
-                }}
-                className="bg-gray-200 text-gray-800 px-5 py-2 rounded hover:bg-gray-300"
-              >
-                Buy Now
-              </button>
-            </div>
+            )}
           </div>
         </div>
-        <div className="pt-0 md:pt-15">
-          <p className="text-sm text-gray-500 mt-2">{product.category}</p>
-          <p className="mt-4 text-gray-700 whitespace-pre-line">{product.description}</p>
-          {/* Desktop: Size selector above Colour selector */}
-          <div className="hidden md:block py-5">
-            <div className="mt-2">
-              <label className="block mb-2 font-medium text-stone-800">Size</label>
-              <div className="flex flex-wrap gap-2 pb-2">
-                {/* Dash button for size deselect */}
-                <button
-                  type="button"
-                  className={`px-3 py-1 rounded-full border ${selectedSize === null ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-                  onClick={() => setSelectedSize(null)}
-                >
-                  -
-                </button>
-                {['150mm', '180mm', '210mm', '240mm'].map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    className={`px-3 py-1 rounded-full border ${selectedSize === size ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-200 text-gray-800 border-gray-300'}`}
-                    onClick={() => setSelectedSize(size)}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="mt-6">
-              <label className="block font-medium text-stone-800 mb-2">Colour</label>
-              <div className="flex flex-wrap gap-2 pb-2">
-                {/* Dash button for thumbnail */}
-                <button
-                  className={`px-3 py-1 rounded-full border ${selectedVariant === null ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-                  onClick={() => setSelectedVariant(null)}
-                >
-                  -
-                </button>
-                {variants.map((variant) => (
-                  <button
-                    key={variant.id}
-                    className={`px-3 py-1 rounded-full border ${selectedVariant?.id === variant.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-                    onClick={() => setSelectedVariant(variant)}
-                  >
-                    {variant.color}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <p className="mt-4 text-xl font-semibold text-gray-900">£{displayPrice.toFixed(2)}</p>
-            <p className="mt-1 text-gray-700">
-              Customizable: <span className="font-medium">{customizable ? 'Yes' : 'No'}</span>
-            </p>
+
+        {/* Product Details */}
+        <div className="space-y-6">
+          {/* Category */}
+          <div className="text-sm text-gray-500">
+            {product.category.name}
           </div>
-          <div className="mt-6 flex gap-4">
-            <button
-              onClick={() => {
-                if (!selectedSize) {
-                  setToast({
-                    message: 'Please select a size before adding to cart.',
-                    type: 'error',
-                  })
-                  return
-                }
-                if (!selectedVariant) {
-                  setToast({
-                    message: 'Please select a color before adding to cart.',
-                    type: 'error',
-                  })
-                  return
-                }
-                setButtonClicked(true)
-                addToCart(product, selectedVariant, selectedSize)
-                setShowMessage(true)
-                setTimeout(() => setButtonClicked(false), 1000)
-                setTimeout(() => setShowMessage(false), 5000)
-              }}
-              className={`px-5 py-2 rounded transition font-medium ${
-                buttonClicked
-                  ? 'bg-green-600 text-white'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {buttonClicked ? 'Added!' : 'Add to Cart'}
-            </button>
-            <button
-              onClick={() => {
-                if (!selectedSize) {
-                  setToast({ message: 'Please select a size before buying.', type: 'error' })
-                  return
-                }
-                if (!selectedVariant) {
-                  setToast({ message: 'Please select a color before buying.', type: 'error' })
-                  return
-                }
-                // Clear cart and add single item for buy now
-                clearCart()
-                addToCart(product, selectedVariant, selectedSize)
-                // Redirect to checkout
-                router.push('/checkout')
-              }}
-              className="bg-gray-200 text-gray-800 px-5 py-2 rounded hover:bg-gray-300"
-            >
-              Buy Now
-            </button>
+
+          {/* Description */}
+          <div className="text-gray-700 leading-relaxed">
+            {product.description}
           </div>
+
+          {/* Variant Selectors */}
+          {variants.length > 0 && (
+            <div className="space-y-4">
+              {/* Size Selector */}
+              {variantOptions.sizes.length > 0 && (
+                <div>
+                  <label className="block font-semibold mb-2 text-stone-800">Size</label>
+                  <div className="flex flex-wrap gap-2">
+                    {variantOptions.sizes.map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`px-3 py-2 rounded-full border text-sm font-medium transition ${
+                          selectedSize === size
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Color Selector */}
+              {variantOptions.colors.length > 0 && (
+                <div>
+                  <label className="block font-semibold mb-2 text-stone-800">Color</label>
+                  <div className="flex flex-wrap gap-2">
+                    {variantOptions.colors.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`px-3 py-2 rounded-full border text-sm font-medium transition ${
+                          selectedColor === color
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+                        }`}
+                      >
+                        {color}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Material Selector */}
+              {variantOptions.materials.length > 0 && (
+                <div>
+                  <label className="block font-semibold mb-2 text-stone-800">Material</label>
+                  <div className="flex flex-wrap gap-2">
+                    {variantOptions.materials.map((material) => (
+                      <button
+                        key={material}
+                        onClick={() => setSelectedMaterial(material)}
+                        className={`px-3 py-2 rounded-full border text-sm font-medium transition ${
+                          selectedMaterial === material
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+                        }`}
+                      >
+                        {material}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Price */}
+          <div className="text-3xl font-bold text-stone-800">
+            £{displayPrice.toFixed(2)}
+            {priceRange.has_variants && !selectedVariant && (
+              <span className="text-lg text-gray-500 ml-2">
+                (from £{priceRange.min.toFixed(2)})
+              </span>
+            )}
+          </div>
+
+          {/* Quantity */}
+          <div>
+            <label className="block font-semibold mb-2 text-stone-800">Quantity</label>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+              >
+                -
+              </button>
+              <span className="text-lg font-medium">{quantity}</span>
+              <button
+                onClick={() => setQuantity(quantity + 1)}
+                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          {/* Add to Cart Button */}
+          <button
+            onClick={handleAddToCart}
+            className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+            disabled={variants.length > 0 && !selectedVariant}
+          >
+            {variants.length > 0 && !selectedVariant 
+              ? 'Select Options' 
+              : 'Add to Cart'
+            }
+          </button>
+
+          {/* Customizable Badge */}
+          {product.customizable && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-blue-800 text-sm">
+                <span className="font-semibold">Customizable:</span> This product can be personalized with your own text or design.
+              </p>
+            </div>
+          )}
+
+          {/* Selected Variant Info */}
+          {selectedVariant && (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+              <p className="text-gray-700 text-sm">
+                <span className="font-semibold">Selected:</span> 
+                {selectedVariant.size && ` ${selectedVariant.size}`}
+                {selectedVariant.color && ` ${selectedVariant.color}`}
+                {selectedVariant.material && ` ${selectedVariant.material}`}
+                {selectedVariant.sku && ` (SKU: ${selectedVariant.sku})`}
+              </p>
+            </div>
+          )}
         </div>
       </div>
-      {showMessage && (
-        <div className="fixed max-w-5xs md:max-w-none bottom-6 right-6 md:right-6 md:bottom-20 md:left-auto left-1/2 transform -translate-x-1/2 md:translate-x-0 bg-gray-200/50 border-stone-300 text-stone-800 px-4 py-2 shadow-md text-sm md:text-base z-50 transition-opacity duration-300 text-center">
-          Item added to cart
-        </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type || 'success'}
+          onClose={() => setToast(null)}
+        />
       )}
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }
 
-export default ProductDetailPage
-
 export const getStaticPaths: GetStaticPaths = async () => {
-  console.log('🔄 [ProductDetail] Generating static paths...')
-
-  const { data: products, error } = await supabaseServer.from('products').select('slug')
-
-  if (error) {
-    console.error('❌ [ProductDetail] Error fetching products for static paths:', error)
-    return { paths: [], fallback: 'blocking' }
+  // For now, return empty paths to use fallback
+  // In production, you might want to pre-generate popular product pages
+  return {
+    paths: [],
+    fallback: 'blocking'
   }
-
-  if (!products) {
-    console.log('⚠️ [ProductDetail] No products found for static paths')
-    return { paths: [], fallback: 'blocking' }
-  }
-
-  const paths = products.map((product: { slug: string }) => ({
-    params: { slug: product.slug },
-  }))
-
-  console.log('✅ [ProductDetail] Generated static paths:', paths.length)
-  return { paths, fallback: 'blocking' }
 }
 
 export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (context) => {
   const { slug } = context.params || {}
 
-  console.log('🔄 [ProductDetail] Getting static props for slug:', slug)
-
   if (!slug || typeof slug !== 'string') {
-    console.log('❌ [ProductDetail] Invalid slug:', slug)
     return { notFound: true }
   }
 
-  console.log('🔍 [ProductDetail] Fetching product with slug:', slug)
-  const { data: product, error: productError } = await supabaseServer
-    .from('products')
-    .select('*')
-    .eq('slug', slug)
-    .single()
+  try {
+    // Fetch product data from our new API
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const response = await fetch(`${baseUrl}/api/products/${slug}`)
+    
+    if (!response.ok) {
+      return { notFound: true }
+    }
 
-  if (productError) {
-    console.error('❌ [ProductDetail] Error fetching product:', productError)
+    const data = await response.json()
+
+    return {
+      props: {
+        product: data.product,
+        variants: data.variants,
+        variantOptions: data.variant_options,
+        priceRange: data.price_range
+      },
+      revalidate: 60 // Revalidate every minute
+    }
+  } catch (error) {
+    console.error('Error fetching product:', error)
     return { notFound: true }
-  }
-
-  if (!product) {
-    console.log('❌ [ProductDetail] Product not found for slug:', slug)
-    return { notFound: true }
-  }
-
-  console.log('✅ [ProductDetail] Product found:', product.title)
-  console.log('🔍 [ProductDetail] Fetching variants for product:', product.id)
-
-  const { data: variants, error: variantsError } = await supabaseServer
-    .from('product_variants')
-    .select('*')
-    .eq('product_id', product.id)
-
-  if (variantsError) {
-    console.error('❌ [ProductDetail] Error fetching variants:', variantsError)
-    return { notFound: true }
-  }
-
-  if (!variants || variants.length === 0) {
-    console.log('⚠️ [ProductDetail] No variants found for product:', product.id)
-    return { notFound: true }
-  }
-
-  console.log('✅ [ProductDetail] Variants found:', variants.length)
-
-  return {
-    props: {
-      product,
-      variants,
-    },
-    revalidate: 60,
   }
 }
+
+export default ProductDetailPage

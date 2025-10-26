@@ -1,21 +1,43 @@
 import React, { useEffect, useState } from 'react'
 import ProductCard from '@/components/ui/ProductCard'
-import { Product, ProductVariant } from '@/types'
+import { ProductVariantNew } from '@/types'
 
-// Type for fetched product with variants
-type ProductWithVariants = {
-  product: Product
-  variants: ProductVariant[]
+// New product type from products_new API
+type ProductNew = {
+  id: string
+  name: string
+  description: string
+  slug: string
+  base_price: number
+  thumbnail_url: string
+  customizable: boolean
+  category: {
+    name: string
+    slug: string
+  }
+  variants: ProductVariantNew[]
+  price_range: {
+    min: number
+    max: number
+    has_variants: boolean
+  }
+  created_at: string
 }
 
 export default function FeaturedProducts() {
-  const [products, setProducts] = useState<ProductWithVariants[]>([])
+  const [products, setProducts] = useState<ProductNew[]>([])
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const res = await fetch('/api/test')
-      const data = await res.json()
-      setProducts(data.slice(0, 4)) // Only show 4 featured products
+      try {
+        const res = await fetch('/api/products')
+        if (res.ok) {
+          const data = await res.json()
+          setProducts(data.products.slice(0, 4)) // Only show 4 featured products
+        }
+      } catch (error) {
+        console.error('Error fetching featured products:', error)
+      }
     }
     fetchProducts()
   }, [])
@@ -27,8 +49,8 @@ export default function FeaturedProducts() {
           Featured Products
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map(({ product, variants }) => (
-            <ProductCard key={product.id} product={product} variants={variants} />
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} variants={product.variants} />
           ))}
         </div>
       </div>

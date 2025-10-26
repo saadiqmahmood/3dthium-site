@@ -1,24 +1,23 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react'
-import { Product, ProductVariant } from '@/types'
 
 export type CartItem = {
-  product: Product
-  variant: ProductVariant
-  size: string
+  product_id: string
+  variant_id?: string | null
   quantity: number
+  size?: string | null
+  color?: string | null
+  material?: string | null
+  price: number
+  name: string
+  image_url: string
 }
 
 type CartContextType = {
   cart: CartItem[]
-  addToCart: (product: Product, variant: ProductVariant, size: string) => void
-  removeFromCart: (productId: string, variantId: string, size: string) => void
+  addToCart: (item: CartItem) => void
+  removeFromCart: (productId: string, variantId?: string) => void
   clearCart: () => void
-  updateCartItemQuantity: (
-    productId: string,
-    variantId: string,
-    size: string,
-    quantity: number
-  ) => void
+  updateCartItemQuantity: (productId: string, variantId: string | undefined, quantity: number) => void
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -42,36 +41,36 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('cart', JSON.stringify(cart))
   }, [cart])
 
-  const addToCart = useCallback((product: Product, variant: ProductVariant, size: string) => {
-    if (!variant) {
-      alert('Please select a color/variant before adding to cart.')
-      return
-    }
-    if (!size) {
-      alert('Please select a size before adding to cart.')
-      return
-    }
+  const addToCart = useCallback((item: CartItem) => {
     setCart((prev) => {
       const existing = prev.find(
-        (item) =>
-          item.product.id === product.id && item.variant.id === variant.id && item.size === size
+        (cartItem) =>
+          cartItem.product_id === item.product_id && 
+          cartItem.variant_id === item.variant_id &&
+          cartItem.size === item.size &&
+          cartItem.color === item.color &&
+          cartItem.material === item.material
       )
       if (existing) {
-        return prev.map((item) =>
-          item.product.id === product.id && item.variant.id === variant.id && item.size === size
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+        return prev.map((cartItem) =>
+          cartItem.product_id === item.product_id && 
+          cartItem.variant_id === item.variant_id &&
+          cartItem.size === item.size &&
+          cartItem.color === item.color &&
+          cartItem.material === item.material
+            ? { ...cartItem, quantity: cartItem.quantity + item.quantity }
+            : cartItem
         )
       }
-      return [...prev, { product, variant, size, quantity: 1 }]
+      return [...prev, item]
     })
   }, [])
 
-  const removeFromCart = useCallback((productId: string, variantId: string, size: string) => {
+  const removeFromCart = useCallback((productId: string, variantId?: string) => {
     setCart((prev) =>
       prev.filter(
         (item) =>
-          !(item.product.id === productId && item.variant.id === variantId && item.size === size)
+          !(item.product_id === productId && item.variant_id === variantId)
       )
     )
   }, [])
@@ -79,20 +78,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const clearCart = useCallback(() => setCart([]), [])
 
   const updateCartItemQuantity = useCallback(
-    (productId: string, variantId: string, size: string, quantity: number) => {
+    (productId: string, variantId: string | undefined, quantity: number) => {
       setCart((prev) => {
         if (quantity <= 0) {
           return prev.filter(
             (item) =>
-              !(
-                item.product.id === productId &&
-                item.variant.id === variantId &&
-                item.size === size
-              )
+              !(item.product_id === productId && item.variant_id === variantId)
           )
         }
         return prev.map((item) =>
-          item.product.id === productId && item.variant.id === variantId && item.size === size
+          item.product_id === productId && item.variant_id === variantId
             ? { ...item, quantity }
             : item
         )
