@@ -420,9 +420,9 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
     // Calculate price range
     let minPrice = product.base_price
     let maxPrice = product.base_price
-    const hasVariants = variants && variants.length > 0
+    const hasVariants = Boolean(variants && variants.length > 0)
 
-    if (hasVariants) {
+    if (hasVariants && variants) {
       const variantPrices = variants.map((v: { price_adjustment: number }) => product.base_price + v.price_adjustment)
       minPrice = Math.min(...variantPrices)
       maxPrice = Math.max(...variantPrices)
