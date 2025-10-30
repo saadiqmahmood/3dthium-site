@@ -481,6 +481,11 @@ export default function CreateProductPage() {
                   <option value="">Select Category</option>
                   {categories
                     .filter((cat) => cat.is_active)
+                    .filter((cat, index, self) => 
+                      // Deduplicate by name - keep first occurrence
+                      index === self.findIndex((c) => c.name === cat.name)
+                    )
+                    .sort((a, b) => a.name.localeCompare(b.name))
                     .map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name}

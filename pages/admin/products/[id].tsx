@@ -486,11 +486,18 @@ export default function EditProductPage() {
                   }`}
                 >
                   <option value="">Select a category</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
+                  {categories
+                    .filter((cat) => cat.is_active)
+                    .filter((cat, index, self) => 
+                      // Deduplicate by name - keep first occurrence
+                      index === self.findIndex((c) => c.name === cat.name)
+                    )
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
                 </select>
                 {errors.category_id && (
                   <p className="text-red-500 text-sm mt-1">{errors.category_id}</p>
