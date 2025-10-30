@@ -35,7 +35,11 @@ export default function OrdersPage() {
   const router = useRouter()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
-  const { client: supabase } = useSupabase()
+  const supabaseContext = useSupabase()
+  if (!supabaseContext) {
+    return <div className="p-8">Error: Supabase client not available</div>
+  }
+  const { client: supabase } = supabaseContext
 
   const fetchOrders = useCallback(async () => {
     try {
