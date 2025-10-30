@@ -33,15 +33,17 @@ interface Order {
 export default function OrdersPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
+  const supabaseContext = useSupabase()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
-  const supabaseContext = useSupabase()
-  if (!supabaseContext) {
-    return <div className="p-8">Error: Supabase client not available</div>
-  }
-  const { client: supabase } = supabaseContext
 
   const fetchOrders = useCallback(async () => {
+    if (!supabaseContext) {
+      console.error('Supabase client not available')
+      return
+    }
+    const { client: supabase } = supabaseContext
+    
     try {
       setLoading(true)
       if (!user) {
@@ -129,10 +131,11 @@ export default function OrdersPage() {
     } finally {
       setLoading(false)
     }
-  }, [user, supabase])
+  }, [user, supabaseContext])
 
   useEffect(() => {
     if (authLoading) return
+    if (!supabaseContext) return
 
     if (!user) {
       router.push('/auth')
@@ -140,7 +143,11 @@ export default function OrdersPage() {
     }
 
     fetchOrders()
-  }, [user, authLoading, router, fetchOrders])
+  }, [user, authLoading, router, fetchOrders, supabaseContext])
+
+  if (!supabaseContext) {
+    return <div className="p-8">Error: Supabase client not available</div>
+  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-GB', {
