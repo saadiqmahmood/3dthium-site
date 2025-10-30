@@ -17,6 +17,17 @@ export default function AuthPage() {
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
   const [resetMode, setResetMode] = useState(false)
 
+  useEffect(() => {
+    if (router.query.reset === 'success') {
+      setToast({ message: 'Password updated! You can now log in.', type: 'success' })
+
+      // Optionally remove the query from the URL after showing the toast
+      const cleaned = { ...router.query }
+      delete cleaned.reset
+      router.replace({ pathname: router.pathname, query: cleaned }, undefined, { shallow: true })
+    }
+  }, [router.query, router])
+
   if (!supabaseContext) {
     return <div className="p-8">Error: Supabase client not available</div>
   }
@@ -88,16 +99,6 @@ export default function AuthPage() {
     }
     setLoading(false)
   }
-  useEffect(() => {
-    if (router.query.reset === 'success') {
-      setToast({ message: 'Password updated! You can now log in.', type: 'success' })
-
-      // Optionally remove the query from the URL after showing the toast
-      const cleaned = { ...router.query }
-      delete cleaned.reset
-      router.replace({ pathname: router.pathname, query: cleaned }, undefined, { shallow: true })
-    }
-  }, [router.query, router])
 
   return (
     <div className="px-4 sm:px-8 py-6">
