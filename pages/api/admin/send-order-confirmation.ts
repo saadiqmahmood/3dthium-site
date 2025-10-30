@@ -48,14 +48,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Format order items for email
     const orderItems = (order.order_items || []).map((item: unknown) => {
       const i = item as Record<string, unknown>
-      const variant = i.variant_new || i.product_variants
+      const variantNew = i.variant_new as { size?: string | null; color?: string | null; material?: string | null } | undefined
+      const productNew = i.product_new as { name?: string } | undefined
+      const products = i.products as { title?: string } | undefined
+      const productVariants = i.product_variants as { color?: string } | undefined
+      
       return {
-        name: i.product_new?.name || i.products?.title || 'Product',
-        quantity: i.quantity,
-        price: i.price_at_purchase,
-        size: variant?.size || i.size || null,
-        color: variant?.color || i.product_variants?.color || null,
-        material: variant?.material || null,
+        name: productNew?.name || products?.title || 'Product',
+        quantity: i.quantity as number,
+        price: i.price_at_purchase as number,
+        size: variantNew?.size || (i.size as string | null) || null,
+        color: variantNew?.color || productVariants?.color || null,
+        material: variantNew?.material || null,
         total: (i.price_at_purchase as number) * (i.quantity as number),
       }
     })

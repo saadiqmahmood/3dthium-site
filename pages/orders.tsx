@@ -348,15 +348,16 @@ export default function OrdersPage() {
                 </h4>
                 <div className="space-y-4">
                   {order.order_items?.map((item) => {
-                    const variant = item.variant_new || item.product_variants
+                    const variantNew = item.variant_new
+                    const productVariants = item.product_variants
                     const productName = item.product_new?.name || item.products?.title || item.products?.name || 'Product'
                     const imageUrl =
-                      variant?.image_url ||
-                      item.product_variants?.image_url ||
+                      variantNew?.image_url ||
+                      productVariants?.image_url ||
                       '/placeholder.png'
-                    const color = variant?.color || item.product_variants?.color
-                    const size = variant?.size || item.size
-                    const material = variant?.material
+                    const color = variantNew?.color || productVariants?.color
+                    const size = variantNew?.size || item.size
+                    const material = variantNew?.material
 
                     return (
                       <div

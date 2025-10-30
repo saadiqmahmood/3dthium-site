@@ -76,7 +76,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             })
           )
 
-          data.order_items = enrichedItems
+          // Type assertion needed because we're enriching the data structure with additional fields
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          data.order_items = enrichedItems as any
         }
 
         console.log('✅ [API/admin/orders/[id]] Order details fetched successfully')
