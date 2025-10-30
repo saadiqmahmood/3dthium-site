@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Toast from '@/components/ui/Toast'
 
 type CustomOrder = {
   id: number
@@ -27,25 +28,39 @@ export default function AdminCustomOrdersPage() {
   const [orders, setOrders] = useState<CustomOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedOrders, setSelectedOrders] = useState<number[]>([])
+  const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchOrders = async () => {
       setLoading(true)
+      setError(null)
       try {
         console.log('🔍 [AdminCustomOrders] Fetching custom orders from API...')
         const response = await fetch('/api/admin/custom-orders')
 
         if (!response.ok) {
           console.error('❌ [AdminCustomOrders] Error fetching custom orders:', response.status)
-          throw new Error('Failed to fetch custom orders')
+          const errorData = await response.json().catch(() => ({ error: 'Failed to fetch custom orders' }))
+          throw new Error(errorData.error || 'Failed to fetch custom orders')
         }
 
         const data = await response.json()
         console.log('✅ [AdminCustomOrders] Custom orders fetched successfully:', data?.length || 0)
-        setOrders(data || [])
+        
+        if (!Array.isArray(data)) {
+          console.warn('⚠️ [AdminCustomOrders] API returned non-array data:', data)
+          setOrders([])
+          setError('Invalid data format received')
+          setToast({ message: 'Invalid data format received', type: 'error' })
+        } else {
+          setOrders(data || [])
+        }
       } catch (error) {
         console.error('❌ [AdminCustomOrders] Error:', error)
-        alert('Failed to load custom orders')
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load custom orders'
+        setError(errorMessage)
+        setToast({ message: errorMessage, type: 'error' })
       } finally {
         setLoading(false)
       }
@@ -70,19 +85,46 @@ export default function AdminCustomOrdersPage() {
   const handleBulkDelete = async () => {
     try {
       for (const id of selectedOrders) {
-        await fetch(`/api/admin/custom-orders/${id}`, { method: 'DELETE' })
+        const response = await fetch(`/api/admin/custom-orders/${id}`, { method: 'DELETE' })
+        if (!response.ok) {
+          throw new Error(`Failed to delete order ${id}`)
+        }
       }
       setOrders((orders) => orders.filter((o) => !selectedOrders.includes(o.id)))
       setSelectedOrders([])
+      setToast({ message: 'Orders deleted successfully', type: 'success' })
     } catch (error) {
       console.error('❌ [AdminCustomOrders] Bulk delete error:', error)
-      alert('Failed to delete custom orders')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete custom orders'
+      setToast({ message: errorMessage, type: 'error' })
     }
   }
 
   return (
     <div className="w-full mx-auto bg-white p-16">
       <h2 className="text-2xl font-bold mb-6 text-stone-800">Custom Orders</h2>
+      
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type || 'success'}
+          onClose={() => setToast(null)}
+        />
+      )}
+      
+      {/* Error State */}
+      {error && !loading && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 text-red-600 hover:text-red-800 underline text-sm"
+          >
+            Retry
+          </button>
+        </div>
+      )}
       {/* Bulk actions */}
       <div className="mb-2 flex items-center gap-2">
         <input
