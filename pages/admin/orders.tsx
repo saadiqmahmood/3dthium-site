@@ -740,16 +740,21 @@ export default function AdminOrdersPage() {
                       </div>
                     ) : (
                       editableOrderItems.map((item, idx) => {
-                        const variant = item.variant_new || item.product_variants
                         const productName =
                           item.product_new?.name || item.products?.title || 'Product'
                         const imageUrl =
-                          variant?.image_url ||
+                          item.variant_new?.image_url ||
                           item.product_variants?.image_url ||
                           '/no-image.png'
-                        const color = variant?.color || item.product_variants?.color
-                        const size = variant?.size || item.size
-                        const material = variant?.material
+                        const color =
+                          item.variant_new?.color || item.product_variants?.color || null
+                        const size =
+                          ('size' in (item.variant_new || {}) ? item.variant_new?.size : null) ||
+                          item.size ||
+                          null
+                        const material =
+                          ('material' in (item.variant_new || {}) ? item.variant_new?.material : null) ||
+                          null
 
                         return (
                           <div
