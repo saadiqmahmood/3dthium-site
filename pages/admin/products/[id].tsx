@@ -486,18 +486,27 @@ export default function EditProductPage() {
                   }`}
                 >
                   <option value="">Select a category</option>
-                  {categories
-                    .filter((cat) => cat.is_active)
-                    .filter((cat, index, self) => 
-                      // Deduplicate by name - keep first occurrence
-                      index === self.findIndex((c) => c.name === cat.name)
-                    )
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
+                  {(() => {
+                    // Normalize and deduplicate categories
+                    const seen = new Set<string>()
+                    return categories
+                      .filter((cat) => cat.is_active)
+                      .filter((cat) => {
+                        // Normalize name for comparison (trim whitespace, lowercase)
+                        const normalizedName = cat.name.trim().toLowerCase()
+                        if (seen.has(normalizedName)) {
+                          return false // Skip duplicate
+                        }
+                        seen.add(normalizedName)
+                        return true
+                      })
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))
+                  })()}
                 </select>
                 {errors.category_id && (
                   <p className="text-red-500 text-sm mt-1">{errors.category_id}</p>
