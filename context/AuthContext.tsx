@@ -15,11 +15,33 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { client } = useSupabase()
+  const supabaseContext = useSupabase()
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
+
+  if (!supabaseContext) {
+    // Return a fallback provider that doesn't require Supabase
+    const noOp = async () => ({ data: null, error: new Error('Supabase not available') })
+    const noOpVoid = async () => {}
+    return (
+      <AuthContext.Provider
+        value={{
+          user: null,
+          session: null,
+          isAdmin: false,
+          loading: false,
+          signIn: noOp,
+          signUp: noOp,
+          signOut: noOpVoid,
+        }}
+      >
+        {children}
+      </AuthContext.Provider>
+    )
+  }
+  const { client } = supabaseContext
 
   // Helper function to check admin status with logging
   const checkAdminStatus = async (userId: string) => {

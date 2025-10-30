@@ -9,8 +9,13 @@ type DebugInfo = {
 
 export default function SessionDebug() {
   const { user, session, isAdmin, loading } = useAuth()
-  const { client } = useSupabase()
+  const supabaseContext = useSupabase()
   const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null)
+
+  if (!supabaseContext) {
+    return null
+  }
+  const { client } = supabaseContext
 
   const checkSession = async () => {
     console.log('🔍 [SessionDebug] Checking session manually...')

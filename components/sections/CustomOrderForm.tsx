@@ -7,7 +7,9 @@ export default function CustomOrderForm() {
   const [fileError, setFileError] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
 
-  const { client: supabase } = useSupabase()
+  // Use hook unconditionally - must be at top level
+  const supabaseContext = useSupabase()
+  const supabase = supabaseContext?.client
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -33,6 +35,12 @@ export default function CustomOrderForm() {
     // Upload file to Supabase Storage
     let fileUrl = ''
     try {
+      if (!supabase) {
+        setStatus('idle')
+        setFileError('Supabase client is not available. Please refresh the page.')
+        return
+      }
+
       const filePath = `${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`
       const { error: uploadError } = await supabase.storage
         .from('custom-orders')
@@ -79,6 +87,14 @@ export default function CustomOrderForm() {
       setStatus('error')
       setFormError('Failed to submit custom order. Please try again.')
     }
+  }
+
+  if (!supabase) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+        <p className="text-red-800">Error: Supabase client is not available. Please refresh the page.</p>
+      </div>
+    )
   }
 
   return (

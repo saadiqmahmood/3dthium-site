@@ -23,7 +23,8 @@ export const useSupabase = () => {
   const context = useContext(SupabaseContext)
   if (!context) {
     console.error('❌ [SupabaseContext] useSupabase must be used within a SupabaseContextProvider')
-    throw new Error('useSupabase must be used within a SupabaseContextProvider')
+    // Return null instead of throwing to allow graceful error handling
+    return null
   }
   console.log('🔧 [SupabaseContext] useSupabase called, client available')
   return context

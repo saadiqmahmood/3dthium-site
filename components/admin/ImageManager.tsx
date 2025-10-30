@@ -16,10 +16,15 @@ export default function ImageManager({
   onGalleryChange,
   maxGalleryImages = 9,
 }: ImageManagerProps) {
-  const { client: supabase } = useSupabase()
+  const supabaseContext = useSupabase()
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<string>('')
   const galleryInputRef = useRef<HTMLInputElement>(null)
+
+  if (!supabaseContext) {
+    return <div className="text-red-500 p-4">Error: Supabase client not available</div>
+  }
+  const { client: supabase } = supabaseContext
 
   /**
    * Creates a square-cropped version of an image
