@@ -33,10 +33,6 @@ export default function AccountPage() {
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
   const supabaseContext = useSupabase()
-  if (!supabaseContext) {
-    return <div className="p-8">Error: Supabase client not available</div>
-  }
-  const { client: supabaseClient } = supabaseContext
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [section, setSection] = useState<'profile' | 'orders'>('profile')
   const [orders, setOrders] = useState<Order[]>([])
@@ -58,6 +54,8 @@ export default function AccountPage() {
   }, [user, loading, router])
 
   useEffect(() => {
+    if (!supabaseContext) return
+    
     console.log('📄 [AccountPage] User or section changed:', {
       hasUser: !!user,
       section,
@@ -69,9 +67,15 @@ export default function AccountPage() {
       fetchOrders()
     }
     // eslint-disable-next-line
-  }, [user, section])
+  }, [user, section, supabaseContext])
 
   const fetchOrders = async () => {
+    if (!supabaseContext) {
+      console.error('❌ [AccountPage] Supabase client not available')
+      return
+    }
+    const { client: supabaseClient } = supabaseContext
+    
     console.log('🔄 [AccountPage] Starting fetchOrders...')
     setOrdersLoading(true)
     try {
