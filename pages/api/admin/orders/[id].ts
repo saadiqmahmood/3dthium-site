@@ -32,37 +32,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Enrich order items with product_variants_new data if available
         if (data.order_items && Array.isArray(data.order_items)) {
           const enrichedItems = await Promise.all(
-            data.order_items.map(async (item: { variant_id?: string; product_id?: string }) => {
-              if (!item.variant_id) return item
-
-              // Try fetching from product_variants_new first
-              const { data: newVariant } = await supabaseAdmin
-                .from('product_variants_new')
-                .select('id, size, color, material, image_url, price_adjustment')
-                .eq('id', item.variant_id)
-                .single()
-
-              if (newVariant) {
-                // Fetch product from products_new for consistency
-                const { data: newProduct } = await supabaseAdmin
-                  .from('products_new')
-                  .select('id, name')
-                  .eq('id', item.product_id)
+            data.order_items.map(async (item: {
+              id: string
+              quantity: number
+              size: string | null
+              price_at_purchase: number
+              variant_id?: string
+              product_id?: string
+              products?: unknown
+              product_variants?: unknown
+            }) => {
+              const enrichedItem = { ...item }
+              
+              if (item.variant_id) {
+                // Try fetching from product_variants_new first
+                const { data: newVariant } = await supabaseAdmin
+                  .from('product_variants_new')
+                  .select('id, size, color, material, image_url, price_adjustment')
+                  .eq('id', item.variant_id)
                   .single()
 
-                return {
-                  ...item,
-                  variant_new: {
-                    size: newVariant.size,
-                    color: newVariant.color,
-                    material: newVariant.material,
-                    image_url: newVariant.image_url,
-                  },
-                  product_new: newProduct ? { id: newProduct.id, name: newProduct.name } : null,
+                if (newVariant) {
+                  // Fetch product from products_new for consistency
+                  const { data: newProduct } = await supabaseAdmin
+                    .from('products_new')
+                    .select('id, name')
+                    .eq('id', item.product_id)
+                    .single()
+
+                  Object.assign(enrichedItem, {
+                    variant_new: {
+                      size: newVariant.size,
+                      color: newVariant.color,
+                      material: newVariant.material,
+                      image_url: newVariant.image_url,
+                    },
+                    product_new: newProduct ? { id: newProduct.id, name: newProduct.name } : null,
+                  })
                 }
               }
 
-              return item
+              return enrichedItem
             })
           )
 
