@@ -32,7 +32,11 @@ interface Order {
 export default function AccountPage() {
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
-  const { client: supabaseClient } = useSupabase()
+  const supabaseContext = useSupabase()
+  if (!supabaseContext) {
+    return <div className="p-8">Error: Supabase client not available</div>
+  }
+  const { client: supabaseClient } = supabaseContext
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [section, setSection] = useState<'profile' | 'orders'>('profile')
   const [orders, setOrders] = useState<Order[]>([])
