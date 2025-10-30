@@ -4,6 +4,35 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
 
+const CartIcon = ({ hasColorfulHero }: { hasColorfulHero: boolean }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 32 32"
+    className={`w-6 h-6 ${hasColorfulHero ? 'fill-white' : 'fill-gray-600'}`}
+  >
+    <title>Cart</title>
+    <path d="M29.74 8.32A1 1 0 0 0 29 8H13a1 1 0 0 0 0 2h14.91l-.81 9.48a1.87 1.87 0 0 1-2 1.52H12.88a1.87 1.87 0 0 1-2-1.52L10 8.92v-.16L9.33 6.2A3.89 3.89 0 0 0 7 3.52L3.37 2.07a1 1 0 0 0-.74 1.86l3.62 1.45a1.89 1.89 0 0 1 1.14 1.3L8 9.16l.9 10.49a3.87 3.87 0 0 0 4 3.35h.1v2.18a3 3 0 1 0 2 0V23h8v2.18a3 3 0 1 0 2 0V23h.12a3.87 3.87 0 0 0 4-3.35L30 9.08a1 1 0 0 0-.26-.76zM14 29a1 1 0 1 1 1-1 1 1 0 0 1-1 1zm10 0a1 1 0 1 1 1-1 1 1 0 0 1-1 1z" />
+    <path d="M15 18v-5a1 1 0 0 0-2 0v5a1 1 0 0 0 2 0zM20 18v-5a1 1 0 0 0-2 0v5a1 1 0 0 0 2 0zM25 18v-5a1 1 0 0 0-2 0v5a1 1 0 0 0 2 0z" />
+  </svg>
+)
+
+const UserIcon = ({ hasColorfulHero }: { hasColorfulHero: boolean }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={`w-6 h-6 ${hasColorfulHero ? 'text-white' : 'text-gray-600'}`}
+  >
+    <title>Account</title>
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+)
+
 export default function Navbar() {
   const { cart } = useCart()
   const isCartEmpty = cart.length === 0
@@ -38,16 +67,6 @@ export default function Navbar() {
     return () => clearTimeout(timeout)
   }, [totalItems])
 
-  const CartIcon = () => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 32 32"
-      className={`w-6 h-6 ${hasColorfulHero ? 'fill-white' : 'fill-gray-600'}`}
-    >
-      <path d="M29.74 8.32A1 1 0 0 0 29 8H13a1 1 0 0 0 0 2h14.91l-.81 9.48a1.87 1.87 0 0 1-2 1.52H12.88a1.87 1.87 0 0 1-2-1.52L10 8.92v-.16L9.33 6.2A3.89 3.89 0 0 0 7 3.52L3.37 2.07a1 1 0 0 0-.74 1.86l3.62 1.45a1.89 1.89 0 0 1 1.14 1.3L8 9.16l.9 10.49a3.87 3.87 0 0 0 4 3.35h.1v2.18a3 3 0 1 0 2 0V23h8v2.18a3 3 0 1 0 2 0V23h.12a3.87 3.87 0 0 0 4-3.35L30 9.08a1 1 0 0 0-.26-.76zM14 29a1 1 0 1 1 1-1 1 1 0 0 1-1 1zm10 0a1 1 0 1 1 1-1 1 1 0 0 1-1 1z" />
-      <path d="M15 18v-5a1 1 0 0 0-2 0v5a1 1 0 0 0 2 0zM20 18v-5a1 1 0 0 0-2 0v5a1 1 0 0 0 2 0zM25 18v-5a1 1 0 0 0-2 0v5a1 1 0 0 0 2 0z" />
-    </svg>
-  )
   return (
     <nav
       className={`${isAccountPage ? 'fixed top-0 left-0 w-full z-50' : ''} ${
@@ -69,7 +88,7 @@ export default function Navbar() {
               className="hover:text-blue-600 md:hidden"
             >
               <div className="relative w-6 h-6">
-                <CartIcon />
+                <CartIcon hasColorfulHero={hasColorfulHero} />
                 {totalItems > 0 && (
                   <span
                     className={`absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'}`}
@@ -84,11 +103,12 @@ export default function Navbar() {
               className="relative w-6 h-6 cursor-not-allowed opacity-50 md:hidden"
               title="Cart is empty"
             >
-              <CartIcon />
+              <CartIcon hasColorfulHero={hasColorfulHero} />
             </div>
           )}
 
           <button
+            type="button"
             onClick={() => setIsOpen(!isOpen)}
             className={`md:hidden p-2 rounded transition
                             ${
@@ -108,6 +128,7 @@ export default function Navbar() {
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
+              <title>Menu</title>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
@@ -154,7 +175,7 @@ export default function Navbar() {
             className={`hidden md:block ${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-blue-600'}`}
           >
             <div className="relative w-6 h-6">
-              <CartIcon />
+              <CartIcon hasColorfulHero={hasColorfulHero} />
               {totalItems > 0 && (
                 <span
                   className={`absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'}`}
@@ -169,7 +190,7 @@ export default function Navbar() {
             className="relative w-6 h-6 cursor-not-allowed opacity-50 hidden md:block"
             title="Cart is empty"
           >
-            <CartIcon />
+            <CartIcon hasColorfulHero={hasColorfulHero} />
           </div>
         )}
         {!user ? (
@@ -183,9 +204,9 @@ export default function Navbar() {
           <>
             <Link
               href="/account"
-              className={`text-sm font-medium ${hasColorfulHero ? 'text-white hover:text-blue-300' : 'text-stone-700 hover:text-blue-500'}`}
+              className={`${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-blue-500'}`}
             >
-              My Account
+              <UserIcon hasColorfulHero={hasColorfulHero} />
             </Link>
             {isAdmin && (
               <Link
@@ -201,13 +222,20 @@ export default function Navbar() {
         {/* Privacy Policy link removed from desktop */}
       </div>
       {isOpen && (
+        // biome-ignore lint/a11y/noStaticElementInteractions: backdrop overlay for mobile menu
         <div
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-all duration-300"
           onClick={() => setIsOpen(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              setIsOpen(false)
+            }
+          }}
           style={{
             animation: 'fadeIn 0.3s ease-out',
           }}
         >
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: stops click propagation */}
           <div
             className={`${
               hasColorfulHero
@@ -215,11 +243,13 @@ export default function Navbar() {
                 : 'bg-white'
             } w-4/5 h-full p-6 shadow-2xl flex flex-col gap-4 transition-all duration-300 transform`}
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
             style={{
               animation: 'slideInLeft 0.4s ease-out',
             }}
           >
             <button
+              type="button"
               onClick={() => setIsOpen(false)}
               className={`self-end p-3 rounded-full transition-all duration-200 hover:scale-110 ${
                 hasColorfulHero
@@ -236,6 +266,7 @@ export default function Navbar() {
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
               >
+                <title>Close</title>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -277,6 +308,7 @@ export default function Navbar() {
               }`}
             >
               <button
+                type="button"
                 onClick={() => {
                   setTimeout(() => setIsOpen(false), 250)
                   router.push('/')
@@ -291,6 +323,7 @@ export default function Navbar() {
               </button>
 
               <button
+                type="button"
                 onClick={() => {
                   setTimeout(() => setIsOpen(false), 250)
                   router.push('/products')
@@ -305,6 +338,7 @@ export default function Navbar() {
               </button>
 
               <button
+                type="button"
                 onClick={() => {
                   setTimeout(() => setIsOpen(false), 250)
                   router.push('/custom-order')
@@ -319,6 +353,7 @@ export default function Navbar() {
               </button>
 
               <button
+                type="button"
                 onClick={() => {
                   setTimeout(() => setIsOpen(false), 250)
                   router.push('/about')
@@ -333,6 +368,7 @@ export default function Navbar() {
               </button>
 
               <button
+                type="button"
                 onClick={() => {
                   setTimeout(() => setIsOpen(false), 250)
                   router.push('/contact')
@@ -347,6 +383,7 @@ export default function Navbar() {
               </button>
               {!user ? (
                 <button
+                  type="button"
                   onClick={() => {
                     setTimeout(() => setIsOpen(false), 250)
                     router.push('/auth')
@@ -358,6 +395,7 @@ export default function Navbar() {
               ) : (
                 <>
                   <button
+                    type="button"
                     onClick={() => {
                       setTimeout(() => setIsOpen(false), 250)
                       router.push('/account')
@@ -372,6 +410,7 @@ export default function Navbar() {
                   </button>
                   {isAdmin && (
                     <button
+                      type="button"
                       onClick={() => {
                         setTimeout(() => setIsOpen(false), 250)
                         router.push('/admin')
@@ -389,6 +428,7 @@ export default function Navbar() {
               )}
               {/** Privacy Policy link (mobile) */}
               <button
+                type="button"
                 onClick={() => {
                   setTimeout(() => setIsOpen(false), 250)
                   router.push('/privacy')

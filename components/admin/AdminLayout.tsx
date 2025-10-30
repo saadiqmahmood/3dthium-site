@@ -5,12 +5,12 @@ import { useAuth } from '@/context/AuthContext'
 
 const SECTIONS = [
   { key: 'dashboard', label: 'Dashboard', href: '/admin' },
-  { key: 'categories', label: 'Categories', href: '/admin/categories' },
-  { key: 'create-product', label: 'Create Product', href: '/admin/create-product' },
-  { key: 'users', label: 'Users', href: '/admin/users' },
-  { key: 'orders', label: 'Orders', href: '/admin/orders' },
   { key: 'products', label: 'Products', href: '/admin/products' },
+  { key: 'create-product', label: 'Create Product', href: '/admin/create-product' },
+  { key: 'categories', label: 'Categories', href: '/admin/categories' },
+  { key: 'orders', label: 'Orders', href: '/admin/orders' },
   { key: 'custom-orders', label: 'Custom Orders', href: '/admin/custom-orders' },
+  { key: 'users', label: 'Users', href: '/admin/users' },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -70,12 +70,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
             <nav className="flex-1 px-6 py-4 space-y-2">
               {SECTIONS.map((s) => (
-                <Link key={s.key} href={s.href} legacyBehavior>
-                  <a
-                    className={`block w-full text-left px-4 py-2 rounded ${current === s.key ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-100 text-gray-700'}`}
-                  >
-                    {s.label}
-                  </a>
+                <Link
+                  key={s.key}
+                  href={s.href}
+                  className={`block w-full text-left px-4 py-2 rounded ${current === s.key ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-100 text-gray-700'}`}
+                >
+                  {s.label}
                 </Link>
               ))}
             </nav>
