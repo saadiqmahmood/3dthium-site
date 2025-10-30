@@ -1,11 +1,11 @@
-import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
+import { createClient } from '@supabase/supabase-js'
+import type { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useCart } from '@/context/CartContext'
-import { ProductVariantNew } from '@/types'
-import { createClient } from '@supabase/supabase-js'
+import type { ProductVariantNew } from '@/types'
 
 // Server-side client for static generation
 const supabaseServer = createClient(
@@ -348,7 +348,7 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
     console.log(`[getStaticProps] Starting for slug: ${slug}`)
     console.log(`[getStaticProps] Supabase URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL}`)
     console.log(`[getStaticProps] Anon key exists: ${!!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`)
-    
+
     // Test basic connection first
     const { data: testData, error: testError } = await supabaseServer
       .from('products_new')
@@ -416,7 +416,9 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
       // Don't return notFound for variants error, just use empty array
     }
 
-    console.log(`[getStaticProps] Variants query completed, found: ${variants?.length || 0} variants`)
+    console.log(
+      `[getStaticProps] Variants query completed, found: ${variants?.length || 0} variants`
+    )
 
     // Calculate price range
     let minPrice = product.base_price
@@ -424,23 +426,32 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
     const hasVariants = Boolean(variants && variants.length > 0)
 
     if (hasVariants && variants) {
-      const variantPrices = variants.map((v: { price_adjustment: number }) => product.base_price + v.price_adjustment)
+      const variantPrices = variants.map(
+        (v: { price_adjustment: number }) => product.base_price + v.price_adjustment
+      )
       minPrice = Math.min(...variantPrices)
       maxPrice = Math.max(...variantPrices)
     }
 
     // Extract unique options for display
-    const uniqueSizes = Array.from(new Set(variants?.map((v: { size?: string }) => v.size).filter(Boolean) || [])) as string[]
-    const uniqueColors = Array.from(new Set(variants?.map((v: { color?: string }) => v.color).filter(Boolean) || [])) as string[]
-    const uniqueMaterials = Array.from(new Set(variants?.map((v: { material?: string }) => v.material).filter(Boolean) || [])) as string[]
+    const uniqueSizes = Array.from(
+      new Set(variants?.map((v: { size?: string }) => v.size).filter(Boolean) || [])
+    ) as string[]
+    const uniqueColors = Array.from(
+      new Set(variants?.map((v: { color?: string }) => v.color).filter(Boolean) || [])
+    ) as string[]
+    const uniqueMaterials = Array.from(
+      new Set(variants?.map((v: { material?: string }) => v.material).filter(Boolean) || [])
+    ) as string[]
 
     console.log(`[getStaticProps] Returning data for: ${product.name}`)
     console.log(`[getStaticProps] Product categories:`, product.categories)
 
     // Handle category data safely
-    const categoryData = product.categories && Array.isArray(product.categories) && product.categories.length > 0 
-      ? product.categories[0] 
-      : { id: null, name: 'Uncategorized', slug: 'uncategorized' }
+    const categoryData =
+      product.categories && Array.isArray(product.categories) && product.categories.length > 0
+        ? product.categories[0]
+        : { id: null, name: 'Uncategorized', slug: 'uncategorized' }
 
     return {
       props: {

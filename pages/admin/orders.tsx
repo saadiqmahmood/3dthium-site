@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { useCallback, useEffect, useState } from 'react'
-import { ProductVariant } from '@/types'
+import type { ProductVariant } from '@/types'
 
 const ORDER_STATUSES = [
   'pending',

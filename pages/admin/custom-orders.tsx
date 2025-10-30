@@ -41,13 +41,15 @@ export default function AdminCustomOrdersPage() {
 
         if (!response.ok) {
           console.error('❌ [AdminCustomOrders] Error fetching custom orders:', response.status)
-          const errorData = await response.json().catch(() => ({ error: 'Failed to fetch custom orders' }))
+          const errorData = await response
+            .json()
+            .catch(() => ({ error: 'Failed to fetch custom orders' }))
           throw new Error(errorData.error || 'Failed to fetch custom orders')
         }
 
         const data = await response.json()
         console.log('✅ [AdminCustomOrders] Custom orders fetched successfully:', data?.length || 0)
-        
+
         if (!Array.isArray(data)) {
           console.warn('⚠️ [AdminCustomOrders] API returned non-array data:', data)
           setOrders([])
@@ -103,7 +105,7 @@ export default function AdminCustomOrdersPage() {
   return (
     <div className="w-full mx-auto bg-white p-16">
       <h2 className="text-2xl font-bold mb-6 text-stone-800">Custom Orders</h2>
-      
+
       {/* Toast Notification */}
       {toast && (
         <Toast
@@ -112,7 +114,7 @@ export default function AdminCustomOrdersPage() {
           onClose={() => setToast(null)}
         />
       )}
-      
+
       {/* Error State */}
       {error && !loading && (
         <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">

@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
-import { ShippingAddress, ShippingRate } from '@/types'
+import type { ShippingAddress, ShippingRate } from '@/types'
 
 export default function CheckoutPage() {
   const { cart } = useCart()

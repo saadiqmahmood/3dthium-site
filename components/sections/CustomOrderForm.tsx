@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import React, { useState } from 'react'
+import type React from 'react'
+import { useState } from 'react'
 import { useSupabase } from '@/context/SupabaseContext'
 
 export default function CustomOrderForm() {
@@ -92,7 +93,9 @@ export default function CustomOrderForm() {
   if (!supabase) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-        <p className="text-red-800">Error: Supabase client is not available. Please refresh the page.</p>
+        <p className="text-red-800">
+          Error: Supabase client is not available. Please refresh the page.
+        </p>
       </div>
     )
   }

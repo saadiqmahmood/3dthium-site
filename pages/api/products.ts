@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
-import { NextApiRequest, NextApiResponse } from 'next'
-import { ProductVariantNew } from '@/types'
+import type { NextApiRequest, NextApiResponse } from 'next'
+import type { ProductVariantNew } from '@/types'
 
 // Public client for frontend consumption
 const supabase = createClient(

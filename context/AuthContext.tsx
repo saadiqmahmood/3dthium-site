@@ -1,5 +1,5 @@
-import { Session, User } from '@supabase/supabase-js'
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
+import type { Session, User } from '@supabase/supabase-js'
+import { createContext, type ReactNode, useContext, useEffect, useState } from 'react'
 import { useSupabase } from './SupabaseContext'
 
 type AuthContextType = {
@@ -242,14 +242,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Calculate time until expiration
     const timeUntilExpiry = session.expires_at - Math.floor(Date.now() / 1000)
-    
+
     // Only set timer if session hasn't expired yet
     if (timeUntilExpiry > 0) {
       // Set timer to check 1 second after expiration (in milliseconds)
       const timeoutMs = (timeUntilExpiry + 1) * 1000
-      
+
       console.log(`⏰ [AuthContext] Setting session expiration check in ${timeUntilExpiry} seconds`)
-      
+
       const timeoutId = setTimeout(() => {
         checkExpiration()
       }, timeoutMs)

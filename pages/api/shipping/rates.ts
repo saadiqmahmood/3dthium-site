@@ -1,5 +1,5 @@
-import { NextApiRequest, NextApiResponse } from 'next'
-import { getShippingRates, ShipmentRequest, ShippingAddress } from '@/lib/shippoClient'
+import type { NextApiRequest, NextApiResponse } from 'next'
+import { getShippingRates, type ShipmentRequest, type ShippingAddress } from '@/lib/shippoClient'
 
 // Helper function to get size multiplier
 function getSizeMultiplier(size: string): number {

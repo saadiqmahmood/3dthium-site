@@ -7,7 +7,7 @@ export const config = {
 }
 
 import { createClient } from '@supabase/supabase-js'
-import { NextApiRequest, NextApiResponse } from 'next'
+import type { NextApiRequest, NextApiResponse } from 'next'
 import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {

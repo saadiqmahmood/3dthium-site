@@ -1,6 +1,6 @@
 import formidable from 'formidable'
 import { promises as fs } from 'fs'
-import { NextApiRequest, NextApiResponse } from 'next'
+import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSupabaseAdmin } from '@/lib/supabaseClient'
 
 export const config = {

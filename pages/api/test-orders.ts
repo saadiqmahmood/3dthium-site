@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { NextApiRequest, NextApiResponse } from 'next'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

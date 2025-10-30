@@ -55,7 +55,7 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (!supabaseContext) return
-    
+
     console.log('📄 [AccountPage] User or section changed:', {
       hasUser: !!user,
       section,
@@ -75,7 +75,7 @@ export default function AccountPage() {
       return
     }
     const { client: supabaseClient } = supabaseContext
-    
+
     console.log('🔄 [AccountPage] Starting fetchOrders...')
     setOrdersLoading(true)
     try {

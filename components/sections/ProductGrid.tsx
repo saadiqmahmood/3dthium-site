@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import ProductCard from '@/components/ui/ProductCard'
-import { ProductVariantNew } from '@/types'
+import type { ProductVariantNew } from '@/types'
 
 // New product type from products_new API
 type ProductNew = {

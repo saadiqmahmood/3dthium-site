@@ -1,5 +1,5 @@
-import { SupabaseClient } from '@supabase/supabase-js'
-import { createContext, ReactNode, useContext } from 'react'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { createContext, type ReactNode, useContext } from 'react'
 
 type SupabaseContextType = {
   client: SupabaseClient

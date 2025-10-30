@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase } from './utils/supabase/server'
 
 export async function middleware(req: NextRequest) {

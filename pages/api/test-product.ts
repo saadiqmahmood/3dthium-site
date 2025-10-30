@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { NextApiRequest, NextApiResponse } from 'next'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 // Test API endpoint to debug the issue
 const supabase = createClient(
@@ -63,18 +63,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (joinError) {
       console.error('❌ [TEST API] Error with join:', joinError)
-      return res.status(200).json({ 
+      return res.status(200).json({
         product: product,
         joinError: joinError.message,
-        message: 'Product found but join failed'
+        message: 'Product found but join failed',
       })
     }
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       product: productWithCategory,
-      message: 'Product found with category'
+      message: 'Product found with category',
     })
-
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred.'
     console.error('❌ [TEST API] Unexpected error:', errorMessage)

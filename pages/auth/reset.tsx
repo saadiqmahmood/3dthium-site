@@ -9,10 +9,20 @@ export default function PasswordResetPage() {
   const [validSession, setValidSession] = useState(false)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
   const router = useRouter()
-  const { client: supabase } = useSupabase()
+  const supabaseContext = useSupabase()
 
   // Check if session is valid (link not expired)
   useEffect(() => {
+    if (!supabaseContext) {
+      setToast({
+        message: 'Supabase client not available. Please refresh the page.',
+        type: 'error',
+      })
+      setLoading(false)
+      return
+    }
+    const { client: supabase } = supabaseContext
+
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession()
       if (data.session) {
@@ -27,10 +37,16 @@ export default function PasswordResetPage() {
     }
 
     checkSession()
-  }, [supabase])
+  }, [supabaseContext])
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!supabaseContext) {
+      setToast({ message: 'Supabase client not available', type: 'error' })
+      return
+    }
+    const { client: supabase } = supabaseContext
+
     setLoading(true)
 
     const { error } = await supabase.auth.updateUser({ password: newPassword })
