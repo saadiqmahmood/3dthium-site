@@ -43,11 +43,18 @@ type Order = {
 type OrderItem = {
   id: string
   quantity: number
-  size: string
+  size: string | null
   price_at_purchase: number
   products?: { id: string; title: string }
   product_variants?: { id: string; color: string; image_url: string }
   variant_id?: string
+  variant_new?: {
+    size?: string | null
+    color?: string | null
+    material?: string | null
+    image_url?: string | null
+  }
+  product_new?: { id: string; name: string } | null
 }
 
 export default function AdminOrdersPage() {
@@ -192,8 +199,16 @@ export default function AdminOrdersPage() {
                 (item: {
                   id: string
                   quantity: number
-                  size: string
+                  size: string | null
                   price_at_purchase: number
+                  variant_id?: string
+                  variant_new?: {
+                    size?: string | null
+                    color?: string | null
+                    material?: string | null
+                    image_url?: string | null
+                  }
+                  product_new?: { id: string; name: string } | null
                   products?: { id: string; title: string } | { id: string; title: string }[]
                   product_variants?:
                     | { id: string; color: string; image_url: string }
@@ -203,6 +218,9 @@ export default function AdminOrdersPage() {
                   quantity: item.quantity,
                   size: item.size,
                   price_at_purchase: item.price_at_purchase,
+                  variant_id: item.variant_id,
+                  variant_new: item.variant_new,
+                  product_new: item.product_new,
                   products:
                     item.products && !Array.isArray(item.products)
                       ? { id: item.products.id, title: item.products.title }
@@ -214,10 +232,6 @@ export default function AdminOrdersPage() {
                           color: item.product_variants.color,
                           image_url: item.product_variants.image_url,
                         }
-                      : undefined,
-                  variant_id:
-                    item.product_variants && !Array.isArray(item.product_variants)
-                      ? item.product_variants.id
                       : undefined,
                 })
               ) as OrderItem[])
@@ -309,8 +323,16 @@ export default function AdminOrdersPage() {
                 (item: {
                   id: string
                   quantity: number
-                  size: string
+                  size: string | null
                   price_at_purchase: number
+                  variant_id?: string
+                  variant_new?: {
+                    size?: string | null
+                    color?: string | null
+                    material?: string | null
+                    image_url?: string | null
+                  }
+                  product_new?: { id: string; name: string } | null
                   products?: { id: string; title: string } | { id: string; title: string }[]
                   product_variants?:
                     | { id: string; color: string; image_url: string }
@@ -320,6 +342,9 @@ export default function AdminOrdersPage() {
                   quantity: item.quantity,
                   size: item.size,
                   price_at_purchase: item.price_at_purchase,
+                  variant_id: item.variant_id,
+                  variant_new: item.variant_new,
+                  product_new: item.product_new,
                   products:
                     item.products && !Array.isArray(item.products)
                       ? { id: item.products.id, title: item.products.title }
@@ -331,10 +356,6 @@ export default function AdminOrdersPage() {
                           color: item.product_variants.color,
                           image_url: item.product_variants.image_url,
                         }
-                      : undefined,
-                  variant_id:
-                    item.product_variants && !Array.isArray(item.product_variants)
-                      ? item.product_variants.id
                       : undefined,
                 })
               ) as OrderItem[])
@@ -708,92 +729,184 @@ export default function AdminOrdersPage() {
                   </div>
                 )}
 
-                <div className="mb-4">
-                  <span className="font-semibold text-gray-800">Items:</span>
-                  <div className="mt-4 flex flex-col gap-6">
-                    {editableOrderItems.length === 0 && (
-                      <div className="text-gray-500">No items</div>
-                    )}
-                    {editableOrderItems.map((item, idx) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg"
-                      >
-                        <Image
-                          src={item.product_variants?.image_url || '/no-image.png'}
-                          alt={item.products?.title || ''}
-                          width={56}
-                          height={56}
-                          className="object-cover rounded"
-                        />
-                        <div className="flex-1 flex flex-col gap-2">
-                          <div className="font-medium text-gray-900">{item.products?.title}</div>
-                          <div className="text-sm text-gray-500">
-                            Color:
-                            <span className="ml-2 font-semibold text-gray-800">
-                              {(variantsByProduct[String(item.products?.id)] || []).find(
-                                (v) => v.id === item.variant_id
-                              )?.color ||
-                                item.product_variants?.color ||
-                                ''}
-                            </span>
-                            <select
-                              value={item.variant_id}
-                              onChange={(e) =>
-                                handleOrderItemChange(idx, 'variant_id', e.target.value)
-                              }
-                              className="ml-2 border rounded px-2 py-1 text-stone-800"
-                            >
-                              {(variantsByProduct[String(item.products?.id)] || []).map(
-                                (variant) => (
-                                  <option key={variant.id} value={variant.id}>
-                                    {variant.color}
-                                  </option>
-                                )
-                              )}
-                            </select>
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            Size:
-                            <select
-                              value={item.size}
-                              onChange={(e) => handleOrderItemChange(idx, 'size', e.target.value)}
-                              className="ml-2 border rounded px-2 py-1 text-stone-800"
-                            >
-                              {SIZES.map((size) => (
-                                <option key={size} value={size}>
-                                  {size}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            Qty:
-                            <input
-                              type="number"
-                              min={1}
-                              value={item.quantity}
-                              onChange={(e) =>
-                                handleOrderItemChange(idx, 'quantity', Number(e.target.value))
-                              }
-                              className="ml-2 border rounded px-2 py-1 w-16 text-stone-800"
-                            />
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-medium text-gray-900">
-                            £{(item.price_at_purchase * item.quantity).toFixed(2)}
-                          </div>
-                        </div>
+                <div className="mb-6">
+                  <h4 className="text-lg font-bold text-gray-900 mb-4">
+                    Order Items ({editableOrderItems.length})
+                  </h4>
+                  <div className="space-y-4">
+                    {editableOrderItems.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                        No items in this order
                       </div>
-                    ))}
+                    ) : (
+                      editableOrderItems.map((item, idx) => {
+                        const variant = item.variant_new || item.product_variants
+                        const productName =
+                          item.product_new?.name || item.products?.title || 'Product'
+                        const imageUrl =
+                          variant?.image_url ||
+                          item.product_variants?.image_url ||
+                          '/no-image.png'
+                        const color = variant?.color || item.product_variants?.color
+                        const size = variant?.size || item.size
+                        const material = variant?.material
+
+                        return (
+                          <div
+                            key={item.id}
+                            className="flex flex-col sm:flex-row gap-4 p-5 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200 shadow-sm"
+                          >
+                            {/* Product Image */}
+                            <div className="relative flex-shrink-0 w-full sm:w-24 h-24 bg-gray-100 rounded-lg overflow-hidden">
+                              <Image
+                                src={imageUrl}
+                                alt={productName}
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 640px) 100vw, 96px"
+                              />
+                            </div>
+
+                            {/* Product Details */}
+                            <div className="flex-1 min-w-0">
+                              <h5 className="text-lg font-semibold text-gray-900 mb-3">
+                                {productName}
+                              </h5>
+
+                              {/* Variant Details - Beautiful Badges */}
+                              <div className="flex flex-wrap gap-2 mb-4">
+                                {color && (
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                    <svg
+                                      className="w-4 h-4 mr-1.5"
+                                      fill="currentColor"
+                                      viewBox="0 0 20 20"
+                                    >
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                                    Color: {color}
+                                  </span>
+                                )}
+                                {size && (
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                    <svg
+                                      className="w-4 h-4 mr-1.5"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                                      />
+                                    </svg>
+                                    Size: {size}
+                                  </span>
+                                )}
+                                {material && (
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-50 text-green-700 border border-green-200">
+                                    <svg
+                                      className="w-4 h-4 mr-1.5"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                      />
+                                    </svg>
+                                    Material: {material}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Editable Fields */}
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                                    Size
+                                  </label>
+                                  <select
+                                    value={item.size || ''}
+                                    onChange={(e) => handleOrderItemChange(idx, 'size', e.target.value)}
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  >
+                                    {SIZES.map((s) => (
+                                      <option key={s} value={s}>
+                                        {s}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                                    Quantity
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    value={item.quantity}
+                                    onChange={(e) =>
+                                      handleOrderItemChange(idx, 'quantity', Number(e.target.value))
+                                    }
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                                    Variant
+                                  </label>
+                                  <select
+                                    value={item.variant_id || ''}
+                                    onChange={(e) =>
+                                      handleOrderItemChange(idx, 'variant_id', e.target.value)
+                                    }
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  >
+                                    {(variantsByProduct[String(item.products?.id)] || []).map(
+                                      (variant) => (
+                                        <option key={variant.id} value={variant.id}>
+                                          {variant.color || 'Default'}
+                                        </option>
+                                      )
+                                    )}
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Price */}
+                            <div className="flex-shrink-0 text-right">
+                              <p className="text-xl font-bold text-gray-900">
+                                £{(item.price_at_purchase * item.quantity).toFixed(2)}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {item.quantity} × £{item.price_at_purchase.toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      })
+                    )}
                   </div>
-                  <button
-                    onClick={handleSaveOrderItems}
-                    className="mt-4 text-stone-800 border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 transition"
-                  >
-                    Save Items
-                  </button>
+                  {editableOrderItems.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleSaveOrderItems}
+                      className="mt-6 w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md hover:shadow-lg"
+                    >
+                      Save Changes
+                    </button>
+                  )}
                 </div>
                 <div className="flex flex-col gap-2 mt-4">
                   <label className="block text-sm font-medium text-stone-800 mb-1">Status</label>
