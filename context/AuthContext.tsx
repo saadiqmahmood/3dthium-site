@@ -222,6 +222,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { data, error }
   }
 
+  // Check session expiration periodically
+  useEffect(() => {
+    if (!session?.expires_at) return
+
+    const checkExpiration = () => {
+      const now = Math.floor(Date.now() / 1000)
+      if (session.expires_at && session.expires_at < now) {
+        console.log('⚠️ [AuthContext] Session expired - logging out automatically')
+        client.auth.signOut()
+        setSession(null)
+        setUser(null)
+        setIsAdmin(false)
+      }
+    }
+
+    // Check immediately
+    checkExpiration()
+
+    // Calculate time until expiration
+    const timeUntilExpiry = session.expires_at - Math.floor(Date.now() / 1000)
+    
+    // Only set timer if session hasn't expired yet
+    if (timeUntilExpiry > 0) {
+      // Set timer to check 1 second after expiration (in milliseconds)
+      const timeoutMs = (timeUntilExpiry + 1) * 1000
+      
+      console.log(`⏰ [AuthContext] Setting session expiration check in ${timeUntilExpiry} seconds`)
+      
+      const timeoutId = setTimeout(() => {
+        checkExpiration()
+      }, timeoutMs)
+
+      return () => {
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [session, client])
+
   // Log state changes
   useEffect(() => {
     console.log('📊 [AuthContext] State updated:', {
@@ -231,6 +269,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       loading,
       userId: user?.id,
       email: user?.email,
+      expiresAt: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : null,
     })
   }, [user, session, isAdmin, loading])
 

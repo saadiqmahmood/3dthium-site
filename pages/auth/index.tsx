@@ -8,8 +8,7 @@ import { useSupabase } from '@/context/SupabaseContext'
 export default function AuthPage() {
   const router = useRouter()
   const { signIn, signUp } = useAuth()
-  const { client: supabase } = useSupabase()
-
+  const supabaseContext = useSupabase()
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,6 +16,11 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
   const [resetMode, setResetMode] = useState(false)
+
+  if (!supabaseContext) {
+    return <div className="p-8">Error: Supabase client not available</div>
+  }
+  const { client: supabase } = supabaseContext
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault()
