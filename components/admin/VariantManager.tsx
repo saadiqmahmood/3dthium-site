@@ -52,9 +52,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
     }
   }
 
-  const handleCreateVariant = async (e: React.FormEvent) => {
-    e.preventDefault()
-
+  const handleCreateVariant = async () => {
     // Validate at least one attribute
     if (!formData.size && !formData.color && !formData.material) {
       setToast({
@@ -204,7 +202,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
       {/* Create Variant Form */}
       <div className="border rounded-lg p-6 bg-gray-50">
         <h3 className="text-lg font-semibold mb-4 text-stone-800">Add New Variant</h3>
-        <form onSubmit={handleCreateVariant} className="space-y-4">
+        <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Size */}
             <div>
@@ -304,13 +302,14 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
           </div>
 
           <button
-            type="submit"
+            type="button"
+            onClick={handleCreateVariant}
             disabled={saving}
             className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
           >
             {saving ? 'Creating...' : 'Add Variant'}
           </button>
-        </form>
+        </div>
       </div>
 
       {/* Variants List */}
