@@ -47,8 +47,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const variantData = req.body
 
+      console.log('🔍 [VARIANT CREATE] Starting creation:', {
+        productId,
+        variantData,
+        timestamp: new Date().toISOString(),
+      })
+
       // Validate at least one attribute is provided
       if (!variantData.size && !variantData.color && !variantData.material) {
+        console.error('❌ [VARIANT CREATE] Validation failed: No attributes provided')
         return res.status(400).json({
           error: 'At least one attribute (size, color, or material) is required',
         })
@@ -95,6 +102,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         variantData.is_available = true
       }
 
+      console.log('💾 [VARIANT CREATE] Attempting insert:', {
+        product_id: productId,
+        ...variantData,
+      })
+
       // Insert variant
       const { data: newVariant, error } = await supabaseAdmin
         .from('product_variants_new')
@@ -108,7 +120,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .single()
 
       if (error) {
-        console.error('Error creating variant:', error)
+        console.error('❌ [VARIANT CREATE] Database error:', {
+          error,
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        })
 
         // Check for unique constraint violation
         if (error.code === '23505') {
@@ -117,8 +135,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           })
         }
 
-        return res.status(500).json({ error: error.message })
+        return res.status(500).json({ 
+          error: error.message,
+          details: error.details,
+          hint: error.hint,
+        })
       }
+
+      console.log('✅ [VARIANT CREATE] Success:', {
+        variantId: newVariant?.id,
+        sku: newVariant?.sku,
+      })
 
       return res.status(201).json(newVariant)
     } catch (error) {
