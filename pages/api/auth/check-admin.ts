@@ -13,8 +13,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Missing userId' })
     }
 
-    console.log('🔍 [API/check-admin] Checking admin status for user:', userId)
-
     const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin
       .from('users')
@@ -23,14 +21,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .single()
 
     if (error) {
-      console.error('❌ [API/check-admin] Error checking admin status:', error)
       return res.status(500).json({ error: 'Failed to check admin status' })
     }
 
-    console.log('✅ [API/check-admin] Admin status result:', data)
     res.status(200).json({ isAdmin: !!data?.is_admin })
-  } catch (error) {
-    console.error('❌ [API/check-admin] Exception checking admin status:', error)
+  } catch {
     res.status(500).json({ error: 'Failed to check admin status' })
   }
 }

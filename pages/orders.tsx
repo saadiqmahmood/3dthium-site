@@ -286,12 +286,7 @@ export default function OrdersPage() {
             onClick={() => router.push('/products')}
             className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -314,7 +309,9 @@ export default function OrdersPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold text-gray-900">Order #{order.id.slice(-8)}</h3>
+                      <h3 className="text-xl font-bold text-gray-900">
+                        Order #{order.id.slice(-8)}
+                      </h3>
                       {getStatusBadge(order.status)}
                     </div>
                     <p className="text-sm text-gray-500">
@@ -335,7 +332,9 @@ export default function OrdersPage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-blue-600">£{order.total_price.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      £{order.total_price.toFixed(2)}
+                    </p>
                     <p className="text-xs text-gray-500 mt-1">Total Amount</p>
                   </div>
                 </div>
@@ -350,11 +349,13 @@ export default function OrdersPage() {
                   {order.order_items?.map((item) => {
                     const variantNew = item.variant_new
                     const productVariants = item.product_variants
-                    const productName = item.product_new?.name || item.products?.title || item.products?.name || 'Product'
+                    const productName =
+                      item.product_new?.name ||
+                      item.products?.title ||
+                      item.products?.name ||
+                      'Product'
                     const imageUrl =
-                      variantNew?.image_url ||
-                      productVariants?.image_url ||
-                      '/placeholder.png'
+                      variantNew?.image_url || productVariants?.image_url || '/placeholder.png'
                     const color = variantNew?.color || productVariants?.color
                     const size = variantNew?.size || item.size
                     const material = variantNew?.material
@@ -409,7 +410,9 @@ export default function OrdersPage() {
                           <div className="flex items-center gap-4 text-sm text-gray-600">
                             <span className="font-medium">Quantity: {item.quantity}</span>
                             <span>×</span>
-                            <span className="font-medium">£{item.price_at_purchase.toFixed(2)}</span>
+                            <span className="font-medium">
+                              £{item.price_at_purchase.toFixed(2)}
+                            </span>
                           </div>
                         </div>
 

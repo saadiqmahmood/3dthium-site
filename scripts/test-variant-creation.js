@@ -194,13 +194,15 @@ async function checkRLSPolicies() {
           with_check
         FROM pg_policies 
         WHERE tablename = 'product_variants_new';
-      `
+      `,
     })
 
     if (error && !error.message.includes('function')) {
       // RPC might not exist, that's okay
       console.log('⚠️  Cannot query policies directly (no exec function)')
-      console.log('💡 Check policies manually in Supabase Dashboard → Database → product_variants_new → Policies')
+      console.log(
+        '💡 Check policies manually in Supabase Dashboard → Database → product_variants_new → Policies'
+      )
       return
     }
 
@@ -220,7 +222,7 @@ async function checkRLSPolicies() {
 // Run all tests
 async function runTests() {
   console.log('\n')
-  
+
   // Check table
   const tableExists = await checkTableExists()
   if (!tableExists) {
@@ -250,7 +252,7 @@ async function runTests() {
   console.log('Product Found:', product ? '✅' : '❌')
   console.log('Variant Creation:', success ? '✅ WORKING' : '❌ BROKEN')
   console.log('═'.repeat(60))
-  
+
   if (success) {
     console.log('\n🎉 All tests passed! Variation system is functional.')
     console.log('💡 If UI still broken, check frontend console for errors.\n')
@@ -266,4 +268,3 @@ runTests().catch((error) => {
   console.error('\n💥 Fatal error:', error)
   process.exit(1)
 })
-

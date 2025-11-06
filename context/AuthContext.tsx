@@ -190,7 +190,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Set timer to check 1 second after expiration (in milliseconds)
       const timeoutMs = (timeUntilExpiry + 1) * 1000
 
-
       const timeoutId = setTimeout(() => {
         checkExpiration()
       }, timeoutMs)
@@ -200,7 +199,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   }, [session, client])
-
 
   return (
     <AuthContext.Provider
