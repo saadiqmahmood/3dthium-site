@@ -3,10 +3,10 @@ import { getSupabaseAdmin } from '../../../lib/supabaseClient'
 
 /**
  * Order Confirmation Email API
- * 
+ *
  * This endpoint sends order confirmation emails to customers.
  * To use this, you'll need to integrate an email service (Resend, SendGrid, etc.)
- * 
+ *
  * Example usage:
  * POST /api/admin/send-order-confirmation
  * Body: { orderId: "uuid" }
@@ -48,11 +48,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Format order items for email
     const orderItems = (order.order_items || []).map((item: unknown) => {
       const i = item as Record<string, unknown>
-      const variantNew = i.variant_new as { size?: string | null; color?: string | null; material?: string | null } | undefined
+      const variantNew = i.variant_new as
+        | { size?: string | null; color?: string | null; material?: string | null }
+        | undefined
       const productNew = i.product_new as { name?: string } | undefined
       const products = i.products as { title?: string } | undefined
       const productVariants = i.product_variants as { color?: string } | undefined
-      
+
       return {
         name: productNew?.name || products?.title || 'Product',
         quantity: i.quantity as number,
@@ -299,21 +301,29 @@ function generateOrderConfirmationEmail({
       </div>
     </div>
 
-    ${shippingAddress ? `
+    ${
+      shippingAddress
+        ? `
     <div class="section">
       <div class="section-title">Shipping Address</div>
       <div class="shipping">${shippingAddress}</div>
     </div>
-    ` : ''}
+    `
+        : ''
+    }
 
-    ${trackingNumber ? `
+    ${
+      trackingNumber
+        ? `
     <div class="section">
       <div class="tracking">
         <strong>Tracking Information:</strong><br>
         ${trackingUrl ? `<a href="${trackingUrl}" class="tracking-link">${trackingNumber}</a>` : trackingNumber}
       </div>
     </div>
-    ` : ''}
+    `
+        : ''
+    }
 
     <div class="footer">
       <p>Thank you for your order!</p>
@@ -324,4 +334,3 @@ function generateOrderConfirmationEmail({
 </html>
   `.trim()
 }
-

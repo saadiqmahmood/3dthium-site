@@ -135,7 +135,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           })
         }
 
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: error.message,
           details: error.details,
           hint: error.hint,

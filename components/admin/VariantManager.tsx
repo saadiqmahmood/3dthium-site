@@ -52,9 +52,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
     }
   }
 
-  const handleCreateVariant = async (e: React.FormEvent) => {
-    e.preventDefault()
-
+  const handleCreateVariant = async () => {
     // Validate at least one attribute
     if (!formData.size && !formData.color && !formData.material) {
       setToast({
@@ -65,7 +63,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
     }
 
     setSaving(true)
-    
+
     const payload = {
       size: formData.size || null,
       color: formData.color || null,
@@ -75,9 +73,9 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
       is_available: formData.is_available,
       stock_quantity: 0, // Print-on-demand
     }
-    
+
     console.log('🚀 [VARIANT MANAGER] Creating variant:', payload)
-    
+
     try {
       const response = await fetch(`/api/admin/product-variants/${productId}`, {
         method: 'POST',
@@ -105,9 +103,9 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
       } else {
         const error = await response.json()
         console.error('❌ [VARIANT MANAGER] Error response:', error)
-        setToast({ 
-          message: error.details || error.hint || error.error || 'Failed to create variant', 
-          type: 'error' 
+        setToast({
+          message: error.details || error.hint || error.error || 'Failed to create variant',
+          type: 'error',
         })
       }
     } catch (error) {
@@ -204,7 +202,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
       {/* Create Variant Form */}
       <div className="border rounded-lg p-6 bg-gray-50">
         <h3 className="text-lg font-semibold mb-4 text-stone-800">Add New Variant</h3>
-        <form onSubmit={handleCreateVariant} className="space-y-4">
+        <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Size */}
             <div>
@@ -216,7 +214,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
                 value={formData.size}
                 onChange={(e) => setFormData({ ...formData, size: e.target.value })}
                 placeholder="e.g., 150mm, 180mm"
-                className="w-full border rounded px-3 py-2 placeholder:text-stone-600"
+                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
               />
             </div>
 
@@ -230,7 +228,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
                 value={formData.color}
                 onChange={(e) => setFormData({ ...formData, color: e.target.value })}
                 placeholder="e.g., White, Black"
-                className="w-full border rounded px-3 py-2 placeholder:text-stone-600"
+                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
               />
             </div>
 
@@ -244,7 +242,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
                 value={formData.material}
                 onChange={(e) => setFormData({ ...formData, material: e.target.value })}
                 placeholder="e.g., PLA, PETG"
-                className="w-full border rounded px-3 py-2 placeholder:text-stone-600"
+                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
               />
             </div>
           </div>
@@ -267,7 +265,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
                 value={formData.price_adjustment}
                 onChange={(e) => setFormData({ ...formData, price_adjustment: e.target.value })}
                 placeholder="0.00"
-                className="w-full border rounded px-3 py-2 placeholder:text-stone-600"
+                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
               />
               <p className="text-xs text-stone-700 mt-1">
                 Positive = more expensive, negative = cheaper
@@ -285,7 +283,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
                 value={formData.sku}
                 onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
                 placeholder="PROD-150-WHT-PLA"
-                className="w-full border rounded px-3 py-2 placeholder:text-stone-600"
+                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
               />
             </div>
           </div>
@@ -304,13 +302,14 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
           </div>
 
           <button
-            type="submit"
+            type="button"
+            onClick={handleCreateVariant}
             disabled={saving}
             className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
           >
             {saving ? 'Creating...' : 'Add Variant'}
           </button>
-        </form>
+        </div>
       </div>
 
       {/* Variants List */}

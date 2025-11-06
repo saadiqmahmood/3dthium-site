@@ -20,8 +20,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    console.log('🔄 [API/products] Fetching public products...')
-
     // Fetch active products with category information
     const { data: products, error: productsError } = await supabase
       .from('products_new')
@@ -53,8 +51,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ products: [] })
     }
 
-    console.log('✅ [API/products] Products fetched:', products.length)
-
     // Fetch variants for all products
     const productIds = products.map((p) => p.id)
     const { data: variants, error: variantsError } = await supabase
@@ -73,11 +69,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .eq('is_available', true)
 
     if (variantsError) {
-      console.error('❌ [API/products] Error fetching variants:', variantsError)
       return res.status(500).json({ error: 'Failed to fetch variants' })
     }
-
-    console.log('✅ [API/products] Variants fetched:', variants?.length || 0)
 
     // Group variants by product_id
     const variantsByProduct: Record<string, ProductVariantNew[]> = {}
@@ -124,14 +117,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     })
 
-    console.log('✅ [API/products] Returning', result.length, 'products with variants')
-
     // Set cache headers for better performance
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
 
     return res.status(200).json({ products: result })
-  } catch (error) {
-    console.error('❌ [API/products] Unexpected error:', error)
+  } catch {
     return res.status(500).json({ error: 'Internal server error' })
   }
 }
