@@ -65,22 +65,31 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
     }
 
     setSaving(true)
+    
+    const payload = {
+      size: formData.size || null,
+      color: formData.color || null,
+      material: formData.material || null,
+      price_adjustment: Number.parseFloat(formData.price_adjustment) || 0,
+      sku: formData.sku || null,
+      is_available: formData.is_available,
+      stock_quantity: 0, // Print-on-demand
+    }
+    
+    console.log('🚀 [VARIANT MANAGER] Creating variant:', payload)
+    
     try {
       const response = await fetch(`/api/admin/product-variants/${productId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          size: formData.size || null,
-          color: formData.color || null,
-          material: formData.material || null,
-          price_adjustment: Number.parseFloat(formData.price_adjustment) || 0,
-          sku: formData.sku || null,
-          is_available: formData.is_available,
-          stock_quantity: 0, // Print-on-demand
-        }),
+        body: JSON.stringify(payload),
       })
 
+      console.log('📡 [VARIANT MANAGER] Response status:', response.status)
+
       if (response.ok) {
+        const created = await response.json()
+        console.log('✅ [VARIANT MANAGER] Variant created:', created)
         setToast({ message: 'Variant created successfully', type: 'success' })
         // Reset form
         setFormData({
@@ -95,11 +104,15 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
         fetchVariants()
       } else {
         const error = await response.json()
-        setToast({ message: error.error || 'Failed to create variant', type: 'error' })
+        console.error('❌ [VARIANT MANAGER] Error response:', error)
+        setToast({ 
+          message: error.details || error.hint || error.error || 'Failed to create variant', 
+          type: 'error' 
+        })
       }
     } catch (error) {
-      console.error('Error creating variant:', error)
-      setToast({ message: 'Failed to create variant', type: 'error' })
+      console.error('❌ [VARIANT MANAGER] Fetch error:', error)
+      setToast({ message: 'Network error: Failed to create variant', type: 'error' })
     } finally {
       setSaving(false)
     }
