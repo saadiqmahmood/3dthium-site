@@ -214,7 +214,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
                 value={formData.size}
                 onChange={(e) => setFormData({ ...formData, size: e.target.value })}
                 placeholder="e.g., 150mm, 180mm"
-                className="w-full border rounded px-3 py-2 placeholder:text-stone-600"
+                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
               />
             </div>
 
@@ -228,7 +228,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
                 value={formData.color}
                 onChange={(e) => setFormData({ ...formData, color: e.target.value })}
                 placeholder="e.g., White, Black"
-                className="w-full border rounded px-3 py-2 placeholder:text-stone-600"
+                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
               />
             </div>
 
@@ -242,7 +242,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
                 value={formData.material}
                 onChange={(e) => setFormData({ ...formData, material: e.target.value })}
                 placeholder="e.g., PLA, PETG"
-                className="w-full border rounded px-3 py-2 placeholder:text-stone-600"
+                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
               />
             </div>
           </div>
@@ -265,7 +265,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
                 value={formData.price_adjustment}
                 onChange={(e) => setFormData({ ...formData, price_adjustment: e.target.value })}
                 placeholder="0.00"
-                className="w-full border rounded px-3 py-2 placeholder:text-stone-600"
+                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
               />
               <p className="text-xs text-stone-700 mt-1">
                 Positive = more expensive, negative = cheaper
@@ -283,7 +283,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
                 value={formData.sku}
                 onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
                 placeholder="PROD-150-WHT-PLA"
-                className="w-full border rounded px-3 py-2 placeholder:text-stone-600"
+                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
               />
             </div>
           </div>
