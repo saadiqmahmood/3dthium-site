@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     switch (req.method) {
       case 'GET': {
         console.log('🔍 [API/admin/orders/[id]] Fetching order details:', id)
-        
+
         // First fetch order with old schema items
         const { data, error } = await supabaseAdmin
           .from('orders')
@@ -32,48 +32,50 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Enrich order items with product_variants_new data if available
         if (data.order_items && Array.isArray(data.order_items)) {
           const enrichedItems = await Promise.all(
-            data.order_items.map(async (item: {
-              id: string
-              quantity: number
-              size: string | null
-              price_at_purchase: number
-              variant_id?: string
-              product_id?: string
-              products?: unknown
-              product_variants?: unknown
-            }) => {
-              const enrichedItem = { ...item }
-              
-              if (item.variant_id) {
-                // Try fetching from product_variants_new first
-                const { data: newVariant } = await supabaseAdmin
-                  .from('product_variants_new')
-                  .select('id, size, color, material, image_url, price_adjustment')
-                  .eq('id', item.variant_id)
-                  .single()
+            data.order_items.map(
+              async (item: {
+                id: string
+                quantity: number
+                size: string | null
+                price_at_purchase: number
+                variant_id?: string
+                product_id?: string
+                products?: unknown
+                product_variants?: unknown
+              }) => {
+                const enrichedItem = { ...item }
 
-                if (newVariant) {
-                  // Fetch product from products_new for consistency
-                  const { data: newProduct } = await supabaseAdmin
-                    .from('products_new')
-                    .select('id, name')
-                    .eq('id', item.product_id)
+                if (item.variant_id) {
+                  // Try fetching from product_variants_new first
+                  const { data: newVariant } = await supabaseAdmin
+                    .from('product_variants_new')
+                    .select('id, size, color, material, image_url, price_adjustment')
+                    .eq('id', item.variant_id)
                     .single()
 
-                  Object.assign(enrichedItem, {
-                    variant_new: {
-                      size: newVariant.size,
-                      color: newVariant.color,
-                      material: newVariant.material,
-                      image_url: newVariant.image_url,
-                    },
-                    product_new: newProduct ? { id: newProduct.id, name: newProduct.name } : null,
-                  })
-                }
-              }
+                  if (newVariant) {
+                    // Fetch product from products_new for consistency
+                    const { data: newProduct } = await supabaseAdmin
+                      .from('products_new')
+                      .select('id, name')
+                      .eq('id', item.product_id)
+                      .single()
 
-              return enrichedItem
-            })
+                    Object.assign(enrichedItem, {
+                      variant_new: {
+                        size: newVariant.size,
+                        color: newVariant.color,
+                        material: newVariant.material,
+                        image_url: newVariant.image_url,
+                      },
+                      product_new: newProduct ? { id: newProduct.id, name: newProduct.name } : null,
+                    })
+                  }
+                }
+
+                return enrichedItem
+              }
+            )
           )
 
           // Type assertion needed because we're enriching the data structure with additional fields
