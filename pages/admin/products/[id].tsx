@@ -3,6 +3,8 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import ImageManager from '@/components/admin/ImageManager'
 import VariantManager from '@/components/admin/VariantManager'
+import AttributeBuilder from '@/components/admin/AttributeBuilder'
+import VariationGenerator from '@/components/admin/VariationGenerator'
 import Toast from '@/components/ui/Toast'
 
 interface Category {
@@ -62,6 +64,26 @@ export default function EditProductPage() {
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [productAttributes, setProductAttributes] = useState<any[]>([])
+  const [loadingAttributes, setLoadingAttributes] = useState(false)
+
+  // Fetch product attributes
+  const fetchProductAttributes = async () => {
+    if (!id) return
+    
+    setLoadingAttributes(true)
+    try {
+      const response = await fetch(`/api/admin/products/${id}/attributes`)
+      if (response.ok) {
+        const data = await response.json()
+        setProductAttributes(data.attributes || [])
+      }
+    } catch (error) {
+      console.error('Error fetching attributes:', error)
+    } finally {
+      setLoadingAttributes(false)
+    }
+  }
 
   // Fetch product data
   useEffect(() => {
@@ -96,6 +118,7 @@ export default function EditProductPage() {
     }
 
     fetchProduct()
+    fetchProductAttributes()
   }, [id])
 
   // Fetch categories
@@ -645,13 +668,42 @@ export default function EditProductPage() {
 
         {/* Step 4: Variants */}
         {currentStep === 4 && id && (
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-stone-800">Product Variants</h2>
-            <p className="text-stone-800 mb-6">
-              Add size, color, and material variations for this product. Each variant can have its
-              own price adjustment.
-            </p>
-            <VariantManager productId={id as string} basePrice={formData.base_price} />
+          <div className="space-y-8">
+            {/* Attribute Builder */}
+            <div className="bg-gray-50 rounded-lg p-6">
+              <AttributeBuilder
+                productId={id as string}
+                productSlug={formData.slug}
+                categorySlug={selectedCategory?.slug || 'products'}
+                initialAttributes={productAttributes}
+                onAttributesChange={(attrs) => setProductAttributes(attrs)}
+              />
+            </div>
+
+            {/* Variation Generator */}
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4 text-stone-800">Bulk Variation Generator</h2>
+              <p className="text-stone-600 mb-6">
+                Generate all possible combinations from your attributes automatically. For example, 3
+                colors × 2 sizes = 6 variations created instantly.
+              </p>
+              <VariationGenerator
+                productId={id as string}
+                attributes={productAttributes}
+                basePrice={formData.base_price}
+                onGenerated={fetchProductAttributes}
+              />
+            </div>
+
+            {/* Manual Variant Manager (Old System - Still Available) */}
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4 text-stone-800">Manual Variant Management</h2>
+              <p className="text-stone-600 mb-6">
+                View and manage all variants (both auto-generated and manual). You can also add
+                individual variants here if needed.
+              </p>
+              <VariantManager productId={id as string} basePrice={formData.base_price} />
+            </div>
           </div>
         )}
 
