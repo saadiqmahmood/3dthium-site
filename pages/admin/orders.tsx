@@ -753,8 +753,9 @@ export default function AdminOrdersPage() {
                           item.size ||
                           null
                         const material =
-                          ('material' in (item.variant_new || {}) ? item.variant_new?.material : null) ||
-                          null
+                          ('material' in (item.variant_new || {})
+                            ? item.variant_new?.material
+                            : null) || null
 
                         return (
                           <div
@@ -842,7 +843,9 @@ export default function AdminOrdersPage() {
                                   </label>
                                   <select
                                     value={item.size || ''}
-                                    onChange={(e) => handleOrderItemChange(idx, 'size', e.target.value)}
+                                    onChange={(e) =>
+                                      handleOrderItemChange(idx, 'size', e.target.value)
+                                    }
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                   >
                                     {SIZES.map((s) => (

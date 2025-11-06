@@ -63,7 +63,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
     }
 
     setSaving(true)
-    
+
     const payload = {
       size: formData.size || null,
       color: formData.color || null,
@@ -73,9 +73,9 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
       is_available: formData.is_available,
       stock_quantity: 0, // Print-on-demand
     }
-    
+
     console.log('🚀 [VARIANT MANAGER] Creating variant:', payload)
-    
+
     try {
       const response = await fetch(`/api/admin/product-variants/${productId}`, {
         method: 'POST',
@@ -103,9 +103,9 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
       } else {
         const error = await response.json()
         console.error('❌ [VARIANT MANAGER] Error response:', error)
-        setToast({ 
-          message: error.details || error.hint || error.error || 'Failed to create variant', 
-          type: 'error' 
+        setToast({
+          message: error.details || error.hint || error.error || 'Failed to create variant',
+          type: 'error',
         })
       }
     } catch (error) {

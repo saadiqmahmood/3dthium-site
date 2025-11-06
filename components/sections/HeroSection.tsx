@@ -23,6 +23,21 @@ const heroImages = [
 
 export default function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
+  const [particles, setParticles] = useState<
+    Array<{ left: number; top: number; delay: number; duration: number }>
+  >([])
+
+  // Generate particles on client-side only
+  useEffect(() => {
+    setParticles(
+      [...Array(20)].map(() => ({
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        delay: Math.random() * 3,
+        duration: 2 + Math.random() * 3,
+      }))
+    )
+  }, [])
   const [scrollY, setScrollY] = useState(0)
 
   useEffect(() => {
@@ -44,15 +59,15 @@ export default function HeroSection() {
 
       {/* Floating Particles */}
       <div className="absolute inset-0">
-        {[...Array(20)].map((_, i) => (
+        {particles.map((particle, i) => (
           <div
             key={i}
             className="absolute w-2 h-2 bg-white/30 rounded-full animate-pulse"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
+              animationDelay: `${particle.delay}s`,
+              animationDuration: `${particle.duration}s`,
             }}
           ></div>
         ))}
