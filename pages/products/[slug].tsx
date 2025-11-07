@@ -130,56 +130,60 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-20 px-6">
+    <div className="min-h-screen bg-zinc-950">
+      <div className="max-w-7xl mx-auto py-24 px-6">
       {/* Back button */}
       <button
         type="button"
         onClick={() => router.back()}
-        className="ml-2 mb-6 text-blue-600 hover:text-blue-800 text-sm flex items-center"
+        className="ml-2 mb-6 text-emerald-400 hover:text-blue-800 text-sm flex items-center"
       >
         ← Back
       </button>
 
-      <div className="grid grid-cols-1 md:grid-cols-[400px_1fr] gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Product Image */}
         <div>
-          <h1 className="text-3xl font-bold text-stone-800 pb-10">{product.name}</h1>
-          <div className="relative">
-            <Image
-              src={displayImage}
-              alt={product.name}
-              className="w-full h-auto rounded-lg"
-              width={1000}
-              height={1000}
-            />
-            {/* Gallery images */}
-            {product.gallery_images && product.gallery_images.length > 0 && (
-              <div className="mt-4 grid grid-cols-4 gap-2">
-                {product.gallery_images.slice(0, 4).map((image, index) => (
-                  <Image
-                    key={index}
-                    src={image}
-                    alt={`${product.name} gallery ${index + 1}`}
-                    className="w-full h-20 object-cover rounded cursor-pointer hover:opacity-75"
-                    width={100}
-                    height={100}
-                    onClick={() => {
-                      /* TODO: Implement gallery modal */
-                    }}
-                  />
-                ))}
-              </div>
-            )}
+          <div className="sticky top-24">
+            <div className="relative bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 p-4">
+              <Image
+                src={displayImage}
+                alt={product.name}
+                className="w-full h-auto rounded-lg"
+                width={1000}
+                height={1000}
+              />
+              {/* Gallery images */}
+              {product.gallery_images && product.gallery_images.length > 0 && (
+                <div className="mt-4 grid grid-cols-4 gap-2">
+                  {product.gallery_images.slice(0, 4).map((image, index) => (
+                    <Image
+                      key={index}
+                      src={image}
+                      alt={`${product.name} gallery ${index + 1}`}
+                      className="w-full h-20 object-cover rounded-lg cursor-pointer hover:opacity-75 border border-zinc-800"
+                      width={100}
+                      height={100}
+                      onClick={() => {
+                        /* TODO: Implement gallery modal */
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Product Details */}
-        <div className="space-y-6">
-          {/* Category */}
-          <div className="text-sm text-gray-500">{product.category.name}</div>
+        <div className="space-y-8">
+          <div>
+            <h1 className="text-4xl font-light text-white mb-3">{product.name}</h1>
+            <div className="text-sm text-zinc-400 font-light mb-4">{product.category.name}</div>
+          </div>
 
           {/* Description */}
-          <div className="text-gray-700 leading-relaxed">{product.description}</div>
+          <div className="text-zinc-300 leading-relaxed font-light">{product.description}</div>
 
           {/* Variant Selectors */}
           {variants.length > 0 && (
@@ -187,16 +191,16 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               {/* Size Selector */}
               {variantOptions.sizes.length > 0 && (
                 <div>
-                  <label className="block font-semibold mb-2 text-stone-800">Size</label>
+                  <label className="block font-semibold mb-2 text-white">Size</label>
                   <div className="flex flex-wrap gap-2">
                     {variantOptions.sizes.map((size) => (
                       <button
                         key={size}
                         onClick={() => setSelectedSize(size)}
-                        className={`px-3 py-2 rounded-full border text-sm font-medium transition ${
+                        className={`px-4 py-2 rounded-lg border text-sm font-light transition ${
                           selectedSize === size
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+                            ? 'bg-emerald-500 text-white border-emerald-500'
+                            : 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-600 hover:text-white'
                         }`}
                       >
                         {size}
@@ -209,16 +213,16 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               {/* Color Selector */}
               {variantOptions.colors.length > 0 && (
                 <div>
-                  <label className="block font-semibold mb-2 text-stone-800">Color</label>
+                  <label className="block font-semibold mb-2 text-white">Color</label>
                   <div className="flex flex-wrap gap-2">
                     {variantOptions.colors.map((color) => (
                       <button
                         key={color}
                         onClick={() => setSelectedColor(color)}
-                        className={`px-3 py-2 rounded-full border text-sm font-medium transition ${
+                        className={`px-4 py-2 rounded-lg border text-sm font-light transition ${
                           selectedColor === color
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+                            ? 'bg-emerald-500 text-white border-emerald-500'
+                            : 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-600 hover:text-white'
                         }`}
                       >
                         {color}
@@ -231,16 +235,16 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               {/* Material Selector */}
               {variantOptions.materials.length > 0 && (
                 <div>
-                  <label className="block font-semibold mb-2 text-stone-800">Material</label>
+                  <label className="block font-semibold mb-2 text-white">Material</label>
                   <div className="flex flex-wrap gap-2">
                     {variantOptions.materials.map((material) => (
                       <button
                         key={material}
                         onClick={() => setSelectedMaterial(material)}
-                        className={`px-3 py-2 rounded-full border text-sm font-medium transition ${
+                        className={`px-4 py-2 rounded-lg border text-sm font-light transition ${
                           selectedMaterial === material
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+                            ? 'bg-emerald-500 text-white border-emerald-500'
+                            : 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-600 hover:text-white'
                         }`}
                       >
                         {material}
@@ -253,43 +257,51 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
           )}
 
           {/* Price */}
-          <div className="text-3xl font-bold text-stone-800">
-            £{displayPrice.toFixed(2)}
-            {priceRange.has_variants && !selectedVariant && (
-              <span className="text-lg text-gray-500 ml-2">
-                (from £{priceRange.min.toFixed(2)})
-              </span>
-            )}
-          </div>
-
-          {/* Quantity */}
-          <div>
-            <label className="block font-semibold mb-2 text-stone-800">Quantity</label>
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-              >
-                -
-              </button>
-              <span className="text-lg font-medium">{quantity}</span>
-              <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-              >
-                +
-              </button>
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
+            <div className="text-sm text-zinc-400 font-light mb-2">Price</div>
+            <div className="text-3xl font-semibold text-white">
+              £{displayPrice.toFixed(2)}
+              {priceRange.has_variants && !selectedVariant && (
+                <span className="text-lg text-zinc-400 ml-2 font-light">
+                  (from £{priceRange.min.toFixed(2)})
+                </span>
+              )}
             </div>
           </div>
 
-          {/* Add to Cart Button */}
-          <button
-            onClick={handleAddToCart}
-            className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-            disabled={variants.length > 0 && !selectedVariant}
-          >
-            {variants.length > 0 && !selectedVariant ? 'Select Options' : 'Add to Cart'}
-          </button>
+          {/* Quantity & Add to Cart */}
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-4">
+            <div>
+              <label className="block font-medium mb-3 text-white text-sm">Quantity</label>
+              <div className="flex items-center space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="w-10 h-10 rounded-lg border border-zinc-700 bg-zinc-900 flex items-center justify-center hover:bg-zinc-800 text-white transition"
+                >
+                  -
+                </button>
+                <span className="text-lg font-medium text-white min-w-[3rem] text-center">{quantity}</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="w-10 h-10 rounded-lg border border-zinc-700 bg-zinc-900 flex items-center justify-center hover:bg-zinc-800 text-white transition"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* Add to Cart Button */}
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className="w-full bg-white text-zinc-950 py-4 px-6 rounded-lg font-medium hover:bg-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={variants.length > 0 && !selectedVariant}
+            >
+              {variants.length > 0 && !selectedVariant ? 'Select Options' : 'Add to Cart'}
+            </button>
+          </div>
 
           {/* Customizable Badge */}
           {product.customizable && (
@@ -304,7 +316,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
           {/* Selected Variant Info */}
           {selectedVariant && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-              <p className="text-gray-700 text-sm">
+              <p className="text-white text-sm">
                 <span className="font-semibold">Selected:</span>
                 {selectedVariant.size && ` ${selectedVariant.size}`}
                 {selectedVariant.color && ` ${selectedVariant.color}`}
@@ -324,6 +336,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
           onClose={() => setToast(null)}
         />
       )}
+      </div>
     </div>
   )
 }

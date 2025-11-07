@@ -203,8 +203,22 @@ export default function VariationGenerator({
 
         {/* Warning for large batches */}
         {combinationCount > 200 && (
-          <p className="text-sm text-orange-600 mt-2 text-center">
-            ⚠️ Large batch detected ({combinationCount} variations). This may take 15-30 seconds.
+          <p className="text-sm text-orange-600 mt-2 text-center flex items-center justify-center gap-1">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-4 h-4"
+            >
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            Large batch detected ({combinationCount} variations). This may take 15-30 seconds.
           </p>
         )}
 
@@ -224,7 +238,23 @@ export default function VariationGenerator({
 
       {/* Info */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h4 className="font-medium text-yellow-900 mb-2">⚠️ Important:</h4>
+        <h4 className="font-medium text-yellow-900 mb-2 flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-5 h-5"
+          >
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          Important:
+        </h4>
         <ul className="text-sm text-yellow-800 space-y-1">
           <li>• This will create variations based on ALL selected attribute combinations</li>
           <li>• If you already have auto-generated variations, they will be duplicated</li>
