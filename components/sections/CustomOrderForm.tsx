@@ -128,7 +128,7 @@ export default function CustomOrderForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Full Name */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="name" className="block text-sm font-medium text-white">
               Full Name
             </label>
             <input
@@ -136,13 +136,13 @@ export default function CustomOrderForm() {
               id="name"
               name="name"
               required
-              className="bg-white mt-1 p-1 block w-full rounded-md border border-stone-300 font-normal text-stone-800 focus:ring-blue-500 focus:border-blue-500"
+              className="bg-white mt-1 p-1 block w-full rounded-md border border-zinc-700 bg-zinc-900 font-normal text-white placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-sm font-medium text-white">
               Email Address
             </label>
             <input
@@ -150,33 +150,33 @@ export default function CustomOrderForm() {
               id="email"
               name="email"
               required
-              className="bg-white mt-1 p-1 block w-full rounded-md border border-stone-300 font-normal text-stone-800 focus:ring-blue-500 focus:border-blue-500"
+              className="bg-white mt-1 p-1 block w-full rounded-md border border-zinc-700 bg-zinc-900 font-normal text-white placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
 
           {/* Phone */}
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="phone" className="block text-sm font-medium text-white">
               Phone Number
             </label>
             <input
               type="tel"
               id="phone"
               name="phone"
-              className="bg-white mt-1 p-1 block w-full rounded-md border border-stone-300 font-normal text-stone-800 focus:ring-blue-500 focus:border-blue-500"
+              className="bg-white mt-1 p-1 block w-full rounded-md border border-zinc-700 bg-zinc-900 font-normal text-white placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
 
           {/* Preferred Material */}
           <div>
-            <label htmlFor="material" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="material" className="block text-sm font-medium text-white">
               Preferred Material
             </label>
             <select
               id="material"
               name="material"
               required
-              className="bg-white mt-1 p-1 block w-full rounded-md border border-stone-300 font-normal text-stone-800 focus:ring-blue-500 focus:border-blue-500"
+              className="bg-white mt-1 p-1 block w-full rounded-md border border-zinc-700 bg-zinc-900 font-normal text-white placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
             >
               <option value="">Select material</option>
               <option value="PLA">PLA</option>
@@ -187,7 +187,7 @@ export default function CustomOrderForm() {
 
           {/* Delivery Address */}
           <div className="md:col-span-2">
-            <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="address" className="block text-sm font-medium text-white">
               Delivery Address
             </label>
             <input
@@ -195,13 +195,13 @@ export default function CustomOrderForm() {
               id="address"
               name="address"
               required
-              className="bg-white mt-1 p-1 block w-full rounded-md border border-stone-300 font-normal text-stone-800 focus:ring-blue-500 focus:border-blue-500"
+              className="bg-white mt-1 p-1 block w-full rounded-md border border-zinc-700 bg-zinc-900 font-normal text-white placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
 
           {/* Scale */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-white mb-1">
               Object Dimensions (in mm)
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -210,21 +210,21 @@ export default function CustomOrderForm() {
                 name="width"
                 placeholder="Width"
                 max={250}
-                className="bg-white p-1 block w-full rounded-md border border-stone-300 font-normal text-stone-800 focus:ring-blue-500 focus:border-blue-500"
+                className="bg-white p-1 block w-full rounded-md border border-zinc-700 bg-zinc-900 font-normal text-white placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
               />
               <input
                 type="number"
                 name="height"
                 placeholder="Height"
                 max={250}
-                className="bg-white p-1 block w-full rounded-md border border-stone-300 font-normal text-stone-800 focus:ring-blue-500 focus:border-blue-500"
+                className="bg-white p-1 block w-full rounded-md border border-zinc-700 bg-zinc-900 font-normal text-white placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
               />
               <input
                 type="number"
                 name="depth"
                 placeholder="Depth"
                 max={250}
-                className="bg-white p-1 block w-full rounded-md border border-stone-300 font-normal text-stone-800 focus:ring-blue-500 focus:border-blue-500"
+                className="bg-white p-1 block w-full rounded-md border border-zinc-700 bg-zinc-900 font-normal text-white placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">Maximum dimensions: 250 x 250 x 250 mm</p>
@@ -233,7 +233,7 @@ export default function CustomOrderForm() {
 
         {/* Description */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="description" className="block text-sm font-medium text-white">
             Project Description
           </label>
           <textarea
@@ -241,13 +241,13 @@ export default function CustomOrderForm() {
             name="description"
             rows={4}
             required
-            className="bg-white mt-1 p-1 block w-full rounded-md border border-stone-300 font-normal text-stone-800 focus:ring-blue-500 focus:border-blue-500"
+            className="bg-white mt-1 p-1 block w-full rounded-md border border-zinc-700 bg-zinc-900 font-normal text-white placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
           />
         </div>
 
         {/* File Upload */}
         <div>
-          <label htmlFor="file" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="file" className="block text-sm font-medium text-white">
             Upload Design File (STL, DWG, SLDPRT, 3MF)
           </label>
           <input
@@ -268,7 +268,7 @@ export default function CustomOrderForm() {
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="bg-stone-800 text-white px-6 py-3 rounded-lg font-medium hover:bg-stone-700 transition disabled:opacity-50"
+            className="bg-white text-zinc-950 px-8 py-3 rounded-lg font-medium hover:bg-zinc-100 transition-colors disabled:opacity-50"
           >
             {status === 'loading' ? 'Submitting...' : 'Submit Request'}
           </button>

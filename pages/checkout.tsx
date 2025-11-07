@@ -154,15 +154,21 @@ export default function CheckoutPage() {
   // Show loading while checking auth status
   if (authLoading) {
     return (
-      <div className="max-w-4xl mx-auto py-20 px-6 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading...</p>
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-20 px-6">
+    <div className="min-h-screen bg-zinc-950 relative overflow-hidden">
+      {/* Background glow effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
+      </div>
+      
+      <div className="relative max-w-4xl mx-auto py-24 px-6">
       <button
         type="button"
         onClick={handleBack}
@@ -170,7 +176,7 @@ export default function CheckoutPage() {
       >
         ← Back
       </button>
-      <h1 className="text-3xl font-bold mb-8 text-stone-800 text-center">Checkout</h1>
+      <h1 className="text-3xl font-light mb-8 text-white text-center">Checkout</h1>
 
       {/* Checkout Progress */}
       <div className="mb-8">
@@ -179,20 +185,20 @@ export default function CheckoutPage() {
             className={`flex items-center ${shippingStep === 'address' ? 'text-blue-600' : 'text-gray-400'}`}
           >
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'address' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+              className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'address' ? 'bg-zinc-900/50 text-zinc-950 text-white' : 'bg-gray-200'}`}
             >
               1
             </div>
             <span className="ml-2">Address</span>
           </div>
           <div
-            className={`w-8 h-0.5 ${shippingStep === 'rates' || shippingStep === 'payment' ? 'bg-blue-600' : 'bg-gray-200'}`}
+            className={`w-8 h-0.5 ${shippingStep === 'rates' || shippingStep === 'payment' ? 'bg-zinc-900/50 text-zinc-950' : 'bg-gray-200'}`}
           ></div>
           <div
             className={`flex items-center ${shippingStep === 'rates' ? 'text-blue-600' : shippingStep === 'payment' ? 'text-green-600' : 'text-gray-400'}`}
           >
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'rates' ? 'bg-blue-600 text-white' : shippingStep === 'payment' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
+              className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'rates' ? 'bg-zinc-900/50 text-zinc-950 text-white' : shippingStep === 'payment' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
             >
               2
             </div>
@@ -216,27 +222,27 @@ export default function CheckoutPage() {
 
       {/* Shipping Address Form */}
       {shippingStep === 'address' && (
-        <div className="bg-white rounded-xl shadow p-8 max-w-2xl mx-auto mb-8">
-          <h2 className="text-xl font-semibold mb-6 text-stone-800">Shipping Address</h2>
+        <div className="bg-zinc-900/50 rounded-xl shadow p-8 max-w-2xl mx-auto mb-8">
+          <h2 className="text-xl font-semibold mb-6 text-white">Shipping Address</h2>
           <form onSubmit={handleAddressSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                <label className="block text-sm font-medium text-white mb-2">Full Name *</label>
                 <input
                   type="text"
-                  className="w-full border border-gray-300 text-stone-800 rounded p-3"
+                  className="w-full border border-gray-300 text-white rounded p-3"
                   value={shippingAddress.name}
                   onChange={(e) => setShippingAddress({ ...shippingAddress, name: e.target.value })}
                   required
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white mb-2">
                   Address Line 1 *
                 </label>
                 <input
                   type="text"
-                  className="w-full border border-gray-300 text-stone-800 rounded p-3"
+                  className="w-full border border-gray-300 text-white rounded p-3"
                   value={shippingAddress.street1}
                   onChange={(e) =>
                     setShippingAddress({ ...shippingAddress, street1: e.target.value })
@@ -245,12 +251,12 @@ export default function CheckoutPage() {
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white mb-2">
                   Address Line 2
                 </label>
                 <input
                   type="text"
-                  className="w-full border border-gray-300 text-stone-800 rounded p-3"
+                  className="w-full border border-gray-300 text-white rounded p-3"
                   value={shippingAddress.street2}
                   onChange={(e) =>
                     setShippingAddress({ ...shippingAddress, street2: e.target.value })
@@ -258,30 +264,30 @@ export default function CheckoutPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                <label className="block text-sm font-medium text-white mb-2">City *</label>
                 <input
                   type="text"
-                  className="w-full border border-gray-300 text-stone-800 rounded p-3"
+                  className="w-full border border-gray-300 text-white rounded p-3"
                   value={shippingAddress.city}
                   onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Postcode *</label>
+                <label className="block text-sm font-medium text-white mb-2">Postcode *</label>
                 <input
                   type="text"
-                  className="w-full border border-gray-300 text-stone-800 rounded p-3"
+                  className="w-full border border-gray-300 text-white rounded p-3"
                   value={shippingAddress.zip}
                   onChange={(e) => setShippingAddress({ ...shippingAddress, zip: e.target.value })}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                <label className="block text-sm font-medium text-white mb-2">Phone</label>
                 <input
                   type="tel"
-                  className="w-full border border-gray-300 text-stone-800 rounded p-3"
+                  className="w-full border border-gray-300 text-white rounded p-3"
                   value={shippingAddress.phone}
                   onChange={(e) =>
                     setShippingAddress({ ...shippingAddress, phone: e.target.value })
@@ -289,10 +295,10 @@ export default function CheckoutPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <label className="block text-sm font-medium text-white mb-2">Email</label>
                 <input
                   type="email"
-                  className="w-full border border-gray-300 text-stone-800 rounded p-3"
+                  className="w-full border border-gray-300 text-white rounded p-3"
                   value={shippingAddress.email}
                   onChange={(e) =>
                     setShippingAddress({ ...shippingAddress, email: e.target.value })
@@ -304,14 +310,14 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 disabled={isLoadingRates}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
+                className="w-full bg-zinc-900/50 text-zinc-950 text-white py-3 px-4 rounded-lg hover:bg-zinc-100 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
               >
                 {isLoadingRates ? 'Calculating Rates...' : 'Continue to Shipping'}
               </button>
             </div>
           </form>
           <div className="mt-4 text-center">
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-zinc-400">
               We care about your privacy. Learn how your information is protected in our{' '}
               <Link href="/privacy" className="text-blue-600 hover:underline">
                 Privacy Policy.
@@ -323,8 +329,8 @@ export default function CheckoutPage() {
 
       {/* Shipping Rates Selection */}
       {shippingStep === 'rates' && (
-        <div className="bg-white rounded-xl shadow p-8 max-w-2xl mx-auto mb-8">
-          <h2 className="text-xl font-semibold mb-6 text-stone-800">Select Shipping Method</h2>
+        <div className="bg-zinc-900/50 rounded-xl shadow p-8 max-w-2xl mx-auto mb-8">
+          <h2 className="text-xl font-semibold mb-6 text-white">Select Shipping Method</h2>
           <div className="space-y-4">
             {shippingRates.map((rate) => {
               const isSelected = selectedRate && selectedRate.object_id === rate.object_id
@@ -337,7 +343,7 @@ export default function CheckoutPage() {
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="font-semibold text-gray-800">{rate.servicelevel.name}</h3>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-zinc-400">
                         {rate.days
                           ? `${rate.days} day${rate.days !== 1 ? 's' : ''} delivery`
                           : 'Delivery'}
@@ -357,14 +363,14 @@ export default function CheckoutPage() {
           <div className="mt-6 flex flex-col sm:flex-row gap-4">
             <button
               onClick={() => setShippingStep('address')}
-              className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition"
+              className="w-full bg-zinc-900/50 border border-zinc-800 text-white py-3 px-4 rounded-lg hover:bg-gray-200 transition"
             >
               Back to Address
             </button>
             <button
               onClick={() => selectedRate && setShippingStep('payment')}
               disabled={!selectedRate}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
+              className="w-full bg-zinc-900/50 text-zinc-950 text-white py-3 px-4 rounded-lg hover:bg-zinc-100 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
             >
               Continue to Payment
             </button>
@@ -377,7 +383,7 @@ export default function CheckoutPage() {
         shippingStep === 'payment' &&
         (checkoutMode === 'choice' ? (
           // User not logged in - show options
-          <div className="bg-white rounded-xl shadow p-8 max-w-lg mx-auto mb-8">
+          <div className="bg-zinc-900/50 rounded-xl shadow p-8 max-w-lg mx-auto mb-8">
             <h3 className="text-lg font-semibold text-gray-900 mb-6 text-center">
               How would you like to checkout?
             </h3>
@@ -385,7 +391,7 @@ export default function CheckoutPage() {
             <div className="space-y-4">
               <Link
                 href="/auth"
-                className="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition text-center"
+                className="block w-full bg-zinc-900/50 text-zinc-950 text-white py-3 px-4 rounded-lg hover:bg-zinc-100 transition text-center"
               >
                 Sign In / Create Account
               </Link>
@@ -395,13 +401,13 @@ export default function CheckoutPage() {
                   <div className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">or</span>
+                  <span className="px-2 bg-zinc-900/50 text-zinc-400">or</span>
                 </div>
               </div>
 
               <button
                 onClick={() => setCheckoutMode('guest')}
-                className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition"
+                className="w-full bg-zinc-900/50 border border-zinc-800 text-white py-3 px-4 rounded-lg hover:bg-gray-200 transition"
               >
                 Checkout as Guest
               </button>
@@ -409,17 +415,17 @@ export default function CheckoutPage() {
           </div>
         ) : (
           // Guest checkout form
-          <div className="bg-white rounded-xl shadow p-8 max-w-lg mx-auto mb-8">
+          <div className="bg-zinc-900/50 rounded-xl shadow p-8 max-w-lg mx-auto mb-8">
             <div className="text-center mb-6">
               <h3 className="text-lg font-semibold text-gray-900">Guest Checkout</h3>
-              <p className="text-sm text-gray-600">Enter your email to receive order updates</p>
+              <p className="text-sm text-zinc-400">Enter your email to receive order updates</p>
             </div>
 
             <form onSubmit={handleGuestCheckout}>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <label className="block text-sm font-medium text-white mb-2">Email Address</label>
               <input
                 type="email"
-                className="w-full border border-gray-300 text-stone-800 rounded p-3 mb-2"
+                className="w-full border border-gray-300 text-white rounded p-3 mb-2"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -432,7 +438,7 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
+                  className="w-full bg-zinc-900/50 text-zinc-950 text-white py-3 px-4 rounded-lg hover:bg-zinc-100 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Processing...' : 'Complete Purchase'}
                 </button>
@@ -441,7 +447,7 @@ export default function CheckoutPage() {
                   type="button"
                   onClick={() => setCheckoutMode('choice')}
                   disabled={isLoading}
-                  className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition disabled:bg-gray-300"
+                  className="w-full bg-zinc-900/50 border border-zinc-800 text-white py-3 px-4 rounded-lg hover:bg-gray-200 transition disabled:bg-gray-300"
                 >
                   Back to Options
                 </button>
@@ -452,7 +458,7 @@ export default function CheckoutPage() {
 
       {/* Order Summary - Always show */}
       <div className="bg-gray-50 rounded-xl p-8 mb-8">
-        <h2 className="text-xl font-semibold mb-6 text-stone-800">Order Summary</h2>
+        <h2 className="text-xl font-semibold mb-6 text-white">Order Summary</h2>
         <div className="space-y-6">
           {cart.map((item) => (
             <div
@@ -468,14 +474,14 @@ export default function CheckoutPage() {
               />
               <div>
                 <h3 className="font-semibold text-gray-800">{item.name}</h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-zinc-400">
                   {[item.size, item.color, item.material].filter(Boolean).join(' • ') ||
                     'Base product'}
                 </p>
-                <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                <p className="text-sm text-zinc-400">Quantity: {item.quantity}</p>
               </div>
               <div className="ml-auto text-right">
-                <p className="text-gray-700 font-medium">
+                <p className="text-white font-medium">
                   £{(item.price * item.quantity).toFixed(2)}
                 </p>
               </div>
@@ -487,8 +493,8 @@ export default function CheckoutPage() {
         {selectedRate && (
           <div className="mt-6 pt-6 border-t border-gray-200">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-gray-600">Shipping ({selectedRate.servicelevel.name})</span>
-              <span className="text-gray-700">£{shippingCost.toFixed(2)}</span>
+              <span className="text-zinc-400">Shipping ({selectedRate.servicelevel.name})</span>
+              <span className="text-white">£{shippingCost.toFixed(2)}</span>
             </div>
           </div>
         )}
@@ -505,19 +511,20 @@ export default function CheckoutPage() {
           <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => setShippingStep('rates')}
-              className="w-full sm:w-64 bg-gray-100 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-200 transition"
+              className="w-full sm:w-64 bg-zinc-900/50 border border-zinc-800 text-white py-3 px-6 rounded-lg hover:bg-gray-200 transition"
             >
               Back to Shipping
             </button>
             <button
               onClick={handleLoggedInCheckout}
               disabled={isLoading}
-              className="w-full sm:w-64 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
+              className="w-full sm:w-64 bg-zinc-900/50 text-zinc-950 text-white py-3 px-6 rounded-lg hover:bg-zinc-100 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Processing...' : 'Complete Purchase'}
             </button>
           </div>
         )}
+      </div>
       </div>
     </div>
   )

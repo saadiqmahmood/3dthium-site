@@ -17,28 +17,29 @@ export default function CartPage() {
   }, [cart, from, router])
 
   return (
-    <div className="max-w-4xl mx-auto py-20 px-6">
-      <button
-        onClick={() => {
-          if (from && typeof from === 'string') {
-            router.push(from)
-          } else {
-            router.push('/products') // fallback
-          }
-        }}
-        className="mb-6 text-sm text-blue-600 hover:underline"
-      >
-        ← Back
-      </button>
+    <div className="min-h-screen bg-zinc-950 pt-24 pb-12">
+      <div className="max-w-4xl mx-auto px-6">
+        <button
+          onClick={() => {
+            if (from && typeof from === 'string') {
+              router.push(from)
+            } else {
+              router.push('/products') // fallback
+            }
+          }}
+          className="mb-6 text-sm text-emerald-400 hover:text-emerald-300 transition-colors font-light"
+        >
+          ← Back
+        </button>
 
-      <h1 className="text-3xl font-bold mb-8 text-stone-800">Your Cart</h1>
+        <h1 className="text-3xl font-light text-white mb-8">Your Cart</h1>
 
-      <div className="space-y-6">
-        {cart.map((item) => (
-          <div
-            key={item.product_id + '-' + (item.variant_id || 'base')}
-            className="flex items-center justify-between border-b pb-4"
-          >
+        <div className="space-y-4">
+          {cart.map((item) => (
+            <div
+              key={item.product_id + '-' + (item.variant_id || 'base')}
+              className="flex items-center justify-between p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl"
+            >
             <div className="flex items-center gap-4">
               <Image
                 width={100}
@@ -48,15 +49,15 @@ export default function CartPage() {
                 className="w-20 h-20 object-cover rounded"
               />
               <div>
-                <h3 className="font-semibold text-gray-800">{item.name}</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="font-medium text-white">{item.name}</h3>
+                <p className="text-sm text-zinc-400 font-light">
                   {[item.size, item.color, item.material].filter(Boolean).join(' • ') ||
                     'Base product'}
                 </p>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-2">
                   <button
                     aria-label="Decrease quantity"
-                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-gray-700"
+                    className="px-3 py-1 bg-zinc-800 rounded-lg hover:bg-zinc-700 text-white border border-zinc-700 disabled:opacity-50"
                     onClick={() =>
                       updateCartItemQuantity(
                         item.product_id,
@@ -68,12 +69,12 @@ export default function CartPage() {
                   >
                     -
                   </button>
-                  <span className="text-sm text-gray-800 w-6 text-center inline-block">
+                  <span className="text-sm text-white w-8 text-center inline-block font-medium">
                     {item.quantity}
                   </span>
                   <button
                     aria-label="Increase quantity"
-                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-gray-700"
+                    className="px-3 py-1 bg-zinc-800 rounded-lg hover:bg-zinc-700 text-white border border-zinc-700"
                     onClick={() =>
                       updateCartItemQuantity(
                         item.product_id,
@@ -88,12 +89,12 @@ export default function CartPage() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-gray-700 font-medium">
+              <p className="text-white font-semibold text-lg">
                 £{(item.price * item.quantity).toFixed(2)}
               </p>
               <button
                 onClick={() => removeFromCart(item.product_id, item.variant_id || undefined)}
-                className="text-red-500 text-sm hover:underline mt-1"
+                className="text-red-400 text-sm hover:text-red-300 transition-colors mt-2 font-light"
               >
                 Remove
               </button>
@@ -102,26 +103,30 @@ export default function CartPage() {
         ))}
       </div>
 
-      <div className="mt-8 flex flex-col md:flex-row justify-between items-center">
-        <p className="text-xl font-semibold text-gray-900">Total: £{total.toFixed(2)}</p>
-        <div className="flex flex-wrap gap-4 w-full md:w-auto mt-6 md:mt-0">
-          <Link href="/products">
-            <button className="bg-gray-100 text-gray-800 px-3 py-2 md:px-4 md:py-2 rounded hover:bg-gray-200 text-sm">
-              Continue Shopping
-            </button>
-          </Link>
-          <Link href="/checkout">
-            <button className="bg-blue-600 text-white px-3 py-2 md:px-4 md:py-2 rounded hover:bg-blue-700 text-sm">
-              Checkout
-            </button>
-          </Link>
+        <div className="mt-8 p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl">
+          <div className="flex justify-between items-center mb-6">
+            <p className="text-xl font-light text-zinc-300">Total:</p>
+            <p className="text-2xl font-semibold text-white">£{total.toFixed(2)}</p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link href="/products" className="flex-1">
+              <button className="w-full border border-zinc-700 text-white px-6 py-3 rounded-lg hover:bg-zinc-900 hover:border-zinc-600 transition-colors font-medium">
+                Continue Shopping
+              </button>
+            </Link>
+            <Link href="/checkout" className="flex-1">
+              <button className="w-full bg-white text-zinc-950 px-6 py-3 rounded-lg hover:bg-zinc-100 transition-colors font-medium">
+                Checkout
+              </button>
+            </Link>
+          </div>
           <button
             onClick={() => {
               setTimeout(() => clearCart(), 300)
             }}
-            className="bg-red-600 text-white px-3 py-2 md:px-4 md:py-2 rounded hover:bg-red-700 text-sm w-full sm:w-auto mt-4 sm:mt-0"
+            className="w-full mt-3 text-red-400 hover:text-red-300 text-sm transition-colors font-light"
           >
-            Clear
+            Clear Cart
           </button>
         </div>
       </div>

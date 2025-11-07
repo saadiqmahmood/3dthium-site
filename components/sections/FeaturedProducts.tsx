@@ -57,12 +57,12 @@ export default function FeaturedProducts() {
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent mb-4"></div>
-            <p className="text-gray-600">Loading featured products...</p>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-emerald-500 border-t-transparent mb-4"></div>
+            <p className="text-zinc-400 font-light">Loading featured products...</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="bg-gray-200 rounded-xl h-80 animate-pulse"></div>
+              <div key={i} className="bg-zinc-800/50 rounded-2xl h-80 animate-pulse"></div>
             ))}
           </div>
         </div>
@@ -74,13 +74,26 @@ export default function FeaturedProducts() {
     return (
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-8 max-w-md mx-auto">
-            <div className="text-red-600 text-4xl mb-4">⚠️</div>
-            <h3 className="text-lg font-semibold text-red-800 mb-2">Unable to Load Products</h3>
-            <p className="text-red-600 mb-4">{error}</p>
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 max-w-md mx-auto">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-12 h-12 text-red-400 mx-auto mb-4"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <h3 className="text-lg font-medium text-white mb-2">Unable to Load Products</h3>
+            <p className="text-zinc-400 mb-4 text-sm font-light">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              className="bg-white text-zinc-950 font-medium py-2 px-6 rounded-lg hover:bg-zinc-100 transition-colors"
             >
               Try Again
             </button>
@@ -94,15 +107,27 @@ export default function FeaturedProducts() {
     return (
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-12 max-w-md mx-auto">
-            <div className="text-gray-400 text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">No Products Available</h3>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-12 max-w-md mx-auto">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-16 h-16 text-zinc-600 mx-auto mb-4"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            <h3 className="text-xl font-medium text-white mb-2">No Products Available</h3>
+            <p className="text-zinc-400 mb-6 font-light">
               We&apos;re working on adding amazing products to our collection!
             </p>
             <Link
               href="/custom-order"
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+              className="inline-block bg-white text-zinc-950 font-medium py-3 px-6 rounded-lg hover:bg-zinc-100 transition-colors"
             >
               Start Custom Order
             </Link>
@@ -127,21 +152,21 @@ export default function FeaturedProducts() {
                 animationDelay: `${index * 200}ms`,
               }}
             >
-              <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-blue-200 group-hover:scale-[1.02]">
+              <div className="bg-zinc-900/50 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all duration-300 overflow-hidden">
                 {/* Product Image */}
-                <div className="relative h-64 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                <div className="relative h-64 bg-zinc-950 overflow-hidden">
                   <Image
                     src={product.thumbnail_url}
                     alt={product.name}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent"></div>
 
                   {/* Category Badge */}
                   <div className="absolute top-4 left-4">
-                    <span className="bg-white/90 backdrop-blur-sm text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                    <span className="bg-zinc-900/80 backdrop-blur-sm text-zinc-300 px-3 py-1 rounded-full text-xs font-light border border-zinc-800">
                       {product.category.name}
                     </span>
                   </div>
@@ -149,8 +174,27 @@ export default function FeaturedProducts() {
                   {/* Customizable Badge */}
                   {product.customizable && (
                     <div className="absolute top-4 right-4">
-                      <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                        ✨ Customizable
+                      <span className="bg-emerald-500/20 backdrop-blur-sm text-emerald-400 px-3 py-1 rounded-full text-xs font-light flex items-center gap-1 border border-emerald-500/30">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="w-4 h-4"
+                        >
+                          <path d="M12 2v6" />
+                          <path d="M12 16v6" />
+                          <path d="m4.93 4.93 4.24 4.24" />
+                          <path d="m14.83 14.83 4.24 4.24" />
+                          <path d="M2 12h6" />
+                          <path d="M16 12h6" />
+                          <path d="m4.93 19.07 4.24-4.24" />
+                          <path d="m14.83 9.17 4.24-4.24" />
+                        </svg>
+                        Customizable
                       </span>
                     </div>
                   )}
@@ -158,37 +202,31 @@ export default function FeaturedProducts() {
 
                 {/* Product Info */}
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-lg font-medium text-white mb-2 group-hover:text-emerald-400 transition-colors">
                     {product.name}
                   </h3>
 
-                  <p className="text-gray-600 mb-4 line-clamp-2">{product.description}</p>
+                  <p className="text-zinc-400 mb-4 line-clamp-2 text-sm font-light">{product.description}</p>
 
                   {/* Price */}
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="mb-4">
                     <div className="flex items-center space-x-2">
-                      <span className="text-2xl font-bold text-gray-800">
+                      <span className="text-xl font-semibold text-white">
                         £{product.price_range.min.toFixed(2)}
                       </span>
                       {product.price_range.has_variants &&
                         product.price_range.min !== product.price_range.max && (
-                          <span className="text-gray-500">
+                          <span className="text-zinc-500 text-sm font-light">
                             - £{product.price_range.max.toFixed(2)}
                           </span>
                         )}
                     </div>
-
-                    {product.variants.length > 0 && (
-                      <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                        {product.variants.length} variant{product.variants.length > 1 ? 's' : ''}
-                      </span>
-                    )}
                   </div>
 
                   {/* Action Button */}
                   <Link
                     href={`/products/${product.slug}`}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-center block"
+                    className="w-full bg-white hover:bg-zinc-100 text-zinc-950 font-medium py-3 px-6 rounded-lg transition-colors text-center block"
                   >
                     View Product
                   </Link>
@@ -200,26 +238,19 @@ export default function FeaturedProducts() {
 
         {/* Call to Action */}
         <div className="text-center">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">Want to See More?</h3>
-            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Explore our complete collection of 3D printed products, each designed with care and
-              available in multiple sizes, colors, and materials.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/products"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
-              >
-                View All Products
-              </Link>
-              <Link
-                href="/custom-order"
-                className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105"
-              >
-                Custom Order
-              </Link>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/products"
+              className="bg-white hover:bg-zinc-100 text-zinc-950 font-medium py-3 px-8 rounded-lg transition-colors"
+            >
+              View All Products
+            </Link>
+            <Link
+              href="/custom-order"
+              className="border border-zinc-700 text-white hover:bg-zinc-900 hover:border-zinc-600 font-medium py-3 px-8 rounded-lg transition-colors"
+            >
+              Custom Order
+            </Link>
           </div>
         </div>
       </div>
