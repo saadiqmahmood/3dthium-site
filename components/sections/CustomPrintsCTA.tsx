@@ -2,20 +2,34 @@ import Link from 'next/link'
 
 export default function CustomPrintsCTA() {
   return (
-    <section className="text-white py-20 px-6">
-      <div className="bg-blue-500 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 rounded-xl py-10 px-6 md:px-22 lg:px-32">
-        <div>
-          <h2 className="text-3xl md:text-4xl font-bold">Custom 3D Prints</h2>
-          <p className="text-sm md:text-base mt-1 text-white/90 font-medium">
-            Request a personalized 3D printed item tailored to your needs.
-          </p>
+    <section className="relative py-32 px-6 bg-zinc-950 overflow-hidden">
+      {/* Hexagon pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
+      </div>
+      
+      <div className="relative max-w-5xl mx-auto">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500/10 via-cyan-500/10 to-transparent border border-emerald-500/20 p-12 md:p-16">
+          {/* Subtle glow effect */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
+          
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex-1">
+              <h2 className="text-4xl md:text-5xl font-light text-white mb-4">
+                Have a <span className="font-semibold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Custom Design?</span>
+              </h2>
+              <p className="text-lg text-zinc-400 font-light leading-relaxed">
+                Upload your 3D model or work with our team to bring your unique vision to life.
+              </p>
+            </div>
+            <Link
+              href="/custom-order"
+              className="bg-white text-zinc-950 px-8 py-4 rounded-lg font-medium hover:bg-zinc-100 transition-all duration-300 whitespace-nowrap"
+            >
+              Get Started
+            </Link>
+          </div>
         </div>
-        <Link
-          href="/custom-order"
-          className="bg-white text-blue-600 px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition"
-        >
-          Learn More
-        </Link>
       </div>
     </section>
   )

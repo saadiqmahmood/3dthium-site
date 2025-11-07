@@ -23,21 +23,6 @@ const heroImages = [
 
 export default function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
-  const [particles, setParticles] = useState<
-    Array<{ left: number; top: number; delay: number; duration: number }>
-  >([])
-
-  // Generate particles on client-side only
-  useEffect(() => {
-    setParticles(
-      [...Array(20)].map(() => ({
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        delay: Math.random() * 3,
-        duration: 2 + Math.random() * 3,
-      }))
-    )
-  }, [])
   const [scrollY, setScrollY] = useState(0)
 
   useEffect(() => {
@@ -49,28 +34,14 @@ export default function HeroSection() {
   }, [])
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 pt-20">
-      {/* Animated Background Elements */}
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-zinc-950 pt-20">
+      {/* Subtle Grid Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#18181b_1px,transparent_1px),linear-gradient(to_bottom,#18181b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-40" />
+      
+      {/* Accent Glow */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
-      </div>
-
-      {/* Floating Particles */}
-      <div className="absolute inset-0">
-        {particles.map((particle, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-white/30 rounded-full animate-pulse"
-            style={{
-              left: `${particle.left}%`,
-              top: `${particle.top}%`,
-              animationDelay: `${particle.delay}s`,
-              animationDuration: `${particle.duration}s`,
-            }}
-          ></div>
-        ))}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
@@ -83,25 +54,24 @@ export default function HeroSection() {
           >
             <div className="space-y-6">
               <h1
-                className="text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-tight"
+                className="text-5xl md:text-7xl lg:text-8xl font-light text-white leading-tight tracking-tight"
                 style={{
                   transform: `translateY(${scrollY * 0.1}px)`,
-                  textShadow: '0 10px 30px rgba(0,0,0,0.3)',
                 }}
               >
-                Showcase Your{' '}
-                <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent animate-pulse">
-                  3D Designs
+                Precision 3D<br />
+                <span className="font-semibold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                  Printing
                 </span>
               </h1>
 
               <p
-                className="text-xl md:text-2xl lg:text-3xl text-blue-100 max-w-2xl mx-auto lg:mx-0 leading-relaxed"
+                className="text-lg md:text-xl lg:text-2xl text-zinc-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light"
                 style={{
                   transform: `translateY(${scrollY * 0.05}px)`,
                 }}
               >
-                Creative 3D printed products for your home, gifts, and more.
+                Transform your ideas into reality with cutting-edge additive manufacturing.
               </p>
             </div>
 
@@ -114,41 +84,19 @@ export default function HeroSection() {
             >
               <Link
                 href="/products"
-                className="group relative bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg"
+                className="group relative bg-white text-zinc-950 px-8 py-4 rounded-lg font-medium text-lg hover:bg-zinc-100 transition-all duration-300"
               >
-                <span className="relative z-10">Explore Products</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                Explore Products
               </Link>
 
               <Link
                 href="/custom-order"
-                className="group relative border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/10 hover:border-white/50 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
+                className="group relative border border-zinc-700 text-white px-8 py-4 rounded-lg font-medium text-lg hover:bg-zinc-900 hover:border-zinc-600 transition-all duration-300"
               >
-                <span className="relative z-10">Custom Order</span>
-                <div className="absolute inset-0 bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                Custom Order
               </Link>
             </div>
 
-            {/* Features */}
-            <div
-              className="flex flex-wrap justify-center lg:justify-start gap-4 mt-8"
-              style={{
-                transform: `translateY(${scrollY * 0.02}px)`,
-              }}
-            >
-              <div className="bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm">
-                ✨ Customizable
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm">
-                🎨 Multiple Colors
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm">
-                📏 Various Sizes
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm">
-                🚀 Fast Delivery
-              </div>
-            </div>
           </div>
 
           {/* Image Gallery */}
@@ -222,11 +170,11 @@ export default function HeroSection() {
       </div>
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/60 animate-bounce">
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-zinc-500 animate-bounce">
         <div className="flex flex-col items-center space-y-2">
-          <span className="text-sm">Scroll to explore</span>
-          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-white/60 rounded-full mt-2 animate-pulse"></div>
+          <span className="text-xs font-light tracking-wider uppercase">Scroll</span>
+          <div className="w-5 h-8 border border-zinc-700 rounded-full flex justify-center">
+            <div className="w-0.5 h-2 bg-zinc-500 rounded-full mt-2 animate-pulse"></div>
           </div>
         </div>
       </div>

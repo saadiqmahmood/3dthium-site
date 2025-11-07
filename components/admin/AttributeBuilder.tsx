@@ -338,7 +338,23 @@ export default function AttributeBuilder({
 
       {/* Info Box */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-medium text-blue-900 mb-2">💡 How It Works:</h4>
+        <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-5 h-5"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" />
+            <path d="M12 8h.01" />
+          </svg>
+          How It Works:
+        </h4>
         <ul className="text-sm text-blue-800 space-y-1">
           <li>1. Define attributes (e.g., Color, Height)</li>
           <li>2. Add options to each (e.g., Red, Blue for Color)</li>

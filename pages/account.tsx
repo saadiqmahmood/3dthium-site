@@ -33,7 +33,6 @@ export default function AccountPage() {
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
   const supabaseContext = useSupabase()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [section, setSection] = useState<'profile' | 'orders'>('profile')
   const [orders, setOrders] = useState<Order[]>([])
   const [ordersLoading, setOrdersLoading] = useState(true)
@@ -245,187 +244,220 @@ export default function AccountPage() {
   }
 
   if (loading || !user) {
-    return <p className="text-center py-20 text-gray-600">Loading account...</p>
+    return <p className="text-center py-20 text-zinc-400">Loading account...</p>
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 pt-20">
-      {/* Sidebar overlay for mobile */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/40 md:hidden"
-          style={{ pointerEvents: 'auto' }}
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-      {/* Sidebar */}
-      <aside
-        className={`fixed z-40 top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-white shadow-lg transform transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:w-64 md:block`}
-      >
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between px-6 py-4 border-b">
-            <span className="text-xl font-bold text-stone-800">My Account</span>
-            <button
-              className="md:hidden text-2xl text-stone-800"
-              onClick={() => setSidebarOpen(false)}
-            >
-              &times;
-            </button>
-          </div>
-          <nav className="flex-1 px-6 py-4 space-y-2">
-            <button
-              onClick={() => {
-                setSection('profile')
-                setSidebarOpen(false)
-                setSelectedOrder(null)
-              }}
-              className={`block w-full text-left px-4 py-2 rounded ${section === 'profile' ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-100 text-gray-700'}`}
-            >
-              Profile
-            </button>
-            <button
-              onClick={() => {
-                setSection('orders')
-                setSidebarOpen(false)
-                setSelectedOrder(null)
-              }}
-              className={`block w-full text-left px-4 py-2 rounded ${section === 'orders' ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-100 text-gray-700'}`}
-            >
-              Orders
-            </button>
-          </nav>
-          <div className="px-6 py-4">
-            <button
-              onClick={signOut}
-              className="w-full bg-stone-800 text-white py-2 rounded hover:bg-stone-700 transition"
-            >
-              Sign Out
-            </button>
-          </div>
+    <div className="min-h-screen bg-zinc-950 pt-20">
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        {/* Header */}
+        <div className="mb-12">
+          <h1 className="text-4xl font-light text-white mb-3">My Account</h1>
+          <p className="text-zinc-400 font-light">Manage your profile and orders</p>
         </div>
-      </aside>
-      {/* Main content */}
-      <main className="flex-1 pl-0 md:pl-64">
-        {/* Mobile nav toggle */}
-        <div className="md:hidden flex items-center justify-between px-4 py-4">
+
+        {/* Tab Navigation */}
+        <div className="flex flex-wrap gap-3 mb-8 border-b border-zinc-800 pb-4">
           <button
-            onClick={() => setSidebarOpen(true)}
-            className="flex items-center gap-2 text-2xl text-blue-600 md:hidden"
+            type="button"
+            onClick={() => {
+              setSection('profile')
+              setSelectedOrder(null)
+            }}
+            className={`px-6 py-3 rounded-lg font-light transition-all ${
+              section === 'profile' 
+                ? 'bg-emerald-500 text-white' 
+                : 'bg-zinc-900/50 text-zinc-300 border border-zinc-800 hover:border-zinc-700 hover:text-white'
+            }`}
           >
-            <span className="text-sm font-semibold text-stone-800">My Account</span>
-            <span className="inline-block align-middle text-stone-800 text-sm">&#8594;</span>
+            <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            Profile
           </button>
-          <span className="text-lg font-bold text-stone-800">Dashboard</span>
+          <button
+            type="button"
+            onClick={() => {
+              setSection('orders')
+              setSelectedOrder(null)
+            }}
+            className={`px-6 py-3 rounded-lg font-light transition-all ${
+              section === 'orders' 
+                ? 'bg-emerald-500 text-white' 
+                : 'bg-zinc-900/50 text-zinc-300 border border-zinc-800 hover:border-zinc-700 hover:text-white'
+            }`}
+          >
+            <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            Orders
+          </button>
+          <button
+            type="button"
+            onClick={signOut}
+            className="ml-auto px-6 py-3 rounded-lg font-light bg-zinc-900/50 text-zinc-300 border border-zinc-800 hover:border-red-700 hover:text-red-400 transition-all"
+          >
+            <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sign Out
+          </button>
         </div>
-        <div className="flex-1 p-4 md:p-10">
+
+        {/* Content */}
+        <div className="min-h-[60vh]">
           {section === 'profile' && (
-            <div className="max-w-lg mx-auto bg-white rounded-xl shadow p-8">
-              <h2 className="text-2xl font-bold mb-6 text-stone-800">Profile</h2>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
-                <p className="text-base text-stone-800 bg-transparent">{user.email}</p>
+            <div className="max-w-2xl">
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 mb-6">
+                <h2 className="text-2xl font-light text-white mb-6 flex items-center gap-3">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Profile Information
+                </h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-light text-zinc-400 mb-2">Email Address</label>
+                    <p className="text-lg text-white font-light bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3">{user.email}</p>
+                  </div>
+                </div>
               </div>
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Change Email</label>
-                <Link href="/account/change-email">
-                  <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition mb-2">
-                    Change Email
-                  </button>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <Link href="/account/change-email" className="block">
+                  <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 hover:border-emerald-500/50 transition-all group cursor-pointer">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-emerald-500/10 p-3 rounded-lg group-hover:bg-emerald-500/20 transition">
+                        <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-medium text-white mb-1">Change Email</h3>
+                        <p className="text-sm text-zinc-400 font-light">Update your email address</p>
+                      </div>
+                    </div>
+                  </div>
                 </Link>
-              </div>
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Change Password
-                </label>
-                <Link href="/account/change-password">
-                  <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition mb-2">
-                    Change Password
-                  </button>
+
+                <Link href="/account/change-password" className="block">
+                  <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 hover:border-emerald-500/50 transition-all group cursor-pointer">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-emerald-500/10 p-3 rounded-lg group-hover:bg-emerald-500/20 transition">
+                        <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-medium text-white mb-1">Change Password</h3>
+                        <p className="text-sm text-zinc-400 font-light">Update your password</p>
+                      </div>
+                    </div>
+                  </div>
                 </Link>
               </div>
             </div>
           )}
           {section === 'orders' && (
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-2xl font-bold mb-6 text-stone-800">My Orders</h2>
+            <div>
               {ordersLoading ? (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-4 text-gray-600">Loading orders...</p>
+                <div className="text-center py-20">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
+                  <p className="mt-4 text-zinc-400 font-light">Loading orders...</p>
                 </div>
               ) : selectedOrder ? (
-                <div className="bg-white rounded-xl shadow-sm border p-6">
+                <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
                   <button
+                    type="button"
                     onClick={() => setSelectedOrder(null)}
-                    className="mb-4 text-blue-600 hover:underline"
+                    className="mb-6 text-emerald-400 hover:text-emerald-300 font-light flex items-center gap-2 transition"
                   >
-                    &larr; Back to Orders
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back to Orders
                   </button>
-                  <div className="flex justify-between items-start mb-4">
+                  <div className="flex flex-wrap justify-between items-start gap-4 mb-6 pb-6 border-b border-zinc-800">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-2xl font-light text-white mb-2">
                         Order #{selectedOrder.id.slice(-8)}
                       </h3>
-                      <p className="text-sm text-gray-500">
-                        {new Date(selectedOrder.created_at).toLocaleString()}
+                      <p className="text-sm text-zinc-400 font-light">
+                        {new Date(selectedOrder.created_at).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </p>
                     </div>
                     <div className="text-right">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${selectedOrder.status === 'paid' ? 'bg-green-100 text-green-800' : selectedOrder.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}
+                        className={`inline-flex px-3 py-1.5 text-xs font-medium rounded-lg ${
+                          selectedOrder.status === 'paid' 
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                            : selectedOrder.status === 'pending' 
+                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
+                            : 'bg-zinc-800 text-zinc-300 border border-zinc-700'
+                        }`}
                       >
-                        {selectedOrder.status.charAt(0).toUpperCase() +
-                          selectedOrder.status.slice(1)}
+                        {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
                       </span>
-                      <p className="text-lg font-bold text-blue-600 mt-1">
+                      <p className="text-2xl font-semibold text-white mt-2">
                         £{selectedOrder.total_price.toFixed(2)}
                       </p>
                     </div>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-3 mb-8">
                     {selectedOrder.order_items?.map((item: OrderItem) => (
                       <div
                         key={item.id}
-                        className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"
+                        className="flex items-center gap-4 p-5 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition"
                       >
-                        <Image
-                          width={60}
-                          height={60}
-                          src={item.product_variants?.image_url || ''}
-                          alt={item.products?.title || ''}
-                          className="w-15 h-15 object-cover rounded"
-                        />
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">{item.products?.title}</h4>
-                          <p className="text-sm text-gray-500">
-                            Color: {item.product_variants?.color}
-                          </p>
-                          <p className="text-sm text-gray-500">Size: {item.size}</p>
-                          <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                        <div className="flex-shrink-0 w-20 h-20 bg-zinc-950 rounded-lg overflow-hidden border border-zinc-800">
+                          <Image
+                            width={80}
+                            height={80}
+                            src={item.product_variants?.image_url || ''}
+                            alt={item.products?.title || ''}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                        <div className="text-right">
-                          <p className="font-medium text-gray-900">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-white mb-2">{item.products?.title}</h4>
+                          <div className="flex flex-wrap gap-3 text-sm text-zinc-400 font-light">
+                            <span>Color: {item.product_variants?.color}</span>
+                            <span>•</span>
+                            <span>Size: {item.size}</span>
+                            <span>•</span>
+                            <span>Qty: {item.quantity}</span>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="font-semibold text-white text-lg">
                             £{(item.price_at_purchase * item.quantity).toFixed(2)}
                           </p>
                         </div>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-8 flex justify-end">
+                  <div className="flex justify-end">
                     <button
+                      type="button"
                       onClick={() => handleReorder(selectedOrder)}
                       disabled={reorderLoading}
-                      className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
+                      className="bg-white text-zinc-950 px-8 py-3 rounded-lg font-medium hover:bg-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {reorderLoading ? 'Adding to Cart...' : 'Reorder'}
+                      {reorderLoading ? 'Adding to Cart...' : 'Reorder All Items'}
                     </button>
                   </div>
                 </div>
               ) : orders.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="text-center py-20 bg-zinc-900/30 border border-zinc-800 rounded-2xl">
+                  <div className="w-20 h-20 bg-zinc-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg
-                      className="w-8 h-8 text-gray-400"
+                      className="w-10 h-10 text-zinc-500"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -438,71 +470,61 @@ export default function AccountPage() {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No orders yet</h3>
-                  <p className="text-gray-600 mb-6">Start shopping to see your orders here</p>
+                  <h3 className="text-xl font-light text-white mb-2">No orders yet</h3>
+                  <p className="text-zinc-400 font-light mb-8">Start shopping to see your orders here</p>
                   <button
+                    type="button"
                     onClick={() => router.push('/products')}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+                    className="bg-white text-zinc-950 px-8 py-3 rounded-lg font-medium hover:bg-zinc-100 transition-colors"
                   >
                     Browse Products
                   </button>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="grid gap-4">
                   {orders.map((order) => (
                     <div
                       key={order.id}
-                      className="bg-white rounded-xl shadow-sm border p-6 cursor-pointer hover:shadow-md transition"
+                      className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 cursor-pointer hover:border-zinc-700 transition-all group"
                       onClick={() => setSelectedOrder(order)}
                     >
-                      <div className="flex justify-between items-start mb-4">
+                      <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <h3 className="text-lg font-medium text-white mb-1 group-hover:text-emerald-400 transition">
                             Order #{order.id.slice(-8)}
                           </h3>
-                          <p className="text-sm text-gray-500">
-                            {new Date(order.created_at).toLocaleString()}
+                          <p className="text-sm text-zinc-400 font-light">
+                            {new Date(order.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
                           </p>
                         </div>
-                        <div className="text-right">
+                        <div className="flex items-center gap-4">
                           <span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${order.status === 'paid' ? 'bg-green-100 text-green-800' : order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}
+                            className={`inline-flex px-3 py-1.5 text-xs font-medium rounded-lg ${
+                              order.status === 'paid' 
+                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                                : order.status === 'pending' 
+                                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
+                                : 'bg-zinc-800 text-zinc-300 border border-zinc-700'
+                            }`}
                           >
                             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                           </span>
-                          <p className="text-lg font-bold text-blue-600 mt-1">
+                          <p className="text-xl font-semibold text-white">
                             £{order.total_price.toFixed(2)}
                           </p>
                         </div>
                       </div>
-                      <div className="space-y-4">
-                        {order.order_items?.map((item: OrderItem) => (
-                          <div
-                            key={item.id}
-                            className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"
-                          >
-                            <Image
-                              width={60}
-                              height={60}
-                              src={item.product_variants?.image_url || ''}
-                              alt={item.products?.title || ''}
-                              className="w-15 h-15 object-cover rounded"
-                            />
-                            <div className="flex-1">
-                              <h4 className="font-medium text-gray-900">{item.products?.title}</h4>
-                              <p className="text-sm text-gray-500">
-                                Color: {item.product_variants?.color}
-                              </p>
-                              <p className="text-sm text-gray-500">Size: {item.size}</p>
-                              <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-medium text-gray-900">
-                                £{(item.price_at_purchase * item.quantity).toFixed(2)}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="flex items-center gap-2 text-sm text-zinc-400 font-light">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        {order.order_items?.length || 0} item{order.order_items?.length !== 1 ? 's' : ''}
+                        <span className="mx-2">•</span>
+                        <span className="group-hover:text-emerald-400 transition">View details →</span>
                       </div>
                     </div>
                   ))}
@@ -511,7 +533,7 @@ export default function AccountPage() {
             </div>
           )}
         </div>
-      </main>
+      </div>
     </div>
   )
 }
