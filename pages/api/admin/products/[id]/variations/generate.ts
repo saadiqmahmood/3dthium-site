@@ -201,9 +201,6 @@ function collectImages(optionsMap: Record<string, AttributeOption>) {
   const allImages: string[] = []
   const sources: Record<string, string[]> = {}
 
-  // Priority order: design > color > material > size
-  const priority = ['design', 'design_pattern', 'color', 'material', 'size', 'height']
-
   for (const key of Object.keys(optionsMap)) {
     const option = optionsMap[key]
     if (option?.images && Array.isArray(option.images) && option.images.length > 0) {

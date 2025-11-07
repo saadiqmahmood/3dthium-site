@@ -64,14 +64,12 @@ export default function EditProductPage() {
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [productAttributes, setProductAttributes] = useState<any[]>([])
-  const [loadingAttributes, setLoadingAttributes] = useState(false)
-
   // Fetch product attributes
   const fetchProductAttributes = async () => {
     if (!id) return
     
-    setLoadingAttributes(true)
     try {
       const response = await fetch(`/api/admin/products/${id}/attributes`)
       if (response.ok) {
@@ -80,8 +78,6 @@ export default function EditProductPage() {
       }
     } catch (error) {
       console.error('Error fetching attributes:', error)
-    } finally {
-      setLoadingAttributes(false)
     }
   }
 
@@ -119,6 +115,7 @@ export default function EditProductPage() {
 
     fetchProduct()
     fetchProductAttributes()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   // Fetch categories
