@@ -31,6 +31,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
     if (productId) {
       fetchVariants()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId])
 
   const fetchVariants = async () => {
