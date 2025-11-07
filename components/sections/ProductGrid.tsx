@@ -77,16 +77,16 @@ export default function ProductGrid() {
       <div className="max-w-7xl mx-auto px-6">
         {/* Category Filters */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Shop by Category</h2>
+          <h2 className="text-2xl font-light text-white mb-6 text-center">Shop by Category</h2>
           <div className="flex flex-wrap justify-center gap-3">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-3 rounded-full border-2 text-sm font-medium transition-all duration-200 ${
+                className={`px-6 py-3 rounded-lg text-sm font-light transition-all duration-200 ${
                   selectedCategory === category
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-lg transform scale-105'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700'
+                    ? 'bg-emerald-500 text-white border border-emerald-500'
+                    : 'bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 hover:text-white'
                 }`}
               >
                 {category}
@@ -98,20 +98,33 @@ export default function ProductGrid() {
         {/* Loading State */}
         {loading && (
           <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
-            <p className="mt-4 text-gray-600 text-lg">Loading amazing products...</p>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
+            <p className="mt-4 text-zinc-400 text-lg font-light">Loading products...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
           <div className="text-center py-20">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-8 max-w-md mx-auto">
-              <div className="text-red-600 text-6xl mb-4">⚠️</div>
-              <p className="text-red-800 text-lg mb-4">{error}</p>
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 max-w-md mx-auto">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-16 h-16 text-red-400 mx-auto mb-4"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <p className="text-white text-lg mb-4 font-light">{error}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                className="bg-white text-zinc-950 font-medium py-3 px-6 rounded-lg hover:bg-zinc-100 transition-colors"
               >
                 Try Again
               </button>
@@ -123,7 +136,7 @@ export default function ProductGrid() {
         {!loading && !error && (
           <>
             <div className="mb-8 text-center">
-              <p className="text-gray-600 text-lg">
+              <p className="text-zinc-400 text-lg font-light">
                 {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
                 {selectedCategory !== 'All' && ` in ${selectedCategory}`}
               </p>
@@ -139,10 +152,22 @@ export default function ProductGrid() {
         {/* No Products State */}
         {!loading && !error && filteredProducts.length === 0 && (
           <div className="text-center py-20">
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-12 max-w-md mx-auto">
-              <div className="text-gray-400 text-6xl mb-4">🔍</div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">No Products Found</h3>
-              <p className="text-gray-600 mb-6">
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-12 max-w-md mx-auto">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-16 h-16 text-zinc-600 mx-auto mb-4"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+              <h3 className="text-xl font-medium text-white mb-2">No Products Found</h3>
+              <p className="text-zinc-400 mb-6 font-light">
                 {selectedCategory === 'All'
                   ? "We're working on adding more amazing products!"
                   : `No products found in ${selectedCategory} category`}
@@ -150,7 +175,7 @@ export default function ProductGrid() {
               {selectedCategory !== 'All' && (
                 <button
                   onClick={() => setSelectedCategory('All')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                  className="bg-white text-zinc-950 font-medium py-2 px-4 rounded-lg hover:bg-zinc-100 transition-colors"
                 >
                   View All Products
                 </button>

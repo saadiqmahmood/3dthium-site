@@ -45,30 +45,44 @@ export default function ProductCard({ product, variants }: Props) {
       : 'No variants'
 
   return (
-    <Link href={`/products/${product.slug}`} className="block">
-      <div className="bg-white rounded-xl shadow hover:shadow-md transition">
-        <div className="w-full h-72 bg-gray-100 rounded-t-xl overflow-hidden">
+    <Link href={`/products/${product.slug}`} className="block group">
+      <div className="bg-zinc-900/50 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all duration-300 overflow-hidden">
+        <div className="relative w-full h-72 bg-zinc-950 overflow-hidden">
           <Image
             src={product.thumbnail_url}
             alt={product.name}
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
             width={300}
             height={300}
           />
-        </div>
-        <div className="p-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-1">{product.name}</h3>
-          <p className="text-sm text-gray-500">{product.category.name}</p>
-
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent"></div>
+          
+          {/* Category Badge */}
+          <div className="absolute top-4 left-4">
+            <span className="bg-zinc-900/80 backdrop-blur-sm text-zinc-300 px-3 py-1 rounded-full text-xs font-light border border-zinc-800">
+              {product.category.name}
+            </span>
+          </div>
+          
           {/* Customizable badge */}
-          {product.customizable && <p className="text-xs text-blue-500 mt-1">Customizable</p>}
+          {product.customizable && (
+            <div className="absolute top-4 right-4">
+              <span className="bg-emerald-500/20 backdrop-blur-sm text-emerald-400 px-3 py-1 rounded-full text-xs font-light border border-emerald-500/30">
+                Custom
+              </span>
+            </div>
+          )}
+        </div>
+        
+        <div className="p-6">
+          <h3 className="text-lg font-medium text-white mb-2 group-hover:text-emerald-400 transition-colors">{product.name}</h3>
 
           {/* Price display */}
-          <p className="text-md text-gray-800 mt-2 font-semibold">{displayPrice}</p>
+          <p className="text-xl font-semibold text-white mt-2">{displayPrice}</p>
 
           {/* Variant info */}
           {product.price_range.has_variants && (
-            <p className="text-xs text-gray-500 mt-1">{variantText}</p>
+            <p className="text-xs text-zinc-500 mt-2 font-light">{variantText}</p>
           )}
         </div>
       </div>

@@ -101,33 +101,40 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="px-4 sm:px-8 py-6">
+    <div className="min-h-screen bg-zinc-950 px-4 sm:px-8 py-6 relative overflow-hidden">
+      {/* Background glow effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-1/3 right-1/3 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 left-1/3 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
+      </div>
+      
+      <div className="relative">
       <button
         type="button"
         onClick={() => router.back()}
-        className="ml-4 mt-6 text-blue-600 hover:text-blue-800 text-sm flex items-center"
+        className="ml-4 mt-6 text-emerald-400 hover:text-blue-800 text-sm flex items-center"
       >
         ← Back
       </button>
 
       <div className="max-w-md mx-auto px-6 py-20">
-        <h1 className="text-3xl font-bold text-center text-stone-800 mb-6">
+        <h1 className="text-3xl font-light text-center text-white mb-6">
           {isLogin ? 'Login' : 'Create an Account'}
         </h1>
         {resetMode ? (
-          <form onSubmit={handlePasswordReset} className="space-y-6 bg-white p-8 rounded-xl shadow">
-            <h2 className="text-xl font-semibold text-center text-stone-800">
+          <form onSubmit={handlePasswordReset} className="space-y-6 bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl">
+            <h2 className="text-xl font-semibold text-center text-white">
               Reset Your Password
             </h2>
 
             <div>
-              <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="reset-email" className="block text-sm font-medium text-white">
                 Email
               </label>
               <input
                 type="email"
                 id="reset-email"
-                className="mt-1 p-2 w-full border border-gray-300 rounded text-stone-800"
+                className="mt-1 p-2 w-full border border-zinc-700 bg-zinc-900 text-white rounded text-white"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -137,7 +144,7 @@ export default function AuthPage() {
               <p className="text-right text-sm">
                 <button
                   type="button"
-                  className="text-blue-600 hover:underline"
+                  className="text-emerald-400 hover:underline"
                   onClick={() => setResetMode(true)}
                 >
                   Forgot password?
@@ -147,7 +154,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+              className="w-full bg-white text-zinc-950 py-3 rounded-lg hover:bg-zinc-100 transition-colors disabled:opacity-50 font-medium"
             >
               {loading ? 'Sending...' : 'Send Reset Link'}
             </button>
@@ -156,14 +163,14 @@ export default function AuthPage() {
               <button
                 type="button"
                 onClick={() => setResetMode(false)}
-                className="text-blue-600 hover:underline"
+                className="text-emerald-400 hover:underline"
               >
                 ← Back to {isLogin ? 'Login' : 'Sign Up'}
               </button>
             </p>
           </form>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-xl shadow">
+          <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl">
             {error && (
               <div className="bg-red-100 text-red-700 border border-red-300 p-3 rounded">
                 {error}
@@ -171,13 +178,13 @@ export default function AuthPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-white">
                 Email
               </label>
               <input
                 type="email"
                 id="email"
-                className="mt-1 p-2 w-full border border-gray-300 text-stone-800 rounded"
+                className="mt-1 p-2 w-full border border-zinc-700 bg-zinc-900 text-white text-white rounded"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -185,13 +192,13 @@ export default function AuthPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-white">
                 Password
               </label>
               <input
                 type="password"
                 id="password"
-                className="mt-1 p-2 w-full border border-gray-300 text-stone-800 rounded"
+                className="mt-1 p-2 w-full border border-zinc-700 bg-zinc-900 text-white text-white rounded"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -202,7 +209,7 @@ export default function AuthPage() {
                 <p className="text-right text-sm mt-2">
                   <button
                     type="button"
-                    className="text-blue-600 hover:underline"
+                    className="text-emerald-400 hover:underline"
                     onClick={() => setResetMode(true)}
                   >
                     Forgot password?
@@ -213,7 +220,7 @@ export default function AuthPage() {
                   <p className="text-right text-xs mt-1">
                     <button
                       type="button"
-                      className="text-blue-600 hover:underline"
+                      className="text-emerald-400 hover:underline"
                       onClick={handleResendConfirmation}
                       disabled={loading}
                     >
@@ -226,7 +233,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+              className="w-full bg-white text-zinc-950 py-3 rounded-lg hover:bg-zinc-100 transition-colors disabled:opacity-50 font-medium"
             >
               {loading ? 'Please wait...' : isLogin ? 'Login' : 'Sign Up'}
             </button>
@@ -234,7 +241,7 @@ export default function AuthPage() {
             {!isLogin && (
               <p className="text-center text-xs text-gray-500 mt-2">
                 By signing up, you agree to our{' '}
-                <Link href="/privacy" className="text-blue-600 hover:underline">
+                <Link href="/privacy" className="text-emerald-400 hover:underline">
                   Privacy Policy
                 </Link>
                 .
@@ -244,7 +251,7 @@ export default function AuthPage() {
               {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
               <button
                 type="button"
-                className="text-blue-600 hover:underline"
+                className="text-emerald-400 hover:underline"
                 onClick={() => setIsLogin(!isLogin)}
               >
                 {isLogin ? 'Sign Up' : 'Login'}
@@ -255,6 +262,7 @@ export default function AuthPage() {
         {toast && (
           <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
         )}
+      </div>
       </div>
     </div>
   )

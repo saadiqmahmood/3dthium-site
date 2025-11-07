@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
 
-const CartIcon = ({ hasColorfulHero }: { hasColorfulHero: boolean }) => (
+const CartIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 32 32"
-    className={`w-6 h-6 ${hasColorfulHero ? 'fill-white' : 'fill-gray-600'}`}
+    className="w-6 h-6 fill-white"
   >
     <title>Cart</title>
     <path d="M29.74 8.32A1 1 0 0 0 29 8H13a1 1 0 0 0 0 2h14.91l-.81 9.48a1.87 1.87 0 0 1-2 1.52H12.88a1.87 1.87 0 0 1-2-1.52L10 8.92v-.16L9.33 6.2A3.89 3.89 0 0 0 7 3.52L3.37 2.07a1 1 0 0 0-.74 1.86l3.62 1.45a1.89 1.89 0 0 1 1.14 1.3L8 9.16l.9 10.49a3.87 3.87 0 0 0 4 3.35h.1v2.18a3 3 0 1 0 2 0V23h8v2.18a3 3 0 1 0 2 0V23h.12a3.87 3.87 0 0 0 4-3.35L30 9.08a1 1 0 0 0-.26-.76zM14 29a1 1 0 1 1 1-1 1 1 0 0 1-1 1zm10 0a1 1 0 1 1 1-1 1 1 0 0 1-1 1z" />
@@ -16,7 +16,7 @@ const CartIcon = ({ hasColorfulHero }: { hasColorfulHero: boolean }) => (
   </svg>
 )
 
-const UserIcon = ({ hasColorfulHero }: { hasColorfulHero: boolean }) => (
+const UserIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
@@ -25,7 +25,7 @@ const UserIcon = ({ hasColorfulHero }: { hasColorfulHero: boolean }) => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className={`w-6 h-6 ${hasColorfulHero ? 'text-white' : 'text-gray-600'}`}
+    className="w-6 h-6 text-white"
   >
     <title>Account</title>
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -41,10 +41,6 @@ export default function Navbar() {
   const [animate, setAnimate] = useState(false)
   const router = useRouter()
   const { user, isAdmin } = useAuth()
-  const isAccountPage = router.pathname.startsWith('/account')
-
-  // Check if current page has a colorful hero section
-  const hasColorfulHero = router.pathname === '/' || router.pathname === '/products'
 
   useEffect(() => {
     const handleResize = () => {
@@ -68,15 +64,14 @@ export default function Navbar() {
   }, [totalItems])
 
   return (
+    <>
     <nav
-      className={`${isAccountPage ? 'fixed top-0 left-0 w-full z-50' : ''} ${
-        hasColorfulHero ? 'absolute top-0 left-0 w-full z-50 bg-transparent' : 'bg-white'
-      } px-6 py-4 flex flex-col md:flex-row md:justify-between md:items-center transition-all duration-300`}
+      className="fixed top-0 left-0 w-full z-50 bg-zinc-950/90 backdrop-blur-lg px-6 py-4 flex flex-col md:flex-row md:justify-between md:items-center transition-all duration-300"
     >
       <div className="flex justify-between items-center w-full relative z-10">
         <Link
           href="/"
-          className={`text-4xl pl-5 font-bold ${hasColorfulHero ? 'text-white' : 'text-blue-500'}`}
+          className="text-4xl pl-5 font-light text-white"
         >
           3Dthium
         </Link>
@@ -88,7 +83,7 @@ export default function Navbar() {
               className="hover:text-blue-600 md:hidden"
             >
               <div className="relative w-6 h-6">
-                <CartIcon hasColorfulHero={hasColorfulHero} />
+                <CartIcon />
                 {totalItems > 0 && (
                   <span
                     className={`absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'}`}
@@ -103,21 +98,18 @@ export default function Navbar() {
               className="relative w-6 h-6 cursor-not-allowed opacity-50 md:hidden"
               title="Cart is empty"
             >
-              <CartIcon hasColorfulHero={hasColorfulHero} />
+              <CartIcon />
             </div>
           )}
 
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className={`md:hidden p-2 rounded transition
-                            ${
-                              isOpen
-                                ? 'bg-blue-500 text-white'
-                                : hasColorfulHero
-                                  ? 'text-white hover:text-blue-300 hover:bg-white/10'
-                                  : 'text-gray-700 hover:text-blue-500 hover:bg-blue-50 active:bg-blue-100'
-                            }`}
+            className={`md:hidden p-2 rounded transition ${
+              isOpen
+                ? 'bg-emerald-500 text-white'
+                : 'text-white hover:text-emerald-400 hover:bg-zinc-900'
+            }`}
             aria-label="Toggle Menu"
           >
             <svg
@@ -134,48 +126,44 @@ export default function Navbar() {
           </button>
         </div>
       </div>
-      <div
-        className={`hidden md:flex md:flex-row md:space-x-7 pr-20 text-sm font-medium items-center ${
-          hasColorfulHero ? 'text-white' : 'text-gray-600'
-        }`}
-      >
+      <div className="hidden md:flex md:flex-row md:space-x-7 pr-20 text-sm font-medium items-center text-white">
         <Link
           href="/"
-          className={`text-base ${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-stone-800'}`}
+          className="text-base text-white hover:text-emerald-400 transition-colors font-light"
         >
           Home
         </Link>
         <Link
           href="/products"
-          className={`text-base ${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-stone-800'}`}
+          className="text-base text-white hover:text-emerald-400 transition-colors font-light"
         >
           Shop
         </Link>
         <Link
           href="/custom-order"
-          className={`text-base whitespace-nowrap ${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-stone-800'}`}
+          className="text-base whitespace-nowrap text-white hover:text-emerald-400 transition-colors font-light"
         >
           Custom Order
         </Link>
         <Link
           href="/about"
-          className={`text-base ${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-stone-800'}`}
+          className="text-base text-white hover:text-emerald-400 transition-colors font-light"
         >
           About
         </Link>
         <Link
           href="/contact"
-          className={`text-base ${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-stone-800'}`}
+          className="text-base text-white hover:text-emerald-400 transition-colors font-light"
         >
           Contact
         </Link>
         {!isCartEmpty ? (
           <Link
             href={{ pathname: '/cart', query: { from: router.asPath } }}
-            className={`hidden md:block ${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-blue-600'}`}
+            className="hidden md:block hover:text-emerald-400 transition-colors"
           >
             <div className="relative w-6 h-6">
-              <CartIcon hasColorfulHero={hasColorfulHero} />
+              <CartIcon />
               {totalItems > 0 && (
                 <span
                   className={`absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'}`}
@@ -190,261 +178,208 @@ export default function Navbar() {
             className="relative w-6 h-6 cursor-not-allowed opacity-50 hidden md:block"
             title="Cart is empty"
           >
-            <CartIcon hasColorfulHero={hasColorfulHero} />
+            <CartIcon />
           </div>
         )}
-        {!user ? (
-          <Link
-            href="/auth"
-            className={`text-sm font-medium ${hasColorfulHero ? 'text-white hover:text-blue-300 hover:underline' : 'text-blue-600 hover:underline'}`}
-          >
-            Login
-          </Link>
-        ) : (
-          <>
+          {!user ? (
             <Link
-              href="/account"
-              className={`${hasColorfulHero ? 'hover:text-blue-300' : 'hover:text-blue-500'}`}
+              href="/auth"
+              className="text-sm font-medium text-white hover:text-emerald-400 transition-colors"
             >
-              <UserIcon hasColorfulHero={hasColorfulHero} />
+              Login
             </Link>
-            {isAdmin && (
+          ) : (
+            <>
               <Link
-                href="/admin"
-                className={`text-sm font-medium ${hasColorfulHero ? 'text-white hover:text-blue-300' : 'text-blue-700 hover:text-blue-900'}`}
+                href="/account"
+                className="hover:text-emerald-400 transition-colors"
               >
-                Admin
+                <UserIcon />
               </Link>
-            )}
-          </>
-        )}
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="text-sm font-medium text-white hover:text-emerald-400 transition-colors"
+                >
+                  Admin
+                </Link>
+              )}
+            </>
+          )}
         {/** Privacy Policy link (desktop) */}
         {/* Privacy Policy link removed from desktop */}
       </div>
-      {isOpen && (
-        // biome-ignore lint/a11y/noStaticElementInteractions: backdrop overlay for mobile menu
-        <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-all duration-300"
-          onClick={() => setIsOpen(false)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              setIsOpen(false)
-            }
-          }}
-          style={{
-            animation: 'fadeIn 0.3s ease-out',
-          }}
-        >
+    </nav>
+    
+    {/* Mobile Menu - Outside nav element */}
+    {isOpen && (
+        <>
+          {/* Backdrop */}
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop overlay for mobile menu */}
+          <div
+            className="md:hidden fixed inset-0 z-[60] bg-black/90 animate-fadeIn"
+            onClick={() => setIsOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setIsOpen(false)
+              }
+            }}
+            style={{
+              animation: 'fadeIn 0.3s ease-out',
+            }}
+          />
+          
+          {/* Menu Panel */}
           {/* biome-ignore lint/a11y/noStaticElementInteractions: stops click propagation */}
           <div
-            className={`${
-              hasColorfulHero
-                ? 'bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900'
-                : 'bg-white'
-            } w-4/5 h-full p-6 shadow-2xl flex flex-col gap-4 transition-all duration-300 transform`}
+            className="md:hidden fixed top-0 left-0 z-[70] bg-zinc-950 w-full sm:w-96 h-full flex flex-col shadow-2xl"
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
             style={{
               animation: 'slideInLeft 0.4s ease-out',
             }}
           >
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className={`self-end p-3 rounded-full transition-all duration-200 hover:scale-110 ${
-                hasColorfulHero
-                  ? 'text-white hover:text-blue-300 hover:bg-white/10'
-                  : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
-              }`}
-              aria-label="Close Menu"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+              <span className="text-2xl font-light text-white">3Dthium</span>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all"
+                aria-label="Close Menu"
               >
-                <title>Close</title>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <Link
-              href="/"
-              className={`text-4xl font-bold ${hasColorfulHero ? 'text-white' : 'text-blue-500'}`}
-            >
-              3Dthium
-            </Link>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
 
             {/* Cart Section */}
             {!isCartEmpty && (
-              <div
-                className={`mt-4 p-4 rounded-lg ${hasColorfulHero ? 'bg-white/10' : 'bg-gray-50'}`}
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`text-sm font-medium ${hasColorfulHero ? 'text-white' : 'text-gray-700'}`}
-                  >
-                    Cart ({totalItems} item{totalItems > 1 ? 's' : ''})
-                  </span>
-                  <Link
-                    href={{ pathname: '/cart', query: { from: router.asPath } }}
-                    className={`text-sm font-semibold px-3 py-1 rounded-full transition-all duration-200 hover:scale-105 ${
-                      hasColorfulHero
-                        ? 'bg-white text-slate-900 hover:bg-white/90'
-                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    View Cart
-                  </Link>
-                </div>
+              <div className="px-6 py-4 bg-zinc-900/50">
+                <Link
+                  href={{ pathname: '/cart', query: { from: router.asPath } }}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-between p-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 transition-colors border border-zinc-800"
+                >
+                  <div className="flex items-center gap-3">
+                    <svg className="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                    </svg>
+                    <span className="text-white text-sm font-light">
+                      {totalItems} item{totalItems !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <svg className="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
               </div>
             )}
-            <div
-              className={`mt-8 flex flex-col space-y-2 ${
-                hasColorfulHero ? 'divide-y divide-white/20' : 'divide-y divide-gray-200'
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  setTimeout(() => setIsOpen(false), 250)
-                  router.push('/')
-                }}
-                className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
-                  hasColorfulHero
-                    ? 'text-white hover:text-blue-300 hover:bg-white/10'
-                    : 'text-stone-800 hover:text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                Home
-              </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setTimeout(() => setIsOpen(false), 250)
-                  router.push('/products')
-                }}
-                className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
-                  hasColorfulHero
-                    ? 'text-white hover:text-blue-300 hover:bg-white/10'
-                    : 'text-stone-800 hover:text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                Shop
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setTimeout(() => setIsOpen(false), 250)
-                  router.push('/custom-order')
-                }}
-                className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
-                  hasColorfulHero
-                    ? 'text-white hover:text-blue-300 hover:bg-white/10'
-                    : 'text-stone-800 hover:text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                Custom Order
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setTimeout(() => setIsOpen(false), 250)
-                  router.push('/about')
-                }}
-                className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
-                  hasColorfulHero
-                    ? 'text-white hover:text-blue-300 hover:bg-white/10'
-                    : 'text-stone-800 hover:text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                About
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setTimeout(() => setIsOpen(false), 250)
-                  router.push('/contact')
-                }}
-                className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
-                  hasColorfulHero
-                    ? 'text-white hover:text-blue-300 hover:bg-white/10'
-                    : 'text-stone-800 hover:text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                Contact
-              </button>
-              {!user ? (
+            {/* Navigation */}
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <div className="space-y-1">
                 <button
                   type="button"
                   onClick={() => {
-                    setTimeout(() => setIsOpen(false), 250)
-                    router.push('/auth')
+                    setIsOpen(false)
+                    router.push('/')
                   }}
-                  className="text-base py-3 font-medium text-blue-600 hover:text-blue-800 text-left"
+                  className="w-full text-left py-3 px-4 text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-lg transition-all font-light"
                 >
-                  Login
+                  Home
                 </button>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTimeout(() => setIsOpen(false), 250)
-                      router.push('/account')
-                    }}
-                    className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
-                      hasColorfulHero
-                        ? 'text-white hover:text-blue-300 hover:bg-white/10'
-                        : 'text-stone-700 hover:text-blue-500 hover:bg-gray-50'
-                    }`}
-                  >
-                    My Account
-                  </button>
-                  {isAdmin && (
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false)
+                    router.push('/products')
+                  }}
+                  className="w-full text-left py-3 px-4 text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-lg transition-all font-light"
+                >
+                  Shop
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false)
+                    router.push('/custom-order')
+                  }}
+                  className="w-full text-left py-3 px-4 text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-lg transition-all font-light"
+                >
+                  Custom Order
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false)
+                    router.push('/about')
+                  }}
+                  className="w-full text-left py-3 px-4 text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-lg transition-all font-light"
+                >
+                  About
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false)
+                    router.push('/contact')
+                  }}
+                  className="w-full text-left py-3 px-4 text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-lg transition-all font-light"
+                >
+                  Contact
+                </button>
+
+                {/* Auth Section */}
+                <div className="pt-4 mt-4 border-t border-zinc-800">
+                  {!user ? (
                     <button
                       type="button"
                       onClick={() => {
-                        setTimeout(() => setIsOpen(false), 250)
-                        router.push('/admin')
+                        setIsOpen(false)
+                        router.push('/auth')
                       }}
-                      className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
-                        hasColorfulHero
-                          ? 'text-white hover:text-blue-300 hover:bg-white/10'
-                          : 'text-blue-700 hover:text-blue-900 hover:bg-blue-50'
-                      }`}
+                      className="w-full text-left py-3 px-4 text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition-all font-medium"
                     >
-                      Admin
+                      Login
                     </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpen(false)
+                          router.push('/account')
+                        }}
+                        className="w-full text-left py-3 px-4 text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-lg transition-all font-light mb-2"
+                      >
+                        My Account
+                      </button>
+                      {isAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsOpen(false)
+                            router.push('/admin')
+                          }}
+                          className="w-full text-left py-3 px-4 text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-lg transition-all font-light"
+                        >
+                          Admin
+                        </button>
+                      )}
+                    </>
                   )}
-                </>
-              )}
-              {/** Privacy Policy link (mobile) */}
-              <button
-                type="button"
-                onClick={() => {
-                  setTimeout(() => setIsOpen(false), 250)
-                  router.push('/privacy')
-                }}
-                className={`text-lg py-4 px-4 font-medium text-left rounded-lg transition-all duration-200 hover:scale-105 ${
-                  hasColorfulHero
-                    ? 'text-white hover:text-blue-300 hover:bg-white/10'
-                    : 'text-blue-600 hover:text-blue-800 hover:bg-blue-50'
-                }`}
-              >
-                Privacy Policy
-              </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
-    </nav>
+    </>
   )
 }
