@@ -47,7 +47,7 @@ export default function ImageUpload({
     return publicUrl
   }
 
-  const handleFileUpload = async (files: FileList) => {
+  const handleFileUpload = useCallback(async (files: FileList) => {
     if (images.length + files.length > maxImages) {
       alert(`Maximum ${maxImages} images allowed`)
       return
@@ -85,7 +85,8 @@ export default function ImageUpload({
     } finally {
       setUploading(false)
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [images, maxImages, onImagesChange])
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()

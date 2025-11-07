@@ -53,6 +53,7 @@ export default function AttributeBuilder({
     ])
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateAttribute = (index: number, field: keyof Attribute, value: any) => {
     const newAttrs = [...attributes]
     newAttrs[index] = { ...newAttrs[index], [field]: value }
@@ -75,6 +76,7 @@ export default function AttributeBuilder({
     updateAttributes(newAttrs)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateOption = (attrIndex: number, optIndex: number, field: keyof AttributeOption, value: any) => {
     const newAttrs = [...attributes]
     newAttrs[attrIndex].options[optIndex] = {
@@ -154,7 +156,7 @@ export default function AttributeBuilder({
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
           <p className="text-stone-600 mb-2">No attributes defined yet</p>
           <p className="text-sm text-stone-500">
-            Click "Add Attribute" to create attributes like Color, Size, or Design
+            Click &quot;Add Attribute&quot; to create attributes like Color, Size, or Design
           </p>
         </div>
       )}
@@ -217,7 +219,7 @@ export default function AttributeBuilder({
 
             {attr.options.length === 0 && (
               <div className="border border-dashed border-gray-300 rounded p-4 text-center text-sm text-stone-600">
-                No options yet. Click "Add Option" to create options like Red, Blue, Small, Large, etc.
+                No options yet. Click &quot;Add Option&quot; to create options like Red, Blue, Small, Large, etc.
               </div>
             )}
 
@@ -286,9 +288,9 @@ export default function AttributeBuilder({
                   <ImageUpload
                     categorySlug={categorySlug}
                     productSlug={`${productSlug}-${attr.name.toLowerCase()}-${option.value || optIdx}`}
-                    galleryImages={option.images || []}
-                    onGalleryChange={(images) => updateOption(attrIdx, optIdx, 'images', images)}
-                    maxGalleryImages={5}
+                    initialImages={option.images || []}
+                    onImagesChange={(images) => updateOption(attrIdx, optIdx, 'images', images)}
+                    maxImages={5}
                   />
                 </div>
 

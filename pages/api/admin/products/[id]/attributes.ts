@@ -28,6 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Sort options within each attribute
       const sortedAttributes = attributes?.map((attr) => ({
         ...attr,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         options: attr.options?.sort((a: any, b: any) => a.display_order - b.display_order) || [],
       }))
 
@@ -73,6 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Insert options for this attribute
         if (attr.options && Array.isArray(attr.options) && attr.options.length > 0) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const optionsToInsert = attr.options.map((opt: any, idx: number) => ({
             attribute_id: newAttr.id,
             value: opt.value || opt.displayName?.toLowerCase().replace(/\s+/g, '-'),
