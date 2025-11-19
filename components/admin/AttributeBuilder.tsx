@@ -76,13 +76,35 @@ export default function AttributeBuilder({
     updateAttributes(newAttrs)
   }
 
+  // Auto-generate value from displayName if value is empty
+  const generateValueFromDisplayName = (displayName: string): string => {
+    return displayName
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
+      .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateOption = (attrIndex: number, optIndex: number, field: keyof AttributeOption, value: any) => {
     const newAttrs = [...attributes]
-    newAttrs[attrIndex].options[optIndex] = {
-      ...newAttrs[attrIndex].options[optIndex],
-      [field]: value,
+    const option = newAttrs[attrIndex].options[optIndex]
+    
+    // Auto-generate value when displayName changes and value is empty
+    if (field === 'displayName' && !option.value) {
+      const autoValue = generateValueFromDisplayName(value)
+      newAttrs[attrIndex].options[optIndex] = {
+        ...option,
+        displayName: value,
+        value: autoValue,
+      }
+    } else {
+      newAttrs[attrIndex].options[optIndex] = {
+        ...option,
+        [field]: value,
+      }
     }
+    
     updateAttributes(newAttrs)
   }
 
@@ -107,6 +129,10 @@ export default function AttributeBuilder({
         if (!opt.displayName.trim()) {
           setMessage({ text: `All options in "${attr.name}" must have a display name`, type: 'error' })
           return
+        }
+        // Auto-generate value if missing
+        if (!opt.value?.trim()) {
+          opt.value = generateValueFromDisplayName(opt.displayName)
         }
       }
     }
@@ -152,10 +178,57 @@ export default function AttributeBuilder({
         </button>
       </div>
 
+      {/* How It Works Info Box */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-5 h-5"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4" />
+            <path d="M12 8h.01" />
+          </svg>
+          How Attributes Work:
+        </h4>
+        <ol className="text-sm text-blue-800 space-y-1.5 list-decimal list-inside">
+          <li>
+            <strong>Add an Attribute:</strong> Click &quot;+ Add Attribute&quot; and name it (e.g., &quot;Color&quot;, &quot;Height&quot;, &quot;Material&quot;)
+          </li>
+          <li>
+            <strong>Choose Type:</strong> Select Color, Size, Material, Design, or Custom (Color shows a color picker)
+          </li>
+          <li>
+            <strong>Add Options:</strong> Click &quot;+ Add Option&quot; for each attribute and enter the Display Name (e.g., &quot;Red&quot;, &quot;150mm&quot;, &quot;Small&quot;). The system ID is auto-generated.
+          </li>
+          <li>
+            <strong>Set Price (Optional):</strong> Add a price modifier if this option affects price (e.g., +5 for Large, -2 for Small, or 0 for no change)
+          </li>
+          <li>
+            <strong>Upload Images (Optional):</strong> Add product images specific to each option. These will be inherited by all variations with that option.
+          </li>
+          <li>
+            <strong>Save Attributes:</strong> Click &quot;Save Attributes&quot; to save your changes
+          </li>
+          <li>
+            <strong>Generate Variations:</strong> Scroll down to the &quot;Bulk Variation Generator&quot; section to automatically create all possible combinations
+          </li>
+        </ol>
+        <p className="text-xs text-blue-700 mt-3 font-medium">
+          💡 Example: Color (Red, Blue) × Height (150mm, 200mm) = 4 variations automatically created!
+        </p>
+      </div>
+
       {attributes.length === 0 && (
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
           <p className="text-stone-600 mb-2">No attributes defined yet</p>
-          <p className="text-sm text-stone-500">
+          <p className="text-sm text-stone-500 mb-4">
             Click &quot;Add Attribute&quot; to create attributes like Color, Size, or Design
           </p>
         </div>
@@ -228,56 +301,56 @@ export default function AttributeBuilder({
                 key={optIdx}
                 className="grid grid-cols-12 gap-3 items-start p-3 bg-gray-50 rounded border"
               >
-                {/* Value */}
-                <div className="col-span-2">
-                  <input
-                    type="text"
-                    placeholder="Value"
-                    value={option.value}
-                    onChange={(e) => updateOption(attrIdx, optIdx, 'value', e.target.value)}
-                    className="w-full px-2 py-1.5 border rounded text-sm text-stone-900 bg-white"
-                    title="Machine-readable value (e.g., 'red', 'small')"
-                  />
-                </div>
+                {/* Value - Hidden, auto-generated from display name */}
+                <input
+                  type="hidden"
+                  value={option.value || generateValueFromDisplayName(option.displayName || '')}
+                />
 
                 {/* Display Name */}
-                <div className="col-span-3">
+                <div className={attr.type === 'color' ? 'col-span-3' : 'col-span-4'}>
+                  <label className="block text-xs text-stone-600 mb-1">Display Name *</label>
                   <input
                     type="text"
-                    placeholder="Display Name *"
+                    placeholder="e.g., Crimson Red, 150mm"
                     value={option.displayName}
                     onChange={(e) => updateOption(attrIdx, optIdx, 'displayName', e.target.value)}
                     className="w-full px-2 py-1.5 border rounded text-sm text-stone-900 bg-white"
-                    title="Human-readable name (e.g., 'Crimson Red', '6 inch')"
+                    title="What customers see (can include units, spaces, etc.)"
                   />
+                  <p className="text-xs text-stone-500 mt-0.5">What customers see</p>
                 </div>
 
                 {/* Color Picker (only for color type) */}
                 {attr.type === 'color' && (
                   <div className="col-span-1">
+                    <label className="block text-xs text-stone-600 mb-1">Color</label>
                     <input
                       type="color"
                       value={option.hexColor || '#000000'}
                       onChange={(e) => updateOption(attrIdx, optIdx, 'hexColor', e.target.value)}
                       className="w-full h-9 border rounded cursor-pointer"
-                      title="Color swatch"
+                      title="Color swatch for this option"
                     />
+                    <p className="text-xs text-stone-500 mt-0.5">Swatch</p>
                   </div>
                 )}
 
                 {/* Price Modifier */}
                 <div className={attr.type === 'color' ? 'col-span-2' : 'col-span-3'}>
+                  <label className="block text-xs text-stone-600 mb-1">Price Modifier</label>
                   <input
                     type="number"
-                    placeholder="Price +/-"
+                    placeholder="0.00"
                     step="0.01"
                     value={option.priceModifier || 0}
                     onChange={(e) =>
                       updateOption(attrIdx, optIdx, 'priceModifier', parseFloat(e.target.value) || 0)
                     }
                     className="w-full px-2 py-1.5 border rounded text-sm text-stone-900 bg-white"
-                    title="Price adjustment (e.g., +5 for large, -2 for small)"
+                    title="Price adjustment: +5 adds $5, -2 subtracts $2, 0 = no change"
                   />
+                  <p className="text-xs text-stone-500 mt-0.5">+5 adds $5, -2 subtracts $2</p>
                 </div>
 
                 {/* Images */}
@@ -285,13 +358,19 @@ export default function AttributeBuilder({
                   <div className="text-xs text-stone-700 mb-1">
                     Images ({option.images?.length || 0})
                   </div>
-                  <ImageUpload
-                    categorySlug={categorySlug}
-                    productSlug={`${productSlug}-${attr.name.toLowerCase()}-${option.value || optIdx}`}
-                    initialImages={option.images || []}
-                    onImagesChange={(images) => updateOption(attrIdx, optIdx, 'images', images)}
-                    maxImages={5}
-                  />
+                  {productSlug && attr.name && option.value ? (
+                    <ImageUpload
+                      categorySlug={categorySlug || 'products'}
+                      productSlug={`${productSlug}-${attr.name.toLowerCase().replace(/\s+/g, '-')}-${option.value.toLowerCase().replace(/\s+/g, '-')}`}
+                      initialImages={option.images || []}
+                      onImagesChange={(images) => updateOption(attrIdx, optIdx, 'images', images)}
+                      maxImages={5}
+                    />
+                  ) : (
+                    <div className="border-2 border-dashed border-gray-300 rounded p-4 text-center text-sm text-gray-500">
+                      Please fill in the attribute name and option value before uploading images
+                    </div>
+                  )}
                 </div>
 
                 {/* Remove Button */}
@@ -336,33 +415,6 @@ export default function AttributeBuilder({
         </div>
       )}
 
-      {/* Info Box */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="w-5 h-5"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 16v-4" />
-            <path d="M12 8h.01" />
-          </svg>
-          How It Works:
-        </h4>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>1. Define attributes (e.g., Color, Height)</li>
-          <li>2. Add options to each (e.g., Red, Blue for Color)</li>
-          <li>3. Upload images for each option (all Red variants will inherit these images)</li>
-          <li>4. Set price modifiers (e.g., +£5 for Large size)</li>
-          <li>5. Save attributes, then use the Variation Generator below</li>
-        </ul>
-      </div>
     </div>
   )
 }
