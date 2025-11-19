@@ -55,34 +55,60 @@ export default function AuthPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError('') // Optional if you're not displaying `error`
+    setError('')
+    setToast(null) // Clear any previous toast
 
-    console.log('Attempting auth:', isLogin ? 'signIn' : 'signUp', { email })
+    try {
+      console.log('Attempting auth:', isLogin ? 'signIn' : 'signUp', { email })
 
-    const action = isLogin ? signIn : signUp
-    const { error } = await action(email, password)
+      const action = isLogin ? signIn : signUp
+      const { error } = await action(email, password)
 
-    if (error) {
-      console.error('Auth error:', error)
-      setToast({ message: error.message, type: 'error' })
-      setLoading(false) // 🔥 ensure button is re-enabled
-      return
+      if (error) {
+        // Provide user-friendly error messages
+        let errorMessage = error.message
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'Invalid email or password. Please check your credentials and try again.'
+          // Only log unexpected errors, not expected auth failures
+          console.log('Login failed: Invalid credentials')
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'Please check your email and confirm your account before logging in.'
+          console.log('Login failed: Email not confirmed')
+        } else if (error.message.includes('User already registered')) {
+          errorMessage = 'An account with this email already exists. Please log in instead.'
+          console.log('Signup failed: User already exists')
+        } else {
+          // Log unexpected errors for debugging
+          console.error('Unexpected auth error:', error)
+        }
+
+        setError(errorMessage)
+        setLoading(false)
+        return
+      }
+
+      console.log('Auth successful:', isLogin ? 'signIn' : 'signUp')
+
+      // ✅ Success
+      setError('')
+      setToast({
+        message: isLogin ? 'Logged in successfully!' : 'Account created successfully!',
+        type: 'success',
+      })
+
+      // ✅ Delay redirect to show toast
+      const redirectTo = (router.query.from as string) || '/'
+      setTimeout(() => {
+        setLoading(false)
+        router.push(redirectTo)
+      }, 1500)
+    } catch (err) {
+      // Catch any unexpected errors
+      console.error('Unexpected auth error:', err)
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.'
+      setError(errorMessage)
+      setLoading(false)
     }
-
-    console.log('Auth successful:', isLogin ? 'signIn' : 'signUp')
-
-    // ✅ Success
-    setToast({
-      message: isLogin ? 'Logged in successfully!' : 'Account created successfully!',
-      type: 'success',
-    })
-
-    // ✅ Delay redirect to show toast
-    const redirectTo = (router.query.from as string) || '/'
-    setTimeout(() => {
-      setLoading(false) // optional here since you're leaving the page
-      router.push(redirectTo)
-    }, 1500)
   }
 
   const handleResendConfirmation = async () => {
@@ -172,8 +198,22 @@ export default function AuthPage() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl">
             {error && (
-              <div className="bg-red-100 text-red-700 border border-red-300 p-3 rounded">
-                {error}
+              <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm">
+                <div className="flex items-center gap-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 flex-shrink-0"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span>{error}</span>
+                </div>
               </div>
             )}
 

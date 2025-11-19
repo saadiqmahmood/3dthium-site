@@ -26,6 +26,11 @@ export default function ImageUpload({
   )
 
   const uploadImage = async (file: File): Promise<string> => {
+    // Validate inputs
+    if (!categorySlug || !productSlug) {
+      throw new Error('Category and product slug are required for upload')
+    }
+
     const fileExt = file.name.split('.').pop()
     const fileName = `${Date.now()}.${fileExt}`
     const filePath = `${categorySlug}/${productSlug}/${fileName}`
@@ -36,7 +41,17 @@ export default function ImageUpload({
     })
 
     if (error) {
-      throw new Error(`Upload failed: ${error.message}`)
+      console.error('Supabase upload error:', error)
+      // Provide more helpful error messages
+      if (error.message.includes('duplicate') || error.message.includes('already exists')) {
+        throw new Error('A file with this name already exists. Please rename your file.')
+      } else if (error.message.includes('not found') || error.message.includes('bucket')) {
+        throw new Error('Storage bucket not found. Please contact support.')
+      } else if (error.message.includes('permission') || error.message.includes('policy')) {
+        throw new Error('Permission denied. You may not have upload access.')
+      } else {
+        throw new Error(`Upload failed: ${error.message}`)
+      }
     }
 
     // Get public URL
@@ -81,7 +96,8 @@ export default function ImageUpload({
       onImagesChange(updatedImages)
     } catch (error) {
       console.error('Upload error:', error)
-      alert('Failed to upload images')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload images'
+      alert(`Upload Error: ${errorMessage}\n\nPlease check:\n- You have a valid product slug\n- You are logged in as an admin\n- Storage bucket exists and has correct permissions`)
     } finally {
       setUploading(false)
     }
