@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function CustomPrintsCTA() {
   return (
-    <section className="relative py-32 px-6 bg-white overflow-hidden">
+    <section className="relative py-16 px-6 bg-white overflow-hidden">
       {/* Hexagon pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />

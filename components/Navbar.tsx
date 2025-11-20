@@ -106,10 +106,10 @@ export default function Navbar() {
             type="button"
             onClick={() => setIsOpen(!isOpen)}
             className={`md:hidden p-2 rounded transition ${
-              isOpen
+                              isOpen
                 ? 'bg-emerald-500 text-white'
                 : 'text-zinc-900 hover:text-emerald-600 hover:bg-gray-100'
-            }`}
+                            }`}
             aria-label="Toggle Menu"
           >
             <svg
@@ -181,52 +181,52 @@ export default function Navbar() {
             <CartIcon />
           </div>
         )}
-          {!user ? (
-            <Link
-              href="/auth"
+        {!user ? (
+          <Link
+            href="/auth"
               className="text-base font-medium text-zinc-900 hover:text-emerald-600 transition-colors"
-            >
-              Login
-            </Link>
-          ) : (
-            <>
-              <Link
-                href="/account"
+          >
+            Login
+          </Link>
+        ) : (
+          <>
+            <Link
+              href="/account"
                 className="hover:text-emerald-400 transition-colors"
-              >
-                <UserIcon />
-              </Link>
-              {isAdmin && (
-                <Link
-                  href="/admin"
+            >
+              <UserIcon />
+            </Link>
+            {isAdmin && (
+              <Link
+                href="/admin"
                   className="text-base font-medium text-zinc-900 hover:text-emerald-600 transition-colors"
-                >
-                  Admin
-                </Link>
-              )}
-            </>
-          )}
+              >
+                Admin
+              </Link>
+            )}
+          </>
+        )}
         {/** Privacy Policy link (desktop) */}
         {/* Privacy Policy link removed from desktop */}
       </div>
     </nav>
     
     {/* Mobile Menu - Outside nav element */}
-    {isOpen && (
+      {isOpen && (
         <>
           {/* Backdrop */}
           {/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop overlay for mobile menu */}
-          <div
+        <div
             className="md:hidden fixed inset-0 z-[60] bg-white/90 backdrop-blur-sm animate-fadeIn"
-            onClick={() => setIsOpen(false)}
+          onClick={() => setIsOpen(false)}
             onKeyDown={(e) => {
               if (e.key === 'Escape') {
                 setIsOpen(false)
               }
             }}
-            style={{
-              animation: 'fadeIn 0.3s ease-out',
-            }}
+          style={{
+            animation: 'fadeIn 0.3s ease-out',
+          }}
           />
           
           {/* Menu Panel */}
@@ -242,24 +242,24 @@ export default function Navbar() {
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <span className="text-3xl font-light text-zinc-900">3Dthium</span>
-              <button
+            <button
                 type="button"
-                onClick={() => setIsOpen(false)}
+              onClick={() => setIsOpen(false)}
                 className="p-2 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-gray-100 transition-all"
-                aria-label="Close Menu"
-              >
+              aria-label="Close Menu"
+            >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
             </div>
 
             {/* Cart Section */}
             {!isCartEmpty && (
               <div className="px-6 py-4 bg-gray-50">
-                <Link
-                  href={{ pathname: '/cart', query: { from: router.asPath } }}
-                  onClick={() => setIsOpen(false)}
+                  <Link
+                    href={{ pathname: '/cart', query: { from: router.asPath } }}
+                    onClick={() => setIsOpen(false)}
                   className="flex items-center justify-between p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-200"
                 >
                   <div className="flex items-center gap-3">
@@ -273,107 +273,107 @@ export default function Navbar() {
                   <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                </Link>
+                  </Link>
               </div>
             )}
 
             {/* Navigation */}
             <div className="flex-1 overflow-y-auto px-6 py-4">
               <div className="space-y-1">
-                <button
+              <button
                   type="button"
-                  onClick={() => {
+                onClick={() => {
                     setIsOpen(false)
-                    router.push('/')
-                  }}
+                  router.push('/')
+                }}
                   className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light"
-                >
-                  Home
-                </button>
+              >
+                Home
+              </button>
 
-                <button
+              <button
                   type="button"
-                  onClick={() => {
+                onClick={() => {
                     setIsOpen(false)
-                    router.push('/products')
-                  }}
+                  router.push('/products')
+                }}
                   className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light"
-                >
-                  Shop
-                </button>
+              >
+                Shop
+              </button>
 
-                <button
+              <button
                   type="button"
-                  onClick={() => {
+                onClick={() => {
                     setIsOpen(false)
-                    router.push('/custom-order')
-                  }}
+                  router.push('/custom-order')
+                }}
                   className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light"
-                >
-                  Custom Order
-                </button>
+              >
+                Custom Order
+              </button>
 
-                <button
+              <button
                   type="button"
-                  onClick={() => {
+                onClick={() => {
                     setIsOpen(false)
-                    router.push('/about')
-                  }}
+                  router.push('/about')
+                }}
                   className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light"
-                >
-                  About
-                </button>
+              >
+                About
+              </button>
 
-                <button
+              <button
                   type="button"
-                  onClick={() => {
+                onClick={() => {
                     setIsOpen(false)
-                    router.push('/contact')
-                  }}
+                  router.push('/contact')
+                }}
                   className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light"
-                >
-                  Contact
-                </button>
+              >
+                Contact
+              </button>
 
                 {/* Auth Section */}
                 <div className="pt-4 mt-4 border-t border-gray-200">
-                  {!user ? (
-                    <button
+              {!user ? (
+                <button
                       type="button"
-                      onClick={() => {
+                  onClick={() => {
                         setIsOpen(false)
-                        router.push('/auth')
-                      }}
+                    router.push('/auth')
+                  }}
                       className="w-full text-left py-3 px-4 text-lg text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition-all font-medium"
-                    >
-                      Login
-                    </button>
-                  ) : (
-                    <>
-                      <button
+                >
+                  Login
+                </button>
+              ) : (
+                <>
+                  <button
                         type="button"
-                        onClick={() => {
+                    onClick={() => {
                           setIsOpen(false)
-                          router.push('/account')
-                        }}
+                      router.push('/account')
+                    }}
                         className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light mb-2"
-                      >
-                        My Account
-                      </button>
-                      {isAdmin && (
-                        <button
+                  >
+                    My Account
+                  </button>
+                  {isAdmin && (
+                    <button
                           type="button"
-                          onClick={() => {
+                      onClick={() => {
                             setIsOpen(false)
-                            router.push('/admin')
-                          }}
+                        router.push('/admin')
+                      }}
                           className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light"
-                        >
-                          Admin
-                        </button>
-                      )}
-                    </>
+                    >
+                      Admin
+                    </button>
                   )}
+                </>
+              )}
                 </div>
               </div>
             </div>

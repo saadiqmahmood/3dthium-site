@@ -98,15 +98,15 @@ export default function ProductGrid() {
         {/* Loading State */}
         {loading && (
           <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
-            <p className="mt-4 text-zinc-600 text-lg font-light">Loading products...</p>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mx-auto"></div>
+            <p className="mt-4 text-zinc-600 font-light">Loading products...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
           <div className="text-center py-20">
-            <div className="bg-white border border-gray-200 rounded-2xl p-8 max-w-md mx-auto shadow-sm">
+            <div className="max-w-md mx-auto">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -121,7 +121,8 @@ export default function ProductGrid() {
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
-              <p className="text-zinc-900 text-lg mb-4 font-light">{error}</p>
+              <h3 className="text-lg font-medium text-zinc-900 mb-2">Unable to Load Products</h3>
+              <p className="text-zinc-600 mb-6 font-light">{error}</p>
               <button
                 onClick={() => window.location.reload()}
                 className="bg-zinc-900 text-white font-medium py-3 px-6 rounded-lg hover:bg-zinc-800 transition-colors"
@@ -141,7 +142,7 @@ export default function ProductGrid() {
                 {selectedCategory !== 'All' && ` in ${selectedCategory}`}
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} variants={product.variants} />
               ))}
@@ -152,7 +153,7 @@ export default function ProductGrid() {
         {/* No Products State */}
         {!loading && !error && filteredProducts.length === 0 && (
           <div className="text-center py-20">
-            <div className="bg-white border border-gray-200 rounded-2xl p-12 max-w-md mx-auto shadow-sm">
+            <div className="max-w-md mx-auto">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -166,7 +167,7 @@ export default function ProductGrid() {
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.35-4.35" />
               </svg>
-              <h3 className="text-xl font-medium text-zinc-900 mb-2">No Products Found</h3>
+              <h3 className="text-lg font-medium text-zinc-900 mb-2">No Products Found</h3>
               <p className="text-zinc-600 mb-6 font-light">
                 {selectedCategory === 'All'
                   ? "We're working on adding more amazing products!"

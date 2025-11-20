@@ -362,8 +362,8 @@ export default function AccountPage() {
             <div>
               {ordersLoading ? (
                 <div className="text-center py-20">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
-                  <p className="mt-4 text-zinc-400 font-light">Loading orders...</p>
+                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mx-auto"></div>
+                  <p className="mt-4 text-zinc-600 font-light">Loading orders...</p>
                 </div>
               ) : selectedOrder ? (
                 <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8">

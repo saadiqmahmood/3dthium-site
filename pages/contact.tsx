@@ -31,7 +31,7 @@ export default function ContactPage() {
         <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
       </div>
         {/* Hero Section */}
-        <section className="relative bg-white py-20 pt-32 overflow-hidden">
+        <section className="relative bg-white py-16 pt-24 overflow-hidden">
           {/* Hexagon pattern */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
