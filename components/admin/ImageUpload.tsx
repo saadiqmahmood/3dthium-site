@@ -50,7 +50,7 @@ export default function ImageUpload({
       } else if (error.message.includes('permission') || error.message.includes('policy')) {
         throw new Error('Permission denied. You may not have upload access.')
       } else {
-        throw new Error(`Upload failed: ${error.message}`)
+      throw new Error(`Upload failed: ${error.message}`)
       }
     }
 

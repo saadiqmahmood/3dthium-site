@@ -127,7 +127,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 px-4 sm:px-8 py-6 relative overflow-hidden">
+    <div className="min-h-screen bg-white px-4 sm:px-8 py-6 relative overflow-hidden">
       {/* Background glow effects */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/3 right-1/3 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
@@ -138,29 +138,29 @@ export default function AuthPage() {
       <button
         type="button"
         onClick={() => router.back()}
-        className="ml-4 mt-6 text-emerald-400 hover:text-blue-800 text-sm flex items-center"
+        className="ml-4 mt-6 text-emerald-600 hover:text-emerald-700 text-base flex items-center"
       >
         ← Back
       </button>
 
       <div className="max-w-md mx-auto px-6 py-20">
-        <h1 className="text-3xl font-light text-center text-white mb-6">
+        <h1 className="text-3xl font-light text-center text-zinc-900 mb-6">
           {isLogin ? 'Login' : 'Create an Account'}
         </h1>
         {resetMode ? (
-          <form onSubmit={handlePasswordReset} className="space-y-6 bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl">
-            <h2 className="text-xl font-semibold text-center text-white">
+          <form onSubmit={handlePasswordReset} className="space-y-6 bg-gray-50 border border-gray-200 p-8 rounded-2xl">
+            <h2 className="text-xl font-semibold text-center text-zinc-900">
               Reset Your Password
             </h2>
 
             <div>
-              <label htmlFor="reset-email" className="block text-base font-medium text-white">
+              <label htmlFor="reset-email" className="block text-base font-medium text-zinc-900">
                 Email
               </label>
               <input
                 type="email"
                 id="reset-email"
-                className="mt-1 p-2 w-full border border-zinc-700 bg-zinc-900 text-white rounded text-white"
+                className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -170,7 +170,7 @@ export default function AuthPage() {
               <p className="text-right text-base">
                 <button
                   type="button"
-                  className="text-emerald-400 hover:underline"
+                  className="text-emerald-600 hover:underline"
                   onClick={() => setResetMode(true)}
                 >
                   Forgot password?
@@ -180,7 +180,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-white text-zinc-950 py-3 rounded-lg hover:bg-zinc-100 transition-colors disabled:opacity-50 font-medium"
+              className="w-full bg-zinc-900 text-white py-3 rounded-lg hover:bg-zinc-800 transition-colors disabled:opacity-50 font-medium"
             >
               {loading ? 'Sending...' : 'Send Reset Link'}
             </button>
@@ -196,7 +196,7 @@ export default function AuthPage() {
             </p>
           </form>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-900/50 border border-zinc-800 p-8 rounded-2xl">
+          <form onSubmit={handleSubmit} className="space-y-6 bg-gray-50 border border-gray-200 p-8 rounded-2xl">
             {error && (
               <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm">
                 <div className="flex items-center gap-2">
@@ -218,13 +218,13 @@ export default function AuthPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-base font-medium text-white">
+              <label htmlFor="email" className="block text-base font-medium text-zinc-900">
                 Email
               </label>
               <input
                 type="email"
                 id="email"
-                className="mt-1 p-2 w-full border border-zinc-700 bg-zinc-900 text-white text-white rounded"
+                className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -232,13 +232,13 @@ export default function AuthPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-base font-medium text-white">
+              <label htmlFor="password" className="block text-base font-medium text-zinc-900">
                 Password
               </label>
               <input
                 type="password"
                 id="password"
-                className="mt-1 p-2 w-full border border-zinc-700 bg-zinc-900 text-white text-white rounded"
+                className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -249,7 +249,7 @@ export default function AuthPage() {
                 <p className="text-right text-base mt-2">
                   <button
                     type="button"
-                    className="text-emerald-400 hover:underline"
+                    className="text-emerald-600 hover:underline"
                     onClick={() => setResetMode(true)}
                   >
                     Forgot password?
@@ -260,7 +260,7 @@ export default function AuthPage() {
                   <p className="text-right text-xs mt-1">
                     <button
                       type="button"
-                      className="text-emerald-400 hover:underline"
+                      className="text-emerald-600 hover:underline"
                       onClick={handleResendConfirmation}
                       disabled={loading}
                     >
@@ -273,7 +273,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-white text-zinc-950 py-3 rounded-lg hover:bg-zinc-100 transition-colors disabled:opacity-50 font-medium"
+              className="w-full bg-zinc-900 text-white py-3 rounded-lg hover:bg-zinc-800 transition-colors disabled:opacity-50 font-medium"
             >
               {loading ? 'Please wait...' : isLogin ? 'Login' : 'Sign Up'}
             </button>

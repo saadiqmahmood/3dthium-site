@@ -2,20 +2,20 @@ import Link from 'next/link'
 
 export default function Footer() {
   return (
-    <footer className="bg-zinc-950 text-zinc-400 border-t border-zinc-900">
+    <footer className="bg-white text-zinc-600 border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand Column */}
           <div className="col-span-1 md:col-span-1">
-            <h3 className="text-2xl font-light text-white mb-4">3Dthium</h3>
-            <p className="text-zinc-500 text-sm font-light mb-4">
+            <h3 className="text-2xl font-light text-zinc-900 mb-4">3Dthium</h3>
+            <p className="text-zinc-600 text-base font-light mb-4">
               Crafting precision 3D printed products for your home, gifts, and custom projects.
             </p>
             <div className="flex gap-4">
               {/* Social Icons - placeholder for future */}
               <a
                 href="#"
-                className="w-8 h-8 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-emerald-500/50 rounded-full flex items-center justify-center transition-all"
+                className="w-8 h-8 bg-gray-100 hover:bg-gray-200 border border-gray-200 hover:border-emerald-500/50 rounded-full flex items-center justify-center transition-all"
                 aria-label="Facebook"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -24,7 +24,7 @@ export default function Footer() {
               </a>
               <a
                 href="#"
-                className="w-8 h-8 bg-gray-700 hover:bg-blue-400 rounded-full flex items-center justify-center transition-colors"
+                className="w-8 h-8 bg-gray-100 hover:bg-blue-500 text-gray-600 hover:text-white rounded-full flex items-center justify-center transition-colors"
                 aria-label="Twitter"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -33,7 +33,7 @@ export default function Footer() {
               </a>
               <a
                 href="#"
-                className="w-8 h-8 bg-gray-700 hover:bg-pink-600 rounded-full flex items-center justify-center transition-colors"
+                className="w-8 h-8 bg-gray-100 hover:bg-pink-500 text-gray-600 hover:text-white rounded-full flex items-center justify-center transition-colors"
                 aria-label="Instagram"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -45,20 +45,20 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-white font-medium mb-4 text-sm">Shop</h4>
-            <ul className="space-y-2 text-sm">
+            <h4 className="text-zinc-900 font-medium mb-4 text-base">Shop</h4>
+            <ul className="space-y-2 text-base">
               <li>
-                <Link href="/products" className="hover:text-white transition-colors">
+                <Link href="/products" className="hover:text-zinc-900 transition-colors">
                   All Products
                 </Link>
               </li>
               <li>
-                <Link href="/custom-order" className="hover:text-white transition-colors">
+                <Link href="/custom-order" className="hover:text-zinc-900 transition-colors">
                   Custom Orders
                 </Link>
               </li>
               <li>
-                <Link href="/cart" className="hover:text-white transition-colors">
+                <Link href="/cart" className="hover:text-zinc-900 transition-colors">
                   Shopping Cart
                 </Link>
               </li>
@@ -67,20 +67,20 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <h4 className="text-white font-medium mb-4 text-sm">Company</h4>
-            <ul className="space-y-2 text-sm">
+            <h4 className="text-zinc-900 font-medium mb-4 text-base">Company</h4>
+            <ul className="space-y-2 text-base">
               <li>
-                <Link href="/about" className="hover:text-white transition-colors">
+                <Link href="/about" className="hover:text-zinc-900 transition-colors">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-white transition-colors">
+                <Link href="/contact" className="hover:text-zinc-900 transition-colors">
                   Contact
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="hover:text-white transition-colors">
+                <Link href="/privacy" className="hover:text-zinc-900 transition-colors">
                   Privacy Policy
                 </Link>
               </li>
@@ -89,20 +89,20 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="text-white font-medium mb-4 text-sm">Support</h4>
-            <ul className="space-y-2 text-sm">
+            <h4 className="text-zinc-900 font-medium mb-4 text-base">Support</h4>
+            <ul className="space-y-2 text-base">
               <li>
-                <Link href="/account" className="hover:text-white transition-colors">
+                <Link href="/account" className="hover:text-zinc-900 transition-colors">
                   My Account
                 </Link>
               </li>
               <li>
-                <Link href="/orders" className="hover:text-white transition-colors">
+                <Link href="/orders" className="hover:text-zinc-900 transition-colors">
                   Order History
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-white transition-colors">
+                <Link href="/contact" className="hover:text-zinc-900 transition-colors">
                   Help Center
                 </Link>
               </li>
@@ -111,15 +111,15 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-zinc-900 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-zinc-500 font-light">
+        <div className="border-t border-gray-200 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-base text-zinc-600 font-light">
             &copy; {new Date().getFullYear()} 3Dthium. All rights reserved.
           </p>
-          <div className="flex gap-6 text-sm font-light">
-            <Link href="/privacy" className="hover:text-white transition-colors">
+          <div className="flex gap-6 text-base font-light">
+            <Link href="/privacy" className="hover:text-zinc-900 transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/contact" className="hover:text-white transition-colors">
+            <Link href="/contact" className="hover:text-zinc-900 transition-colors">
               Terms of Service
             </Link>
           </div>

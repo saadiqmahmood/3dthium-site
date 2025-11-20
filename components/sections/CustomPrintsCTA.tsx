@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function CustomPrintsCTA() {
   return (
-    <section className="relative py-32 px-6 bg-zinc-950 overflow-hidden">
+    <section className="relative py-32 px-6 bg-white overflow-hidden">
       {/* Hexagon pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
@@ -15,16 +15,16 @@ export default function CustomPrintsCTA() {
           
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex-1">
-              <h2 className="text-4xl md:text-5xl font-light text-white mb-4">
-                Have a <span className="font-semibold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Custom Design?</span>
+              <h2 className="text-4xl md:text-5xl font-light text-zinc-900 mb-4">
+                Have a <span className="font-semibold bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">Custom Design?</span>
               </h2>
-              <p className="text-lg text-zinc-400 font-light leading-relaxed">
+              <p className="text-lg text-zinc-600 font-light leading-relaxed">
                 Upload your 3D model or work with our team to bring your unique vision to life.
               </p>
             </div>
             <Link
               href="/custom-order"
-              className="bg-white text-zinc-950 px-8 py-4 rounded-lg font-medium hover:bg-zinc-100 transition-all duration-300 whitespace-nowrap"
+              className="bg-zinc-900 text-white px-8 py-4 rounded-lg font-medium hover:bg-zinc-800 transition-all duration-300 whitespace-nowrap"
             >
               Get Started
             </Link>

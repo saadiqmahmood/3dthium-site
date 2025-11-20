@@ -248,16 +248,16 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 pt-20">
+    <div className="min-h-screen bg-white pt-20">
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl font-light text-white mb-3">My Account</h1>
-          <p className="text-zinc-400 font-light">Manage your profile and orders</p>
+          <h1 className="text-4xl font-light text-zinc-900 mb-3">My Account</h1>
+          <p className="text-zinc-600 font-light">Manage your profile and orders</p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex flex-wrap gap-3 mb-8 border-b border-zinc-800 pb-4">
+        <div className="flex flex-wrap gap-3 mb-8 border-b border-gray-200 pb-4">
           <button
             type="button"
             onClick={() => {
@@ -267,7 +267,7 @@ export default function AccountPage() {
             className={`px-6 py-3 rounded-lg font-light transition-all ${
               section === 'profile' 
                 ? 'bg-emerald-500 text-white' 
-                : 'bg-zinc-900/50 text-zinc-300 border border-zinc-800 hover:border-zinc-700 hover:text-white'
+                : 'bg-gray-100 text-zinc-700 border border-gray-200 hover:border-gray-300 hover:text-zinc-900'
             }`}
           >
             <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -284,7 +284,7 @@ export default function AccountPage() {
             className={`px-6 py-3 rounded-lg font-light transition-all ${
               section === 'orders' 
                 ? 'bg-emerald-500 text-white' 
-                : 'bg-zinc-900/50 text-zinc-300 border border-zinc-800 hover:border-zinc-700 hover:text-white'
+                : 'bg-gray-100 text-zinc-700 border border-gray-200 hover:border-gray-300 hover:text-zinc-900'
             }`}
           >
             <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -295,7 +295,7 @@ export default function AccountPage() {
           <button
             type="button"
             onClick={signOut}
-            className="ml-auto px-6 py-3 rounded-lg font-light bg-zinc-900/50 text-zinc-300 border border-zinc-800 hover:border-red-700 hover:text-red-400 transition-all"
+            className="ml-auto px-6 py-3 rounded-lg font-light bg-gray-100 text-zinc-700 border border-gray-200 hover:border-red-300 hover:text-red-600 transition-all"
           >
             <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -308,8 +308,8 @@ export default function AccountPage() {
         <div className="min-h-[60vh]">
           {section === 'profile' && (
             <div className="max-w-2xl">
-              <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 mb-6">
-                <h2 className="text-2xl font-light text-white mb-6 flex items-center gap-3">
+              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 mb-6">
+                <h2 className="text-2xl font-light text-zinc-900 mb-6 flex items-center gap-3">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
@@ -318,14 +318,14 @@ export default function AccountPage() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-base font-light text-zinc-400 mb-2">Email Address</label>
-                    <p className="text-lg text-white font-light bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3">{user.email}</p>
+                    <p className="text-lg text-zinc-900 font-light bg-white border border-gray-200 rounded-lg px-4 py-3">{user.email}</p>
                   </div>
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <Link href="/account/change-email" className="block">
-                  <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 hover:border-emerald-500/50 transition-all group cursor-pointer">
+                  <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 hover:border-emerald-500/50 transition-all group cursor-pointer">
                     <div className="flex items-start gap-4">
                       <div className="bg-emerald-500/10 p-3 rounded-lg group-hover:bg-emerald-500/20 transition">
                         <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -333,15 +333,15 @@ export default function AccountPage() {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-lg font-medium text-white mb-1">Change Email</h3>
-                        <p className="text-base text-zinc-400 font-light">Update your email address</p>
+                        <h3 className="text-lg font-medium text-zinc-900 mb-1">Change Email</h3>
+                        <p className="text-base text-zinc-600 font-light">Update your email address</p>
                       </div>
                     </div>
                   </div>
                 </Link>
 
                 <Link href="/account/change-password" className="block">
-                  <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 hover:border-emerald-500/50 transition-all group cursor-pointer">
+                  <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 hover:border-emerald-500/50 transition-all group cursor-pointer">
                     <div className="flex items-start gap-4">
                       <div className="bg-emerald-500/10 p-3 rounded-lg group-hover:bg-emerald-500/20 transition">
                         <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -349,8 +349,8 @@ export default function AccountPage() {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-lg font-medium text-white mb-1">Change Password</h3>
-                        <p className="text-base text-zinc-400 font-light">Update your password</p>
+                        <h3 className="text-lg font-medium text-zinc-900 mb-1">Change Password</h3>
+                        <p className="text-base text-zinc-600 font-light">Update your password</p>
                       </div>
                     </div>
                   </div>
@@ -366,7 +366,7 @@ export default function AccountPage() {
                   <p className="mt-4 text-zinc-400 font-light">Loading orders...</p>
                 </div>
               ) : selectedOrder ? (
-                <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
+                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8">
                   <button
                     type="button"
                     onClick={() => setSelectedOrder(null)}
@@ -377,12 +377,12 @@ export default function AccountPage() {
                     </svg>
                     Back to Orders
                   </button>
-                  <div className="flex flex-wrap justify-between items-start gap-4 mb-6 pb-6 border-b border-zinc-800">
+                  <div className="flex flex-wrap justify-between items-start gap-4 mb-6 pb-6 border-b border-gray-200">
                     <div>
-                      <h3 className="text-2xl font-light text-white mb-2">
+                      <h3 className="text-2xl font-light text-zinc-900 mb-2">
                         Order #{selectedOrder.id.slice(-8)}
                       </h3>
-                      <p className="text-base text-zinc-400 font-light">
+                      <p className="text-base text-zinc-600 font-light">
                         {new Date(selectedOrder.created_at).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
@@ -399,12 +399,12 @@ export default function AccountPage() {
                             ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
                             : selectedOrder.status === 'pending' 
                             ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
-                            : 'bg-zinc-800 text-zinc-300 border border-zinc-700'
+                            : 'bg-gray-200 text-zinc-600 border border-gray-300'
                         }`}
                       >
                         {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
                       </span>
-                      <p className="text-2xl font-semibold text-white mt-2">
+                      <p className="text-2xl font-semibold text-zinc-900 mt-2">
                         £{selectedOrder.total_price.toFixed(2)}
                       </p>
                     </div>
@@ -413,9 +413,9 @@ export default function AccountPage() {
                     {selectedOrder.order_items?.map((item: OrderItem) => (
                       <div
                         key={item.id}
-                        className="flex items-center gap-4 p-5 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition"
+                        className="flex items-center gap-4 p-5 bg-gray-50 border border-gray-200 rounded-xl hover:border-gray-300 transition"
                       >
-                        <div className="flex-shrink-0 w-20 h-20 bg-zinc-950 rounded-lg overflow-hidden border border-zinc-800">
+                        <div className="flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                           <Image
                             width={80}
                             height={80}
@@ -425,8 +425,8 @@ export default function AccountPage() {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-white mb-2">{item.products?.title}</h4>
-                          <div className="flex flex-wrap gap-3 text-base text-zinc-400 font-light">
+                          <h4 className="font-medium text-zinc-900 mb-2">{item.products?.title}</h4>
+                          <div className="flex flex-wrap gap-3 text-base text-zinc-600 font-light">
                             <span>Color: {item.product_variants?.color}</span>
                             <span>•</span>
                             <span>Size: {item.size}</span>
@@ -435,7 +435,7 @@ export default function AccountPage() {
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="font-semibold text-white text-lg">
+                          <p className="font-semibold text-zinc-900 text-lg">
                             £{(item.price_at_purchase * item.quantity).toFixed(2)}
                           </p>
                         </div>
@@ -447,17 +447,17 @@ export default function AccountPage() {
                       type="button"
                       onClick={() => handleReorder(selectedOrder)}
                       disabled={reorderLoading}
-                      className="bg-white text-zinc-950 px-8 py-3 rounded-lg font-medium hover:bg-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-zinc-900 text-white px-8 py-3 rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {reorderLoading ? 'Adding to Cart...' : 'Reorder All Items'}
                     </button>
                   </div>
                 </div>
               ) : orders.length === 0 ? (
-                <div className="text-center py-20 bg-zinc-900/30 border border-zinc-800 rounded-2xl">
-                  <div className="w-20 h-20 bg-zinc-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className="text-center py-20 bg-gray-50 border border-gray-200 rounded-2xl">
+                  <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg
-                      className="w-10 h-10 text-zinc-500"
+                      className="w-10 h-10 text-zinc-600"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -470,12 +470,12 @@ export default function AccountPage() {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-light text-white mb-2">No orders yet</h3>
-                  <p className="text-zinc-400 font-light mb-8">Start shopping to see your orders here</p>
+                  <h3 className="text-xl font-light text-zinc-900 mb-2">No orders yet</h3>
+                  <p className="text-zinc-600 font-light mb-8">Start shopping to see your orders here</p>
                   <button
                     type="button"
                     onClick={() => router.push('/products')}
-                    className="bg-white text-zinc-950 px-8 py-3 rounded-lg font-medium hover:bg-zinc-100 transition-colors"
+                    className="bg-zinc-900 text-white px-8 py-3 rounded-lg font-medium hover:bg-zinc-800 transition-colors"
                   >
                     Browse Products
                   </button>
@@ -485,15 +485,15 @@ export default function AccountPage() {
                   {orders.map((order) => (
                     <div
                       key={order.id}
-                      className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 cursor-pointer hover:border-zinc-700 transition-all group"
+                      className="bg-gray-50 border border-gray-200 rounded-2xl p-6 cursor-pointer hover:border-gray-300 transition-all group"
                       onClick={() => setSelectedOrder(order)}
                     >
                       <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
                         <div>
-                          <h3 className="text-lg font-medium text-white mb-1 group-hover:text-emerald-400 transition">
+                          <h3 className="text-lg font-medium text-zinc-900 mb-1 group-hover:text-emerald-600 transition">
                             Order #{order.id.slice(-8)}
                           </h3>
-                          <p className="text-base text-zinc-400 font-light">
+                          <p className="text-base text-zinc-600 font-light">
                             {new Date(order.created_at).toLocaleDateString('en-US', {
                               year: 'numeric',
                               month: 'short',
@@ -508,23 +508,23 @@ export default function AccountPage() {
                                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
                                 : order.status === 'pending' 
                                 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
-                                : 'bg-zinc-800 text-zinc-300 border border-zinc-700'
+                                : 'bg-gray-200 text-zinc-600 border border-gray-300'
                             }`}
                           >
                             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                           </span>
-                          <p className="text-xl font-semibold text-white">
+                          <p className="text-xl font-semibold text-zinc-900">
                             £{order.total_price.toFixed(2)}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 text-base text-zinc-400 font-light">
+                          <div className="flex items-center gap-2 text-base text-zinc-600 font-light">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
                         {order.order_items?.length || 0} item{order.order_items?.length !== 1 ? 's' : ''}
                         <span className="mx-2">•</span>
-                        <span className="group-hover:text-emerald-400 transition">View details →</span>
+                        <span className="text-emerald-600 group-hover:text-emerald-700 transition">View details →</span>
                       </div>
                     </div>
                   ))}

@@ -154,14 +154,14 @@ export default function CheckoutPage() {
   // Show loading while checking auth status
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 relative overflow-hidden">
+    <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Background glow effects */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
@@ -176,7 +176,7 @@ export default function CheckoutPage() {
       >
         ← Back
       </button>
-      <h1 className="text-3xl font-light mb-8 text-white text-center">Checkout</h1>
+      <h1 className="text-3xl font-light mb-8 text-zinc-900 text-center">Checkout</h1>
 
       {/* Checkout Progress */}
       <div className="mb-8">
@@ -185,20 +185,20 @@ export default function CheckoutPage() {
             className={`flex items-center ${shippingStep === 'address' ? 'text-blue-600' : 'text-gray-400'}`}
           >
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'address' ? 'bg-zinc-900/50 text-zinc-950 text-white' : 'bg-gray-200'}`}
+              className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'address' ? 'bg-zinc-900 text-white' : 'bg-gray-200'}`}
             >
               1
             </div>
             <span className="ml-2">Address</span>
           </div>
           <div
-            className={`w-8 h-0.5 ${shippingStep === 'rates' || shippingStep === 'payment' ? 'bg-zinc-900/50 text-zinc-950' : 'bg-gray-200'}`}
+            className={`w-8 h-0.5 ${shippingStep === 'rates' || shippingStep === 'payment' ? 'bg-zinc-900' : 'bg-gray-200'}`}
           ></div>
           <div
             className={`flex items-center ${shippingStep === 'rates' ? 'text-blue-600' : shippingStep === 'payment' ? 'text-green-600' : 'text-gray-400'}`}
           >
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'rates' ? 'bg-zinc-900/50 text-zinc-950 text-white' : shippingStep === 'payment' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
+              className={`w-8 h-8 rounded-full flex items-center justify-center ${shippingStep === 'rates' ? 'bg-zinc-900 text-white' : shippingStep === 'payment' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
             >
               2
             </div>
@@ -222,7 +222,7 @@ export default function CheckoutPage() {
 
       {/* Shipping Address Form */}
       {shippingStep === 'address' && (
-        <div className="bg-zinc-900/50 rounded-xl shadow p-8 max-w-2xl mx-auto mb-8">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl shadow p-8 max-w-2xl mx-auto mb-8">
           <h2 className="text-xl font-semibold mb-6 text-white">Shipping Address</h2>
           <form onSubmit={handleAddressSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -310,7 +310,7 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 disabled={isLoadingRates}
-                className="w-full bg-zinc-900/50 text-zinc-950 text-white py-3 px-4 rounded-lg hover:bg-zinc-100 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
+                className="w-full bg-zinc-900 text-white py-3 px-4 rounded-lg hover:bg-zinc-800 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
               >
                 {isLoadingRates ? 'Calculating Rates...' : 'Continue to Shipping'}
               </button>
@@ -329,7 +329,7 @@ export default function CheckoutPage() {
 
       {/* Shipping Rates Selection */}
       {shippingStep === 'rates' && (
-        <div className="bg-zinc-900/50 rounded-xl shadow p-8 max-w-2xl mx-auto mb-8">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl shadow p-8 max-w-2xl mx-auto mb-8">
           <h2 className="text-xl font-semibold mb-6 text-white">Select Shipping Method</h2>
           <div className="space-y-4">
             {shippingRates.map((rate) => {
@@ -363,7 +363,7 @@ export default function CheckoutPage() {
           <div className="mt-6 flex flex-col sm:flex-row gap-4">
             <button
               onClick={() => setShippingStep('address')}
-              className="w-full bg-zinc-900/50 border border-zinc-800 text-white py-3 px-4 rounded-lg hover:bg-gray-200 transition"
+              className="w-full bg-white border border-gray-300 text-zinc-900 py-3 px-4 rounded-lg hover:bg-gray-100 transition"
             >
               Back to Address
             </button>
@@ -383,7 +383,7 @@ export default function CheckoutPage() {
         shippingStep === 'payment' &&
         (checkoutMode === 'choice' ? (
           // User not logged in - show options
-          <div className="bg-zinc-900/50 rounded-xl shadow p-8 max-w-lg mx-auto mb-8">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl shadow p-8 max-w-lg mx-auto mb-8">
             <h3 className="text-lg font-semibold text-gray-900 mb-6 text-center">
               How would you like to checkout?
             </h3>
@@ -391,7 +391,7 @@ export default function CheckoutPage() {
             <div className="space-y-4">
               <Link
                 href="/auth"
-                className="block w-full bg-zinc-900/50 text-zinc-950 text-white py-3 px-4 rounded-lg hover:bg-zinc-100 transition text-center"
+                className="block w-full bg-zinc-900 text-white py-3 px-4 rounded-lg hover:bg-zinc-800 transition text-center"
               >
                 Sign In / Create Account
               </Link>
@@ -401,13 +401,13 @@ export default function CheckoutPage() {
                   <div className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-base">
-                  <span className="px-2 bg-zinc-900/50 text-zinc-400">or</span>
+                  <span className="px-2 bg-white text-zinc-600">or</span>
                 </div>
               </div>
 
               <button
                 onClick={() => setCheckoutMode('guest')}
-                className="w-full bg-zinc-900/50 border border-zinc-800 text-white py-3 px-4 rounded-lg hover:bg-gray-200 transition"
+                className="w-full bg-white border border-gray-300 text-zinc-900 py-3 px-4 rounded-lg hover:bg-gray-100 transition"
               >
                 Checkout as Guest
               </button>
@@ -415,7 +415,7 @@ export default function CheckoutPage() {
           </div>
         ) : (
           // Guest checkout form
-          <div className="bg-zinc-900/50 rounded-xl shadow p-8 max-w-lg mx-auto mb-8">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl shadow p-8 max-w-lg mx-auto mb-8">
             <div className="text-center mb-6">
               <h3 className="text-lg font-semibold text-gray-900">Guest Checkout</h3>
               <p className="text-sm text-zinc-400">Enter your email to receive order updates</p>
@@ -438,7 +438,7 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-zinc-900/50 text-zinc-950 text-white py-3 px-4 rounded-lg hover:bg-zinc-100 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
+                  className="w-full bg-zinc-900 text-white py-3 px-4 rounded-lg hover:bg-zinc-800 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Processing...' : 'Complete Purchase'}
                 </button>
@@ -511,14 +511,14 @@ export default function CheckoutPage() {
           <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => setShippingStep('rates')}
-              className="w-full sm:w-64 bg-zinc-900/50 border border-zinc-800 text-white py-3 px-6 rounded-lg hover:bg-gray-200 transition"
+              className="w-full sm:w-64 bg-white border border-gray-300 text-zinc-900 py-3 px-6 rounded-lg hover:bg-gray-100 transition"
             >
               Back to Shipping
             </button>
             <button
               onClick={handleLoggedInCheckout}
               disabled={isLoading}
-              className="w-full sm:w-64 bg-zinc-900/50 text-zinc-950 text-white py-3 px-6 rounded-lg hover:bg-zinc-100 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
+              className="w-full sm:w-64 bg-zinc-900 text-white py-3 px-6 rounded-lg hover:bg-zinc-800 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Processing...' : 'Complete Purchase'}
             </button>

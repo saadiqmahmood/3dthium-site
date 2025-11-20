@@ -58,11 +58,11 @@ export default function FeaturedProducts() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-emerald-500 border-t-transparent mb-4"></div>
-            <p className="text-zinc-400 font-light">Loading featured products...</p>
+            <p className="text-zinc-600 font-light">Loading featured products...</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="bg-zinc-800/50 rounded-2xl h-80 animate-pulse"></div>
+              <div key={i} className="bg-gray-200 rounded-2xl h-80 animate-pulse"></div>
             ))}
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function FeaturedProducts() {
     return (
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 max-w-md mx-auto">
+          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 max-w-md mx-auto">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -83,17 +83,17 @@ export default function FeaturedProducts() {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-12 h-12 text-red-400 mx-auto mb-4"
+              className="w-12 h-12 text-red-500 mx-auto mb-4"
             >
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
-            <h3 className="text-lg font-medium text-white mb-2">Unable to Load Products</h3>
-            <p className="text-zinc-400 mb-4 text-sm font-light">{error}</p>
+            <h3 className="text-lg font-medium text-zinc-900 mb-2">Unable to Load Products</h3>
+            <p className="text-zinc-600 mb-4 text-sm font-light">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-white text-zinc-950 font-medium py-2 px-6 rounded-lg hover:bg-zinc-100 transition-colors"
+              className="bg-zinc-900 text-white font-medium py-2 px-6 rounded-lg hover:bg-zinc-800 transition-colors"
             >
               Try Again
             </button>
@@ -107,7 +107,7 @@ export default function FeaturedProducts() {
     return (
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-12 max-w-md mx-auto">
+          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-12 max-w-md mx-auto">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -116,18 +116,18 @@ export default function FeaturedProducts() {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-16 h-16 text-zinc-600 mx-auto mb-4"
+              className="w-16 h-16 text-zinc-400 mx-auto mb-4"
             >
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.35-4.35" />
             </svg>
-            <h3 className="text-xl font-medium text-white mb-2">No Products Available</h3>
-            <p className="text-zinc-400 mb-6 font-light">
+            <h3 className="text-xl font-medium text-zinc-900 mb-2">No Products Available</h3>
+            <p className="text-zinc-600 mb-6 font-light">
               We&apos;re working on adding amazing products to our collection!
             </p>
             <Link
               href="/custom-order"
-              className="inline-block bg-white text-zinc-950 font-medium py-3 px-6 rounded-lg hover:bg-zinc-100 transition-colors"
+              className="inline-block bg-zinc-900 text-white font-medium py-3 px-6 rounded-lg hover:bg-zinc-800 transition-colors"
             >
               Start Custom Order
             </Link>
@@ -152,9 +152,9 @@ export default function FeaturedProducts() {
                 animationDelay: `${index * 200}ms`,
               }}
             >
-              <div className="bg-zinc-900/50 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all duration-300 overflow-hidden">
+              <div className="bg-white rounded-2xl border border-gray-200 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 overflow-hidden shadow-sm">
                 {/* Product Image */}
-                <div className="relative h-64 bg-zinc-950 overflow-hidden">
+                <div className="relative h-64 bg-gray-100 overflow-hidden">
                   <Image
                     src={product.thumbnail_url}
                     alt={product.name}
@@ -162,11 +162,11 @@ export default function FeaturedProducts() {
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
 
                   {/* Category Badge */}
                   <div className="absolute top-4 left-4">
-                    <span className="bg-zinc-900/80 backdrop-blur-sm text-zinc-300 px-3 py-1 rounded-full text-xs font-light border border-zinc-800">
+                    <span className="bg-white/90 backdrop-blur-sm text-zinc-700 px-3 py-1 rounded-full text-xs font-light border border-gray-200">
                       {product.category.name}
                     </span>
                   </div>
@@ -174,7 +174,7 @@ export default function FeaturedProducts() {
                   {/* Customizable Badge */}
                   {product.customizable && (
                     <div className="absolute top-4 right-4">
-                      <span className="bg-emerald-500/20 backdrop-blur-sm text-emerald-400 px-3 py-1 rounded-full text-xs font-light flex items-center gap-1 border border-emerald-500/30">
+                      <span className="bg-emerald-500/10 backdrop-blur-sm text-emerald-600 px-3 py-1 rounded-full text-xs font-light flex items-center gap-1 border border-emerald-500/30">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 24 24"
@@ -202,21 +202,21 @@ export default function FeaturedProducts() {
 
                 {/* Product Info */}
                 <div className="p-6">
-                  <h3 className="text-lg font-medium text-white mb-2 group-hover:text-emerald-400 transition-colors">
+                  <h3 className="text-lg font-medium text-zinc-900 mb-2 group-hover:text-emerald-600 transition-colors">
                     {product.name}
                   </h3>
 
-                  <p className="text-zinc-400 mb-4 line-clamp-2 text-sm font-light">{product.description}</p>
+                  <p className="text-zinc-600 mb-4 line-clamp-2 text-sm font-light">{product.description}</p>
 
                   {/* Price */}
                   <div className="mb-4">
                     <div className="flex items-center space-x-2">
-                      <span className="text-xl font-semibold text-white">
+                      <span className="text-xl font-semibold text-zinc-900">
                         £{product.price_range.min.toFixed(2)}
                       </span>
                       {product.price_range.has_variants &&
                         product.price_range.min !== product.price_range.max && (
-                          <span className="text-zinc-500 text-sm font-light">
+                          <span className="text-zinc-600 text-sm font-light">
                             - £{product.price_range.max.toFixed(2)}
                           </span>
                         )}
@@ -226,7 +226,7 @@ export default function FeaturedProducts() {
                   {/* Action Button */}
                   <Link
                     href={`/products/${product.slug}`}
-                    className="w-full bg-white hover:bg-zinc-100 text-zinc-950 font-medium py-3 px-6 rounded-lg transition-colors text-center block"
+                    className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-medium py-3 px-6 rounded-lg transition-colors text-center block"
                   >
                     View Product
                   </Link>
@@ -241,13 +241,13 @@ export default function FeaturedProducts() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/products"
-              className="bg-white hover:bg-zinc-100 text-zinc-950 font-medium py-3 px-8 rounded-lg transition-colors"
+              className="bg-zinc-900 hover:bg-zinc-800 text-white font-medium py-3 px-8 rounded-lg transition-colors"
             >
               View All Products
             </Link>
             <Link
               href="/custom-order"
-              className="border border-zinc-700 text-white hover:bg-zinc-900 hover:border-zinc-600 font-medium py-3 px-8 rounded-lg transition-colors"
+              className="border border-gray-300 text-zinc-900 hover:bg-gray-100 hover:border-gray-400 font-medium py-3 px-8 rounded-lg transition-colors"
             >
               Custom Order
             </Link>
