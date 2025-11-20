@@ -59,7 +59,7 @@ export default function ProductCard({ product, variants }: Props) {
           
           {/* Category Badge */}
           <div className="absolute top-4 left-4">
-            <span className="bg-zinc-900/80 backdrop-blur-sm text-zinc-300 px-3 py-1 rounded-full text-xs font-light border border-zinc-800">
+            <span className="bg-zinc-900/80 backdrop-blur-sm text-zinc-300 px-3 py-1 rounded-full text-sm font-light border border-zinc-800">
               {product.category.name}
             </span>
           </div>
@@ -67,7 +67,7 @@ export default function ProductCard({ product, variants }: Props) {
           {/* Customizable badge */}
           {product.customizable && (
             <div className="absolute top-4 right-4">
-              <span className="bg-emerald-500/20 backdrop-blur-sm text-emerald-400 px-3 py-1 rounded-full text-xs font-light border border-emerald-500/30">
+              <span className="bg-emerald-500/20 backdrop-blur-sm text-emerald-400 px-3 py-1 rounded-full text-sm font-light border border-emerald-500/30">
                 Custom
               </span>
             </div>
@@ -75,14 +75,14 @@ export default function ProductCard({ product, variants }: Props) {
         </div>
         
         <div className="p-6">
-          <h3 className="text-lg font-medium text-white mb-2 group-hover:text-emerald-400 transition-colors">{product.name}</h3>
+          <h3 className="text-xl font-medium text-white mb-2 group-hover:text-emerald-400 transition-colors">{product.name}</h3>
 
           {/* Price display */}
-          <p className="text-xl font-semibold text-white mt-2">{displayPrice}</p>
+          <p className="text-2xl font-semibold text-white mt-2">{displayPrice}</p>
 
           {/* Variant info */}
           {product.price_range.has_variants && (
-            <p className="text-xs text-zinc-500 mt-2 font-light">{variantText}</p>
+            <p className="text-sm text-zinc-500 mt-2 font-light">{variantText}</p>
           )}
         </div>
       </div>

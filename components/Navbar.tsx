@@ -71,7 +71,7 @@ export default function Navbar() {
       <div className="flex justify-between items-center w-full relative z-10">
         <Link
           href="/"
-          className="text-4xl pl-5 font-light text-white"
+          className="text-5xl pl-5 font-light text-white"
         >
           3Dthium
         </Link>
@@ -126,34 +126,34 @@ export default function Navbar() {
           </button>
         </div>
       </div>
-      <div className="hidden md:flex md:flex-row md:space-x-7 pr-20 text-sm font-medium items-center text-white">
+      <div className="hidden md:flex md:flex-row md:space-x-7 pr-20 text-base font-medium items-center text-white">
         <Link
           href="/"
-          className="text-base text-white hover:text-emerald-400 transition-colors font-light"
+          className="text-lg text-white hover:text-emerald-400 transition-colors font-light"
         >
           Home
         </Link>
         <Link
           href="/products"
-          className="text-base text-white hover:text-emerald-400 transition-colors font-light"
+          className="text-lg text-white hover:text-emerald-400 transition-colors font-light"
         >
           Shop
         </Link>
         <Link
           href="/custom-order"
-          className="text-base whitespace-nowrap text-white hover:text-emerald-400 transition-colors font-light"
+          className="text-lg whitespace-nowrap text-white hover:text-emerald-400 transition-colors font-light"
         >
           Custom Order
         </Link>
         <Link
           href="/about"
-          className="text-base text-white hover:text-emerald-400 transition-colors font-light"
+          className="text-lg text-white hover:text-emerald-400 transition-colors font-light"
         >
           About
         </Link>
         <Link
           href="/contact"
-          className="text-base text-white hover:text-emerald-400 transition-colors font-light"
+          className="text-lg text-white hover:text-emerald-400 transition-colors font-light"
         >
           Contact
         </Link>
@@ -184,7 +184,7 @@ export default function Navbar() {
           {!user ? (
             <Link
               href="/auth"
-              className="text-sm font-medium text-white hover:text-emerald-400 transition-colors"
+              className="text-base font-medium text-white hover:text-emerald-400 transition-colors"
             >
               Login
             </Link>
@@ -199,7 +199,7 @@ export default function Navbar() {
               {isAdmin && (
                 <Link
                   href="/admin"
-                  className="text-sm font-medium text-white hover:text-emerald-400 transition-colors"
+                  className="text-base font-medium text-white hover:text-emerald-400 transition-colors"
                 >
                   Admin
                 </Link>
@@ -241,7 +241,7 @@ export default function Navbar() {
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-              <span className="text-2xl font-light text-white">3Dthium</span>
+              <span className="text-3xl font-light text-white">3Dthium</span>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
@@ -266,7 +266,7 @@ export default function Navbar() {
                     <svg className="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
                     </svg>
-                    <span className="text-white text-sm font-light">
+                    <span className="text-white text-base font-light">
                       {totalItems} item{totalItems !== 1 ? 's' : ''}
                     </span>
                   </div>

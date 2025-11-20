@@ -227,7 +227,7 @@ export default function CheckoutPage() {
           <form onSubmit={handleAddressSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-white mb-2">Full Name *</label>
+                <label className="block text-base font-medium text-white mb-2">Full Name *</label>
                 <input
                   type="text"
                   className="w-full border border-gray-300 text-white rounded p-3"
@@ -237,7 +237,7 @@ export default function CheckoutPage() {
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-white mb-2">
+                <label className="block text-base font-medium text-white mb-2">
                   Address Line 1 *
                 </label>
                 <input
@@ -251,7 +251,7 @@ export default function CheckoutPage() {
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-white mb-2">
+                <label className="block text-base font-medium text-white mb-2">
                   Address Line 2
                 </label>
                 <input
@@ -264,7 +264,7 @@ export default function CheckoutPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-white mb-2">City *</label>
+                <label className="block text-base font-medium text-white mb-2">City *</label>
                 <input
                   type="text"
                   className="w-full border border-gray-300 text-white rounded p-3"
@@ -274,7 +274,7 @@ export default function CheckoutPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Postcode *</label>
+                <label className="block text-base font-medium text-white mb-2">Postcode *</label>
                 <input
                   type="text"
                   className="w-full border border-gray-300 text-white rounded p-3"
@@ -284,7 +284,7 @@ export default function CheckoutPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Phone</label>
+                <label className="block text-base font-medium text-white mb-2">Phone</label>
                 <input
                   type="tel"
                   className="w-full border border-gray-300 text-white rounded p-3"
@@ -295,7 +295,7 @@ export default function CheckoutPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Email</label>
+                <label className="block text-base font-medium text-white mb-2">Email</label>
                 <input
                   type="email"
                   className="w-full border border-gray-300 text-white rounded p-3"
@@ -317,7 +317,7 @@ export default function CheckoutPage() {
             </div>
           </form>
           <div className="mt-4 text-center">
-            <span className="text-xs text-zinc-400">
+            <span className="text-sm text-zinc-400">
               We care about your privacy. Learn how your information is protected in our{' '}
               <Link href="/privacy" className="text-blue-600 hover:underline">
                 Privacy Policy.
@@ -343,7 +343,7 @@ export default function CheckoutPage() {
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="font-semibold text-gray-800">{rate.servicelevel.name}</h3>
-                      <p className="text-sm text-zinc-400">
+                      <p className="text-base text-zinc-400">
                         {rate.days
                           ? `${rate.days} day${rate.days !== 1 ? 's' : ''} delivery`
                           : 'Delivery'}
@@ -400,7 +400,7 @@ export default function CheckoutPage() {
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300" />
                 </div>
-                <div className="relative flex justify-center text-sm">
+                <div className="relative flex justify-center text-base">
                   <span className="px-2 bg-zinc-900/50 text-zinc-400">or</span>
                 </div>
               </div>
@@ -432,7 +432,7 @@ export default function CheckoutPage() {
                 disabled={isLoading}
                 placeholder="your@email.com"
               />
-              {emailError && <p className="text-red-500 text-sm mb-4">{emailError}</p>}
+              {emailError && <p className="text-red-500 text-base mb-4">{emailError}</p>}
 
               <div className="space-y-3">
                 <button

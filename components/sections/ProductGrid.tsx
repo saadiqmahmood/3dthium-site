@@ -83,7 +83,7 @@ export default function ProductGrid() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-3 rounded-lg text-sm font-light transition-all duration-200 ${
+                className={`px-6 py-3 rounded-lg text-base font-light transition-all duration-200 ${
                   selectedCategory === category
                     ? 'bg-emerald-500 text-white border border-emerald-500'
                     : 'bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 hover:text-white'

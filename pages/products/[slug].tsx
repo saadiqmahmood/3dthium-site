@@ -178,12 +178,12 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
         {/* Product Details */}
         <div className="space-y-8">
           <div>
-            <h1 className="text-4xl font-light text-white mb-3">{product.name}</h1>
-            <div className="text-sm text-zinc-400 font-light mb-4">{product.category.name}</div>
+            <h1 className="text-5xl font-light text-white mb-3">{product.name}</h1>
+            <div className="text-base text-zinc-400 font-light mb-4">{product.category.name}</div>
           </div>
 
           {/* Description */}
-          <div className="text-zinc-300 leading-relaxed font-light">{product.description}</div>
+          <div className="text-zinc-300 text-lg leading-relaxed font-light">{product.description}</div>
 
           {/* Variant Selectors */}
           {variants.length > 0 && (
@@ -191,13 +191,13 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               {/* Size Selector */}
               {variantOptions.sizes.length > 0 && (
                 <div>
-                  <label className="block font-semibold mb-2 text-white">Size</label>
+                  <label className="block font-semibold mb-2 text-white text-lg">Size</label>
                   <div className="flex flex-wrap gap-2">
                     {variantOptions.sizes.map((size) => (
                       <button
                         key={size}
                         onClick={() => setSelectedSize(size)}
-                        className={`px-4 py-2 rounded-lg border text-sm font-light transition ${
+                        className={`px-4 py-2 rounded-lg border text-base font-light transition ${
                           selectedSize === size
                             ? 'bg-emerald-500 text-white border-emerald-500'
                             : 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-600 hover:text-white'
@@ -213,13 +213,13 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               {/* Color Selector */}
               {variantOptions.colors.length > 0 && (
                 <div>
-                  <label className="block font-semibold mb-2 text-white">Color</label>
+                  <label className="block font-semibold mb-2 text-white text-lg">Color</label>
                   <div className="flex flex-wrap gap-2">
                     {variantOptions.colors.map((color) => (
                       <button
                         key={color}
                         onClick={() => setSelectedColor(color)}
-                        className={`px-4 py-2 rounded-lg border text-sm font-light transition ${
+                        className={`px-4 py-2 rounded-lg border text-base font-light transition ${
                           selectedColor === color
                             ? 'bg-emerald-500 text-white border-emerald-500'
                             : 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-600 hover:text-white'
@@ -235,13 +235,13 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               {/* Material Selector */}
               {variantOptions.materials.length > 0 && (
                 <div>
-                  <label className="block font-semibold mb-2 text-white">Material</label>
+                  <label className="block font-semibold mb-2 text-white text-lg">Material</label>
                   <div className="flex flex-wrap gap-2">
                     {variantOptions.materials.map((material) => (
                       <button
                         key={material}
                         onClick={() => setSelectedMaterial(material)}
-                        className={`px-4 py-2 rounded-lg border text-sm font-light transition ${
+                        className={`px-4 py-2 rounded-lg border text-base font-light transition ${
                           selectedMaterial === material
                             ? 'bg-emerald-500 text-white border-emerald-500'
                             : 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-600 hover:text-white'
@@ -258,11 +258,11 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
 
           {/* Price */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-            <div className="text-sm text-zinc-400 font-light mb-2">Price</div>
-            <div className="text-3xl font-semibold text-white">
+            <div className="text-base text-zinc-400 font-light mb-2">Price</div>
+            <div className="text-4xl font-semibold text-white">
               £{displayPrice.toFixed(2)}
               {priceRange.has_variants && !selectedVariant && (
-                <span className="text-lg text-zinc-400 ml-2 font-light">
+                <span className="text-xl text-zinc-400 ml-2 font-light">
                   (from £{priceRange.min.toFixed(2)})
                 </span>
               )}
@@ -272,7 +272,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
           {/* Quantity & Add to Cart */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-4">
             <div>
-              <label className="block font-medium mb-3 text-white text-sm">Quantity</label>
+              <label className="block font-medium mb-3 text-white text-base">Quantity</label>
               <div className="flex items-center space-x-3">
                 <button
                   type="button"

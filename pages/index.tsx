@@ -65,7 +65,7 @@ export default function Home() {
                 <path d="m14.83 9.17 4.24-4.24" />
               </svg>
               <h3 className="text-lg font-medium text-white mb-3">Custom Designs</h3>
-              <p className="text-sm text-zinc-400 font-light leading-relaxed">
+              <p className="text-base text-zinc-400 font-light leading-relaxed">
                 Personalized products tailored to your exact specifications
               </p>
             </div>
@@ -84,7 +84,7 @@ export default function Home() {
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
               </svg>
               <h3 className="text-lg font-medium text-white mb-3">Fast Production</h3>
-              <p className="text-sm text-zinc-400 font-light leading-relaxed">
+              <p className="text-base text-zinc-400 font-light leading-relaxed">
                 Quick turnaround times without compromising on quality
               </p>
             </div>
@@ -103,7 +103,7 @@ export default function Home() {
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
               </svg>
               <h3 className="text-lg font-medium text-white mb-3">Premium Materials</h3>
-              <p className="text-sm text-zinc-400 font-light leading-relaxed">
+              <p className="text-base text-zinc-400 font-light leading-relaxed">
                 High-quality PLA, PETG, and resin for durable results
               </p>
             </div>
@@ -124,7 +124,7 @@ export default function Home() {
                 <path d="M16 10a4 4 0 0 1-8 0" />
               </svg>
               <h3 className="text-lg font-medium text-white mb-3">Free Shipping</h3>
-              <p className="text-sm text-zinc-400 font-light leading-relaxed">
+              <p className="text-base text-zinc-400 font-light leading-relaxed">
                 Complimentary shipping on all orders with tracking
               </p>
             </div>
@@ -185,7 +185,7 @@ export default function Home() {
                 <span className="text-2xl font-light text-emerald-400">1</span>
               </div>
               <h3 className="text-xl font-medium text-white mb-4">Choose or Design</h3>
-              <p className="text-zinc-400 text-sm font-light leading-relaxed">
+              <p className="text-zinc-400 text-base font-light leading-relaxed">
                 Browse our collection or upload your own design. We support various file formats and
                 can help optimize your model.
               </p>
@@ -198,7 +198,7 @@ export default function Home() {
                 <span className="text-2xl font-light text-cyan-400">2</span>
               </div>
               <h3 className="text-xl font-medium text-white mb-4">Customize</h3>
-              <p className="text-zinc-400 text-sm font-light leading-relaxed">
+              <p className="text-zinc-400 text-base font-light leading-relaxed">
                 Select your preferred size, color, and material. Add personal touches like text,
                 logos, or custom modifications.
               </p>
@@ -211,7 +211,7 @@ export default function Home() {
                 <span className="text-2xl font-light text-emerald-400">3</span>
               </div>
               <h3 className="text-xl font-medium text-white mb-4">Print & Ship</h3>
-              <p className="text-zinc-400 text-sm font-light leading-relaxed">
+              <p className="text-zinc-400 text-base font-light leading-relaxed">
                 We print your item with care, perform quality checks, and ship it securely to your
                 doorstep.
               </p>
@@ -257,12 +257,12 @@ export default function Home() {
                   </svg>
                 ))}
               </div>
-              <p className="text-zinc-300 mb-6 text-sm font-light leading-relaxed">
+              <p className="text-zinc-300 mb-6 text-base font-light leading-relaxed">
                 &quot;Amazing quality and attention to detail! The custom phone case I ordered
                 exceeded my expectations.&quot;
               </p>
-              <div className="font-medium text-white text-sm">Sarah M.</div>
-              <div className="text-zinc-500 text-xs font-light">Product Designer</div>
+              <div className="font-medium text-white text-base">Sarah M.</div>
+              <div className="text-zinc-500 text-sm font-light">Product Designer</div>
             </div>
 
             <div
@@ -275,12 +275,12 @@ export default function Home() {
                   </svg>
                 ))}
               </div>
-              <p className="text-zinc-300 mb-6 text-sm font-light leading-relaxed">
+              <p className="text-zinc-300 mb-6 text-base font-light leading-relaxed">
                 &quot;Fast shipping and excellent customer service. The 3D printed desk organizer is
                 perfect for my workspace.&quot;
               </p>
-              <div className="font-medium text-white text-sm">James L.</div>
-              <div className="text-zinc-500 text-xs font-light">Software Engineer</div>
+              <div className="font-medium text-white text-base">James L.</div>
+              <div className="text-zinc-500 text-sm font-light">Software Engineer</div>
             </div>
 
             <div
@@ -293,12 +293,12 @@ export default function Home() {
                   </svg>
                 ))}
               </div>
-              <p className="text-zinc-300 mb-6 text-sm font-light leading-relaxed">
+              <p className="text-zinc-300 mb-6 text-base font-light leading-relaxed">
                 &quot;Love the customization options! They helped me create the perfect gift for my
                 daughter&apos;s birthday.&quot;
               </p>
-              <div className="font-medium text-white text-sm">Maria R.</div>
-              <div className="text-zinc-500 text-xs font-light">Small Business Owner</div>
+              <div className="font-medium text-white text-base">Maria R.</div>
+              <div className="text-zinc-500 text-sm font-light">Small Business Owner</div>
             </div>
           </div>
         </div>
