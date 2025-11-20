@@ -25,7 +25,7 @@ export default function Home() {
       <HeroSection />
 
       {/* Features Section */}
-      <section className="relative py-32 bg-white overflow-hidden">
+      <section className="relative py-16 bg-white overflow-hidden">
         {/* Hexagon pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
@@ -133,7 +133,7 @@ export default function Home() {
       </section>
 
       {/* Featured Products */}
-      <section className="relative py-32 bg-white overflow-hidden">
+      <section className="relative py-16 bg-white overflow-hidden">
         {/* Hexagon pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
@@ -141,7 +141,7 @@ export default function Home() {
         
         <div className="relative max-w-7xl mx-auto px-6">
           <div
-            className={`text-center mb-20 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+            className={`text-center mb-8 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
           >
             <h2 className="text-4xl md:text-5xl font-light text-zinc-900 mb-6">
               Featured <span className="font-semibold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Products</span>
@@ -159,7 +159,7 @@ export default function Home() {
       </section>
 
       {/* Process Section */}
-      <section className="relative py-32 bg-white overflow-hidden">
+      <section className="relative py-16 bg-white overflow-hidden">
         {/* Hexagon pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
@@ -228,7 +228,7 @@ export default function Home() {
       </div>
 
       {/* Testimonials Section */}
-      <section className="relative py-32 bg-white overflow-hidden">
+      <section className="relative py-16 bg-white overflow-hidden">
         {/* Hexagon pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
