@@ -77,7 +77,7 @@ export default function ProductGrid() {
       <div className="max-w-7xl mx-auto px-6">
         {/* Category Filters */}
         <div className="mb-12">
-          <h2 className="text-2xl font-light text-white mb-6 text-center">Shop by Category</h2>
+          <h2 className="text-2xl font-light text-zinc-900 mb-6 text-center">Shop by Category</h2>
           <div className="flex flex-wrap justify-center gap-3">
             {categories.map((category) => (
               <button
@@ -86,7 +86,7 @@ export default function ProductGrid() {
                 className={`px-6 py-3 rounded-lg text-base font-light transition-all duration-200 ${
                   selectedCategory === category
                     ? 'bg-emerald-500 text-white border border-emerald-500'
-                    : 'bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800 hover:text-white'
+                    : 'bg-gray-100 text-zinc-700 border border-gray-200 hover:bg-gray-200 hover:text-zinc-900'
                 }`}
               >
                 {category}
@@ -99,14 +99,14 @@ export default function ProductGrid() {
         {loading && (
           <div className="text-center py-20">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
-            <p className="mt-4 text-zinc-400 text-lg font-light">Loading products...</p>
+            <p className="mt-4 text-zinc-600 text-lg font-light">Loading products...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
           <div className="text-center py-20">
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 max-w-md mx-auto">
+            <div className="bg-white border border-gray-200 rounded-2xl p-8 max-w-md mx-auto shadow-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -115,16 +115,16 @@ export default function ProductGrid() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-16 h-16 text-red-400 mx-auto mb-4"
+                className="w-16 h-16 text-red-500 mx-auto mb-4"
               >
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
-              <p className="text-white text-lg mb-4 font-light">{error}</p>
+              <p className="text-zinc-900 text-lg mb-4 font-light">{error}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="bg-white text-zinc-950 font-medium py-3 px-6 rounded-lg hover:bg-zinc-100 transition-colors"
+                className="bg-zinc-900 text-white font-medium py-3 px-6 rounded-lg hover:bg-zinc-800 transition-colors"
               >
                 Try Again
               </button>
@@ -136,7 +136,7 @@ export default function ProductGrid() {
         {!loading && !error && (
           <>
             <div className="mb-8 text-center">
-              <p className="text-zinc-400 text-lg font-light">
+              <p className="text-zinc-600 text-lg font-light">
                 {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
                 {selectedCategory !== 'All' && ` in ${selectedCategory}`}
               </p>
@@ -152,7 +152,7 @@ export default function ProductGrid() {
         {/* No Products State */}
         {!loading && !error && filteredProducts.length === 0 && (
           <div className="text-center py-20">
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-12 max-w-md mx-auto">
+            <div className="bg-white border border-gray-200 rounded-2xl p-12 max-w-md mx-auto shadow-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -161,13 +161,13 @@ export default function ProductGrid() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-16 h-16 text-zinc-600 mx-auto mb-4"
+                className="w-16 h-16 text-zinc-400 mx-auto mb-4"
               >
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.35-4.35" />
               </svg>
-              <h3 className="text-xl font-medium text-white mb-2">No Products Found</h3>
-              <p className="text-zinc-400 mb-6 font-light">
+              <h3 className="text-xl font-medium text-zinc-900 mb-2">No Products Found</h3>
+              <p className="text-zinc-600 mb-6 font-light">
                 {selectedCategory === 'All'
                   ? "We're working on adding more amazing products!"
                   : `No products found in ${selectedCategory} category`}
@@ -175,7 +175,7 @@ export default function ProductGrid() {
               {selectedCategory !== 'All' && (
                 <button
                   onClick={() => setSelectedCategory('All')}
-                  className="bg-white text-zinc-950 font-medium py-2 px-4 rounded-lg hover:bg-zinc-100 transition-colors"
+                  className="bg-zinc-900 text-white font-medium py-2 px-4 rounded-lg hover:bg-zinc-800 transition-colors"
                 >
                   View All Products
                 </button>

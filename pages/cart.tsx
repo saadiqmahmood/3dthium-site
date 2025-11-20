@@ -17,7 +17,7 @@ export default function CartPage() {
   }, [cart, from, router])
 
   return (
-    <div className="min-h-screen bg-zinc-950 pt-24 pb-12">
+    <div className="min-h-screen bg-white pt-24 pb-12">
       <div className="max-w-4xl mx-auto px-6">
         <button
           onClick={() => {
@@ -27,18 +27,18 @@ export default function CartPage() {
               router.push('/products') // fallback
             }
           }}
-          className="mb-6 text-base text-emerald-400 hover:text-emerald-300 transition-colors font-light"
+          className="mb-6 text-base text-emerald-600 hover:text-emerald-700 transition-colors font-light"
         >
           ← Back
         </button>
 
-        <h1 className="text-4xl font-light text-white mb-8">Your Cart</h1>
+        <h1 className="text-4xl font-light text-zinc-900 mb-8">Your Cart</h1>
 
         <div className="space-y-4">
           {cart.map((item) => (
             <div
               key={item.product_id + '-' + (item.variant_id || 'base')}
-              className="flex items-center justify-between p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl"
+              className="flex items-center justify-between p-6 bg-gray-50 border border-gray-200 rounded-2xl"
             >
             <div className="flex items-center gap-4">
               <Image
@@ -49,15 +49,15 @@ export default function CartPage() {
                 className="w-20 h-20 object-cover rounded"
               />
               <div>
-                <h3 className="font-medium text-white text-lg">{item.name}</h3>
-                <p className="text-base text-zinc-400 font-light">
+                <h3 className="font-medium text-zinc-900 text-lg">{item.name}</h3>
+                <p className="text-base text-zinc-600 font-light">
                   {[item.size, item.color, item.material].filter(Boolean).join(' • ') ||
                     'Base product'}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
                   <button
                     aria-label="Decrease quantity"
-                    className="px-3 py-1 bg-zinc-800 rounded-lg hover:bg-zinc-700 text-white border border-zinc-700 disabled:opacity-50"
+                    className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300 text-zinc-900 border border-gray-300 disabled:opacity-50"
                     onClick={() =>
                       updateCartItemQuantity(
                         item.product_id,
@@ -69,7 +69,7 @@ export default function CartPage() {
                   >
                     -
                   </button>
-                  <span className="text-base text-white w-8 text-center inline-block font-medium">
+                  <span className="text-base text-zinc-900 w-8 text-center inline-block font-medium">
                     {item.quantity}
                   </span>
                   <button
@@ -89,12 +89,12 @@ export default function CartPage() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-white font-semibold text-lg">
+              <p className="text-zinc-900 font-semibold text-lg">
                 £{(item.price * item.quantity).toFixed(2)}
               </p>
               <button
                 onClick={() => removeFromCart(item.product_id, item.variant_id || undefined)}
-                className="text-red-400 text-base hover:text-red-300 transition-colors mt-2 font-light"
+                className="text-red-600 text-base hover:text-red-700 transition-colors mt-2 font-light"
               >
                 Remove
               </button>
@@ -103,19 +103,19 @@ export default function CartPage() {
         ))}
       </div>
 
-        <div className="mt-8 p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl">
+        <div className="mt-8 p-6 bg-gray-50 border border-gray-200 rounded-2xl">
           <div className="flex justify-between items-center mb-6">
-            <p className="text-xl font-light text-zinc-300">Total:</p>
-            <p className="text-2xl font-semibold text-white">£{total.toFixed(2)}</p>
+            <p className="text-xl font-light text-zinc-700">Total:</p>
+            <p className="text-2xl font-semibold text-zinc-900">£{total.toFixed(2)}</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link href="/products" className="flex-1">
-              <button className="w-full border border-zinc-700 text-white px-6 py-3 rounded-lg hover:bg-zinc-900 hover:border-zinc-600 transition-colors font-medium">
+              <button className="w-full border border-gray-300 text-zinc-900 px-6 py-3 rounded-lg hover:bg-gray-100 hover:border-gray-400 transition-colors font-medium">
                 Continue Shopping
               </button>
             </Link>
             <Link href="/checkout" className="flex-1">
-              <button className="w-full bg-white text-zinc-950 px-6 py-3 rounded-lg hover:bg-zinc-100 transition-colors font-medium">
+              <button className="w-full bg-zinc-900 text-white px-6 py-3 rounded-lg hover:bg-zinc-800 transition-colors font-medium">
                 Checkout
               </button>
             </Link>
@@ -124,7 +124,7 @@ export default function CartPage() {
             onClick={() => {
               setTimeout(() => clearCart(), 300)
             }}
-            className="w-full mt-3 text-red-400 hover:text-red-300 text-base transition-colors font-light"
+            className="w-full mt-3 text-red-600 hover:text-red-700 text-base transition-colors font-light"
           >
             Clear Cart
           </button>

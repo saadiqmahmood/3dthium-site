@@ -34,9 +34,9 @@ export default function HeroSection() {
   }, [])
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-zinc-950 pt-20">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white pt-20">
       {/* Subtle Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#18181b_1px,transparent_1px),linear-gradient(to_bottom,#18181b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-40" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#fff_70%,transparent_110%)] opacity-40" />
       
       {/* Accent Glow */}
       <div className="absolute inset-0">
@@ -54,7 +54,7 @@ export default function HeroSection() {
           >
             <div className="space-y-6">
               <h1
-                className="text-5xl md:text-7xl lg:text-8xl font-light text-white leading-tight tracking-tight"
+                className="text-5xl md:text-7xl lg:text-8xl font-light text-zinc-900 leading-tight tracking-tight"
                 style={{
                   transform: `translateY(${scrollY * 0.1}px)`,
                 }}
@@ -66,7 +66,7 @@ export default function HeroSection() {
               </h1>
 
               <p
-                className="text-lg md:text-xl lg:text-2xl text-zinc-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light"
+                className="text-lg md:text-xl lg:text-2xl text-zinc-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light"
                 style={{
                   transform: `translateY(${scrollY * 0.05}px)`,
                 }}
@@ -84,14 +84,14 @@ export default function HeroSection() {
             >
               <Link
                 href="/products"
-                className="group relative bg-white text-zinc-950 px-8 py-4 rounded-lg font-medium text-lg hover:bg-zinc-100 transition-all duration-300"
+                className="group relative bg-zinc-900 text-white px-8 py-4 rounded-lg font-medium text-lg hover:bg-zinc-800 transition-all duration-300"
               >
                 Explore Products
               </Link>
 
               <Link
                 href="/custom-order"
-                className="group relative border border-zinc-700 text-white px-8 py-4 rounded-lg font-medium text-lg hover:bg-zinc-900 hover:border-zinc-600 transition-all duration-300"
+                className="group relative border border-gray-300 text-zinc-900 px-8 py-4 rounded-lg font-medium text-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-300"
               >
                 Custom Order
               </Link>
@@ -114,7 +114,7 @@ export default function HeroSection() {
               {/* Grid Container */}
               <div className="grid grid-cols-6 grid-rows-2 gap-3 w-full h-full">
                 {/* Top row: two equal images */}
-                <div className="relative col-span-3 row-span-1 rounded-2xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-sm border border-white/20 hover:scale-105 transition-transform duration-500">
+                <div className="relative col-span-3 row-span-1 rounded-2xl overflow-hidden shadow-2xl bg-gray-100 backdrop-blur-sm border border-gray-200 hover:scale-105 transition-transform duration-500">
                   <Image
                     src={heroImages[0].src}
                     alt={heroImages[0].alt}
@@ -124,10 +124,10 @@ export default function HeroSection() {
                     priority
                     className="hover:scale-110 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent"></div>
                 </div>
 
-                <div className="relative col-span-3 row-span-1 rounded-2xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-sm border border-white/20 hover:scale-105 transition-transform duration-500">
+                <div className="relative col-span-3 row-span-1 rounded-2xl overflow-hidden shadow-2xl bg-gray-100 backdrop-blur-sm border border-gray-200 hover:scale-105 transition-transform duration-500">
                   <Image
                     src={heroImages[1].src}
                     alt={heroImages[1].alt}
@@ -136,11 +136,11 @@ export default function HeroSection() {
                     sizes="(max-width: 768px) 50vw, 250px"
                     className="hover:scale-110 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent"></div>
                 </div>
 
                 {/* Bottom row: kitchen (slimmer), key holder (wider) */}
-                <div className="relative col-span-2 row-span-1 rounded-2xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-sm border border-white/20 hover:scale-105 transition-transform duration-500">
+                <div className="relative col-span-2 row-span-1 rounded-2xl overflow-hidden shadow-2xl bg-gray-100 backdrop-blur-sm border border-gray-200 hover:scale-105 transition-transform duration-500">
                   <Image
                     src={heroImages[2].src}
                     alt={heroImages[2].alt}
@@ -149,10 +149,10 @@ export default function HeroSection() {
                     sizes="(max-width: 768px) 33vw, 167px"
                     className="hover:scale-110 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent"></div>
                 </div>
 
-                <div className="relative col-span-4 row-span-1 rounded-2xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-sm border border-white/20 hover:scale-105 transition-transform duration-500">
+                <div className="relative col-span-4 row-span-1 rounded-2xl overflow-hidden shadow-2xl bg-gray-100 backdrop-blur-sm border border-gray-200 hover:scale-105 transition-transform duration-500">
                   <Image
                     src={heroImages[3].src}
                     alt={heroImages[3].alt}
@@ -161,7 +161,7 @@ export default function HeroSection() {
                     sizes="(max-width: 768px) 67vw, 333px"
                     className="hover:scale-110 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent"></div>
                 </div>
               </div>
             </div>
@@ -170,11 +170,11 @@ export default function HeroSection() {
       </div>
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-zinc-500 animate-bounce">
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-zinc-600 animate-bounce">
         <div className="flex flex-col items-center space-y-2">
           <span className="text-sm font-light tracking-wider uppercase">Scroll</span>
-          <div className="w-5 h-8 border border-zinc-700 rounded-full flex justify-center">
-            <div className="w-0.5 h-2 bg-zinc-500 rounded-full mt-2 animate-pulse"></div>
+          <div className="w-5 h-8 border border-gray-300 rounded-full flex justify-center">
+            <div className="w-0.5 h-2 bg-zinc-600 rounded-full mt-2 animate-pulse"></div>
           </div>
         </div>
       </div>

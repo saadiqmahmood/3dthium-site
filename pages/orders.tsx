@@ -249,7 +249,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 relative overflow-hidden">
+    <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Background glow effects */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
@@ -258,17 +258,17 @@ export default function OrdersPage() {
       
       <div className="relative max-w-6xl mx-auto py-24 px-4 sm:px-6 lg:px-8">
       <div className="mb-10">
-        <h1 className="text-4xl font-light text-white mb-3">My Orders</h1>
-        <p className="text-lg text-zinc-400">View your order history and track your purchases</p>
+        <h1 className="text-4xl font-light text-zinc-900 mb-3">My Orders</h1>
+        <p className="text-lg text-zinc-600">View your order history and track your purchases</p>
       </div>
 
       {loading ? (
         <div className="text-center py-16">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-zinc-400">Loading orders...</p>
+          <p className="mt-4 text-zinc-600">Loading orders...</p>
         </div>
       ) : orders.length === 0 ? (
-        <div className="text-center py-16 bg-zinc-900/50 border border-zinc-800 rounded-2xl shadow-sm border border-gray-100">
+        <div className="text-center py-16 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm">
           <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg
               className="w-10 h-10 text-blue-600"
@@ -284,8 +284,8 @@ export default function OrdersPage() {
               />
             </svg>
           </div>
-          <h3 className="text-2xl font-semibold text-gray-900 mb-2">No orders yet</h3>
-          <p className="text-zinc-400 mb-8 max-w-md mx-auto">
+          <h3 className="text-2xl font-semibold text-zinc-900 mb-2">No orders yet</h3>
+          <p className="text-zinc-600 mb-8 max-w-md mx-auto">
             Start shopping to see your orders here. Browse our collection of 3D printed products!
           </p>
           <button
@@ -309,7 +309,7 @@ export default function OrdersPage() {
           {orders.map((order) => (
             <div
               key={order.id}
-              className="bg-zinc-900/50 border border-zinc-800 rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300"
+              className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow duration-300"
             >
               {/* Order Header */}
               <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-5 border-b border-gray-100">
@@ -391,7 +391,7 @@ export default function OrdersPage() {
                           <div className="flex flex-wrap gap-3 mb-3">
                             {color && (
                               <div className="flex items-center gap-2">
-                                <span className="text-sm text-zinc-400 font-medium">Color:</span>
+                                <span className="text-sm text-zinc-600 font-medium">Color:</span>
                                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200">
                                   {color}
                                 </span>
@@ -414,7 +414,7 @@ export default function OrdersPage() {
                               </div>
                             )}
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-zinc-400">
+                          <div className="flex items-center gap-4 text-sm text-zinc-600">
                             <span className="font-medium">Quantity: {item.quantity}</span>
                             <span>×</span>
                             <span className="font-medium">

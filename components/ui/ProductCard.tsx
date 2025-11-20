@@ -46,8 +46,8 @@ export default function ProductCard({ product, variants }: Props) {
 
   return (
     <Link href={`/products/${product.slug}`} className="block group">
-      <div className="bg-zinc-900/50 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all duration-300 overflow-hidden">
-        <div className="relative w-full h-72 bg-zinc-950 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200 hover:border-gray-300 transition-all duration-300 overflow-hidden shadow-sm">
+        <div className="relative w-full h-72 bg-gray-100 overflow-hidden">
           <Image
             src={product.thumbnail_url}
             alt={product.name}
@@ -55,11 +55,11 @@ export default function ProductCard({ product, variants }: Props) {
             width={300}
             height={300}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
           
           {/* Category Badge */}
           <div className="absolute top-4 left-4">
-            <span className="bg-zinc-900/80 backdrop-blur-sm text-zinc-300 px-3 py-1 rounded-full text-sm font-light border border-zinc-800">
+            <span className="bg-white/90 backdrop-blur-sm text-zinc-700 px-3 py-1 rounded-full text-sm font-light border border-gray-200">
               {product.category.name}
             </span>
           </div>
@@ -67,7 +67,7 @@ export default function ProductCard({ product, variants }: Props) {
           {/* Customizable badge */}
           {product.customizable && (
             <div className="absolute top-4 right-4">
-              <span className="bg-emerald-500/20 backdrop-blur-sm text-emerald-400 px-3 py-1 rounded-full text-sm font-light border border-emerald-500/30">
+              <span className="bg-emerald-500/10 backdrop-blur-sm text-emerald-600 px-3 py-1 rounded-full text-sm font-light border border-emerald-500/30">
                 Custom
               </span>
             </div>
@@ -75,14 +75,14 @@ export default function ProductCard({ product, variants }: Props) {
         </div>
         
         <div className="p-6">
-          <h3 className="text-xl font-medium text-white mb-2 group-hover:text-emerald-400 transition-colors">{product.name}</h3>
+          <h3 className="text-xl font-medium text-zinc-900 mb-2 group-hover:text-emerald-600 transition-colors">{product.name}</h3>
 
           {/* Price display */}
-          <p className="text-2xl font-semibold text-white mt-2">{displayPrice}</p>
+          <p className="text-2xl font-semibold text-zinc-900 mt-2">{displayPrice}</p>
 
           {/* Variant info */}
           {product.price_range.has_variants && (
-            <p className="text-sm text-zinc-500 mt-2 font-light">{variantText}</p>
+            <p className="text-sm text-zinc-600 mt-2 font-light">{variantText}</p>
           )}
         </div>
       </div>

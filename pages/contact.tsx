@@ -24,28 +24,28 @@ export default function ContactPage() {
         <title>Contact Us | 3Dthium</title>
       </Head>
 
-      <div className="min-h-screen bg-zinc-950 relative overflow-hidden">
+      <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Background glow effects */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
       </div>
         {/* Hero Section */}
-        <section className="relative bg-zinc-950 py-20 pt-32 overflow-hidden">
+        <section className="relative bg-white py-20 pt-32 overflow-hidden">
           {/* Hexagon pattern */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
           </div>
           <div className="relative max-w-7xl mx-auto px-6 text-center">
-            <h1 className="text-5xl md:text-6xl font-light text-white mb-6">Get In Touch</h1>
-            <p className="text-lg md:text-xl text-zinc-400 max-w-3xl mx-auto font-light">
+            <h1 className="text-5xl md:text-6xl font-light text-zinc-900 mb-6">Get In Touch</h1>
+            <p className="text-lg md:text-xl text-zinc-600 max-w-3xl mx-auto font-light">
               Have a question or need assistance? We&apos;re here to help bring your ideas to life.
             </p>
           </div>
         </section>
 
         {/* Contact Info Cards */}
-        <section className="relative py-16 bg-zinc-950 overflow-hidden">
+        <section className="relative py-16 bg-white overflow-hidden">
           {/* Hexagon pattern */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
@@ -53,7 +53,7 @@ export default function ContactPage() {
           <div className="relative max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
               {/* Email */}
-              <div className="bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-8 text-center transition-all">
+              <div className="bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl p-8 text-center transition-all">
                 <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -77,7 +77,7 @@ export default function ContactPage() {
               </div>
 
               {/* Phone */}
-              <div className="bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-8 text-center transition-all">
+              <div className="bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl p-8 text-center transition-all">
                 <div className="w-16 h-16 bg-cyan-500/10 border border-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -100,7 +100,7 @@ export default function ContactPage() {
               </div>
 
               {/* Location */}
-              <div className="bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-8 text-center transition-all">
+              <div className="bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl p-8 text-center transition-all">
                 <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -125,18 +125,18 @@ export default function ContactPage() {
         </section>
 
         {/* Contact Form */}
-        <section className="relative pb-16 bg-zinc-950 overflow-hidden">
+        <section className="relative pb-16 bg-white overflow-hidden">
           {/* Hexagon pattern */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
           </div>
           
           <div className="relative max-w-4xl mx-auto px-6 pt-16">
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
               {/* Form Header */}
-              <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border-b border-zinc-800 px-8 py-8">
-                <h2 className="text-3xl md:text-4xl font-light text-white mb-3">Send Us a Message</h2>
-                <p className="text-zinc-400 text-lg font-light">Fill out the form and we&apos;ll get back to you as soon as possible</p>
+              <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border-b border-gray-200 px-8 py-8">
+                <h2 className="text-3xl md:text-4xl font-light text-zinc-900 mb-3">Send Us a Message</h2>
+                <p className="text-zinc-600 text-lg font-light">Fill out the form and we&apos;ll get back to you as soon as possible</p>
               </div>
 
               {/* Form Content */}
@@ -183,7 +183,7 @@ export default function ContactPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Name */}
                     <div>
-                      <label htmlFor="name" className="block text-base font-medium text-white mb-2">
+                      <label htmlFor="name" className="block text-base font-medium text-zinc-900 mb-2">
                         Full Name *
                       </label>
                       <input
@@ -198,7 +198,7 @@ export default function ContactPage() {
 
                     {/* Email */}
                     <div>
-                      <label htmlFor="email" className="block text-base font-medium text-white mb-2">
+                      <label htmlFor="email" className="block text-base font-medium text-zinc-900 mb-2">
                         Email Address *
                       </label>
                       <input
@@ -214,7 +214,7 @@ export default function ContactPage() {
 
                   {/* Subject */}
                   <div>
-                    <label htmlFor="subject" className="block text-base font-medium text-white mb-2">
+                    <label htmlFor="subject" className="block text-base font-medium text-zinc-900 mb-2">
                       Subject *
                     </label>
                     <input
@@ -229,7 +229,7 @@ export default function ContactPage() {
 
                   {/* Message */}
                   <div>
-                    <label htmlFor="message" className="block text-base font-medium text-white mb-2">
+                    <label htmlFor="message" className="block text-base font-medium text-zinc-900 mb-2">
                       Message *
                     </label>
                     <textarea
@@ -247,7 +247,7 @@ export default function ContactPage() {
                     <button
                       type="submit"
                       disabled={status === 'loading'}
-                      className="w-full md:w-auto bg-white text-zinc-950 px-8 py-4 rounded-lg font-medium hover:bg-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full md:w-auto bg-zinc-900 text-white px-8 py-4 rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {status === 'loading' ? 'Sending...' : 'Send Message'}
                     </button>

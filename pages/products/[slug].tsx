@@ -130,13 +130,13 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto py-24 px-6">
       {/* Back button */}
       <button
         type="button"
         onClick={() => router.back()}
-        className="ml-2 mb-6 text-emerald-400 hover:text-blue-800 text-sm flex items-center"
+        className="ml-2 mb-6 text-emerald-600 hover:text-emerald-700 text-base flex items-center"
       >
         ← Back
       </button>
@@ -145,7 +145,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
         {/* Product Image */}
         <div>
           <div className="sticky top-24">
-            <div className="relative bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 p-4">
+            <div className="relative bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 p-4">
               <Image
                 src={displayImage}
                 alt={product.name}
@@ -161,7 +161,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                       key={index}
                       src={image}
                       alt={`${product.name} gallery ${index + 1}`}
-                      className="w-full h-20 object-cover rounded-lg cursor-pointer hover:opacity-75 border border-zinc-800"
+                      className="w-full h-20 object-cover rounded-lg cursor-pointer hover:opacity-75 border border-gray-200"
                       width={100}
                       height={100}
                       onClick={() => {
@@ -178,12 +178,12 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
         {/* Product Details */}
         <div className="space-y-8">
           <div>
-            <h1 className="text-5xl font-light text-white mb-3">{product.name}</h1>
-            <div className="text-base text-zinc-400 font-light mb-4">{product.category.name}</div>
+            <h1 className="text-5xl font-light text-zinc-900 mb-3">{product.name}</h1>
+            <div className="text-base text-zinc-600 font-light mb-4">{product.category.name}</div>
           </div>
 
           {/* Description */}
-          <div className="text-zinc-300 text-lg leading-relaxed font-light">{product.description}</div>
+          <div className="text-zinc-700 text-lg leading-relaxed font-light">{product.description}</div>
 
           {/* Variant Selectors */}
           {variants.length > 0 && (
@@ -191,7 +191,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               {/* Size Selector */}
               {variantOptions.sizes.length > 0 && (
                 <div>
-                  <label className="block font-semibold mb-2 text-white text-lg">Size</label>
+                  <label className="block font-semibold mb-2 text-zinc-900 text-lg">Size</label>
                   <div className="flex flex-wrap gap-2">
                     {variantOptions.sizes.map((size) => (
                       <button
@@ -200,7 +200,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                         className={`px-4 py-2 rounded-lg border text-base font-light transition ${
                           selectedSize === size
                             ? 'bg-emerald-500 text-white border-emerald-500'
-                            : 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-600 hover:text-white'
+                            : 'bg-gray-100 text-zinc-700 border-gray-300 hover:border-gray-400 hover:text-zinc-900'
                         }`}
                       >
                         {size}
@@ -213,7 +213,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               {/* Color Selector */}
               {variantOptions.colors.length > 0 && (
                 <div>
-                  <label className="block font-semibold mb-2 text-white text-lg">Color</label>
+                  <label className="block font-semibold mb-2 text-zinc-900 text-lg">Color</label>
                   <div className="flex flex-wrap gap-2">
                     {variantOptions.colors.map((color) => (
                       <button
@@ -222,7 +222,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                         className={`px-4 py-2 rounded-lg border text-base font-light transition ${
                           selectedColor === color
                             ? 'bg-emerald-500 text-white border-emerald-500'
-                            : 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-600 hover:text-white'
+                            : 'bg-gray-100 text-zinc-700 border-gray-300 hover:border-gray-400 hover:text-zinc-900'
                         }`}
                       >
                         {color}
@@ -235,7 +235,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               {/* Material Selector */}
               {variantOptions.materials.length > 0 && (
                 <div>
-                  <label className="block font-semibold mb-2 text-white text-lg">Material</label>
+                  <label className="block font-semibold mb-2 text-zinc-900 text-lg">Material</label>
                   <div className="flex flex-wrap gap-2">
                     {variantOptions.materials.map((material) => (
                       <button
@@ -244,7 +244,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                         className={`px-4 py-2 rounded-lg border text-base font-light transition ${
                           selectedMaterial === material
                             ? 'bg-emerald-500 text-white border-emerald-500'
-                            : 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-600 hover:text-white'
+                            : 'bg-gray-100 text-zinc-700 border-gray-300 hover:border-gray-400 hover:text-zinc-900'
                         }`}
                       >
                         {material}
@@ -257,12 +257,12 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
           )}
 
           {/* Price */}
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-            <div className="text-base text-zinc-400 font-light mb-2">Price</div>
-            <div className="text-4xl font-semibold text-white">
+          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
+            <div className="text-base text-zinc-600 font-light mb-2">Price</div>
+            <div className="text-4xl font-semibold text-zinc-900">
               £{displayPrice.toFixed(2)}
               {priceRange.has_variants && !selectedVariant && (
-                <span className="text-xl text-zinc-400 ml-2 font-light">
+                <span className="text-xl text-zinc-600 ml-2 font-light">
                   (from £{priceRange.min.toFixed(2)})
                 </span>
               )}
@@ -270,22 +270,22 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
           </div>
 
           {/* Quantity & Add to Cart */}
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-4">
+          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-4">
             <div>
-              <label className="block font-medium mb-3 text-white text-base">Quantity</label>
+              <label className="block font-medium mb-3 text-zinc-900 text-base">Quantity</label>
               <div className="flex items-center space-x-3">
                 <button
                   type="button"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-10 h-10 rounded-lg border border-zinc-700 bg-zinc-900 flex items-center justify-center hover:bg-zinc-800 text-white transition"
+                  className="w-10 h-10 rounded-lg border border-gray-300 bg-white flex items-center justify-center hover:bg-gray-100 text-zinc-900 transition"
                 >
                   -
                 </button>
-                <span className="text-lg font-medium text-white min-w-[3rem] text-center">{quantity}</span>
+                <span className="text-lg font-medium text-zinc-900 min-w-[3rem] text-center">{quantity}</span>
                 <button
                   type="button"
                   onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 rounded-lg border border-zinc-700 bg-zinc-900 flex items-center justify-center hover:bg-zinc-800 text-white transition"
+                  className="w-10 h-10 rounded-lg border border-gray-300 bg-white flex items-center justify-center hover:bg-gray-100 text-zinc-900 transition"
                 >
                   +
                 </button>
@@ -296,7 +296,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
             <button
               type="button"
               onClick={handleAddToCart}
-              className="w-full bg-white text-zinc-950 py-4 px-6 rounded-lg font-medium hover:bg-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-zinc-900 text-white py-4 px-6 rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={variants.length > 0 && !selectedVariant}
             >
               {variants.length > 0 && !selectedVariant ? 'Select Options' : 'Add to Cart'}
@@ -316,7 +316,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
           {/* Selected Variant Info */}
           {selectedVariant && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-              <p className="text-white text-sm">
+              <p className="text-zinc-900 text-base">
                 <span className="font-semibold">Selected:</span>
                 {selectedVariant.size && ` ${selectedVariant.size}`}
                 {selectedVariant.color && ` ${selectedVariant.color}`}
