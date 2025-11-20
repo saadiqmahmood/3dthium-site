@@ -172,7 +172,7 @@ export default function HeroSection() {
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-zinc-500 animate-bounce">
         <div className="flex flex-col items-center space-y-2">
-          <span className="text-xs font-light tracking-wider uppercase">Scroll</span>
+          <span className="text-sm font-light tracking-wider uppercase">Scroll</span>
           <div className="w-5 h-8 border border-zinc-700 rounded-full flex justify-center">
             <div className="w-0.5 h-2 bg-zinc-500 rounded-full mt-2 animate-pulse"></div>
           </div>

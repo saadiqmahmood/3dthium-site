@@ -317,7 +317,7 @@ export default function AccountPage() {
                 </h2>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-light text-zinc-400 mb-2">Email Address</label>
+                    <label className="block text-base font-light text-zinc-400 mb-2">Email Address</label>
                     <p className="text-lg text-white font-light bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3">{user.email}</p>
                   </div>
                 </div>
@@ -334,7 +334,7 @@ export default function AccountPage() {
                       </div>
                       <div>
                         <h3 className="text-lg font-medium text-white mb-1">Change Email</h3>
-                        <p className="text-sm text-zinc-400 font-light">Update your email address</p>
+                        <p className="text-base text-zinc-400 font-light">Update your email address</p>
                       </div>
                     </div>
                   </div>
@@ -350,7 +350,7 @@ export default function AccountPage() {
                       </div>
                       <div>
                         <h3 className="text-lg font-medium text-white mb-1">Change Password</h3>
-                        <p className="text-sm text-zinc-400 font-light">Update your password</p>
+                        <p className="text-base text-zinc-400 font-light">Update your password</p>
                       </div>
                     </div>
                   </div>
@@ -382,7 +382,7 @@ export default function AccountPage() {
                       <h3 className="text-2xl font-light text-white mb-2">
                         Order #{selectedOrder.id.slice(-8)}
                       </h3>
-                      <p className="text-sm text-zinc-400 font-light">
+                      <p className="text-base text-zinc-400 font-light">
                         {new Date(selectedOrder.created_at).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
@@ -394,7 +394,7 @@ export default function AccountPage() {
                     </div>
                     <div className="text-right">
                       <span
-                        className={`inline-flex px-3 py-1.5 text-xs font-medium rounded-lg ${
+                        className={`inline-flex px-3 py-1.5 text-sm font-medium rounded-lg ${
                           selectedOrder.status === 'paid' 
                             ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
                             : selectedOrder.status === 'pending' 
@@ -426,7 +426,7 @@ export default function AccountPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-medium text-white mb-2">{item.products?.title}</h4>
-                          <div className="flex flex-wrap gap-3 text-sm text-zinc-400 font-light">
+                          <div className="flex flex-wrap gap-3 text-base text-zinc-400 font-light">
                             <span>Color: {item.product_variants?.color}</span>
                             <span>•</span>
                             <span>Size: {item.size}</span>
@@ -493,7 +493,7 @@ export default function AccountPage() {
                           <h3 className="text-lg font-medium text-white mb-1 group-hover:text-emerald-400 transition">
                             Order #{order.id.slice(-8)}
                           </h3>
-                          <p className="text-sm text-zinc-400 font-light">
+                          <p className="text-base text-zinc-400 font-light">
                             {new Date(order.created_at).toLocaleDateString('en-US', {
                               year: 'numeric',
                               month: 'short',
@@ -503,7 +503,7 @@ export default function AccountPage() {
                         </div>
                         <div className="flex items-center gap-4">
                           <span
-                            className={`inline-flex px-3 py-1.5 text-xs font-medium rounded-lg ${
+                            className={`inline-flex px-3 py-1.5 text-sm font-medium rounded-lg ${
                               order.status === 'paid' 
                                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
                                 : order.status === 'pending' 
@@ -518,7 +518,7 @@ export default function AccountPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-zinc-400 font-light">
+                      <div className="flex items-center gap-2 text-base text-zinc-400 font-light">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>

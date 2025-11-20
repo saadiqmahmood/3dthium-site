@@ -27,12 +27,12 @@ export default function CartPage() {
               router.push('/products') // fallback
             }
           }}
-          className="mb-6 text-sm text-emerald-400 hover:text-emerald-300 transition-colors font-light"
+          className="mb-6 text-base text-emerald-400 hover:text-emerald-300 transition-colors font-light"
         >
           ← Back
         </button>
 
-        <h1 className="text-3xl font-light text-white mb-8">Your Cart</h1>
+        <h1 className="text-4xl font-light text-white mb-8">Your Cart</h1>
 
         <div className="space-y-4">
           {cart.map((item) => (
@@ -49,8 +49,8 @@ export default function CartPage() {
                 className="w-20 h-20 object-cover rounded"
               />
               <div>
-                <h3 className="font-medium text-white">{item.name}</h3>
-                <p className="text-sm text-zinc-400 font-light">
+                <h3 className="font-medium text-white text-lg">{item.name}</h3>
+                <p className="text-base text-zinc-400 font-light">
                   {[item.size, item.color, item.material].filter(Boolean).join(' • ') ||
                     'Base product'}
                 </p>
@@ -69,7 +69,7 @@ export default function CartPage() {
                   >
                     -
                   </button>
-                  <span className="text-sm text-white w-8 text-center inline-block font-medium">
+                  <span className="text-base text-white w-8 text-center inline-block font-medium">
                     {item.quantity}
                   </span>
                   <button
@@ -94,7 +94,7 @@ export default function CartPage() {
               </p>
               <button
                 onClick={() => removeFromCart(item.product_id, item.variant_id || undefined)}
-                className="text-red-400 text-sm hover:text-red-300 transition-colors mt-2 font-light"
+                className="text-red-400 text-base hover:text-red-300 transition-colors mt-2 font-light"
               >
                 Remove
               </button>
@@ -124,7 +124,7 @@ export default function CartPage() {
             onClick={() => {
               setTimeout(() => clearCart(), 300)
             }}
-            className="w-full mt-3 text-red-400 hover:text-red-300 text-sm transition-colors font-light"
+            className="w-full mt-3 text-red-400 hover:text-red-300 text-base transition-colors font-light"
           >
             Clear Cart
           </button>

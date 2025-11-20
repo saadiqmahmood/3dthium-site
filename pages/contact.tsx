@@ -183,7 +183,7 @@ export default function ContactPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Name */}
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
+                      <label htmlFor="name" className="block text-base font-medium text-white mb-2">
                         Full Name *
                       </label>
                       <input
@@ -198,7 +198,7 @@ export default function ContactPage() {
 
                     {/* Email */}
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
+                      <label htmlFor="email" className="block text-base font-medium text-white mb-2">
                         Email Address *
                       </label>
                       <input
@@ -214,7 +214,7 @@ export default function ContactPage() {
 
                   {/* Subject */}
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-white mb-2">
+                    <label htmlFor="subject" className="block text-base font-medium text-white mb-2">
                       Subject *
                     </label>
                     <input
@@ -229,7 +229,7 @@ export default function ContactPage() {
 
                   {/* Message */}
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-white mb-2">
+                    <label htmlFor="message" className="block text-base font-medium text-white mb-2">
                       Message *
                     </label>
                     <textarea

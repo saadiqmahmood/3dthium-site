@@ -154,7 +154,7 @@ export default function AuthPage() {
             </h2>
 
             <div>
-              <label htmlFor="reset-email" className="block text-sm font-medium text-white">
+              <label htmlFor="reset-email" className="block text-base font-medium text-white">
                 Email
               </label>
               <input
@@ -167,7 +167,7 @@ export default function AuthPage() {
               />
             </div>
             {isLogin && (
-              <p className="text-right text-sm">
+              <p className="text-right text-base">
                 <button
                   type="button"
                   className="text-emerald-400 hover:underline"
@@ -218,7 +218,7 @@ export default function AuthPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-white">
+              <label htmlFor="email" className="block text-base font-medium text-white">
                 Email
               </label>
               <input
@@ -232,7 +232,7 @@ export default function AuthPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-white">
+              <label htmlFor="password" className="block text-base font-medium text-white">
                 Password
               </label>
               <input
@@ -246,7 +246,7 @@ export default function AuthPage() {
             </div>
             {isLogin && !resetMode && (
               <>
-                <p className="text-right text-sm mt-2">
+                <p className="text-right text-base mt-2">
                   <button
                     type="button"
                     className="text-emerald-400 hover:underline"
