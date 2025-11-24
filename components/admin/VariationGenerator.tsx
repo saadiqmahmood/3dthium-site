@@ -27,9 +27,12 @@ export default function VariationGenerator({
   const [generating, setGenerating] = useState(false)
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
 
+  // Filter out attributes without IDs (unsaved attributes)
+  const savedAttributes = attributes.filter((attr) => attr.id && attr.id.trim() !== '')
+
   // Calculate combination count
   const combinationCount = selectedAttrIds.reduce((total, attrId) => {
-    const attr = attributes.find((a) => a.id === attrId)
+    const attr = savedAttributes.find((a) => a.id === attrId)
     return total * (attr?.options?.length || 1)
   }, 1)
 
@@ -44,6 +47,16 @@ export default function VariationGenerator({
   const handleGenerate = async () => {
     if (selectedAttrIds.length === 0) {
       setMessage({ text: 'Please select at least one attribute', type: 'error' })
+      return
+    }
+
+    // Validate that all selected attributes have IDs
+    const attributesWithoutIds = selectedAttrIds.filter((id) => !id || id.trim() === '')
+    if (attributesWithoutIds.length > 0) {
+      setMessage({
+        text: 'Some selected attributes are missing IDs. Please save your attributes first.',
+        type: 'error',
+      })
       return
     }
 
@@ -92,12 +105,13 @@ export default function VariationGenerator({
     }
   }
 
-  if (attributes.length === 0) {
+  if (savedAttributes.length === 0) {
     return (
       <div className="border border-dashed border-gray-300 rounded-lg p-8 text-center">
-        <p className="text-stone-600 mb-2">No attributes defined</p>
+        <p className="text-stone-600 mb-2">No saved attributes found</p>
         <p className="text-sm text-stone-500">
-          Please create and save attributes above before generating variations
+          Please create and save attributes in the &quot;Attributes&quot; tab first before
+          generating variations
         </p>
       </div>
     )
@@ -114,7 +128,7 @@ export default function VariationGenerator({
             Select Attributes to Combine:
           </label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {attributes.map((attr) => (
+            {savedAttributes.map((attr) => (
               <label
                 key={attr.id}
                 className="flex items-center space-x-3 p-3 border rounded hover:bg-gray-50 cursor-pointer transition"
@@ -142,7 +156,7 @@ export default function VariationGenerator({
                 <p className="text-xs text-blue-600 mt-2">
                   {selectedAttrIds
                     .map((id) => {
-                      const attr = attributes.find((a) => a.id === id)
+                      const attr = savedAttributes.find((a) => a.id === id)
                       return `${attr?.name} (${attr?.options.length})`
                     })
                     .join(' × ')}

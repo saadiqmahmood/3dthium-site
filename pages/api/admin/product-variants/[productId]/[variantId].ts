@@ -78,6 +78,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // DELETE: Delete a variant
   if (req.method === 'DELETE') {
     try {
+      // Delete the variant
       const { error } = await supabaseAdmin
         .from('product_variants_new')
         .delete()
@@ -87,6 +88,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (error) {
         console.error('Error deleting variant:', error)
         return res.status(500).json({ error: error.message })
+      }
+
+      // Check if there are any remaining variants for this product
+      const { count, error: countError } = await supabaseAdmin
+        .from('product_variants_new')
+        .select('*', { count: 'exact', head: true })
+        .eq('product_id', productId)
+
+      if (countError) {
+        console.error('Error checking remaining variants:', countError)
+        // Don't fail the deletion, just log the error
+      } else if (count === 0) {
+        // No variants remaining - clean up attributes and options
+        console.log(
+          '🧹 [VARIANT DELETE] No variants remaining, cleaning up attributes for product:',
+          productId
+        )
+
+        // Delete all attributes (options will cascade delete)
+        const { error: attrError } = await supabaseAdmin
+          .from('product_attributes')
+          .delete()
+          .eq('product_id', productId)
+
+        if (attrError) {
+          console.error('Error cleaning up attributes:', attrError)
+          // Don't fail the deletion, just log the error
+        } else {
+          console.log('✅ [VARIANT DELETE] Attributes cleaned up successfully')
+        }
       }
 
       return res.status(200).json({ message: 'Variant deleted successfully' })

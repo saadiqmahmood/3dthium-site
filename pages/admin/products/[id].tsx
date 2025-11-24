@@ -66,6 +66,7 @@ export default function EditProductPage() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [productAttributes, setProductAttributes] = useState<any[]>([])
+  const [variantRefreshTrigger, setVariantRefreshTrigger] = useState(0)
   // Fetch product attributes
   const fetchProductAttributes = async () => {
     if (!id) return
@@ -74,7 +75,37 @@ export default function EditProductPage() {
       const response = await fetch(`/api/admin/products/${id}/attributes`)
       if (response.ok) {
         const data = await response.json()
-        setProductAttributes(data.attributes || [])
+        // Transform from API format (snake_case) to component format (camelCase)
+        const transformedAttributes = (data.attributes || []).map(
+          (attr: {
+            id: string
+            name: string
+            type: string
+            display_order: number
+            required: boolean
+            options?: Array<{
+              value: string
+              display_name: string
+              hex_color?: string
+              images?: string[]
+              price_modifier?: number
+            }>
+          }) => ({
+            id: attr.id,
+            name: attr.name,
+            type: attr.type,
+            displayOrder: attr.display_order,
+            required: attr.required,
+            options: (attr.options || []).map((opt) => ({
+              value: opt.value,
+              displayName: opt.display_name,
+              hexColor: opt.hex_color,
+              images: opt.images || [],
+              priceModifier: opt.price_modifier || 0,
+            })),
+          })
+        )
+        setProductAttributes(transformedAttributes)
       }
     } catch (error) {
       console.error('Error fetching attributes:', error)
@@ -170,19 +201,6 @@ export default function EditProductPage() {
     }))
   }
 
-  const handleAttributeChange = (
-    attributeName: string,
-    value: string | number | boolean | string[]
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      attributes: {
-        ...prev.attributes,
-        [attributeName]: value,
-      },
-    }))
-  }
-
   const handleGalleryChange = (galleryImages: string[]) => {
     setFormData((prev) => ({
       ...prev,
@@ -219,16 +237,6 @@ export default function EditProductPage() {
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }
-
-  const nextStep = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep((prev) => Math.min(prev + 1, 4))
-    }
-  }
-
-  const prevStep = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -288,127 +296,6 @@ export default function EditProductPage() {
     }
   }
 
-  const renderAttributeField = (attribute: CategoryAttribute) => {
-    const value = formData.attributes[attribute.name] || ''
-    const error = errors[`attr_${attribute.name}`]
-
-    switch (attribute.type) {
-      case 'text':
-        return (
-          <div key={attribute.id}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {attribute.name} {attribute.required && <span className="text-red-500">*</span>}
-            </label>
-            {attribute.description && (
-              <p className="text-xs text-gray-500 mb-1">{attribute.description}</p>
-            )}
-            <input
-              type="text"
-              value={String(value)}
-              onChange={(e) => handleAttributeChange(attribute.name, e.target.value)}
-              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                error ? 'border-red-500' : ''
-              }`}
-            />
-            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-          </div>
-        )
-
-      case 'number':
-        return (
-          <div key={attribute.id}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {attribute.name} {attribute.required && <span className="text-red-500">*</span>}
-            </label>
-            <input
-              type="number"
-              value={String(value)}
-              onChange={(e) =>
-                handleAttributeChange(attribute.name, parseFloat(e.target.value) || 0)
-              }
-              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                error ? 'border-red-500' : ''
-              }`}
-            />
-            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-          </div>
-        )
-
-      case 'boolean':
-        return (
-          <div key={attribute.id}>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id={attribute.id}
-                checked={Boolean(value)}
-                onChange={(e) => handleAttributeChange(attribute.name, e.target.checked)}
-                className="mr-2"
-              />
-              <span className="text-sm font-medium text-gray-700">{attribute.name}</span>
-            </label>
-            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-          </div>
-        )
-
-      case 'select':
-        return (
-          <div key={attribute.id}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {attribute.name} {attribute.required && <span className="text-red-500">*</span>}
-            </label>
-            <select
-              value={String(value)}
-              onChange={(e) => handleAttributeChange(attribute.name, e.target.value)}
-              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                error ? 'border-red-500' : ''
-              }`}
-            >
-              <option value="">Select {attribute.name}</option>
-              {attribute.options?.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-          </div>
-        )
-
-      case 'multiselect':
-        return (
-          <div key={attribute.id}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {attribute.name} {attribute.required && <span className="text-red-500">*</span>}
-            </label>
-            <div className="space-y-2">
-              {attribute.options?.map((option) => (
-                <label key={option} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={Array.isArray(value) && value.includes(option)}
-                    onChange={(e) => {
-                      const currentValues = Array.isArray(value) ? value : []
-                      const newValues = e.target.checked
-                        ? [...currentValues, option]
-                        : currentValues.filter((v) => v !== option)
-                      handleAttributeChange(attribute.name, newValues)
-                    }}
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-gray-700">{option}</span>
-                </label>
-              ))}
-            </div>
-            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-          </div>
-        )
-
-      default:
-        return null
-    }
-  }
-
   const selectedCategory = categories.find((c) => c.id === formData.category_id)
 
   if (loadingProduct) {
@@ -438,35 +325,28 @@ export default function EditProductPage() {
         </div>
       </div>
 
-      {/* Progress Steps */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between max-w-3xl mx-auto">
+      {/* Clickable Tabs */}
+      <div className="mb-8 border-b border-gray-200">
+        <div className="flex space-x-1 max-w-4xl mx-auto">
           {[
             { num: 1, label: 'Basic Info' },
             { num: 2, label: 'Images & Description' },
             { num: 3, label: 'Attributes' },
             { num: 4, label: 'Variants' },
             { num: 5, label: 'Review' },
-          ].map((step, index) => (
-            <div key={step.num} className="flex items-center">
-              <div className="flex flex-col items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                    currentStep >= step.num ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
-                  }`}
-                >
-                  {step.num}
-                </div>
-                <span className="text-xs mt-1 text-gray-600">{step.label}</span>
-              </div>
-              {index < 4 && (
-                <div
-                  className={`w-16 h-1 mx-2 ${
-                    currentStep > step.num ? 'bg-blue-600' : 'bg-gray-200'
-                  }`}
-                />
-              )}
-            </div>
+          ].map((step) => (
+            <button
+              key={step.num}
+              type="button"
+              onClick={() => setCurrentStep(step.num)}
+              className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+                currentStep === step.num
+                  ? 'border-blue-600 text-blue-600 bg-blue-50'
+                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+              }`}
+            >
+              {step.label}
+            </button>
           ))}
         </div>
       </div>
@@ -647,63 +527,72 @@ export default function EditProductPage() {
           </div>
         )}
 
-        {/* Step 3: Attributes */}
-        {currentStep === 3 && (
+        {/* Step 3: Attributes - Create and manage product attributes (Color, Size, etc.) */}
+        {currentStep === 3 && id && (
           <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-stone-800">Product Attributes</h2>
-            {categoryAttributes.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {categoryAttributes.map(renderAttributeField)}
-              </div>
-            ) : (
-              <p className="text-gray-500 text-center py-8">
-                No attributes defined for this category.
-              </p>
-            )}
+            <AttributeBuilder
+              productId={id as string}
+              productSlug={formData.slug}
+              categorySlug={selectedCategory?.slug || 'products'}
+              initialAttributes={productAttributes}
+              onAttributesChange={async (attrs) => {
+                setProductAttributes(attrs)
+                // Refresh attributes from server after save to get IDs
+                await fetchProductAttributes()
+              }}
+            />
           </div>
         )}
 
-        {/* Step 4: Variants */}
+        {/* Step 4: Variants - Generate and manage variants */}
         {currentStep === 4 && id && (
-          <div className="space-y-8">
-            {/* Attribute Builder */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <AttributeBuilder
-                productId={id as string}
-                productSlug={formData.slug}
-                categorySlug={selectedCategory?.slug || 'products'}
-                initialAttributes={productAttributes}
-                onAttributesChange={(attrs) => setProductAttributes(attrs)}
-              />
-            </div>
-
+          <div className="space-y-6">
             {/* Variation Generator */}
             <div className="bg-gray-50 rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4 text-stone-800">
-                Bulk Variation Generator
-              </h2>
-              <p className="text-stone-600 mb-6">
-                Generate all possible combinations from your attributes automatically. For example,
-                3 colors × 2 sizes = 6 variations created instantly.
+              <h2 className="text-xl font-semibold mb-2 text-stone-800">Generate Variants</h2>
+              <p className="text-stone-600 mb-4">
+                Create all possible combinations from your attributes. For example, 3 colors × 2
+                sizes = 6 variants.
               </p>
-              <VariationGenerator
-                productId={id as string}
-                attributes={productAttributes}
-                basePrice={formData.base_price}
-                onGenerated={fetchProductAttributes}
-              />
+              {productAttributes.length === 0 ? (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                  <p className="text-gray-600 mb-2">No attributes defined yet</p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Go to the &quot;Attributes&quot; tab to create attributes first
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(3)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                  >
+                    Go to Attributes
+                  </button>
+                </div>
+              ) : (
+                <VariationGenerator
+                  productId={id as string}
+                  attributes={productAttributes}
+                  basePrice={formData.base_price}
+                  onGenerated={() => {
+                    fetchProductAttributes()
+                    // Trigger variant refresh
+                    setVariantRefreshTrigger((prev) => prev + 1)
+                  }}
+                />
+              )}
             </div>
 
-            {/* Manual Variant Manager (Old System - Still Available) */}
+            {/* Variant Manager - View and manage all variants */}
             <div className="bg-gray-50 rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4 text-stone-800">
-                Manual Variant Management
-              </h2>
-              <p className="text-stone-600 mb-6">
-                View and manage all variants (both auto-generated and manual). You can also add
-                individual variants here if needed.
+              <h2 className="text-xl font-semibold mb-2 text-stone-800">Manage Variants</h2>
+              <p className="text-stone-600 mb-4">
+                View, edit, and delete all variants (both auto-generated and manual).
               </p>
-              <VariantManager productId={id as string} basePrice={formData.base_price} />
+              <VariantManager
+                productId={id as string}
+                basePrice={formData.base_price}
+                refreshTrigger={variantRefreshTrigger}
+              />
             </div>
           </div>
         )}
@@ -742,6 +631,75 @@ export default function EditProductPage() {
                   </p>
                 </div>
               </div>
+
+              {/* Attributes and Options Summary */}
+              {productAttributes && productAttributes.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="font-medium text-gray-900 mb-3">Product Attributes & Options</h3>
+                  <div className="space-y-4">
+                    {productAttributes.map((attr, idx) => (
+                      <div key={idx} className="border rounded-lg p-4 bg-white">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold text-gray-800">{attr.name}</h4>
+                          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
+                            {attr.type}
+                          </span>
+                          {attr.required && (
+                            <span className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded">
+                              Required
+                            </span>
+                          )}
+                        </div>
+                        {attr.options && attr.options.length > 0 ? (
+                          <div className="mt-2">
+                            <p className="text-sm text-gray-600 mb-2">
+                              Options ({attr.options.length}):
+                            </p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                              {attr.options.map(
+                                (
+                                  opt: {
+                                    value: string
+                                    displayName: string
+                                    images?: string[]
+                                    priceModifier?: number
+                                  },
+                                  optIdx: number
+                                ) => (
+                                  <div
+                                    key={optIdx}
+                                    className="border rounded p-2 bg-gray-50 text-sm"
+                                  >
+                                    <div className="font-medium text-gray-900">
+                                      {opt.displayName}
+                                    </div>
+                                    {opt.priceModifier !== undefined && opt.priceModifier !== 0 && (
+                                      <div className="text-xs text-gray-600 mt-1">
+                                        {opt.priceModifier >= 0 ? '+' : ''}£
+                                        {opt.priceModifier.toFixed(2)}
+                                      </div>
+                                    )}
+                                    {opt.images &&
+                                      Array.isArray(opt.images) &&
+                                      opt.images.length > 0 && (
+                                        <div className="text-xs text-gray-500 mt-1">
+                                          {opt.images.length} image
+                                          {opt.images.length !== 1 ? 's' : ''}
+                                        </div>
+                                      )}
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-500 italic">No options defined</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Gallery Preview */}
               {formData.galleryImages.length > 0 && (
@@ -786,34 +744,15 @@ export default function EditProductPage() {
           </div>
         )}
 
-        {/* Navigation */}
-        <div className="flex justify-between mt-6">
+        {/* Save Button */}
+        <div className="flex justify-end mt-6">
           <button
-            type="button"
-            onClick={prevStep}
-            disabled={currentStep === 1}
-            className="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            type="submit"
+            disabled={loading}
+            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 disabled:opacity-50 transition"
           >
-            Previous
+            {loading ? 'Saving...' : 'Save Changes'}
           </button>
-
-          {currentStep < 5 ? (
-            <button
-              type="button"
-              onClick={nextStep}
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 disabled:opacity-50 transition"
-            >
-              {loading ? 'Saving...' : 'Save Changes'}
-            </button>
-          )}
         </div>
       </form>
 

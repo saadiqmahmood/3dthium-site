@@ -5,9 +5,14 @@ import type { ProductVariantNew } from '@/types'
 interface VariantManagerProps {
   productId: string
   basePrice: number
+  refreshTrigger?: number // Add refresh trigger prop
 }
 
-export default function VariantManager({ productId, basePrice }: VariantManagerProps) {
+export default function VariantManager({
+  productId,
+  basePrice,
+  refreshTrigger,
+}: VariantManagerProps) {
   const [variants, setVariants] = useState<ProductVariantNew[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -32,7 +37,7 @@ export default function VariantManager({ productId, basePrice }: VariantManagerP
       fetchVariants()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId])
+  }, [productId, refreshTrigger]) // Add refreshTrigger to dependencies
 
   const fetchVariants = async () => {
     setLoading(true)
