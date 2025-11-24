@@ -59,7 +59,8 @@ export default function HeroSection() {
                   transform: `translateY(${scrollY * 0.1}px)`,
                 }}
               >
-                Precision 3D<br />
+                Precision 3D
+                <br />
                 <span className="font-semibold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                   Printing
                 </span>
@@ -96,7 +97,6 @@ export default function HeroSection() {
                 Custom Order
               </Link>
             </div>
-
           </div>
 
           {/* Image Gallery */}

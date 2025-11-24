@@ -77,8 +77,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Validate all attributes have options
     for (const attr of attributes) {
       if (!attr.options || attr.options.length === 0) {
-        return res.status(400).json({ 
-          error: `Attribute "${attr.name}" has no options. Please add options first.` 
+        return res.status(400).json({
+          error: `Attribute "${attr.name}" has no options. Please add options first.`,
         })
       }
     }
@@ -86,7 +86,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 3. Generate all combinations using cartesian product
     const combinations = generateCombinations(attributes as Attribute[])
 
-    console.log(`🎲 [VARIATION GENERATOR] Generating ${combinations.length} variations for product: ${product.name}`)
+    console.log(
+      `🎲 [VARIATION GENERATOR] Generating ${combinations.length} variations for product: ${product.name}`
+    )
 
     // 4. Create variation records
     const basePrice = parseFloat(String(product.base_price))
@@ -94,15 +96,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Build SKU: SLUG-ATTR1VAL-ATTR2VAL-001
       const skuParts = [
         product.slug.toUpperCase().replace(/-/g, '').slice(0, 8),
-        ...Object.values(combo.values).map(v => String(v).toUpperCase().replace(/\s+/g, '').slice(0, 4)),
-        String(index + 1).padStart(3, '0')
+        ...Object.values(combo.values).map((v) =>
+          String(v).toUpperCase().replace(/\s+/g, '').slice(0, 4)
+        ),
+        String(index + 1).padStart(3, '0'),
       ]
       const sku = skuParts.join('-')
 
       // Calculate price
       let finalPrice = basePrice
       if (pricingStrategy === 'additive') {
-        Object.values(combo.options).forEach(option => {
+        Object.values(combo.options).forEach((option) => {
           finalPrice += option.price_modifier || 0
         })
       }
@@ -134,7 +138,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     for (let i = 0; i < variants.length; i += batchSize) {
       const batch = variants.slice(i, i + batchSize)
-      
+
       const { data: created, error: insertError } = await supabase
         .from('product_variants_new')
         .insert(batch)
@@ -142,24 +146,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (insertError) {
         console.error('❌ [VARIATION GENERATOR] Batch insert failed:', insertError)
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: insertError.message,
           hint: insertError.hint,
-          details: insertError.details 
+          details: insertError.details,
         })
       }
 
       createdVariants.push(...(created || []))
     }
 
-    console.log(`✅ [VARIATION GENERATOR] Created ${createdVariants.length} variations successfully`)
+    console.log(
+      `✅ [VARIATION GENERATOR] Created ${createdVariants.length} variations successfully`
+    )
 
     return res.status(201).json({
       success: true,
       created: createdVariants.length,
       variants: createdVariants,
     })
-
   } catch (error) {
     console.error('❌ [VARIATION GENERATOR] Unexpected error:', error)
     return res.status(500).json({ error: 'Failed to generate variations' })
@@ -171,19 +176,19 @@ function generateCombinations(attributes: Attribute[]): Combination[] {
   if (!attributes.length) return []
 
   const result: Combination[] = []
-  
+
   function recurse(index: number, current: Combination) {
     if (index === attributes.length) {
-      result.push({ 
+      result.push({
         values: { ...current.values },
-        options: { ...current.options }
+        options: { ...current.options },
       })
       return
     }
 
     const attr = attributes[index]
     const attrKey = attr.name.toLowerCase().replace(/\s+/g, '_')
-    
+
     for (const option of attr.options) {
       recurse(index + 1, {
         values: { ...current.values, [attrKey]: option.value },
@@ -205,7 +210,7 @@ function collectImages(optionsMap: Record<string, AttributeOption>) {
     const option = optionsMap[key]
     if (option?.images && Array.isArray(option.images) && option.images.length > 0) {
       // Add images that aren't already included
-      const newImages = option.images.filter(img => !allImages.includes(img))
+      const newImages = option.images.filter((img) => !allImages.includes(img))
       allImages.push(...newImages)
       sources[key] = option.images
     }
@@ -216,4 +221,3 @@ function collectImages(optionsMap: Record<string, AttributeOption>) {
     sources,
   }
 }
-

@@ -16,10 +16,15 @@ export default function CustomOrderPage() {
         </div>
         <div className="relative max-w-7xl mx-auto px-6 text-center">
           <h1 className="text-5xl md:text-6xl font-light text-zinc-900 mb-6">
-            Bring Your <span className="font-semibold bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">Vision</span> to Life
+            Bring Your{' '}
+            <span className="font-semibold bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">
+              Vision
+            </span>{' '}
+            to Life
           </h1>
           <p className="text-lg md:text-xl text-zinc-600 max-w-3xl mx-auto font-light">
-            Have a unique idea? We&apos;ll turn your custom designs into reality with precision 3D printing.
+            Have a unique idea? We&apos;ll turn your custom designs into reality with precision 3D
+            printing.
           </p>
         </div>
       </section>
@@ -42,7 +47,8 @@ export default function CustomOrderPage() {
               </div>
               <h3 className="text-xl font-medium text-zinc-900 mb-3">Submit Your Request</h3>
               <p className="text-zinc-600 font-light">
-                Fill out the form with your project details and upload design files if you have them.
+                Fill out the form with your project details and upload design files if you have
+                them.
               </p>
             </div>
 
@@ -77,12 +83,14 @@ export default function CustomOrderPage() {
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
         </div>
-        
+
         <div className="relative max-w-5xl mx-auto px-6">
           <div className="bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden">
             {/* Form Header */}
             <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border-b border-gray-200 px-8 py-8">
-              <h2 className="text-3xl md:text-4xl font-light text-zinc-900 mb-3">Start Your Custom Project</h2>
+              <h2 className="text-3xl md:text-4xl font-light text-zinc-900 mb-3">
+                Start Your Custom Project
+              </h2>
               <p className="text-zinc-600 text-lg font-light">
                 Tell us about your project and we&apos;ll make it happen
               </p>

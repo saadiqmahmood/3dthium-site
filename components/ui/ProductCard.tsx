@@ -29,7 +29,7 @@ type Props = {
   variants: ProductVariantNew[]
 }
 
-export default function ProductCard({ product, variants }: Props) {
+export default function ProductCard({ product }: Props) {
   // Calculate display price
   const displayPrice = product.price_range.has_variants
     ? product.price_range.min === product.price_range.max
@@ -50,7 +50,7 @@ export default function ProductCard({ product, variants }: Props) {
             height={300}
           />
         </div>
-        
+
         {/* Product Info */}
         <div className="p-4">
           {/* Product Name */}

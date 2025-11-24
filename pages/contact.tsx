@@ -25,11 +25,11 @@ export default function ContactPage() {
       </Head>
 
       <div className="min-h-screen bg-white relative overflow-hidden">
-      {/* Background glow effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
-      </div>
+        {/* Background glow effects */}
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
+        </div>
         {/* Hero Section */}
         <section className="relative bg-white py-16 pt-24 overflow-hidden">
           {/* Hexagon pattern */}
@@ -70,8 +70,13 @@ export default function ContactPage() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-medium text-white mb-2">Email Us</h3>
-                <p className="text-zinc-400 mb-4 font-light">We typically respond within 24 hours</p>
-                <a href="mailto:hello@3dthium.com" className="text-emerald-400 hover:text-emerald-300 font-light transition-colors">
+                <p className="text-zinc-400 mb-4 font-light">
+                  We typically respond within 24 hours
+                </p>
+                <a
+                  href="mailto:hello@3dthium.com"
+                  className="text-emerald-400 hover:text-emerald-300 font-light transition-colors"
+                >
                   hello@3dthium.com
                 </a>
               </div>
@@ -94,7 +99,10 @@ export default function ContactPage() {
                 </div>
                 <h3 className="text-xl font-medium text-white mb-2">Call Us</h3>
                 <p className="text-zinc-400 mb-4 font-light">Mon-Fri, 9am-6pm GMT</p>
-                <a href="tel:+441234567890" className="text-cyan-400 hover:text-cyan-300 font-light transition-colors">
+                <a
+                  href="tel:+441234567890"
+                  className="text-cyan-400 hover:text-cyan-300 font-light transition-colors"
+                >
                   +44 (0) 123 456 7890
                 </a>
               </div>
@@ -130,13 +138,17 @@ export default function ContactPage() {
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
           </div>
-          
+
           <div className="relative max-w-4xl mx-auto px-6 pt-16">
             <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
               {/* Form Header */}
               <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border-b border-gray-200 px-8 py-8">
-                <h2 className="text-3xl md:text-4xl font-light text-zinc-900 mb-3">Send Us a Message</h2>
-                <p className="text-zinc-600 text-lg font-light">Fill out the form and we&apos;ll get back to you as soon as possible</p>
+                <h2 className="text-3xl md:text-4xl font-light text-zinc-900 mb-3">
+                  Send Us a Message
+                </h2>
+                <p className="text-zinc-600 text-lg font-light">
+                  Fill out the form and we&apos;ll get back to you as soon as possible
+                </p>
               </div>
 
               {/* Form Content */}
@@ -157,7 +169,9 @@ export default function ContactPage() {
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                         <polyline points="22 4 12 14.01 9 11.01" />
                       </svg>
-                      <span className="font-medium">Your message was sent successfully! We&apos;ll be in touch soon.</span>
+                      <span className="font-medium">
+                        Your message was sent successfully! We&apos;ll be in touch soon.
+                      </span>
                     </div>
                   )}
                   {status === 'error' && (
@@ -183,7 +197,10 @@ export default function ContactPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Name */}
                     <div>
-                      <label htmlFor="name" className="block text-base font-medium text-zinc-900 mb-2">
+                      <label
+                        htmlFor="name"
+                        className="block text-base font-medium text-zinc-900 mb-2"
+                      >
                         Full Name *
                       </label>
                       <input
@@ -198,7 +215,10 @@ export default function ContactPage() {
 
                     {/* Email */}
                     <div>
-                      <label htmlFor="email" className="block text-base font-medium text-zinc-900 mb-2">
+                      <label
+                        htmlFor="email"
+                        className="block text-base font-medium text-zinc-900 mb-2"
+                      >
                         Email Address *
                       </label>
                       <input
@@ -214,7 +234,10 @@ export default function ContactPage() {
 
                   {/* Subject */}
                   <div>
-                    <label htmlFor="subject" className="block text-base font-medium text-zinc-900 mb-2">
+                    <label
+                      htmlFor="subject"
+                      className="block text-base font-medium text-zinc-900 mb-2"
+                    >
                       Subject *
                     </label>
                     <input
@@ -229,7 +252,10 @@ export default function ContactPage() {
 
                   {/* Message */}
                   <div>
-                    <label htmlFor="message" className="block text-base font-medium text-zinc-900 mb-2">
+                    <label
+                      htmlFor="message"
+                      className="block text-base font-medium text-zinc-900 mb-2"
+                    >
                       Message *
                     </label>
                     <textarea

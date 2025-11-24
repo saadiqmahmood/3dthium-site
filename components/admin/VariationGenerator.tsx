@@ -48,7 +48,11 @@ export default function VariationGenerator({
     }
 
     if (combinationCount > 1000) {
-      if (!confirm(`This will create ${combinationCount} variations. This may take a while. Continue?`)) {
+      if (
+        !confirm(
+          `This will create ${combinationCount} variations. This may take a while. Continue?`
+        )
+      ) {
         return
       }
     }
@@ -147,7 +151,11 @@ export default function VariationGenerator({
               <div className="text-right">
                 <p className="text-sm text-blue-700">Estimated Time:</p>
                 <p className="text-lg font-semibold text-blue-900">
-                  {combinationCount < 50 ? '< 5 sec' : combinationCount < 200 ? '5-15 sec' : '15-30 sec'}
+                  {combinationCount < 50
+                    ? '< 5 sec'
+                    : combinationCount < 200
+                      ? '5-15 sec'
+                      : '15-30 sec'}
                 </p>
               </div>
             </div>
@@ -265,4 +273,3 @@ export default function VariationGenerator({
     </div>
   )
 }
-

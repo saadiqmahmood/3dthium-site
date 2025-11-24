@@ -265,13 +265,23 @@ export default function AccountPage() {
               setSelectedOrder(null)
             }}
             className={`px-6 py-3 rounded-lg font-light transition-all ${
-              section === 'profile' 
-                ? 'bg-emerald-500 text-white' 
+              section === 'profile'
+                ? 'bg-emerald-500 text-white'
                 : 'bg-gray-100 text-zinc-700 border border-gray-200 hover:border-gray-300 hover:text-zinc-900'
             }`}
           >
-            <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <svg
+              className="w-5 h-5 inline mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
             </svg>
             Profile
           </button>
@@ -282,13 +292,23 @@ export default function AccountPage() {
               setSelectedOrder(null)
             }}
             className={`px-6 py-3 rounded-lg font-light transition-all ${
-              section === 'orders' 
-                ? 'bg-emerald-500 text-white' 
+              section === 'orders'
+                ? 'bg-emerald-500 text-white'
                 : 'bg-gray-100 text-zinc-700 border border-gray-200 hover:border-gray-300 hover:text-zinc-900'
             }`}
           >
-            <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            <svg
+              className="w-5 h-5 inline mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+              />
             </svg>
             Orders
           </button>
@@ -297,8 +317,18 @@ export default function AccountPage() {
             onClick={signOut}
             className="ml-auto px-6 py-3 rounded-lg font-light bg-gray-100 text-zinc-700 border border-gray-200 hover:border-red-300 hover:text-red-600 transition-all"
           >
-            <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            <svg
+              className="w-5 h-5 inline mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
             </svg>
             Sign Out
           </button>
@@ -311,14 +341,23 @@ export default function AccountPage() {
               <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 mb-6">
                 <h2 className="text-2xl font-light text-zinc-900 mb-6 flex items-center gap-3">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
                   Profile Information
                 </h2>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-base font-light text-zinc-400 mb-2">Email Address</label>
-                    <p className="text-lg text-zinc-900 font-light bg-white border border-gray-200 rounded-lg px-4 py-3">{user.email}</p>
+                    <label className="block text-base font-light text-zinc-400 mb-2">
+                      Email Address
+                    </label>
+                    <p className="text-lg text-zinc-900 font-light bg-white border border-gray-200 rounded-lg px-4 py-3">
+                      {user.email}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -328,13 +367,25 @@ export default function AccountPage() {
                   <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 hover:border-emerald-500/50 transition-all group cursor-pointer">
                     <div className="flex items-start gap-4">
                       <div className="bg-emerald-500/10 p-3 rounded-lg group-hover:bg-emerald-500/20 transition">
-                        <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        <svg
+                          className="w-6 h-6 text-emerald-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                          />
                         </svg>
                       </div>
                       <div>
                         <h3 className="text-lg font-medium text-zinc-900 mb-1">Change Email</h3>
-                        <p className="text-base text-zinc-600 font-light">Update your email address</p>
+                        <p className="text-base text-zinc-600 font-light">
+                          Update your email address
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -344,8 +395,18 @@ export default function AccountPage() {
                   <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 hover:border-emerald-500/50 transition-all group cursor-pointer">
                     <div className="flex items-start gap-4">
                       <div className="bg-emerald-500/10 p-3 rounded-lg group-hover:bg-emerald-500/20 transition">
-                        <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        <svg
+                          className="w-6 h-6 text-emerald-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                          />
                         </svg>
                       </div>
                       <div>
@@ -373,7 +434,12 @@ export default function AccountPage() {
                     className="mb-6 text-emerald-400 hover:text-emerald-300 font-light flex items-center gap-2 transition"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 19l-7-7 7-7"
+                      />
                     </svg>
                     Back to Orders
                   </button>
@@ -388,21 +454,22 @@ export default function AccountPage() {
                           month: 'long',
                           day: 'numeric',
                           hour: '2-digit',
-                          minute: '2-digit'
+                          minute: '2-digit',
                         })}
                       </p>
                     </div>
                     <div className="text-right">
                       <span
                         className={`inline-flex px-3 py-1.5 text-sm font-medium rounded-lg ${
-                          selectedOrder.status === 'paid' 
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
-                            : selectedOrder.status === 'pending' 
-                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
-                            : 'bg-gray-200 text-zinc-600 border border-gray-300'
+                          selectedOrder.status === 'paid'
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            : selectedOrder.status === 'pending'
+                              ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                              : 'bg-gray-200 text-zinc-600 border border-gray-300'
                         }`}
                       >
-                        {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                        {selectedOrder.status.charAt(0).toUpperCase() +
+                          selectedOrder.status.slice(1)}
                       </span>
                       <p className="text-2xl font-semibold text-zinc-900 mt-2">
                         £{selectedOrder.total_price.toFixed(2)}
@@ -471,7 +538,9 @@ export default function AccountPage() {
                     </svg>
                   </div>
                   <h3 className="text-xl font-light text-zinc-900 mb-2">No orders yet</h3>
-                  <p className="text-zinc-600 font-light mb-8">Start shopping to see your orders here</p>
+                  <p className="text-zinc-600 font-light mb-8">
+                    Start shopping to see your orders here
+                  </p>
                   <button
                     type="button"
                     onClick={() => router.push('/products')}
@@ -497,18 +566,18 @@ export default function AccountPage() {
                             {new Date(order.created_at).toLocaleDateString('en-US', {
                               year: 'numeric',
                               month: 'short',
-                              day: 'numeric'
+                              day: 'numeric',
                             })}
                           </p>
                         </div>
                         <div className="flex items-center gap-4">
                           <span
                             className={`inline-flex px-3 py-1.5 text-sm font-medium rounded-lg ${
-                              order.status === 'paid' 
-                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
-                                : order.status === 'pending' 
-                                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
-                                : 'bg-gray-200 text-zinc-600 border border-gray-300'
+                              order.status === 'paid'
+                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                : order.status === 'pending'
+                                  ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                  : 'bg-gray-200 text-zinc-600 border border-gray-300'
                             }`}
                           >
                             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
@@ -518,13 +587,26 @@ export default function AccountPage() {
                           </p>
                         </div>
                       </div>
-                          <div className="flex items-center gap-2 text-base text-zinc-600 font-light">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      <div className="flex items-center gap-2 text-base text-zinc-600 font-light">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                          />
                         </svg>
-                        {order.order_items?.length || 0} item{order.order_items?.length !== 1 ? 's' : ''}
+                        {order.order_items?.length || 0} item
+                        {order.order_items?.length !== 1 ? 's' : ''}
                         <span className="mx-2">•</span>
-                        <span className="text-emerald-600 group-hover:text-emerald-700 transition">View details →</span>
+                        <span className="text-emerald-600 group-hover:text-emerald-700 transition">
+                          View details →
+                        </span>
                       </div>
                     </div>
                   ))}

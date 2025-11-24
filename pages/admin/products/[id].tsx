@@ -69,7 +69,7 @@ export default function EditProductPage() {
   // Fetch product attributes
   const fetchProductAttributes = async () => {
     if (!id) return
-    
+
     try {
       const response = await fetch(`/api/admin/products/${id}/attributes`)
       if (response.ok) {
@@ -679,10 +679,12 @@ export default function EditProductPage() {
 
             {/* Variation Generator */}
             <div className="bg-gray-50 rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4 text-stone-800">Bulk Variation Generator</h2>
+              <h2 className="text-xl font-semibold mb-4 text-stone-800">
+                Bulk Variation Generator
+              </h2>
               <p className="text-stone-600 mb-6">
-                Generate all possible combinations from your attributes automatically. For example, 3
-                colors × 2 sizes = 6 variations created instantly.
+                Generate all possible combinations from your attributes automatically. For example,
+                3 colors × 2 sizes = 6 variations created instantly.
               </p>
               <VariationGenerator
                 productId={id as string}
@@ -694,7 +696,9 @@ export default function EditProductPage() {
 
             {/* Manual Variant Manager (Old System - Still Available) */}
             <div className="bg-gray-50 rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4 text-stone-800">Manual Variant Management</h2>
+              <h2 className="text-xl font-semibold mb-4 text-stone-800">
+                Manual Variant Management
+              </h2>
               <p className="text-stone-600 mb-6">
                 View and manage all variants (both auto-generated and manual). You can also add
                 individual variants here if needed.
