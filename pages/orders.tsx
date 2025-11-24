@@ -255,192 +255,194 @@ export default function OrdersPage() {
         <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
       </div>
-      
+
       <div className="relative max-w-6xl mx-auto py-24 px-4 sm:px-6 lg:px-8">
-      <div className="mb-10">
-        <h1 className="text-4xl font-light text-zinc-900 mb-3">My Orders</h1>
-        <p className="text-lg text-zinc-600">View your order history and track your purchases</p>
-      </div>
-
-      {loading ? (
-        <div className="text-center py-16">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-zinc-600">Loading orders...</p>
+        <div className="mb-10">
+          <h1 className="text-4xl font-light text-zinc-900 mb-3">My Orders</h1>
+          <p className="text-lg text-zinc-600">View your order history and track your purchases</p>
         </div>
-      ) : orders.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg
-              className="w-10 h-10 text-blue-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-              />
-            </svg>
+
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-zinc-600">Loading orders...</p>
           </div>
-          <h3 className="text-2xl font-semibold text-zinc-900 mb-2">No orders yet</h3>
-          <p className="text-zinc-600 mb-8 max-w-md mx-auto">
-            Start shopping to see your orders here. Browse our collection of 3D printed products!
-          </p>
-          <button
-            type="button"
-            onClick={() => router.push('/products')}
-            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-              />
-            </svg>
-            Browse Products
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {orders.map((order) => (
-            <div
-              key={order.id}
-              className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow duration-300"
-            >
-              {/* Order Header */}
-              <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-5 border-b border-gray-100">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold text-gray-900">
-                        Order #{order.id.slice(-8)}
-                      </h3>
-                      {getStatusBadge(order.status)}
-                    </div>
-                    <p className="text-sm text-gray-500">
-                      <svg
-                        className="w-4 h-4 inline mr-1"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                      {formatDate(order.created_at)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-blue-600">
-                      £{order.total_price.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">Total Amount</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Order Items */}
-              <div className="px-6 py-6">
-                <h4 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
-                  Order Items ({order.order_items?.length || 0})
-                </h4>
-                <div className="space-y-4">
-                  {order.order_items?.map((item) => {
-                    const variantNew = item.variant_new
-                    const productVariants = item.product_variants
-                    const productName =
-                      item.product_new?.name ||
-                      item.products?.title ||
-                      item.products?.name ||
-                      'Product'
-                    const imageUrl =
-                      variantNew?.image_url || productVariants?.image_url || '/placeholder.png'
-                    const color = variantNew?.color || productVariants?.color
-                    const size = variantNew?.size || item.size
-                    const material = variantNew?.material
-
-                    return (
-                      <div
-                        key={item.id}
-                        className="flex flex-col sm:flex-row gap-4 p-5 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-blue-200 transition-all duration-200"
-                      >
-                        {/* Product Image */}
-                        <div className="relative flex-shrink-0 w-full sm:w-24 h-24 bg-gray-100 rounded-lg overflow-hidden">
-                          <Image
-                            src={imageUrl}
-                            alt={productName}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 640px) 100vw, 96px"
-                          />
-                        </div>
-
-                        {/* Product Details */}
-                        <div className="flex-1 min-w-0">
-                          <h5 className="text-lg font-semibold text-gray-900 mb-2 truncate">
-                            {productName}
-                          </h5>
-                          <div className="flex flex-wrap gap-3 mb-3">
-                            {color && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm text-zinc-600 font-medium">Color:</span>
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                  {color}
-                                </span>
-                              </div>
-                            )}
-                            {size && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm text-zinc-400 font-medium">Size:</span>
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-                                  {size}
-                                </span>
-                              </div>
-                            )}
-                            {material && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm text-zinc-400 font-medium">Material:</span>
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-50 text-green-700 border border-green-200">
-                                  {material}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-4 text-sm text-zinc-600">
-                            <span className="font-medium">Quantity: {item.quantity}</span>
-                            <span>×</span>
-                            <span className="font-medium">
-                              £{item.price_at_purchase.toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Price */}
-                        <div className="flex-shrink-0 text-right">
-                          <p className="text-xl font-bold text-gray-900">
-                            £{(item.price_at_purchase * item.quantity).toFixed(2)}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {item.quantity} × £{item.price_at_purchase.toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
+        ) : orders.length === 0 ? (
+          <div className="text-center py-16 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg
+                className="w-10 h-10 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
+              </svg>
             </div>
-          ))}
-        </div>
-      )}
+            <h3 className="text-2xl font-semibold text-zinc-900 mb-2">No orders yet</h3>
+            <p className="text-zinc-600 mb-8 max-w-md mx-auto">
+              Start shopping to see your orders here. Browse our collection of 3D printed products!
+            </p>
+            <button
+              type="button"
+              onClick={() => router.push('/products')}
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
+              </svg>
+              Browse Products
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {orders.map((order) => (
+              <div
+                key={order.id}
+                className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow duration-300"
+              >
+                {/* Order Header */}
+                <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-5 border-b border-gray-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold text-gray-900">
+                          Order #{order.id.slice(-8)}
+                        </h3>
+                        {getStatusBadge(order.status)}
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        <svg
+                          className="w-4 h-4 inline mr-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                        {formatDate(order.created_at)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-blue-600">
+                        £{order.total_price.toFixed(2)}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">Total Amount</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Items */}
+                <div className="px-6 py-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
+                    Order Items ({order.order_items?.length || 0})
+                  </h4>
+                  <div className="space-y-4">
+                    {order.order_items?.map((item) => {
+                      const variantNew = item.variant_new
+                      const productVariants = item.product_variants
+                      const productName =
+                        item.product_new?.name ||
+                        item.products?.title ||
+                        item.products?.name ||
+                        'Product'
+                      const imageUrl =
+                        variantNew?.image_url || productVariants?.image_url || '/placeholder.png'
+                      const color = variantNew?.color || productVariants?.color
+                      const size = variantNew?.size || item.size
+                      const material = variantNew?.material
+
+                      return (
+                        <div
+                          key={item.id}
+                          className="flex flex-col sm:flex-row gap-4 p-5 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-blue-200 transition-all duration-200"
+                        >
+                          {/* Product Image */}
+                          <div className="relative flex-shrink-0 w-full sm:w-24 h-24 bg-gray-100 rounded-lg overflow-hidden">
+                            <Image
+                              src={imageUrl}
+                              alt={productName}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 640px) 100vw, 96px"
+                            />
+                          </div>
+
+                          {/* Product Details */}
+                          <div className="flex-1 min-w-0">
+                            <h5 className="text-lg font-semibold text-gray-900 mb-2 truncate">
+                              {productName}
+                            </h5>
+                            <div className="flex flex-wrap gap-3 mb-3">
+                              {color && (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm text-zinc-600 font-medium">Color:</span>
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                    {color}
+                                  </span>
+                                </div>
+                              )}
+                              {size && (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm text-zinc-400 font-medium">Size:</span>
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                    {size}
+                                  </span>
+                                </div>
+                              )}
+                              {material && (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm text-zinc-400 font-medium">
+                                    Material:
+                                  </span>
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-50 text-green-700 border border-green-200">
+                                    {material}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-zinc-600">
+                              <span className="font-medium">Quantity: {item.quantity}</span>
+                              <span>×</span>
+                              <span className="font-medium">
+                                £{item.price_at_purchase.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Price */}
+                          <div className="flex-shrink-0 text-right">
+                            <p className="text-xl font-bold text-gray-900">
+                              £{(item.price_at_purchase * item.quantity).toFixed(2)}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {item.quantity} × £{item.price_at_purchase.toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

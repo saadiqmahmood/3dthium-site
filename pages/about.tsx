@@ -9,11 +9,11 @@ export default function AboutPage() {
       </Head>
 
       <div className="min-h-screen bg-white relative overflow-hidden">
-      {/* Background glow effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
-      </div>
+        {/* Background glow effects */}
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
+        </div>
         {/* Hero Section */}
         <section className="relative bg-white py-16 pt-24 overflow-hidden">
           {/* Hexagon pattern */}
@@ -23,7 +23,8 @@ export default function AboutPage() {
           <div className="relative max-w-7xl mx-auto px-6 text-center">
             <h1 className="text-5xl md:text-6xl font-light text-zinc-900 mb-6">About 3Dthium</h1>
             <p className="text-lg md:text-xl text-zinc-600 max-w-3xl mx-auto font-light">
-              Transforming digital concepts into tangible, beautiful objects through precision 3D printing.
+              Transforming digital concepts into tangible, beautiful objects through precision 3D
+              printing.
             </p>
           </div>
         </section>
@@ -40,12 +41,13 @@ export default function AboutPage() {
                 <h2 className="text-4xl font-light text-zinc-900 mb-6">Our Story</h2>
                 <p className="text-base text-zinc-600 leading-relaxed mb-6 font-light">
                   3Dthium began with a deep curiosity for turning digital concepts into tangible,
-                  beautiful objects. What started as a small home setup has evolved into a brand driven
-                  by creativity, purpose, and problem-solving through 3D design.
+                  beautiful objects. What started as a small home setup has evolved into a brand
+                  driven by creativity, purpose, and problem-solving through 3D design.
                 </p>
                 <p className="text-base text-zinc-600 leading-relaxed font-light">
-                  From our humble beginnings, we&apos;ve grown into a trusted name in custom 3D printing,
-                  serving customers who value quality, creativity, and personalization in every piece.
+                  From our humble beginnings, we&apos;ve grown into a trusted name in custom 3D
+                  printing, serving customers who value quality, creativity, and personalization in
+                  every piece.
                 </p>
               </div>
               <div className="bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border border-gray-200 rounded-2xl p-12 text-center">
@@ -74,7 +76,7 @@ export default function AboutPage() {
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
           </div>
-          
+
           <div className="relative max-w-7xl mx-auto px-6">
             <h2 className="text-4xl font-light text-center text-zinc-900 mb-12">Our Values</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -102,7 +104,8 @@ export default function AboutPage() {
                 <p className="text-zinc-600 leading-relaxed font-light">
                   Our team thrives on pushing boundaries. Every model we create is designed with
                   precision and imagination, whether it&apos;s for a personalized cake topper or a
-                  functional kitchen gadget. Innovation isn&apos;t just a value, it&apos;s part of our process.
+                  functional kitchen gadget. Innovation isn&apos;t just a value, it&apos;s part of
+                  our process.
                 </p>
               </div>
 
@@ -125,8 +128,8 @@ export default function AboutPage() {
                 <h3 className="text-xl font-medium text-zinc-900 mb-4">Premium Quality</h3>
                 <p className="text-zinc-600 leading-relaxed font-light">
                   We use only the finest materials and state-of-the-art 3D printing technology to
-                  ensure every product meets our exacting standards. Quality isn&apos;t negotiable—it&apos;s
-                  our promise to you.
+                  ensure every product meets our exacting standards. Quality isn&apos;t
+                  negotiable—it&apos;s our promise to you.
                 </p>
               </div>
 
@@ -148,9 +151,9 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-xl font-medium text-zinc-900 mb-4">Personalized for You</h3>
                 <p className="text-zinc-600 leading-relaxed font-light">
-                  We believe every customer deserves something unique. That&apos;s why 3Dthium offers
-                  fully customizable prints—from names to scale and colors—crafted with care and
-                  made to reflect your vision.
+                  We believe every customer deserves something unique. That&apos;s why 3Dthium
+                  offers fully customizable prints—from names to scale and colors—crafted with care
+                  and made to reflect your vision.
                 </p>
               </div>
             </div>
@@ -163,13 +166,14 @@ export default function AboutPage() {
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
           </div>
-          
+
           <div className="relative max-w-7xl mx-auto px-6">
             <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-gray-200 rounded-3xl p-12 md:p-16 text-center">
               <h2 className="text-4xl md:text-5xl font-light text-zinc-900 mb-6">Our Mission</h2>
               <p className="text-lg md:text-xl text-zinc-700 max-w-4xl mx-auto leading-relaxed font-light">
-                To make high-quality, custom 3D printing accessible to everyone. We&apos;re committed to
-                turning your ideas into reality with precision, creativity, and care—one layer at a time.
+                To make high-quality, custom 3D printing accessible to everyone. We&apos;re
+                committed to turning your ideas into reality with precision, creativity, and
+                care—one layer at a time.
               </p>
             </div>
           </div>
@@ -181,11 +185,12 @@ export default function AboutPage() {
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
           </div>
-          
+
           <div className="relative max-w-7xl mx-auto px-6 text-center">
             <h2 className="text-4xl font-light text-zinc-900 mb-6">Ready to Get Started?</h2>
             <p className="text-lg text-zinc-600 mb-8 max-w-2xl mx-auto font-light">
-              Explore our products or request a custom print today. Let&apos;s create something amazing together.
+              Explore our products or request a custom print today. Let&apos;s create something
+              amazing together.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

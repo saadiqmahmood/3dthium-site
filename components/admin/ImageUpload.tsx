@@ -50,7 +50,7 @@ export default function ImageUpload({
       } else if (error.message.includes('permission') || error.message.includes('policy')) {
         throw new Error('Permission denied. You may not have upload access.')
       } else {
-      throw new Error(`Upload failed: ${error.message}`)
+        throw new Error(`Upload failed: ${error.message}`)
       }
     }
 
@@ -62,47 +62,51 @@ export default function ImageUpload({
     return publicUrl
   }
 
-  const handleFileUpload = useCallback(async (files: FileList) => {
-    if (images.length + files.length > maxImages) {
-      alert(`Maximum ${maxImages} images allowed`)
-      return
-    }
-
-    setUploading(true)
-    const newImages: string[] = []
-
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i]
-
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          alert(`${file.name} is not an image file`)
-          continue
-        }
-
-        // Validate file size (5MB limit)
-        if (file.size > 5 * 1024 * 1024) {
-          alert(`${file.name} is too large. Maximum size is 5MB`)
-          continue
-        }
-
-        const imageUrl = await uploadImage(file)
-        newImages.push(imageUrl)
+  const handleFileUpload = useCallback(
+    async (files: FileList) => {
+      if (images.length + files.length > maxImages) {
+        alert(`Maximum ${maxImages} images allowed`)
+        return
       }
 
-      const updatedImages = [...images, ...newImages]
-      setImages(updatedImages)
-      onImagesChange(updatedImages)
-    } catch (error) {
-      console.error('Upload error:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Failed to upload images'
-      alert(`Upload Error: ${errorMessage}\n\nPlease check:\n- You have a valid product slug\n- You are logged in as an admin\n- Storage bucket exists and has correct permissions`)
-    } finally {
-      setUploading(false)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [images, maxImages, onImagesChange])
+      setUploading(true)
+      const newImages: string[] = []
+
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i]
+
+          // Validate file type
+          if (!file.type.startsWith('image/')) {
+            alert(`${file.name} is not an image file`)
+            continue
+          }
+
+          // Validate file size (5MB limit)
+          if (file.size > 5 * 1024 * 1024) {
+            alert(`${file.name} is too large. Maximum size is 5MB`)
+            continue
+          }
+
+          const imageUrl = await uploadImage(file)
+          newImages.push(imageUrl)
+        }
+
+        const updatedImages = [...images, ...newImages]
+        setImages(updatedImages)
+        onImagesChange(updatedImages)
+      } catch (error) {
+        console.error('Upload error:', error)
+        const errorMessage = error instanceof Error ? error.message : 'Failed to upload images'
+        alert(
+          `Upload Error: ${errorMessage}\n\nPlease check:\n- You have a valid product slug\n- You are logged in as an admin\n- Storage bucket exists and has correct permissions`
+        )
+      } finally {
+        setUploading(false)
+      }
+    },
+    [images, maxImages, onImagesChange, uploadImage]
+  )
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()

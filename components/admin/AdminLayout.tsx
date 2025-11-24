@@ -73,9 +73,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={s.key}
                   href={s.href}
-                    className={`block w-full text-left px-4 py-2 rounded ${current === s.key ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-100 text-gray-700'}`}
-                  >
-                    {s.label}
+                  className={`block w-full text-left px-4 py-2 rounded ${current === s.key ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-100 text-gray-700'}`}
+                >
+                  {s.label}
                 </Link>
               ))}
             </nav>

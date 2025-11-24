@@ -53,8 +53,7 @@ export default function AttributeBuilder({
     ])
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateAttribute = (index: number, field: keyof Attribute, value: any) => {
+  const updateAttribute = (index: number, field: keyof Attribute, value: string | number | AttributeOption[] | 'color' | 'size' | 'material' | 'design' | 'custom' | undefined) => {
     const newAttrs = [...attributes]
     newAttrs[index] = { ...newAttrs[index], [field]: value }
     updateAttributes(newAttrs)
@@ -85,11 +84,15 @@ export default function AttributeBuilder({
       .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateOption = (attrIndex: number, optIndex: number, field: keyof AttributeOption, value: any) => {
+  const updateOption = (
+    attrIndex: number,
+    optIndex: number,
+    field: keyof AttributeOption,
+    value: string | number | string[] | undefined
+  ) => {
     const newAttrs = [...attributes]
     const option = newAttrs[attrIndex].options[optIndex]
-    
+
     // Auto-generate value when displayName changes and value is empty
     if (field === 'displayName' && !option.value) {
       const autoValue = generateValueFromDisplayName(value)
@@ -104,7 +107,7 @@ export default function AttributeBuilder({
         [field]: value,
       }
     }
-    
+
     updateAttributes(newAttrs)
   }
 
@@ -122,12 +125,18 @@ export default function AttributeBuilder({
         return
       }
       if (attr.options.length === 0) {
-        setMessage({ text: `Attribute "${attr.name}" must have at least one option`, type: 'error' })
+        setMessage({
+          text: `Attribute "${attr.name}" must have at least one option`,
+          type: 'error',
+        })
         return
       }
       for (const opt of attr.options) {
         if (!opt.displayName.trim()) {
-          setMessage({ text: `All options in "${attr.name}" must have a display name`, type: 'error' })
+          setMessage({
+            text: `All options in "${attr.name}" must have a display name`,
+            type: 'error',
+          })
           return
         }
         // Auto-generate value if missing
@@ -199,29 +208,37 @@ export default function AttributeBuilder({
         </h4>
         <ol className="text-sm text-blue-800 space-y-1.5 list-decimal list-inside">
           <li>
-            <strong>Add an Attribute:</strong> Click &quot;+ Add Attribute&quot; and name it (e.g., &quot;Color&quot;, &quot;Height&quot;, &quot;Material&quot;)
+            <strong>Add an Attribute:</strong> Click &quot;+ Add Attribute&quot; and name it (e.g.,
+            &quot;Color&quot;, &quot;Height&quot;, &quot;Material&quot;)
           </li>
           <li>
-            <strong>Choose Type:</strong> Select Color, Size, Material, Design, or Custom (Color shows a color picker)
+            <strong>Choose Type:</strong> Select Color, Size, Material, Design, or Custom (Color
+            shows a color picker)
           </li>
           <li>
-            <strong>Add Options:</strong> Click &quot;+ Add Option&quot; for each attribute and enter the Display Name (e.g., &quot;Red&quot;, &quot;150mm&quot;, &quot;Small&quot;). The system ID is auto-generated.
+            <strong>Add Options:</strong> Click &quot;+ Add Option&quot; for each attribute and
+            enter the Display Name (e.g., &quot;Red&quot;, &quot;150mm&quot;, &quot;Small&quot;).
+            The system ID is auto-generated.
           </li>
           <li>
-            <strong>Set Price (Optional):</strong> Add a price modifier if this option affects price (e.g., +5 for Large, -2 for Small, or 0 for no change)
+            <strong>Set Price (Optional):</strong> Add a price modifier if this option affects price
+            (e.g., +5 for Large, -2 for Small, or 0 for no change)
           </li>
           <li>
-            <strong>Upload Images (Optional):</strong> Add product images specific to each option. These will be inherited by all variations with that option.
+            <strong>Upload Images (Optional):</strong> Add product images specific to each option.
+            These will be inherited by all variations with that option.
           </li>
           <li>
             <strong>Save Attributes:</strong> Click &quot;Save Attributes&quot; to save your changes
           </li>
           <li>
-            <strong>Generate Variations:</strong> Scroll down to the &quot;Bulk Variation Generator&quot; section to automatically create all possible combinations
+            <strong>Generate Variations:</strong> Scroll down to the &quot;Bulk Variation
+            Generator&quot; section to automatically create all possible combinations
           </li>
         </ol>
         <p className="text-xs text-blue-700 mt-3 font-medium">
-          💡 Example: Color (Red, Blue) × Height (150mm, 200mm) = 4 variations automatically created!
+          💡 Example: Color (Red, Blue) × Height (150mm, 200mm) = 4 variations automatically
+          created!
         </p>
       </div>
 
@@ -292,7 +309,8 @@ export default function AttributeBuilder({
 
             {attr.options.length === 0 && (
               <div className="border border-dashed border-gray-300 rounded p-4 text-center text-sm text-stone-600">
-                No options yet. Click &quot;Add Option&quot; to create options like Red, Blue, Small, Large, etc.
+                No options yet. Click &quot;Add Option&quot; to create options like Red, Blue,
+                Small, Large, etc.
               </div>
             )}
 
@@ -345,7 +363,12 @@ export default function AttributeBuilder({
                     step="0.01"
                     value={option.priceModifier || 0}
                     onChange={(e) =>
-                      updateOption(attrIdx, optIdx, 'priceModifier', parseFloat(e.target.value) || 0)
+                      updateOption(
+                        attrIdx,
+                        optIdx,
+                        'priceModifier',
+                        parseFloat(e.target.value) || 0
+                      )
                     }
                     className="w-full px-2 py-1.5 border rounded text-sm text-stone-900 bg-white"
                     title="Price adjustment: +5 adds $5, -2 subtracts $2, 0 = no change"
@@ -414,8 +437,6 @@ export default function AttributeBuilder({
           </button>
         </div>
       )}
-
     </div>
   )
 }
-

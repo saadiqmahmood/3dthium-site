@@ -105,7 +105,8 @@ export default function AuthPage() {
     } catch (err) {
       // Catch any unexpected errors
       console.error('Unexpected auth error:', err)
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.'
+      const errorMessage =
+        err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.'
       setError(errorMessage)
       setLoading(false)
     }
@@ -133,120 +134,44 @@ export default function AuthPage() {
         <div className="absolute top-1/3 right-1/3 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/3 left-1/3 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
       </div>
-      
+
       <div className="relative">
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="ml-4 mt-6 text-emerald-600 hover:text-emerald-700 text-base flex items-center"
-      >
-        ← Back
-      </button>
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="ml-4 mt-6 text-emerald-600 hover:text-emerald-700 text-base flex items-center"
+        >
+          ← Back
+        </button>
 
-      <div className="max-w-md mx-auto px-6 py-20">
-        <h1 className="text-3xl font-light text-center text-zinc-900 mb-6">
-          {isLogin ? 'Login' : 'Create an Account'}
-        </h1>
-        {resetMode ? (
-          <form onSubmit={handlePasswordReset} className="space-y-6 bg-gray-50 border border-gray-200 p-8 rounded-2xl">
-            <h2 className="text-xl font-semibold text-center text-zinc-900">
-              Reset Your Password
-            </h2>
-
-            <div>
-              <label htmlFor="reset-email" className="block text-base font-medium text-zinc-900">
-                Email
-              </label>
-              <input
-                type="email"
-                id="reset-email"
-                className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            {isLogin && (
-              <p className="text-right text-base">
-                <button
-                  type="button"
-                  className="text-emerald-600 hover:underline"
-                  onClick={() => setResetMode(true)}
-                >
-                  Forgot password?
-                </button>
-              </p>
-            )}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-zinc-900 text-white py-3 rounded-lg hover:bg-zinc-800 transition-colors disabled:opacity-50 font-medium"
+        <div className="max-w-md mx-auto px-6 py-20">
+          <h1 className="text-3xl font-light text-center text-zinc-900 mb-6">
+            {isLogin ? 'Login' : 'Create an Account'}
+          </h1>
+          {resetMode ? (
+            <form
+              onSubmit={handlePasswordReset}
+              className="space-y-6 bg-gray-50 border border-gray-200 p-8 rounded-2xl"
             >
-              {loading ? 'Sending...' : 'Send Reset Link'}
-            </button>
+              <h2 className="text-xl font-semibold text-center text-zinc-900">
+                Reset Your Password
+              </h2>
 
-            <p className="text-center text-sm text-gray-600">
-              <button
-                type="button"
-                onClick={() => setResetMode(false)}
-                className="text-emerald-400 hover:underline"
-              >
-                ← Back to {isLogin ? 'Login' : 'Sign Up'}
-              </button>
-            </p>
-          </form>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6 bg-gray-50 border border-gray-200 p-8 rounded-2xl">
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm">
-                <div className="flex items-center gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 flex-shrink-0"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span>{error}</span>
-                </div>
+              <div>
+                <label htmlFor="reset-email" className="block text-base font-medium text-zinc-900">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="reset-email"
+                  className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </div>
-            )}
-
-            <div>
-              <label htmlFor="email" className="block text-base font-medium text-zinc-900">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-base font-medium text-zinc-900">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            {isLogin && !resetMode && (
-              <>
-                <p className="text-right text-base mt-2">
+              {isLogin && (
+                <p className="text-right text-base">
                   <button
                     type="button"
                     className="text-emerald-600 hover:underline"
@@ -255,54 +180,136 @@ export default function AuthPage() {
                     Forgot password?
                   </button>
                 </p>
-                {/* Only show resend link if error message indicates email not confirmed */}
-                {email && error && /confirm/i.test(error) && (
-                  <p className="text-right text-xs mt-1">
+              )}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-zinc-900 text-white py-3 rounded-lg hover:bg-zinc-800 transition-colors disabled:opacity-50 font-medium"
+              >
+                {loading ? 'Sending...' : 'Send Reset Link'}
+              </button>
+
+              <p className="text-center text-sm text-gray-600">
+                <button
+                  type="button"
+                  onClick={() => setResetMode(false)}
+                  className="text-emerald-400 hover:underline"
+                >
+                  ← Back to {isLogin ? 'Login' : 'Sign Up'}
+                </button>
+              </p>
+            </form>
+          ) : (
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-6 bg-gray-50 border border-gray-200 p-8 rounded-2xl"
+            >
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm">
+                  <div className="flex items-center gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 flex-shrink-0"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span>{error}</span>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label htmlFor="email" className="block text-base font-medium text-zinc-900">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-base font-medium text-zinc-900">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              {isLogin && !resetMode && (
+                <>
+                  <p className="text-right text-base mt-2">
                     <button
                       type="button"
                       className="text-emerald-600 hover:underline"
-                      onClick={handleResendConfirmation}
-                      disabled={loading}
+                      onClick={() => setResetMode(true)}
                     >
-                      Resend confirmation email
+                      Forgot password?
                     </button>
                   </p>
-                )}
-              </>
-            )}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-zinc-900 text-white py-3 rounded-lg hover:bg-zinc-800 transition-colors disabled:opacity-50 font-medium"
-            >
-              {loading ? 'Please wait...' : isLogin ? 'Login' : 'Sign Up'}
-            </button>
-
-            {!isLogin && (
-              <p className="text-center text-xs text-gray-500 mt-2">
-                By signing up, you agree to our{' '}
-                <Link href="/privacy" className="text-emerald-400 hover:underline">
-                  Privacy Policy
-                </Link>
-                .
-              </p>
-            )}
-            <p className="text-center text-sm text-gray-600">
-              {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
+                  {/* Only show resend link if error message indicates email not confirmed */}
+                  {email && error && /confirm/i.test(error) && (
+                    <p className="text-right text-xs mt-1">
+                      <button
+                        type="button"
+                        className="text-emerald-600 hover:underline"
+                        onClick={handleResendConfirmation}
+                        disabled={loading}
+                      >
+                        Resend confirmation email
+                      </button>
+                    </p>
+                  )}
+                </>
+              )}
               <button
-                type="button"
-                className="text-emerald-400 hover:underline"
-                onClick={() => setIsLogin(!isLogin)}
+                type="submit"
+                disabled={loading}
+                className="w-full bg-zinc-900 text-white py-3 rounded-lg hover:bg-zinc-800 transition-colors disabled:opacity-50 font-medium"
               >
-                {isLogin ? 'Sign Up' : 'Login'}
+                {loading ? 'Please wait...' : isLogin ? 'Login' : 'Sign Up'}
               </button>
-            </p>
-          </form>
-        )}
-        {toast && (
-          <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
-        )}
-      </div>
+
+              {!isLogin && (
+                <p className="text-center text-xs text-gray-500 mt-2">
+                  By signing up, you agree to our{' '}
+                  <Link href="/privacy" className="text-emerald-400 hover:underline">
+                    Privacy Policy
+                  </Link>
+                  .
+                </p>
+              )}
+              <p className="text-center text-sm text-gray-600">
+                {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
+                <button
+                  type="button"
+                  className="text-emerald-400 hover:underline"
+                  onClick={() => setIsLogin(!isLogin)}
+                >
+                  {isLogin ? 'Sign Up' : 'Login'}
+                </button>
+              </p>
+            </form>
+          )}
+          {toast && (
+            <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+          )}
+        </div>
       </div>
     </div>
   )

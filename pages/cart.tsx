@@ -40,68 +40,68 @@ export default function CartPage() {
               key={item.product_id + '-' + (item.variant_id || 'base')}
               className="flex items-center justify-between p-6 bg-gray-50 border border-gray-200 rounded-2xl"
             >
-            <div className="flex items-center gap-4">
-              <Image
-                width={100}
-                height={100}
-                src={item.image_url}
-                alt={item.name}
-                className="w-20 h-20 object-cover rounded"
-              />
-              <div>
-                <h3 className="font-medium text-zinc-900 text-lg">{item.name}</h3>
-                <p className="text-base text-zinc-600 font-light">
-                  {[item.size, item.color, item.material].filter(Boolean).join(' • ') ||
-                    'Base product'}
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <button
-                    aria-label="Decrease quantity"
-                    className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300 text-zinc-900 border border-gray-300 disabled:opacity-50"
-                    onClick={() =>
-                      updateCartItemQuantity(
-                        item.product_id,
-                        item.variant_id || undefined,
-                        item.quantity - 1
-                      )
-                    }
-                    disabled={item.quantity <= 1}
-                  >
-                    -
-                  </button>
-                  <span className="text-base text-zinc-900 w-8 text-center inline-block font-medium">
-                    {item.quantity}
-                  </span>
-                  <button
-                    aria-label="Increase quantity"
-                    className="px-3 py-1 bg-zinc-800 rounded-lg hover:bg-zinc-700 text-white border border-zinc-700"
-                    onClick={() =>
-                      updateCartItemQuantity(
-                        item.product_id,
-                        item.variant_id || undefined,
-                        item.quantity + 1
-                      )
-                    }
-                  >
-                    +
-                  </button>
+              <div className="flex items-center gap-4">
+                <Image
+                  width={100}
+                  height={100}
+                  src={item.image_url}
+                  alt={item.name}
+                  className="w-20 h-20 object-cover rounded"
+                />
+                <div>
+                  <h3 className="font-medium text-zinc-900 text-lg">{item.name}</h3>
+                  <p className="text-base text-zinc-600 font-light">
+                    {[item.size, item.color, item.material].filter(Boolean).join(' • ') ||
+                      'Base product'}
+                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <button
+                      aria-label="Decrease quantity"
+                      className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300 text-zinc-900 border border-gray-300 disabled:opacity-50"
+                      onClick={() =>
+                        updateCartItemQuantity(
+                          item.product_id,
+                          item.variant_id || undefined,
+                          item.quantity - 1
+                        )
+                      }
+                      disabled={item.quantity <= 1}
+                    >
+                      -
+                    </button>
+                    <span className="text-base text-zinc-900 w-8 text-center inline-block font-medium">
+                      {item.quantity}
+                    </span>
+                    <button
+                      aria-label="Increase quantity"
+                      className="px-3 py-1 bg-zinc-800 rounded-lg hover:bg-zinc-700 text-white border border-zinc-700"
+                      onClick={() =>
+                        updateCartItemQuantity(
+                          item.product_id,
+                          item.variant_id || undefined,
+                          item.quantity + 1
+                        )
+                      }
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
               </div>
+              <div className="text-right">
+                <p className="text-zinc-900 font-semibold text-lg">
+                  £{(item.price * item.quantity).toFixed(2)}
+                </p>
+                <button
+                  onClick={() => removeFromCart(item.product_id, item.variant_id || undefined)}
+                  className="text-red-600 text-base hover:text-red-700 transition-colors mt-2 font-light"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-zinc-900 font-semibold text-lg">
-                £{(item.price * item.quantity).toFixed(2)}
-              </p>
-              <button
-                onClick={() => removeFromCart(item.product_id, item.variant_id || undefined)}
-                className="text-red-600 text-base hover:text-red-700 transition-colors mt-2 font-light"
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
         <div className="mt-8 p-6 bg-gray-50 border border-gray-200 rounded-2xl">
           <div className="flex justify-between items-center mb-6">
