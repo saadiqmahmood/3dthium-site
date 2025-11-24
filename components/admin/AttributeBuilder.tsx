@@ -53,7 +53,20 @@ export default function AttributeBuilder({
     ])
   }
 
-  const updateAttribute = (index: number, field: keyof Attribute, value: string | number | AttributeOption[] | 'color' | 'size' | 'material' | 'design' | 'custom' | undefined) => {
+  const updateAttribute = (
+    index: number,
+    field: keyof Attribute,
+    value:
+      | string
+      | number
+      | AttributeOption[]
+      | 'color'
+      | 'size'
+      | 'material'
+      | 'design'
+      | 'custom'
+      | undefined
+  ) => {
     const newAttrs = [...attributes]
     newAttrs[index] = { ...newAttrs[index], [field]: value }
     updateAttributes(newAttrs)
@@ -94,7 +107,7 @@ export default function AttributeBuilder({
     const option = newAttrs[attrIndex].options[optIndex]
 
     // Auto-generate value when displayName changes and value is empty
-    if (field === 'displayName' && !option.value) {
+    if (field === 'displayName' && !option.value && typeof value === 'string') {
       const autoValue = generateValueFromDisplayName(value)
       newAttrs[attrIndex].options[optIndex] = {
         ...option,

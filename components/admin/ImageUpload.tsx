@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
 import { useCallback, useState } from 'react'
+import { useSupabase } from '@/context/SupabaseContext'
 
 interface ImageUploadProps {
   categorySlug: string
@@ -20,47 +20,52 @@ export default function ImageUpload({
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  const supabaseContext = useSupabase()
+  const supabase = supabaseContext?.client
 
-  const uploadImage = async (file: File): Promise<string> => {
-    // Validate inputs
-    if (!categorySlug || !productSlug) {
-      throw new Error('Category and product slug are required for upload')
-    }
-
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${Date.now()}.${fileExt}`
-    const filePath = `${categorySlug}/${productSlug}/${fileName}`
-
-    const { error } = await supabase.storage.from('products').upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: false,
-    })
-
-    if (error) {
-      console.error('Supabase upload error:', error)
-      // Provide more helpful error messages
-      if (error.message.includes('duplicate') || error.message.includes('already exists')) {
-        throw new Error('A file with this name already exists. Please rename your file.')
-      } else if (error.message.includes('not found') || error.message.includes('bucket')) {
-        throw new Error('Storage bucket not found. Please contact support.')
-      } else if (error.message.includes('permission') || error.message.includes('policy')) {
-        throw new Error('Permission denied. You may not have upload access.')
-      } else {
-        throw new Error(`Upload failed: ${error.message}`)
+  const uploadImage = useCallback(
+    async (file: File): Promise<string> => {
+      // Validate inputs
+      if (!categorySlug || !productSlug) {
+        throw new Error('Category and product slug are required for upload')
       }
-    }
 
-    // Get public URL
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from('products').getPublicUrl(filePath)
+      if (!supabase) {
+        throw new Error('Supabase client not available. Please refresh the page.')
+      }
 
-    return publicUrl
-  }
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Date.now()}.${fileExt}`
+      const filePath = `${categorySlug}/${productSlug}/${fileName}`
+
+      const { error } = await supabase.storage.from('products').upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+
+      if (error) {
+        console.error('Supabase upload error:', error)
+        // Provide more helpful error messages
+        if (error.message.includes('duplicate') || error.message.includes('already exists')) {
+          throw new Error('A file with this name already exists. Please rename your file.')
+        } else if (error.message.includes('not found') || error.message.includes('bucket')) {
+          throw new Error('Storage bucket not found. Please contact support.')
+        } else if (error.message.includes('permission') || error.message.includes('policy')) {
+          throw new Error('Permission denied. You may not have upload access.')
+        } else {
+          throw new Error(`Upload failed: ${error.message}`)
+        }
+      }
+
+      // Get public URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('products').getPublicUrl(filePath)
+
+      return publicUrl
+    },
+    [categorySlug, productSlug, supabase]
+  )
 
   const handleFileUpload = useCallback(
     async (files: FileList) => {
@@ -130,6 +135,14 @@ export default function ImageUpload({
     },
     [handleFileUpload]
   )
+
+  if (!supabaseContext) {
+    return (
+      <div className="p-4 border border-red-300 bg-red-50 rounded-lg text-red-800">
+        <p>Error: Supabase client not available. Please refresh the page.</p>
+      </div>
+    )
+  }
 
   const removeImage = (index: number) => {
     const updatedImages = images.filter((_, i) => i !== index)
