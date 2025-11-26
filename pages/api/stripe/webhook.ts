@@ -21,42 +21,16 @@ const supabase = createClient(
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
-interface Product {
-  id: string
-  title: string
-}
-
-interface Variant {
-  id: string
-  color: string
-  price: number
-  image_url: string
-  customizable?: boolean
-}
-
 interface CartItem {
-  product: Product
-  variant: Variant
+  product_id: string
+  variant_id?: string | null
   quantity: number
-  size: string
-}
-
-// Helper function for dynamic price calculation
-function getDynamicPrice(variant: { color: string }, size: string): number {
-  let basePrice = 16.99
-  if (variant.color && variant.color.includes('And')) {
-    basePrice = 17.99
-  }
-  if (size === '210mm') {
-    return basePrice - 4
-  } else if (size === '180mm') {
-    return basePrice - 7
-  } else if (size === '150mm') {
-    return basePrice - 10
-  } else if (size === '240mm') {
-    return basePrice
-  }
-  return basePrice
+  size?: string | null
+  color?: string | null
+  material?: string | null
+  price: number
+  name: string
+  image_url: string
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -179,11 +153,13 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     // Create order items - match the actual database schema
     const orderItems = (cartItems as CartItem[]).map((item) => ({
       order_id: order.id,
-      product_id: item.product.id,
-      variant_id: item.variant.id,
+      product_id: item.product_id,
+      variant_id: item.variant_id || null,
       quantity: item.quantity,
-      size: item.size,
-      price_at_purchase: getDynamicPrice(item.variant, item.size), // Use dynamic price
+      size: item.size || null,
+      color: item.color || null,
+      material: item.material || null,
+      price_at_purchase: item.price, // Use the price stored in cart
     }))
 
     const { error: itemsError } = await supabase.from('order_items').insert(orderItems)

@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useCart } from '@/context/CartContext'
 import type { ProductVariantNew } from '@/types'
@@ -44,13 +44,19 @@ type ProductNew = {
   }
 }
 
+type VariantOption = {
+  value: string
+  displayName: string
+  hexColor?: string | null
+}
+
 type ProductDetailPageProps = {
   product: ProductNew | null
   variants: ProductVariantNew[]
   variantOptions: {
-    sizes: string[]
-    colors: string[]
-    materials: string[]
+    sizes: VariantOption[]
+    colors: VariantOption[]
+    materials: VariantOption[]
   }
   priceRange: {
     min: number
@@ -72,23 +78,47 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<string | null>(null)
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null)
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariantNew | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
+  const [mainImage, setMainImage] = useState<string | null>(null)
 
-  // Update selected variant when selections change
-  useEffect(() => {
-    if (!variants.length) return
+  // Calculate selected variant synchronously during render to prevent flicker
+  // This ensures the variant is always in sync with selections without state updates
+  const selectedVariant = useMemo(() => {
+    if (!variants.length) return null
 
-    // Find matching variant
-    const matchingVariant = variants.find(
-      (variant) =>
-        variant.size === selectedSize &&
-        variant.color === selectedColor &&
-        variant.material === selectedMaterial
-    )
+    // Filter variants that match the selected attributes (partial matching)
+    const matchingVariants = variants.filter((variant) => {
+      const sizeMatch = !selectedSize || variant.size === selectedSize
+      const colorMatch = !selectedColor || variant.color === selectedColor
+      const materialMatch = !selectedMaterial || variant.material === selectedMaterial
+      return sizeMatch && colorMatch && materialMatch
+    })
 
-    setSelectedVariant(matchingVariant || null)
+    // If we have selections, find the best matching variant
+    // Priority: exact match > matches all selected > first match
+    if (selectedSize || selectedColor || selectedMaterial) {
+      // First, try to find exact match (all selected attributes match)
+      const exactMatch = matchingVariants.find(
+        (variant) =>
+          variant.size === selectedSize &&
+          variant.color === selectedColor &&
+          variant.material === selectedMaterial
+      )
+
+      if (exactMatch) {
+        return exactMatch
+      }
+
+      // If no exact match, use the first matching variant for price preview
+      // This gives users a dynamic price as they select options
+      if (matchingVariants.length > 0) {
+        return matchingVariants[0]
+      }
+    }
+
+    // No selections or no matches
+    return null
   }, [selectedSize, selectedColor, selectedMaterial, variants])
 
   if (!product) {
@@ -99,17 +129,112 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
     )
   }
 
-  // Calculate display price
+  // Calculate display price - dynamic based on selections
   const displayPrice = selectedVariant
     ? product.base_price + selectedVariant.price_adjustment
     : product.base_price
 
-  // Get display image
-  const displayImage = selectedVariant?.image_url || product.thumbnail_url || ''
+  // Check if we have an exact variant match (all selected attributes match the variant exactly)
+  const hasCompleteVariantMatch =
+    selectedVariant &&
+    selectedVariant.size === selectedSize &&
+    selectedVariant.color === selectedColor &&
+    selectedVariant.material === selectedMaterial
+
+  // Helper function to get display name for a value
+  const getDisplayName = (value: string | null | undefined): string => {
+    if (!value) return ''
+    // Try to find in variantOptions
+    const allOptions = [
+      ...variantOptions.sizes,
+      ...variantOptions.colors,
+      ...variantOptions.materials,
+    ]
+    const option = allOptions.find((opt) => opt.value === value)
+    return option?.displayName || value
+  }
+
+  // Helper function to format size display name with unit
+  const formatSizeDisplay = (displayName: string): string => {
+    // If it already contains a unit (mm, cm, in, ft, etc.), return as is
+    if (/mm|cm|in|ft|m\b/i.test(displayName)) {
+      return displayName
+    }
+    // Otherwise, add "mm" as default unit
+    return `${displayName}mm`
+  }
+
+  // Handler for size selection - auto-select first available color
+  const handleSizeSelect = (sizeValue: string) => {
+    setSelectedSize(sizeValue)
+
+    // If size is selected and color is not selected, auto-select first available color
+    if (variantOptions.colors.length > 0 && !selectedColor) {
+      // Find variants with this size
+      const sizeVariants = variants.filter((v) => v.size === sizeValue)
+      if (sizeVariants.length > 0) {
+        // Get the first color from variants with this size (prefer black if available)
+        const blackVariant = sizeVariants.find((v) => {
+          const colorDisplay = getDisplayName(v.color)
+          return (
+            colorDisplay.toLowerCase().includes('black') ||
+            v.color?.toLowerCase().includes('black') ||
+            v.color?.toLowerCase().includes('b-') ||
+            v.color === 'option-b'
+          )
+        })
+        const firstColorValue = blackVariant?.color || sizeVariants[0].color
+        if (firstColorValue) {
+          setSelectedColor(firstColorValue)
+        }
+      } else {
+        // If no variants with this size, just select first color option
+        setSelectedColor(variantOptions.colors[0].value)
+      }
+    }
+  }
+
+  // Only update image when color is selected, not when size changes
+  const getDisplayImage = () => {
+    // Only use variant image if color is selected
+    if (selectedColor && selectedVariant?.image_url) {
+      return selectedVariant.image_url
+    }
+    return product.thumbnail_url || ''
+  }
+
+  // Get display image (only changes when color is selected)
+  // Use manually selected main image if set, otherwise use calculated image
+  const displayImage = mainImage || getDisplayImage()
 
   const handleAddToCart = () => {
-    if (!selectedVariant && variants.length > 0) {
-      setToast({ message: 'Please select a variant', type: 'error' })
+    // Require all attributes that have variants to be selected
+    const hasSizeOptions = variantOptions.sizes.length > 0
+    const hasColorOptions = variantOptions.colors.length > 0
+    const hasMaterialOptions = variantOptions.materials.length > 0
+
+    const requiresSize = hasSizeOptions && !selectedSize
+    const requiresColor = hasColorOptions && !selectedColor
+    const requiresMaterial = hasMaterialOptions && !selectedMaterial
+
+    if (variants.length > 0 && (requiresSize || requiresColor || requiresMaterial)) {
+      const missing = []
+      if (requiresSize) missing.push('size')
+      if (requiresColor) missing.push('color')
+      if (requiresMaterial) missing.push('material')
+      setToast({
+        message: `Please select ${missing.join(' and ')}`,
+        type: 'error',
+      })
+      return
+    }
+
+    // If we have variants but no exact match, user needs to complete selection
+    if (variants.length > 0 && !hasCompleteVariantMatch) {
+      setToast({
+        message: 'Please complete all variant selections',
+        type: 'error',
+      })
       return
     }
 
@@ -127,6 +252,21 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
 
     addToCart(cartItem)
     setToast({ message: 'Added to cart!', type: 'success' })
+
+    // Reset quantity after adding to cart
+    setQuantity(1)
+  }
+
+  // Check if a color option is available for the selected size
+  const isColorAvailable = (colorValue: string): boolean => {
+    if (!selectedSize) return true // All colors available if no size selected
+    return variants.some((v) => v.size === selectedSize && v.color === colorValue)
+  }
+
+  // Check if a size option is available for the selected color
+  const isSizeAvailable = (sizeValue: string): boolean => {
+    if (!selectedColor) return true // All sizes available if no color selected
+    return variants.some((v) => v.color === selectedColor && v.size === sizeValue)
   }
 
   return (
@@ -146,28 +286,56 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
           <div>
             <div className="sticky top-24">
               <div className="relative bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 p-4">
-                <Image
-                  src={displayImage}
-                  alt={product.name}
-                  className="w-full h-auto rounded-lg"
-                  width={1000}
-                  height={1000}
-                />
+                <div className="relative aspect-square w-full bg-gray-50 rounded-lg overflow-hidden">
+                  <Image
+                    src={displayImage}
+                    alt={product.name}
+                    className="w-full h-full object-contain transition-opacity duration-300"
+                    width={1000}
+                    height={1000}
+                  />
+                </div>
                 {/* Gallery images */}
                 {product.gallery_images && product.gallery_images.length > 0 && (
                   <div className="mt-4 grid grid-cols-4 gap-2">
-                    {product.gallery_images.slice(0, 4).map((image, index) => (
+                    {/* Main image as first thumbnail */}
+                    <button
+                      type="button"
+                      onClick={() => setMainImage(null)}
+                      className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                        mainImage === null
+                          ? 'border-emerald-500 ring-2 ring-emerald-200'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
                       <Image
-                        key={index}
-                        src={image}
-                        alt={`${product.name} gallery ${index + 1}`}
-                        className="w-full h-20 object-cover rounded-lg cursor-pointer hover:opacity-75 border border-gray-200"
+                        src={displayImage}
+                        alt={`${product.name} main`}
+                        className="w-full h-full object-cover"
                         width={100}
                         height={100}
-                        onClick={() => {
-                          /* TODO: Implement gallery modal */
-                        }}
                       />
+                    </button>
+                    {/* Gallery images */}
+                    {product.gallery_images.slice(0, 3).map((image, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => setMainImage(image)}
+                        className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                          mainImage === image
+                            ? 'border-emerald-500 ring-2 ring-emerald-200'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <Image
+                          src={image}
+                          alt={`${product.name} gallery ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          width={100}
+                          height={100}
+                        />
+                      </button>
                     ))}
                   </div>
                 )}
@@ -183,9 +351,11 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
             </div>
 
             {/* Description */}
-            <div className="text-zinc-700 text-lg leading-relaxed font-light">
-              {product.description}
-            </div>
+            {product.description && (
+              <div className="text-zinc-700 text-lg leading-relaxed font-light">
+                {product.description}
+              </div>
+            )}
 
             {/* Variant Selectors */}
             {variants.length > 0 && (
@@ -195,19 +365,25 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                   <div>
                     <label className="block font-semibold mb-2 text-zinc-900 text-lg">Size</label>
                     <div className="flex flex-wrap gap-2">
-                      {variantOptions.sizes.map((size) => (
-                        <button
-                          key={size}
-                          onClick={() => setSelectedSize(size)}
-                          className={`px-4 py-2 rounded-lg border text-base font-light transition ${
-                            selectedSize === size
-                              ? 'bg-emerald-500 text-white border-emerald-500'
-                              : 'bg-gray-100 text-zinc-700 border-gray-300 hover:border-gray-400 hover:text-zinc-900'
-                          }`}
-                        >
-                          {size}
-                        </button>
-                      ))}
+                      {variantOptions.sizes.map((sizeOption) => {
+                        const isDisabled = !isSizeAvailable(sizeOption.value)
+                        return (
+                          <button
+                            key={sizeOption.value}
+                            onClick={() => !isDisabled && handleSizeSelect(sizeOption.value)}
+                            disabled={isDisabled}
+                            className={`px-4 py-2 rounded-lg border text-base font-light transition ${
+                              selectedSize === sizeOption.value
+                                ? 'bg-emerald-500 text-white border-emerald-500'
+                                : isDisabled
+                                  ? 'bg-gray-50 text-zinc-400 border-gray-200 cursor-not-allowed opacity-50'
+                                  : 'bg-gray-100 text-zinc-700 border-gray-300 hover:border-gray-400 hover:text-zinc-900'
+                            }`}
+                          >
+                            {formatSizeDisplay(sizeOption.displayName)}
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -217,19 +393,42 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                   <div>
                     <label className="block font-semibold mb-2 text-zinc-900 text-lg">Color</label>
                     <div className="flex flex-wrap gap-2">
-                      {variantOptions.colors.map((color) => (
-                        <button
-                          key={color}
-                          onClick={() => setSelectedColor(color)}
-                          className={`px-4 py-2 rounded-lg border text-base font-light transition ${
-                            selectedColor === color
-                              ? 'bg-emerald-500 text-white border-emerald-500'
-                              : 'bg-gray-100 text-zinc-700 border-gray-300 hover:border-gray-400 hover:text-zinc-900'
-                          }`}
-                        >
-                          {color}
-                        </button>
-                      ))}
+                      {variantOptions.colors.map((colorOption) => {
+                        const isDisabled = !isColorAvailable(colorOption.value)
+                        const hasColorSwatch =
+                          colorOption.hexColor && colorOption.hexColor.trim() !== ''
+                        return (
+                          <button
+                            key={colorOption.value}
+                            onClick={() => !isDisabled && setSelectedColor(colorOption.value)}
+                            disabled={isDisabled}
+                            className={`relative px-4 py-2 rounded-lg border text-base font-light transition flex items-center gap-2 ${
+                              selectedColor === colorOption.value
+                                ? 'bg-emerald-500 text-white border-emerald-500 ring-2 ring-emerald-200'
+                                : isDisabled
+                                  ? 'bg-gray-50 text-zinc-400 border-gray-200 cursor-not-allowed opacity-50'
+                                  : 'bg-gray-100 text-zinc-700 border-gray-300 hover:border-gray-400 hover:text-zinc-900'
+                            }`}
+                            title={
+                              isDisabled
+                                ? 'Not available for selected size'
+                                : colorOption.displayName
+                            }
+                          >
+                            {hasColorSwatch && (
+                              <span
+                                className={`w-5 h-5 rounded-full border-2 ${
+                                  selectedColor === colorOption.value
+                                    ? 'border-white'
+                                    : 'border-gray-300'
+                                }`}
+                                style={{ backgroundColor: colorOption.hexColor || '#ccc' }}
+                              />
+                            )}
+                            <span>{colorOption.displayName}</span>
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -241,17 +440,17 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                       Material
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {variantOptions.materials.map((material) => (
+                      {variantOptions.materials.map((materialOption) => (
                         <button
-                          key={material}
-                          onClick={() => setSelectedMaterial(material)}
+                          key={materialOption.value}
+                          onClick={() => setSelectedMaterial(materialOption.value)}
                           className={`px-4 py-2 rounded-lg border text-base font-light transition ${
-                            selectedMaterial === material
+                            selectedMaterial === materialOption.value
                               ? 'bg-emerald-500 text-white border-emerald-500'
                               : 'bg-gray-100 text-zinc-700 border-gray-300 hover:border-gray-400 hover:text-zinc-900'
                           }`}
                         >
-                          {material}
+                          {materialOption.displayName}
                         </button>
                       ))}
                     </div>
@@ -265,7 +464,10 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               <div className="text-base text-zinc-600 font-light mb-2">Price</div>
               <div className="text-4xl font-semibold text-zinc-900">
                 £{displayPrice.toFixed(2)}
-                {priceRange.has_variants && !selectedVariant && (
+                {variants.length > 0 && !hasCompleteVariantMatch && (
+                  <span className="text-xl text-zinc-600 ml-2 font-light">(preview)</span>
+                )}
+                {variants.length === 0 && priceRange.has_variants && (
                   <span className="text-xl text-zinc-600 ml-2 font-light">
                     (from £{priceRange.min.toFixed(2)})
                   </span>
@@ -290,8 +492,9 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                   </span>
                   <button
                     type="button"
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 rounded-lg border border-gray-300 bg-white flex items-center justify-center hover:bg-gray-100 text-zinc-900 transition"
+                    onClick={() => setQuantity(Math.min(99, quantity + 1))}
+                    disabled={quantity >= 99}
+                    className="w-10 h-10 rounded-lg border border-gray-300 bg-white flex items-center justify-center hover:bg-gray-100 text-zinc-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     +
                   </button>
@@ -303,9 +506,9 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                 type="button"
                 onClick={handleAddToCart}
                 className="w-full bg-zinc-900 text-white py-4 px-6 rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={variants.length > 0 && !selectedVariant}
+                disabled={variants.length > 0 && !hasCompleteVariantMatch}
               >
-                {variants.length > 0 && !selectedVariant ? 'Select Options' : 'Add to Cart'}
+                {variants.length > 0 && !hasCompleteVariantMatch ? 'Select Options' : 'Add to Cart'}
               </button>
             </div>
 
@@ -315,19 +518,6 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                 <p className="text-blue-800 text-sm">
                   <span className="font-semibold">Customizable:</span> This product can be
                   personalized with your own text or design.
-                </p>
-              </div>
-            )}
-
-            {/* Selected Variant Info */}
-            {selectedVariant && (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                <p className="text-zinc-900 text-base">
-                  <span className="font-semibold">Selected:</span>
-                  {selectedVariant.size && ` ${selectedVariant.size}`}
-                  {selectedVariant.color && ` ${selectedVariant.color}`}
-                  {selectedVariant.material && ` ${selectedVariant.material}`}
-                  {selectedVariant.sku && ` (SKU: ${selectedVariant.sku})`}
                 </p>
               </div>
             )}
@@ -439,6 +629,39 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
       `[getStaticProps] Variants query completed, found: ${variants?.length || 0} variants`
     )
 
+    // Fetch product attributes and options to get display names
+    const { data: attributes, error: attrError } = await supabaseServer
+      .from('product_attributes')
+      .select('*')
+      .eq('product_id', product.id)
+      .order('display_order', { ascending: true })
+
+    const valueToDisplayNameMap: Record<string, string> = {}
+    let attributeOptions: Array<{
+      value: string
+      display_name: string
+      hex_color?: string | null
+      attribute_id: string
+    }> = []
+
+    if (!attrError && attributes && attributes.length > 0) {
+      const attributeIds = attributes.map((attr) => attr.id)
+      const { data: options, error: optError } = await supabaseServer
+        .from('product_attribute_options')
+        .select('*')
+        .in('attribute_id', attributeIds)
+
+      if (!optError && options) {
+        attributeOptions = options
+        // Create mapping from value to display_name and hex_color
+        options.forEach(
+          (opt: { value: string; display_name: string; hex_color?: string | null }) => {
+            valueToDisplayNameMap[opt.value] = opt.display_name
+          }
+        )
+      }
+    }
+
     // Calculate price range
     let minPrice = product.base_price
     let maxPrice = product.base_price
@@ -452,16 +675,45 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
       maxPrice = Math.max(...variantPrices)
     }
 
-    // Extract unique options for display
-    const uniqueSizes = Array.from(
+    // Extract unique options for display (using display names, but store values for matching)
+    const uniqueSizeValues = Array.from(
       new Set(variants?.map((v: { size?: string }) => v.size).filter(Boolean) || [])
     ) as string[]
-    const uniqueColors = Array.from(
+    const uniqueColorValues = Array.from(
       new Set(variants?.map((v: { color?: string }) => v.color).filter(Boolean) || [])
     ) as string[]
-    const uniqueMaterials = Array.from(
+    const uniqueMaterialValues = Array.from(
       new Set(variants?.map((v: { material?: string }) => v.material).filter(Boolean) || [])
     ) as string[]
+
+    // Map values to display names and hex colors
+    const sizeOptions = uniqueSizeValues.map((value) => ({
+      value,
+      displayName: valueToDisplayNameMap[value] || value,
+    }))
+
+    // For colors, also include hex_color if available
+    const colorOptionsMap: Record<string, string | null> = {}
+    if (attributeOptions.length > 0 && attributes) {
+      attributeOptions.forEach((opt) => {
+        // Check if this option belongs to a color attribute
+        const attr = attributes.find((a: { id: string; type: string }) => a.id === opt.attribute_id)
+        if (attr?.type === 'color' && uniqueColorValues.includes(opt.value)) {
+          colorOptionsMap[opt.value] = opt.hex_color || null
+        }
+      })
+    }
+
+    const colorOptions = uniqueColorValues.map((value) => ({
+      value,
+      displayName: valueToDisplayNameMap[value] || value,
+      hexColor: colorOptionsMap[value] || null,
+    }))
+
+    const materialOptions = uniqueMaterialValues.map((value) => ({
+      value,
+      displayName: valueToDisplayNameMap[value] || value,
+    }))
 
     console.log(`[getStaticProps] Returning data for: ${product.name}`)
     console.log(`[getStaticProps] Product categories:`, product.categories)
@@ -477,9 +729,9 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
         product: { ...product, category: categoryData }, // Flatten category
         variants: variants || [],
         variantOptions: {
-          sizes: uniqueSizes,
-          colors: uniqueColors,
-          materials: uniqueMaterials,
+          sizes: sizeOptions,
+          colors: colorOptions,
+          materials: materialOptions,
         },
         priceRange: {
           min: minPrice,

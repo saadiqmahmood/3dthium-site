@@ -17,6 +17,7 @@ export default function VariantManager({
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
+  const [valueToDisplayNameMap, setValueToDisplayNameMap] = useState<Record<string, string>>({})
 
   // Form state for new variant
   const [formData, setFormData] = useState({
@@ -35,9 +36,33 @@ export default function VariantManager({
   useEffect(() => {
     if (productId) {
       fetchVariants()
+      fetchAttributeOptions()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId, refreshTrigger]) // Add refreshTrigger to dependencies
+
+  const fetchAttributeOptions = async () => {
+    try {
+      const response = await fetch(`/api/admin/products/${productId}/attributes`)
+      if (response.ok) {
+        const data = await response.json()
+        const attributes = data.attributes || []
+
+        // Create mapping from value to display_name
+        const mapping: Record<string, string> = {}
+        attributes.forEach((attr: { options?: Array<{ value: string; display_name: string }> }) => {
+          if (attr.options) {
+            attr.options.forEach((opt: { value: string; display_name: string }) => {
+              mapping[opt.value] = opt.display_name
+            })
+          }
+        })
+        setValueToDisplayNameMap(mapping)
+      }
+    } catch (error) {
+      console.error('Error fetching attribute options:', error)
+    }
+  }
 
   const fetchVariants = async () => {
     setLoading(true)
@@ -193,6 +218,12 @@ export default function VariantManager({
 
   const calculateFinalPrice = (priceAdjustment: number) => {
     return basePrice + priceAdjustment
+  }
+
+  // Helper function to get display name for a value
+  const getDisplayName = (value: string | null | undefined): string => {
+    if (!value) return '-'
+    return valueToDisplayNameMap[value] || value
   }
 
   if (loading) {
@@ -456,10 +487,14 @@ export default function VariantManager({
                     ) : (
                       // View mode
                       <>
-                        <td className="px-4 py-3 text-sm text-stone-800">{variant.size || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-stone-800">{variant.color || '-'}</td>
                         <td className="px-4 py-3 text-sm text-stone-800">
-                          {variant.material || '-'}
+                          {getDisplayName(variant.size)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-stone-800">
+                          {getDisplayName(variant.color)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-stone-800">
+                          {getDisplayName(variant.material)}
                         </td>
                         <td className="px-4 py-3 text-sm text-stone-800">
                           {variant.price_adjustment >= 0 ? '+' : ''}£

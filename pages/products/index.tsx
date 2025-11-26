@@ -5,7 +5,7 @@ export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative bg-white py-16 pt-24 overflow-hidden">
+      <section className="relative bg-white pt-40 pb-8 overflow-hidden">
         {/* Hexagon pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
@@ -26,7 +26,7 @@ export default function ProductsPage() {
       </section>
 
       {/* Products Section */}
-      <section className="relative py-16 bg-white overflow-hidden">
+      <section className="relative pt-8 pb-16 bg-white overflow-hidden">
         {/* Hexagon pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
