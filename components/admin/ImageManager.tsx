@@ -197,23 +197,23 @@ export default function ImageManager({
   return (
     <div className="space-y-6">
       {/* Gallery Section */}
-      <div className="bg-gray-50 rounded-lg p-6">
+      <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-gray-900">
+          <h3 className="text-lg font-light text-zinc-900">
             Product Images ({galleryImages.length}/{maxGalleryImages})
           </h3>
           {galleryImages.length > 0 && (
-            <p className="text-sm text-gray-600">First image will be the thumbnail</p>
+            <p className="text-sm text-zinc-600 font-light">First image will be the thumbnail</p>
           )}
         </div>
 
         {/* Upload Button */}
         <div className="mb-4">
           <label
-            className={`cursor-pointer px-4 py-2 rounded transition ${
+            className={`cursor-pointer inline-block px-4 py-2 rounded-lg transition-colors font-light ${
               uploading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                ? 'bg-gray-400 cursor-not-allowed text-white'
+                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
             }`}
           >
             <input
@@ -227,7 +227,7 @@ export default function ImageManager({
             />
             {uploading ? uploadProgress : 'Upload Images'}
           </label>
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-zinc-500 mt-2 font-light">
             • Images will be automatically cropped to square
             <br />• Maximum {maxGalleryImages} images
             <br />• Recommended: 800x800px or larger
@@ -237,10 +237,10 @@ export default function ImageManager({
 
         {/* Upload Progress */}
         {uploading && (
-          <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="mb-4 bg-emerald-50 border border-emerald-200 rounded-lg p-4">
             <div className="flex items-center space-x-3">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-              <span className="text-sm text-blue-700">{uploadProgress}</span>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-600"></div>
+              <span className="text-sm text-emerald-700 font-light">{uploadProgress}</span>
             </div>
           </div>
         )}
@@ -257,7 +257,7 @@ export default function ImageManager({
                     <img
                       src={imageUrl}
                       alt={`Gallery ${index + 1}`}
-                      className="object-cover rounded border-2 border-gray-300"
+                      className="object-cover rounded-lg border-2 border-gray-200"
                       style={{
                         width: '128px',
                         height: '128px',
@@ -273,15 +273,15 @@ export default function ImageManager({
                     />
                     {/* Thumbnail Badge */}
                     {index === 0 && (
-                      <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                      <div className="absolute top-1 left-1 bg-emerald-600 text-white text-xs px-2 py-0.5 rounded font-light">
                         Thumbnail
                       </div>
                     )}
                   </div>
 
                   {/* Image Info */}
-                  <div className="text-xs text-gray-600 w-32">
-                    <div className="font-medium truncate" title={imageUrl}>
+                  <div className="text-xs text-zinc-600 w-32">
+                    <div className="font-light truncate" title={imageUrl}>
                       Image {index + 1}
                     </div>
                   </div>
@@ -291,7 +291,7 @@ export default function ImageManager({
                     {index > 0 && (
                       <button
                         onClick={() => reorderGalleryImages(index, index - 1)}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 transition"
+                        className="bg-emerald-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-emerald-700 transition-colors font-light"
                         title="Move left"
                       >
                         ← Move
@@ -300,7 +300,7 @@ export default function ImageManager({
                     {index < galleryImages.length - 1 && (
                       <button
                         onClick={() => reorderGalleryImages(index, index + 1)}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 transition"
+                        className="bg-emerald-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-emerald-700 transition-colors font-light"
                         title="Move right"
                       >
                         Move →
@@ -308,7 +308,7 @@ export default function ImageManager({
                     )}
                     <button
                       onClick={() => removeGalleryImage(index)}
-                      className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600 transition"
+                      className="bg-red-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-red-700 transition-colors font-light"
                       title="Remove"
                     >
                       Remove
@@ -319,9 +319,9 @@ export default function ImageManager({
             </div>
           </div>
         ) : (
-          <div className="text-center py-12 bg-white rounded-lg border-2 border-dashed border-gray-300">
+          <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
             <svg
-              className="mx-auto h-12 w-12 text-gray-400"
+              className="mx-auto h-12 w-12 text-zinc-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -333,8 +333,8 @@ export default function ImageManager({
                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <p className="mt-2 text-sm text-gray-600">No images uploaded yet</p>
-            <p className="text-xs text-gray-500">
+            <p className="mt-2 text-sm text-zinc-600 font-light">No images uploaded yet</p>
+            <p className="text-xs text-zinc-500 font-light">
               Click &quot;Upload Images&quot; to add product photos
             </p>
           </div>

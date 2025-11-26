@@ -105,7 +105,7 @@ export default function ContactPage() {
                 >
                   +44 (0) 123 456 7890
                 </a>
-              </div>
+          </div>
 
               {/* Location */}
               <div className="bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl p-8 text-center transition-all">
@@ -191,46 +191,46 @@ export default function ContactPage() {
                         <line x1="12" y1="16" x2="12.01" y2="16" />
                       </svg>
                       <span className="font-medium">Something went wrong. Please try again.</span>
-                    </div>
-                  )}
+              </div>
+            )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Name */}
-                    <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Name */}
+              <div>
                       <label
                         htmlFor="name"
                         className="block text-base font-medium text-zinc-900 mb-2"
                       >
                         Full Name *
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        required
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  required
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         placeholder="John Smith"
-                      />
-                    </div>
+                />
+              </div>
 
-                    {/* Email */}
-                    <div>
+              {/* Email */}
+              <div>
                       <label
                         htmlFor="email"
                         className="block text-base font-medium text-zinc-900 mb-2"
                       >
                         Email Address *
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        required
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         placeholder="john@example.com"
-                      />
-                    </div>
-                  </div>
+                />
+              </div>
+            </div>
 
                   {/* Subject */}
                   <div>
@@ -250,40 +250,40 @@ export default function ContactPage() {
                     />
                   </div>
 
-                  {/* Message */}
-                  <div>
+            {/* Message */}
+            <div>
                     <label
                       htmlFor="message"
                       className="block text-base font-medium text-zinc-900 mb-2"
                     >
                       Message *
-                    </label>
-                    <textarea
-                      id="message"
-                      name="message"
+              </label>
+              <textarea
+                id="message"
+                name="message"
                       rows={6}
-                      required
+                required
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                       placeholder="Tell us more about your inquiry..."
-                    />
-                  </div>
+              />
+            </div>
 
                   {/* Submit Button */}
-                  <div>
-                    <button
-                      type="submit"
-                      disabled={status === 'loading'}
+            <div>
+              <button
+                type="submit"
+                disabled={status === 'loading'}
                       className="w-full md:w-auto bg-zinc-900 text-white px-8 py-4 rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {status === 'loading' ? 'Sending...' : 'Send Message'}
-                    </button>
-                  </div>
-                </form>
+              >
+                {status === 'loading' ? 'Sending...' : 'Send Message'}
+              </button>
+            </div>
+          </form>
               </div>
             </div>
           </div>
         </section>
-      </div>
+        </div>
     </>
   )
 }

@@ -107,9 +107,9 @@ export default function VariationGenerator({
 
   if (savedAttributes.length === 0) {
     return (
-      <div className="border border-dashed border-gray-300 rounded-lg p-8 text-center">
-        <p className="text-stone-600 mb-2">No saved attributes found</p>
-        <p className="text-sm text-stone-500">
+      <div className="border border-dashed border-gray-200 rounded-lg p-8 text-center bg-gray-50">
+        <p className="text-zinc-600 mb-2 font-light">No saved attributes found</p>
+        <p className="text-sm text-zinc-500 font-light">
           Please create and save attributes in the &quot;Attributes&quot; tab first before
           generating variations
         </p>
@@ -119,28 +119,28 @@ export default function VariationGenerator({
 
   return (
     <div className="space-y-6">
-      <div className="border rounded-lg p-6 bg-white shadow-sm">
-        <h3 className="text-xl font-bold text-stone-800 mb-4">Generate Variations</h3>
+      <div className="border border-gray-100 rounded-lg p-6 bg-white shadow-sm">
+        <h3 className="text-xl font-light text-zinc-900 mb-4">Generate Variations</h3>
 
         {/* Attribute Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-3 text-stone-800">
+          <label className="block text-sm font-light mb-3 text-zinc-700">
             Select Attributes to Combine:
           </label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {savedAttributes.map((attr) => (
               <label
                 key={attr.id}
-                className="flex items-center space-x-3 p-3 border rounded hover:bg-gray-50 cursor-pointer transition"
+                className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 <input
                   type="checkbox"
                   checked={selectedAttrIds.includes(attr.id)}
                   onChange={() => toggleAttribute(attr.id)}
-                  className="rounded w-4 h-4"
+                  className="rounded w-4 h-4 text-emerald-600 focus:ring-emerald-500"
                 />
-                <span className="text-stone-800 font-medium">{attr.name}</span>
-                <span className="text-sm text-stone-600">({attr.options.length} options)</span>
+                <span className="text-zinc-900 font-light">{attr.name}</span>
+                <span className="text-sm text-zinc-600 font-light">({attr.options.length} options)</span>
               </label>
             ))}
           </div>
@@ -148,12 +148,12 @@ export default function VariationGenerator({
 
         {/* Preview */}
         {selectedAttrIds.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6 mb-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-700 mb-1">Total Combinations:</p>
-                <p className="text-4xl font-bold text-blue-900">{combinationCount}</p>
-                <p className="text-xs text-blue-600 mt-2">
+                <p className="text-sm text-emerald-700 mb-1 font-light">Total Combinations:</p>
+                <p className="text-4xl font-light text-emerald-900">{combinationCount}</p>
+                <p className="text-xs text-emerald-600 mt-2 font-light">
                   {selectedAttrIds
                     .map((id) => {
                       const attr = savedAttributes.find((a) => a.id === id)
@@ -163,8 +163,8 @@ export default function VariationGenerator({
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-blue-700">Estimated Time:</p>
-                <p className="text-lg font-semibold text-blue-900">
+                <p className="text-sm text-emerald-700 font-light">Estimated Time:</p>
+                <p className="text-lg font-light text-emerald-900">
                   {combinationCount < 50
                     ? '< 5 sec'
                     : combinationCount < 200
@@ -179,33 +179,33 @@ export default function VariationGenerator({
         {/* Settings */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div>
-            <label className="block text-sm font-medium mb-1 text-stone-800">
+            <label className="block text-sm font-light mb-2 text-zinc-700">
               Pricing Strategy
             </label>
             <select
               value={pricingStrategy}
               onChange={(e) => setPricingStrategy(e.target.value as 'base' | 'additive')}
-              className="w-full px-3 py-2 border rounded text-stone-900 bg-white focus:ring-2 focus:ring-blue-200"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg text-zinc-900 bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
             >
               <option value="base">Base Price (all same: £{basePrice})</option>
               <option value="additive">Additive (base + modifiers)</option>
             </select>
-            <p className="text-xs text-stone-600 mt-1">
+            <p className="text-xs text-zinc-600 mt-1 font-light">
               {pricingStrategy === 'base'
                 ? 'All variations will have the same price'
                 : 'Prices will include modifiers set on each option'}
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1 text-stone-800">Default Stock</label>
+            <label className="block text-sm font-light mb-2 text-zinc-700">Default Stock</label>
             <input
               type="number"
               value={defaultStock}
               onChange={(e) => setDefaultStock(parseInt(e.target.value) || 0)}
-              className="w-full px-3 py-2 border rounded text-stone-900 bg-white focus:ring-2 focus:ring-blue-200"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg text-zinc-900 bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
               min="0"
             />
-            <p className="text-xs text-stone-600 mt-1">
+            <p className="text-xs text-zinc-600 mt-1 font-light">
               Set to 0 for print-on-demand (no stock tracking)
             </p>
           </div>
@@ -216,7 +216,7 @@ export default function VariationGenerator({
           type="button"
           onClick={handleGenerate}
           disabled={selectedAttrIds.length === 0 || generating}
-          className="w-full py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition text-lg"
+          className="w-full py-3 bg-emerald-600 text-white rounded-lg font-light hover:bg-emerald-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
         >
           {generating
             ? 'Generating...'
@@ -247,10 +247,10 @@ export default function VariationGenerator({
         {/* Message */}
         {message && (
           <div
-            className={`mt-4 p-3 rounded ${
+            className={`mt-4 p-3 rounded-lg font-light ${
               message.type === 'success'
-                ? 'bg-green-50 text-green-800 border border-green-200'
-                : 'bg-red-50 text-red-800 border border-red-200'
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                : 'bg-red-50 text-red-700 border border-red-200'
             }`}
           >
             {message.text}
@@ -260,7 +260,7 @@ export default function VariationGenerator({
 
       {/* Info */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h4 className="font-medium text-yellow-900 mb-2 flex items-center gap-2">
+        <h4 className="font-light text-yellow-900 mb-2 flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -277,7 +277,7 @@ export default function VariationGenerator({
           </svg>
           Important:
         </h4>
-        <ul className="text-sm text-yellow-800 space-y-1">
+        <ul className="text-sm text-yellow-800 space-y-1 font-light">
           <li>• This will create variations based on ALL selected attribute combinations</li>
           <li>• If you already have auto-generated variations, they will be duplicated</li>
           <li>• You can delete auto-generated variations and regenerate if needed</li>

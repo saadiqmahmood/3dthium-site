@@ -402,21 +402,24 @@ export default function AdminOrdersPage() {
 
   // --- Render ---
   return (
-    <div className="w-full mx-auto bg-white p-16">
-      <h2 className="text-2xl font-bold mb-6 text-stone-800">Orders</h2>
+    <div className="w-full mx-auto">
+      <div className="mb-6">
+        <h1 className="text-3xl font-light text-zinc-900 mb-2">Orders</h1>
+        <p className="text-sm text-zinc-600 font-light">Manage and track customer orders</p>
+      </div>
       {/* Filters */}
-      <div className="mb-4 flex flex-wrap gap-2 items-center">
+      <div className="mb-6 flex flex-wrap gap-3 items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100">
         <input
           type="text"
           placeholder="Search..."
           value={orderSearch}
           onChange={(e) => setOrderSearch(e.target.value)}
-          className="border rounded px-3 py-2 w-48 text-stone-800 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          className="border border-gray-200 rounded-lg px-4 py-2 w-48 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
         />
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="border rounded px-3 py-2 text-stone-800"
+          className="border border-gray-200 rounded-lg px-4 py-2 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
         >
           <option value="">All Statuses</option>
           {ORDER_STATUSES.map((s) => (
@@ -429,27 +432,27 @@ export default function AdminOrdersPage() {
           type="date"
           value={filterDateFrom}
           onChange={(e) => setFilterDateFrom(e.target.value)}
-          className="border rounded px-3 py-2 text-stone-800"
+          className="border border-gray-200 rounded-lg px-4 py-2 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
         />
         <input
           type="date"
           value={filterDateTo}
           onChange={(e) => setFilterDateTo(e.target.value)}
-          className="border rounded px-3 py-2 text-stone-800"
+          className="border border-gray-200 rounded-lg px-4 py-2 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
         />
         <input
           type="number"
           placeholder="Min £"
           value={filterPriceMin}
           onChange={(e) => setFilterPriceMin(e.target.value)}
-          className="border rounded px-3 py-2 w-24 text-stone-800"
+          className="border border-gray-200 rounded-lg px-4 py-2 w-24 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
         />
         <input
           type="number"
           placeholder="Max £"
           value={filterPriceMax}
           onChange={(e) => setFilterPriceMax(e.target.value)}
-          className="border rounded px-3 py-2 w-24 text-stone-800"
+          className="border border-gray-200 rounded-lg px-4 py-2 w-24 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
         />
         <button
           onClick={() => {
@@ -459,122 +462,137 @@ export default function AdminOrdersPage() {
             setFilterPriceMin('')
             setFilterPriceMax('')
           }}
-          className="text-sm text-gray-500 underline ml-2"
+          className="text-sm text-zinc-600 hover:text-zinc-900 font-light ml-auto"
         >
           Clear Filters
         </button>
       </div>
       {/* Bulk actions */}
-      <div className="mb-2 flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={allSelected}
-          onChange={toggleSelectAll}
-          className="accent-blue-200 w-5 h-3 rounded"
-        />
-        <span className="text-sm text-stone-800">Select All</span>
-        {selectedOrders.length > 0 && (
-          <span
+      {selectedOrders.length > 0 && (
+        <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-center justify-between">
+          <span className="text-sm text-emerald-900 font-light">
+            {selectedOrders.length} order{selectedOrders.length !== 1 ? 's' : ''} selected
+          </span>
+          <button
             onClick={handleBulkDelete}
-            className="ml-4 text-red-700 font-semibold hover:underline cursor-pointer select-none text-sm"
+            className="px-4 py-1.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors font-light"
           >
             Delete Selected
-          </span>
-        )}
-        <span className="ml-auto text-sm text-gray-500">
+          </button>
+        </div>
+      )}
+
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={allSelected}
+            onChange={toggleSelectAll}
+            className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
+          />
+          <span className="text-sm text-zinc-700 font-light">Select All</span>
+        </div>
+        <span className="text-sm text-zinc-600 font-light">
           {filteredOrders.length} order{filteredOrders.length !== 1 ? 's' : ''}
         </span>
       </div>
-      <div className="overflow-x-auto rounded-lg border">
+      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
         <table className="min-w-full bg-white text-sm">
-          <thead className="bg-gray-100">
+          <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-2 py-3">
+              <th className="px-4 py-3 w-12">
                 <input
                   type="checkbox"
                   checked={allSelected}
                   onChange={toggleSelectAll}
-                  className="accent-blue-200 w-5 h-3 rounded"
+                  className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
                 />
               </th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Order ID</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">User/Guest Email</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Total</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Shipping</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Status</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Created</th>
-              <th className="px-4 py-3 text-center font-semibold text-gray-700">Actions</th>
+              <th className="px-4 py-3 text-left font-light text-zinc-700">Order ID</th>
+              <th className="px-4 py-3 text-left font-light text-zinc-700">User/Guest Email</th>
+              <th className="px-4 py-3 text-left font-light text-zinc-700">Total</th>
+              <th className="px-4 py-3 text-left font-light text-zinc-700">Shipping</th>
+              <th className="px-4 py-3 text-left font-light text-zinc-700">Status</th>
+              <th className="px-4 py-3 text-left font-light text-zinc-700">Created</th>
+              <th className="px-4 py-3 text-center font-light text-zinc-700">Actions</th>
             </tr>
           </thead>
           <tbody>
             {ordersLoading ? (
               <tr>
-                <td colSpan={8} className="text-center py-8 text-gray-500">
-                  Loading orders...
+                <td colSpan={8} className="text-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+                  <p className="text-zinc-600 mt-2 font-light">Loading orders...</p>
                 </td>
               </tr>
             ) : paginatedOrders.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center py-8 text-gray-500">
+                <td colSpan={8} className="text-center py-12 text-zinc-500 font-light">
                   No orders found.
                 </td>
               </tr>
             ) : (
               paginatedOrders.map((order) => (
-                <tr key={order.id} className="border-b hover:bg-gray-50">
-                  <td className="px-2 py-3">
+                <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3">
                     <input
                       type="checkbox"
                       checked={selectedOrders.includes(order.id)}
                       onChange={() => toggleSelectOrder(order.id)}
-                      className="accent-blue-200 w-5 h-3 rounded"
+                      className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
                     />
                   </td>
-                  <td className="px-4 py-3 font-mono text-gray-900">{order.id.slice(-8)}</td>
-                  <td className="px-4 py-3 text-gray-800">
+                  <td className="px-4 py-3 font-mono text-zinc-900 text-xs font-light">{order.id.slice(-8)}</td>
+                  <td className="px-4 py-3 text-zinc-900 font-light">
                     {order.user_email || order.guest_email || (
-                      <span className="text-gray-400 italic">Unknown</span>
+                      <span className="text-zinc-400 italic">Unknown</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-800">
+                  <td className="px-4 py-3 text-zinc-900 font-light">
                     £{Number(order.total_price).toFixed(2)}
                   </td>
-                  <td className="px-4 py-3 text-gray-800">
+                  <td className="px-4 py-3 text-zinc-700 font-light">
                     {order.shipping_method ? (
                       <div className="text-xs">
-                        <div className="font-medium">{order.shipping_method}</div>
+                        <div className="font-light">{order.shipping_method}</div>
                         {order.shipping_cost && (
-                          <div className="text-gray-500">£{order.shipping_cost.toFixed(2)}</div>
+                          <div className="text-zinc-500 font-light">£{order.shipping_cost.toFixed(2)}</div>
                         )}
                         {order.tracking_number && (
-                          <div className="text-blue-600 cursor-pointer hover:underline">
+                          <div className="text-emerald-600 cursor-pointer hover:text-emerald-700 font-light">
                             Track: {order.tracking_number.slice(-8)}
                           </div>
                         )}
                       </div>
                     ) : (
-                      <span className="text-gray-400 text-xs">No shipping</span>
+                      <span className="text-zinc-400 text-xs font-light">No shipping</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
                     <span
-                      className={`inline-block px-2 py-1 rounded text-xs font-semibold ${order.status === 'processing' ? 'bg-green-100 text-green-800' : order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : order.status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}
+                      className={`inline-block px-2 py-1 rounded-full text-xs font-light ${
+                        order.status === 'processing'
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : order.status === 'pending'
+                            ? 'bg-yellow-50 text-yellow-700'
+                            : order.status === 'cancelled'
+                              ? 'bg-red-50 text-red-700'
+                              : 'bg-gray-100 text-zinc-700'
+                      }`}
                     >
                       {order.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-700">
+                  <td className="px-4 py-3 text-zinc-600 text-xs font-light">
                     {new Date(order.created_at).toLocaleString()}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <div className="flex gap-2 justify-center">
-                      <button
-                        onClick={() => setSelectedOrder(order)}
-                        className="text-stone-800 border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 transition"
-                      >
-                        View Details
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => setSelectedOrder(order)}
+                      className="text-emerald-600 hover:text-emerald-700 border border-emerald-300 px-3 py-1 rounded-lg hover:bg-emerald-50 transition-colors text-xs font-light"
+                    >
+                      View Details
+                    </button>
                   </td>
                 </tr>
               ))
@@ -583,25 +601,27 @@ export default function AdminOrdersPage() {
         </table>
       </div>
       {/* Pagination */}
-      <div className="flex justify-between items-center mt-4">
-        <button
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-          className="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <span className="text-sm text-stone-800">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-          className="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-between items-center mt-6">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-light text-sm"
+          >
+            Previous
+          </button>
+          <span className="text-sm text-zinc-600 font-light">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-light text-sm"
+          >
+            Next
+          </button>
+        </div>
+      )}
       {/* Order details modal */}
       {selectedOrder && (
         <div
@@ -609,118 +629,129 @@ export default function AdminOrdersPage() {
           onClick={() => setSelectedOrder(null)}
         >
           <div
-            className="bg-white rounded-xl shadow-lg p-8 max-w-3xl w-full border border-stone-200 max-h-[80vh] overflow-y-auto"
+            className="bg-white rounded-xl shadow-lg p-8 max-w-3xl w-full border border-gray-200 max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-bold mb-4 text-stone-800">Order Details</h3>
+            <h3 className="text-xl font-light mb-6 text-zinc-900">Order Details</h3>
             {orderDetailsLoading ? (
-              <div className="text-center py-8 text-gray-500">Loading...</div>
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+                <p className="text-zinc-600 mt-2 font-light">Loading...</p>
+              </div>
             ) : orderDetails ? (
               <>
-                <div className="mb-2 text-gray-700">
-                  <span className="font-semibold">Order ID:</span>{' '}
-                  <span className="font-mono text-gray-900">{orderDetails.id}</span>
+                <div className="mb-3 text-zinc-700 font-light">
+                  <span className="font-medium">Order ID:</span>{' '}
+                  <span className="font-mono text-zinc-900 text-sm">{orderDetails.id}</span>
                 </div>
-                <div className="mb-2 text-gray-700">
-                  <span className="font-semibold">User/Guest Email:</span>{' '}
+                <div className="mb-3 text-zinc-700 font-light">
+                  <span className="font-medium">User/Guest Email:</span>{' '}
                   {orderDetails.user_id
                     ? orders.find((o) => o.id === orderDetails.id)?.user_email
                     : orderDetails.guest_email || (
-                        <span className="text-gray-400 italic">Unknown</span>
+                        <span className="text-zinc-400 italic">Unknown</span>
                       )}
                 </div>
-                <div className="mb-2 text-gray-700">
-                  <span className="font-semibold">Total:</span> £
-                  {Number(orderDetails.total_price).toFixed(2)}
+                <div className="mb-3 text-zinc-700 font-light">
+                  <span className="font-medium">Total:</span>{' '}
+                  <span className="font-light text-zinc-900">£{Number(orderDetails.total_price).toFixed(2)}</span>
                 </div>
-                <div className="mb-2 text-gray-700">
-                  <span className="font-semibold">Status:</span>{' '}
+                <div className="mb-3 text-zinc-700 font-light">
+                  <span className="font-medium">Status:</span>{' '}
                   <span
-                    className={`inline-block px-2 py-1 rounded text-xs font-semibold ${orderDetails.status === 'processing' ? 'bg-green-100 text-green-800' : orderDetails.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : orderDetails.status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}
+                    className={`inline-block px-2 py-1 rounded-full text-xs font-light ${
+                      orderDetails.status === 'processing'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : orderDetails.status === 'pending'
+                          ? 'bg-yellow-50 text-yellow-700'
+                          : orderDetails.status === 'cancelled'
+                            ? 'bg-red-50 text-red-700'
+                            : 'bg-gray-100 text-zinc-700'
+                    }`}
                   >
                     {orderDetails.status}
                   </span>
                 </div>
-                <div className="mb-2 text-gray-700">
-                  <span className="font-semibold">Created:</span>{' '}
+                <div className="mb-4 text-zinc-700 font-light">
+                  <span className="font-medium">Created:</span>{' '}
                   {new Date(orderDetails.created_at).toLocaleString()}
                 </div>
 
                 {/* Shipping Information */}
                 {(orderDetails.shipping_name || orderDetails.shipping_address) && (
-                  <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold text-gray-800 mb-2">Shipping Information</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                  <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="font-light text-zinc-900 mb-3">Shipping Information</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                       {orderDetails.shipping_name && (
-                        <div className="text-gray-700">
+                        <div className="text-zinc-700 font-light">
                           <span className="font-medium">Name:</span> {orderDetails.shipping_name}
                         </div>
                       )}
                       {orderDetails.shipping_address && (
-                        <div className="text-gray-700">
+                        <div className="text-zinc-700 font-light">
                           <span className="font-medium">Address:</span>{' '}
                           {orderDetails.shipping_address}
                         </div>
                       )}
                       {orderDetails.shipping_city && (
-                        <div className="text-gray-700">
+                        <div className="text-zinc-700 font-light">
                           <span className="font-medium">City:</span> {orderDetails.shipping_city}
                         </div>
                       )}
                       {orderDetails.shipping_postcode && (
-                        <div className="text-gray-700">
+                        <div className="text-zinc-700 font-light">
                           <span className="font-medium">Postcode:</span>{' '}
                           {orderDetails.shipping_postcode}
                         </div>
                       )}
                       {orderDetails.shipping_phone && (
-                        <div className="text-gray-700">
+                        <div className="text-zinc-700 font-light">
                           <span className="font-medium">Phone:</span> {orderDetails.shipping_phone}
                         </div>
                       )}
                       {orderDetails.shipping_method && (
-                        <div className="text-gray-700">
+                        <div className="text-zinc-700 font-light">
                           <span className="font-medium">Method:</span>{' '}
                           {orderDetails.shipping_method}
                         </div>
                       )}
                       {orderDetails.shipping_cost && (
-                        <div className="text-gray-700">
+                        <div className="text-zinc-700 font-light">
                           <span className="font-medium">Cost:</span> £
                           {orderDetails.shipping_cost.toFixed(2)}
                         </div>
                       )}
                       {orderDetails.tracking_number && (
-                        <div className="text-gray-700">
-                          <span className="font-medium">Tracking:</span>
+                        <div className="text-zinc-700 font-light">
+                          <span className="font-medium">Tracking:</span>{' '}
                           {orderDetails.tracking_url ? (
                             <a
                               href={orderDetails.tracking_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="ml-1 text-blue-600 hover:underline"
+                              className="text-emerald-600 hover:text-emerald-700 font-light"
                             >
                               {orderDetails.tracking_number}
                             </a>
                           ) : (
-                            <span className="ml-1">{orderDetails.tracking_number}</span>
+                            <span>{orderDetails.tracking_number}</span>
                           )}
                         </div>
                       )}
                       {orderDetails.shipped_at && (
-                        <div className="text-gray-700">
+                        <div className="text-zinc-700 font-light">
                           <span className="font-medium">Shipped:</span>{' '}
                           {new Date(orderDetails.shipped_at).toLocaleString()}
                         </div>
                       )}
                     </div>
                     {orderDetails.shipping_label_url && (
-                      <div className="mt-2">
+                      <div className="mt-3">
                         <a
                           href={orderDetails.shipping_label_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                          className="inline-block px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-light"
                         >
                           View Shipping Label
                         </a>
@@ -730,12 +761,12 @@ export default function AdminOrdersPage() {
                 )}
 
                 <div className="mb-6">
-                  <h4 className="text-lg font-bold text-gray-900 mb-4">
+                  <h4 className="text-lg font-light text-zinc-900 mb-4">
                     Order Items ({editableOrderItems.length})
                   </h4>
                   <div className="space-y-4">
                     {editableOrderItems.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                      <div className="text-center py-8 text-zinc-500 bg-gray-50 rounded-lg font-light">
                         No items in this order
                       </div>
                     ) : (
@@ -775,14 +806,14 @@ export default function AdminOrdersPage() {
 
                             {/* Product Details */}
                             <div className="flex-1 min-w-0">
-                              <h5 className="text-lg font-semibold text-gray-900 mb-3">
+                              <h5 className="text-base font-light text-zinc-900 mb-3">
                                 {productName}
                               </h5>
 
                               {/* Variant Details - Beautiful Badges */}
                               <div className="flex flex-wrap gap-2 mb-4">
                                 {color && (
-                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-light bg-blue-50 text-blue-700 border border-blue-200">
                                     <svg
                                       className="w-4 h-4 mr-1.5"
                                       fill="currentColor"
@@ -798,7 +829,7 @@ export default function AdminOrdersPage() {
                                   </span>
                                 )}
                                 {size && (
-                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-light bg-purple-50 text-purple-700 border border-purple-200">
                                     <svg
                                       className="w-4 h-4 mr-1.5"
                                       fill="none"
@@ -816,7 +847,7 @@ export default function AdminOrdersPage() {
                                   </span>
                                 )}
                                 {material && (
-                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-50 text-green-700 border border-green-200">
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-light bg-emerald-50 text-emerald-700 border border-emerald-200">
                                     <svg
                                       className="w-4 h-4 mr-1.5"
                                       fill="none"
@@ -838,7 +869,7 @@ export default function AdminOrdersPage() {
                               {/* Editable Fields */}
                               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div>
-                                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  <label className="block text-xs font-light text-zinc-700 mb-2">
                                     Size
                                   </label>
                                   <select
@@ -846,7 +877,7 @@ export default function AdminOrdersPage() {
                                     onChange={(e) =>
                                       handleOrderItemChange(idx, 'size', e.target.value)
                                     }
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 font-light"
                                   >
                                     {SIZES.map((s) => (
                                       <option key={s} value={s}>
@@ -856,7 +887,7 @@ export default function AdminOrdersPage() {
                                   </select>
                                 </div>
                                 <div>
-                                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  <label className="block text-xs font-light text-zinc-700 mb-2">
                                     Quantity
                                   </label>
                                   <input
@@ -866,11 +897,11 @@ export default function AdminOrdersPage() {
                                     onChange={(e) =>
                                       handleOrderItemChange(idx, 'quantity', Number(e.target.value))
                                     }
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 font-light"
                                   />
                                 </div>
                                 <div>
-                                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  <label className="block text-xs font-light text-zinc-700 mb-2">
                                     Variant
                                   </label>
                                   <select
@@ -878,7 +909,7 @@ export default function AdminOrdersPage() {
                                     onChange={(e) =>
                                       handleOrderItemChange(idx, 'variant_id', e.target.value)
                                     }
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 font-light"
                                   >
                                     {(variantsByProduct[String(item.products?.id)] || []).map(
                                       (variant) => (
@@ -894,10 +925,10 @@ export default function AdminOrdersPage() {
 
                             {/* Price */}
                             <div className="flex-shrink-0 text-right">
-                              <p className="text-xl font-bold text-gray-900">
+                              <p className="text-xl font-light text-zinc-900">
                                 £{(item.price_at_purchase * item.quantity).toFixed(2)}
                               </p>
-                              <p className="text-xs text-gray-500 mt-1">
+                              <p className="text-xs text-zinc-500 mt-1 font-light">
                                 {item.quantity} × £{item.price_at_purchase.toFixed(2)}
                               </p>
                             </div>
@@ -910,49 +941,51 @@ export default function AdminOrdersPage() {
                     <button
                       type="button"
                       onClick={handleSaveOrderItems}
-                      className="mt-6 w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md hover:shadow-lg"
+                      className="mt-6 w-full sm:w-auto px-6 py-3 bg-emerald-600 text-white font-light rounded-lg hover:bg-emerald-700 transition-colors"
                     >
                       Save Changes
                     </button>
                   )}
                 </div>
-                <div className="flex flex-col gap-2 mt-4">
-                  <label className="block text-sm font-medium text-stone-800 mb-1">Status</label>
-                  <select
-                    value={orderStatusInput}
-                    onChange={(e) => setOrderStatusInput(e.target.value)}
-                    className="border rounded px-3 py-2 w-48 text-stone-800 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  >
-                    {ORDER_STATUSES.map((status) => (
-                      <option key={status} value={status} className="text-stone-800">
-                        {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="flex justify-center gap-6 items-center mt-2">
+                <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-gray-100">
+                  <div>
+                    <label className="block text-sm font-light text-zinc-700 mb-2">Status</label>
+                    <select
+                      value={orderStatusInput}
+                      onChange={(e) => setOrderStatusInput(e.target.value)}
+                      className="border border-gray-200 rounded-lg px-4 py-2 w-full text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
+                    >
+                      {ORDER_STATUSES.map((status) => (
+                        <option key={status} value={status}>
+                          {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex gap-3">
                     <button
                       onClick={handleUpdateOrderStatus}
-                      className="text-stone-800 border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 transition"
+                      className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-light text-sm"
                     >
-                      Update
+                      Update Status
                     </button>
                     <button
                       onClick={handleDeleteOrderFromModal}
-                      className="text-red-700 border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 transition"
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-light text-sm"
                     >
-                      Delete
+                      Delete Order
+                    </button>
+                    <button
+                      onClick={() => setSelectedOrder(null)}
+                      className="ml-auto px-4 py-2 bg-white border border-gray-200 text-zinc-700 rounded-lg hover:bg-gray-50 transition-colors font-light text-sm"
+                    >
+                      Close
                     </button>
                   </div>
-                  <button
-                    onClick={() => setSelectedOrder(null)}
-                    className="mt-2 text-stone-800 border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 transition"
-                  >
-                    Close
-                  </button>
                 </div>
               </>
             ) : (
-              <div className="text-center py-8 text-gray-500">Order not found.</div>
+              <div className="text-center py-8 text-zinc-500 font-light">Order not found.</div>
             )}
           </div>
         </div>

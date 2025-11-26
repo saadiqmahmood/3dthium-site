@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 interface Category {
@@ -97,11 +96,11 @@ export default function AdminCategoriesPage() {
         fetchCategories()
       } else {
         const error = await response.json()
-        alert(`Error: ${error.message || 'Failed to save category'}`)
+        console.error(`Error: ${error.message || 'Failed to save category'}`)
       }
     } catch (error) {
       console.error('Error saving category:', error)
-      alert('Failed to save category')
+      console.error('Failed to save category')
     }
   }
 
@@ -133,11 +132,11 @@ export default function AdminCategoriesPage() {
         fetchCategories()
       } else {
         const error = await response.json()
-        alert(`Error: ${error.message || 'Failed to delete category'}`)
+        console.error(`Error: ${error.message || 'Failed to delete category'}`)
       }
     } catch (error) {
       console.error('Error deleting category:', error)
-      alert('Failed to delete category')
+      console.error('Failed to delete category')
     }
   }
 
@@ -180,15 +179,15 @@ export default function AdminCategoriesPage() {
 
   const renderCategoryTree = (categories: Category[], level: number = 0) => {
     return categories.map((category) => (
-      <div key={category.id} className="border-l-2 border-gray-200 ml-4">
+      <div key={category.id} className="border-l-2 border-gray-100 ml-4">
         <div
-          className={`flex items-center justify-between p-3 hover:bg-gray-50 ${level > 0 ? 'ml-4' : ''}`}
+          className={`flex items-center justify-between p-4 hover:bg-gray-50 transition-colors ${level > 0 ? 'ml-4' : ''}`}
         >
           <div className="flex items-center space-x-3">
             {category.children && category.children.length > 0 && (
               <button
                 onClick={() => toggleExpanded(category.id)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-zinc-400 hover:text-zinc-600 transition-colors"
               >
                 {expandedCategories.has(category.id) ? '▼' : '▶'}
               </button>
@@ -196,34 +195,36 @@ export default function AdminCategoriesPage() {
             <div className="flex-1">
               <div className="flex items-center space-x-2">
                 <span
-                  className={`font-medium text-gray-900 ${level === 0 ? 'text-lg' : 'text-base'}`}
+                  className={`font-light text-zinc-900 ${level === 0 ? 'text-base' : 'text-sm'}`}
                 >
                   {category.name}
                 </span>
                 {category.product_count !== undefined && (
-                  <span className="text-sm text-gray-500">({category.product_count})</span>
+                  <span className="text-xs text-zinc-500 font-light">
+                    ({category.product_count})
+                  </span>
                 )}
                 {!category.is_active && (
-                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                  <span className="text-xs bg-gray-100 text-zinc-600 px-2 py-0.5 rounded-full font-light">
                     Inactive
                   </span>
                 )}
               </div>
               {category.description && (
-                <p className="text-sm text-gray-600 mt-1">{category.description}</p>
+                <p className="text-sm text-zinc-600 mt-1 font-light">{category.description}</p>
               )}
             </div>
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handleEdit(category)}
-              className="text-stone-800 border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 transition"
+              className="text-emerald-600 hover:text-emerald-700 border border-emerald-300 px-3 py-1 rounded-lg hover:bg-emerald-50 transition-colors text-xs font-light"
             >
               Edit
             </button>
             <button
               onClick={() => handleDelete(category.id)}
-              className="text-stone-800 border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 transition"
+              className="text-red-600 hover:text-red-700 border border-red-300 px-3 py-1 rounded-lg hover:bg-red-50 transition-colors text-xs font-light"
             >
               Delete
             </button>
@@ -242,69 +243,64 @@ export default function AdminCategoriesPage() {
 
   if (loading) {
     return (
-      <div className="w-full mx-auto bg-white p-16">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading categories...</p>
+      <div className="w-full mx-auto">
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
+          <p className="mt-4 text-zinc-600 font-light">Loading categories...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="w-full mx-auto bg-white p-16">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-stone-800">Category Management</h1>
-        <div className="flex space-x-4">
-          <Link
-            href="/admin"
-            className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
-          >
-            Back to Admin
-          </Link>
-          <button
-            onClick={() => {
-              setShowForm(true)
-              setEditingCategory(null)
-              resetForm()
-            }}
-            className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
-          >
-            Add New Category
-          </button>
+    <div className="w-full mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-light text-zinc-900 mb-2">Categories</h1>
+          <p className="text-sm text-zinc-600 font-light">Manage product categories</p>
         </div>
+        <button
+          onClick={() => {
+            setShowForm(true)
+            setEditingCategory(null)
+            resetForm()
+          }}
+          className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-light"
+        >
+          + Add Category
+        </button>
       </div>
 
       {/* Category Form */}
       {showForm && (
-        <div className="bg-gray-50 rounded-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-stone-800">
+        <div className="bg-white rounded-lg p-6 mb-8 shadow-sm border border-gray-100">
+          <h2 className="text-xl font-light mb-6 text-zinc-900">
             {editingCategory ? 'Edit Category' : 'Add New Category'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                <label className="block text-sm font-light text-zinc-700 mb-2">Name *</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+                <label className="block text-sm font-light text-zinc-700 mb-2">Slug *</label>
                 <input
                   type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-light text-zinc-700 mb-2">
                   Parent Category
                 </label>
                 <select
@@ -312,7 +308,7 @@ export default function AdminCategoriesPage() {
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, parent_id: e.target.value || null }))
                   }
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light"
                 >
                   <option value="">No Parent (Top Level)</option>
                   {categories
@@ -325,33 +321,33 @@ export default function AdminCategoriesPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
+                <label className="block text-sm font-light text-zinc-700 mb-2">Sort Order</label>
                 <input
                   type="number"
                   value={formData.sort_order}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))
                   }
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label className="block text-sm font-light text-zinc-700 mb-2">Description</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                 rows={3}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+              <label className="block text-sm font-light text-zinc-700 mb-2">Image URL</label>
               <input
                 type="url"
                 value={formData.image_url}
                 onChange={(e) => setFormData((prev) => ({ ...prev, image_url: e.target.value }))}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light"
                 placeholder="https://example.com/image.jpg"
               />
             </div>
@@ -363,15 +359,15 @@ export default function AdminCategoriesPage() {
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, is_active: e.target.checked }))
                   }
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
                 />
-                <span className="text-sm text-gray-700">Active</span>
+                <span className="text-sm text-zinc-700 font-light">Active</span>
               </label>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 pt-4">
               <button
                 type="submit"
-                className="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300"
+                className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-light"
               >
                 {editingCategory ? 'Update Category' : 'Create Category'}
               </button>
@@ -382,7 +378,7 @@ export default function AdminCategoriesPage() {
                   setEditingCategory(null)
                   resetForm()
                 }}
-                className="bg-gray-100 text-gray-700 px-6 py-2 rounded hover:bg-gray-200"
+                className="px-6 py-2 bg-white border border-gray-200 text-zinc-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-light"
               >
                 Cancel
               </button>
@@ -392,15 +388,17 @@ export default function AdminCategoriesPage() {
       )}
 
       {/* Categories List */}
-      <div className="bg-white rounded-lg border">
-        <div className="px-6 py-4 border-b bg-gray-100">
-          <h3 className="text-lg font-medium text-gray-900">Categories ({categories.length})</h3>
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-lg font-light text-zinc-900">
+            Categories ({categories.length})
+          </h3>
         </div>
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-gray-100">
           {categoryTree.length > 0 ? (
             renderCategoryTree(categoryTree)
           ) : (
-            <div className="px-6 py-8 text-center text-gray-500">
+            <div className="px-6 py-12 text-center text-zinc-500 font-light">
               No categories found. Create your first category to get started.
             </div>
           )}

@@ -261,26 +261,26 @@ export default function CreateProductPage() {
       case 'text':
         return (
           <div key={attribute.id}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-light text-zinc-700 mb-2">
               {attribute.name} {attribute.required && <span className="text-red-500">*</span>}
             </label>
             <input
               type="text"
               value={String(value)}
               onChange={(e) => handleAttributeChange(attribute.name, e.target.value)}
-              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                error ? 'border-red-500' : 'border-gray-300'
+              className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light ${
+                error ? 'border-red-500' : 'border-gray-200'
               }`}
               placeholder={attribute.description}
             />
-            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            {error && <p className="text-red-500 text-sm mt-1 font-light">{error}</p>}
           </div>
         )
 
       case 'number':
         return (
           <div key={attribute.id}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-light text-zinc-700 mb-2">
               {attribute.name} {attribute.required && <span className="text-red-500">*</span>}
             </label>
             <input
@@ -289,12 +289,12 @@ export default function CreateProductPage() {
               onChange={(e) =>
                 handleAttributeChange(attribute.name, parseFloat(e.target.value) || 0)
               }
-              className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                error ? 'border-red-500' : 'border-gray-300'
+              className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light ${
+                error ? 'border-red-500' : 'border-gray-200'
               }`}
               placeholder={attribute.description}
             />
-            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            {error && <p className="text-red-500 text-sm mt-1 font-light">{error}</p>}
           </div>
         )
 
@@ -306,9 +306,9 @@ export default function CreateProductPage() {
               id={attribute.id}
               checked={Boolean(value)}
               onChange={(e) => handleAttributeChange(attribute.name, e.target.checked)}
-              className="mr-2"
+              className="mr-2 w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
             />
-            <label htmlFor={attribute.id} className="text-sm font-medium text-gray-700">
+            <label htmlFor={attribute.id} className="text-sm font-light text-zinc-700">
               {attribute.name} {attribute.required && <span className="text-red-500">*</span>}
             </label>
             {error && <p className="text-red-500 text-sm ml-2">{error}</p>}
@@ -318,7 +318,7 @@ export default function CreateProductPage() {
       case 'select':
         return (
           <div key={attribute.id}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-light text-zinc-700 mb-2">
               {attribute.name} {attribute.required && <span className="text-red-500">*</span>}
             </label>
             <select
@@ -342,7 +342,7 @@ export default function CreateProductPage() {
       case 'multiselect':
         return (
           <div key={attribute.id}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-light text-zinc-700 mb-2">
               {attribute.name} {attribute.required && <span className="text-red-500">*</span>}
             </label>
             <div className="space-y-2">
@@ -362,9 +362,9 @@ export default function CreateProductPage() {
                         )
                       }
                     }}
-                    className="mr-2"
+                    className="mr-2 w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
                   />
-                  {option}
+                  <span className="text-sm font-light text-zinc-700">{option}</span>
                 </label>
               ))}
             </div>
@@ -387,45 +387,48 @@ export default function CreateProductPage() {
   const selectedCategory = categories.find((c) => c.id === formData.category_id)
 
   return (
-    <div className="w-full mx-auto bg-white p-16">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-stone-800">Create New Product</h1>
+    <div className="w-full mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-light text-zinc-900 mb-2">Create New Product</h1>
+          <p className="text-sm text-zinc-600 font-light">Add a new product to your store</p>
+        </div>
         <Link
           href="/admin/products"
-          className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+          className="px-4 py-2 bg-white border border-gray-200 text-zinc-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-light"
         >
           Back to Products
         </Link>
       </div>
 
       {/* Progress Steps */}
-      <div className="mb-8">
+      <div className="mb-8 bg-white rounded-lg p-6 shadow-sm border border-gray-100">
         <div className="flex items-center justify-between">
           {steps.map((step, index) => (
             <div key={step.number} className="flex items-center">
               <div
-                className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
+                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
                   currentStep >= step.number
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-gray-300 text-gray-500'
+                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                    : 'border-gray-300 text-zinc-500'
                 }`}
               >
                 {step.number}
               </div>
               <div className="ml-3">
                 <div
-                  className={`text-sm font-medium ${
-                    currentStep >= step.number ? 'text-blue-600' : 'text-gray-500'
+                  className={`text-sm font-light ${
+                    currentStep >= step.number ? 'text-emerald-600' : 'text-zinc-500'
                   }`}
                 >
                   {step.title}
                 </div>
-                <div className="text-xs text-gray-400">{step.description}</div>
+                <div className="text-xs text-zinc-400 font-light">{step.description}</div>
               </div>
               {index < steps.length - 1 && (
                 <div
-                  className={`w-16 h-0.5 mx-4 ${
-                    currentStep > step.number ? 'bg-blue-600' : 'bg-gray-300'
+                  className={`w-16 h-0.5 mx-4 transition-colors ${
+                    currentStep > step.number ? 'bg-emerald-600' : 'bg-gray-300'
                   }`}
                 />
               )}
@@ -438,44 +441,44 @@ export default function CreateProductPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Step 1: Basic Info */}
         {currentStep === 1 && (
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-stone-800">Basic Information</h2>
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+            <h2 className="text-xl font-light mb-6 text-zinc-900">Basic Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                <label className="block text-sm font-light text-zinc-700 mb-2">Name *</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                    errors.name ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light ${
+                    errors.name ? 'border-red-500' : 'border-gray-200'
                   }`}
                   placeholder="Enter product name"
                 />
                 {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+                <label className="block text-sm font-light text-zinc-700 mb-2">Slug *</label>
                 <input
                   type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
-                  className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                    errors.slug ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light ${
+                    errors.slug ? 'border-red-500' : 'border-gray-200'
                   }`}
                   placeholder="product-url-slug"
                 />
                 {errors.slug && <p className="text-red-500 text-sm mt-1">{errors.slug}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                <label className="block text-sm font-light text-zinc-700 mb-2">Category *</label>
                 <select
                   value={formData.category_id}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, category_id: e.target.value }))
                   }
-                  className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                    errors.category_id ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light ${
+                    errors.category_id ? 'border-red-500' : 'border-gray-200'
                   }`}
                 >
                   <option value="">Select Category</option>
@@ -506,7 +509,7 @@ export default function CreateProductPage() {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Base Price *</label>
+                <label className="block text-sm font-light text-zinc-700 mb-2">Base Price *</label>
                 <input
                   type="number"
                   step="0.01"
@@ -518,8 +521,8 @@ export default function CreateProductPage() {
                       base_price: parseFloat(e.target.value) || 0,
                     }))
                   }
-                  className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                    errors.base_price ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light ${
+                    errors.base_price ? 'border-red-500' : 'border-gray-200'
                   }`}
                   placeholder="0.00"
                 />
@@ -533,11 +536,11 @@ export default function CreateProductPage() {
 
         {/* Step 2: Description & Media */}
         {currentStep === 2 && (
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-stone-800">Description & Media</h2>
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+            <h2 className="text-xl font-light mb-6 text-zinc-900">Description & Media</h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-light text-zinc-700 mb-2">
                   Description *
                 </label>
                 <textarea
@@ -546,8 +549,8 @@ export default function CreateProductPage() {
                     setFormData((prev) => ({ ...prev, description: e.target.value }))
                   }
                   rows={4}
-                  className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                    errors.description ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light ${
+                    errors.description ? 'border-red-500' : 'border-gray-200'
                   }`}
                   placeholder="Describe your product..."
                 />
@@ -559,7 +562,7 @@ export default function CreateProductPage() {
               {/* Image Management Component */}
               {selectedCategory && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-light text-zinc-700 mb-2">
                     Product Images *
                   </label>
                   <ImageManager
@@ -583,9 +586,9 @@ export default function CreateProductPage() {
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, is_active: e.target.checked }))
                     }
-                    className="mr-2"
+                    className="mr-2 w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
                   />
-                  <span className="text-sm text-gray-700">Active</span>
+                  <span className="text-sm text-zinc-700 font-light">Active</span>
                 </label>
                 <label className="flex items-center">
                   <input
@@ -594,9 +597,9 @@ export default function CreateProductPage() {
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, customizable: e.target.checked }))
                     }
-                    className="mr-2"
+                    className="mr-2 w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
                   />
-                  <span className="text-sm text-gray-700">Customizable</span>
+                  <span className="text-sm text-zinc-700 font-light">Customizable</span>
                 </label>
               </div>
             </div>
@@ -605,14 +608,14 @@ export default function CreateProductPage() {
 
         {/* Step 3: Attributes */}
         {currentStep === 3 && (
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-stone-800">Category Attributes</h2>
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+            <h2 className="text-xl font-light mb-6 text-zinc-900">Category Attributes</h2>
             {categoryAttributes.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {categoryAttributes.map(renderAttributeField)}
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-8">
+              <p className="text-zinc-500 text-center py-8 font-light">
                 No attributes defined for this category. You can add attributes in the category
                 management.
               </p>
@@ -622,36 +625,38 @@ export default function CreateProductPage() {
 
         {/* Step 4: Review */}
         {currentStep === 4 && (
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-stone-800">Review & Create</h2>
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+            <h2 className="text-xl font-light mb-6 text-zinc-900">Review & Create</h2>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h3 className="font-medium text-gray-900">Basic Information</h3>
-                  <p>
-                    <strong>Name:</strong> {formData.name}
+                  <h3 className="font-light text-zinc-900 mb-3">Basic Information</h3>
+                  <p className="text-sm text-zinc-700 font-light mb-2">
+                    <span className="font-medium">Name:</span> {formData.name}
                   </p>
-                  <p>
-                    <strong>Category:</strong>{' '}
+                  <p className="text-sm text-zinc-700 font-light mb-2">
+                    <span className="font-medium">Category:</span>{' '}
                     {categories.find((c) => c.id === formData.category_id)?.name}
                   </p>
-                  <p>
-                    <strong>Base Price:</strong> ${formData.base_price}
+                  <p className="text-sm text-zinc-700 font-light mb-2">
+                    <span className="font-medium">Base Price:</span> £{formData.base_price}
                   </p>
-                  <p>
-                    <strong>Slug:</strong> {formData.slug}
+                  <p className="text-sm text-zinc-700 font-light mb-2">
+                    <span className="font-medium">Slug:</span> {formData.slug}
                   </p>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Settings</h3>
-                  <p>
-                    <strong>Active:</strong> {formData.is_active ? 'Yes' : 'No'}
+                  <h3 className="font-light text-zinc-900 mb-3">Settings</h3>
+                  <p className="text-sm text-zinc-700 font-light mb-2">
+                    <span className="font-medium">Active:</span> {formData.is_active ? 'Yes' : 'No'}
                   </p>
-                  <p>
-                    <strong>Customizable:</strong> {formData.customizable ? 'Yes' : 'No'}
+                  <p className="text-sm text-zinc-700 font-light mb-2">
+                    <span className="font-medium">Customizable:</span>{' '}
+                    {formData.customizable ? 'Yes' : 'No'}
                   </p>
-                  <p>
-                    <strong>Description:</strong> {formData.description.substring(0, 100)}...
+                  <p className="text-sm text-zinc-700 font-light mb-2">
+                    <span className="font-medium">Description:</span>{' '}
+                    {formData.description.substring(0, 100)}...
                   </p>
                 </div>
               </div>
@@ -659,7 +664,7 @@ export default function CreateProductPage() {
               {/* Gallery Preview */}
               {formData.galleryImages.length > 0 && (
                 <div>
-                  <h3 className="font-medium text-gray-900">
+                  <h3 className="font-light text-zinc-900 mb-3">
                     Gallery Images ({formData.galleryImages.length})
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
@@ -672,7 +677,7 @@ export default function CreateProductPage() {
                           className="w-full h-16 object-cover rounded border"
                         />
                         {index === 0 && (
-                          <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1 rounded">
+                          <div className="absolute top-1 left-1 bg-emerald-600 text-white text-xs px-2 py-0.5 rounded font-light">
                             Thumbnail
                           </div>
                         )}
@@ -684,7 +689,7 @@ export default function CreateProductPage() {
 
               {Object.keys(formData.attributes).length > 0 && (
                 <div>
-                  <h3 className="font-medium text-gray-900">Attributes</h3>
+                  <h3 className="font-light text-zinc-900 mb-3">Attributes</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {Object.entries(formData.attributes).map(([key, value]) => (
                       <p key={key}>
@@ -700,12 +705,12 @@ export default function CreateProductPage() {
         )}
 
         {/* Navigation */}
-        <div className="flex justify-between">
+        <div className="flex justify-between pt-6 border-t border-gray-100">
           <button
             type="button"
             onClick={prevStep}
             disabled={currentStep === 1}
-            className="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-white border border-gray-200 text-zinc-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-light"
           >
             Previous
           </button>
@@ -714,7 +719,7 @@ export default function CreateProductPage() {
             <button
               type="button"
               onClick={nextStep}
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+              className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-light"
             >
               Next
             </button>
@@ -722,7 +727,7 @@ export default function CreateProductPage() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+              className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-light"
             >
               {loading ? 'Creating...' : 'Create Product'}
             </button>

@@ -1,23 +1,12 @@
-import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
-
-const SECTIONS = [
-  { key: 'dashboard', label: 'Dashboard', href: '/admin' },
-  { key: 'products', label: 'Products', href: '/admin/products' },
-  { key: 'create-product', label: 'Create Product', href: '/admin/create-product' },
-  { key: 'categories', label: 'Categories', href: '/admin/categories' },
-  { key: 'orders', label: 'Orders', href: '/admin/orders' },
-  { key: 'custom-orders', label: 'Custom Orders', href: '/admin/custom-orders' },
-  { key: 'users', label: 'Users', href: '/admin/users' },
-]
+import AdminSidebar from './AdminSidebar'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const { user, isAdmin, loading: authLoading } = useAuth()
-  const current =
-    router.pathname === '/admin' ? 'dashboard' : router.pathname.split('/')[2] || 'dashboard'
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   // Redirect if not authenticated or not admin
   useEffect(() => {
@@ -38,8 +27,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Checking authentication...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
+          <p className="mt-4 text-zinc-600 font-light">Checking authentication...</p>
         </div>
       </div>
     )
@@ -51,38 +40,49 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Minimal Admin Navbar */}
-      <nav className="fixed top-0 left-0 w-full bg-white border-b border-stone-200 px-8 py-3 flex items-center justify-between z-50">
-        <Link href="/" className="text-4xl font-bold text-blue-500">
-          3Dthium
-        </Link>
-        <Link href="/account" className="text-stone-800 hover:underline font-medium">
-          My Account
-        </Link>
-      </nav>
-      <div>
-        {/* Sidebar */}
-        <aside className="fixed top-[56px] left-0 h-[calc(100vh-56px)] w-64 bg-white shadow-lg z-40 flex-shrink-0">
-          <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <span className="text-xl font-bold text-stone-800">Admin</span>
-            </div>
-            <nav className="flex-1 px-6 py-4 space-y-2">
-              {SECTIONS.map((s) => (
-                <Link
-                  key={s.key}
-                  href={s.href}
-                  className={`block w-full text-left px-4 py-2 rounded ${current === s.key ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-100 text-gray-700'}`}
-                >
-                  {s.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-        </aside>
-        {/* Main content */}
-        <main className="flex-1 flex flex-col pl-64 pt-[56px]">{children}</main>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 h-screen bg-white border-r border-gray-200 z-40 transition-transform duration-300 ${
+          sidebarCollapsed ? '-translate-x-full' : 'translate-x-0'
+        }`}
+      >
+        <AdminSidebar onCollapse={() => setSidebarCollapsed(true)} />
+      </aside>
+
+      {/* Collapsed Sidebar Toggle Button */}
+      {sidebarCollapsed && (
+        <button
+          type="button"
+          onClick={() => setSidebarCollapsed(false)}
+          className="fixed top-4 left-4 z-50 p-2 bg-white border border-gray-200 rounded-lg shadow-md hover:bg-gray-50 transition-colors"
+          aria-label="Open sidebar"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-5 h-5 text-zinc-700"
+          >
+            <rect width="18" height="18" x="3" y="3" rx="2" />
+            <path d="M9 3v18" />
+            <path d="m9 9 6 6-6 6" />
+          </svg>
+        </button>
+      )}
+
+      {/* Main content */}
+      <div
+        className={`flex-1 flex flex-col transition-all duration-300 ${
+          sidebarCollapsed ? 'pl-0' : 'pl-64'
+        }`}
+      >
+        {/* Page content */}
+        <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
   )

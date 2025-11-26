@@ -43,7 +43,7 @@ export default function AdminUsersPage() {
         setUsers(data || [])
       } catch (error) {
         console.error('❌ [AdminUsers] Error:', error)
-        alert('Failed to load users')
+        console.error('Failed to load users')
       } finally {
         setUsersLoading(false)
       }
@@ -74,7 +74,7 @@ export default function AdminUsersPage() {
       setSelectedUsers([])
     } catch (error) {
       console.error('❌ [AdminUsers] Bulk delete error:', error)
-      alert('Failed to delete users')
+        console.error('Failed to delete users')
     }
   }
   const handleAction = async (user: User, type: 'toggle') => {
@@ -96,7 +96,7 @@ export default function AdminUsersPage() {
       }
     } catch (error) {
       console.error('❌ [AdminUsers] Action error:', error)
-      alert('Failed to update user')
+        console.error('Failed to update user')
     }
   }
 
@@ -106,103 +106,108 @@ export default function AdminUsersPage() {
   }, [search])
 
   return (
-    <div className="w-full mx-auto bg-white p-16">
-      <h2 className="text-2xl font-bold mb-6 text-stone-800">Users</h2>
-      <div className="mb-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+    <div className="w-full mx-auto">
+      <div className="mb-6">
+        <h1 className="text-3xl font-light text-zinc-900 mb-2">Users</h1>
+        <p className="text-sm text-zinc-600 font-light">Manage user accounts and permissions</p>
+      </div>
+
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
         <input
           type="text"
           placeholder="Search by email or Auth User ID..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border rounded px-3 py-2 w-full sm:w-72 text-stone-800 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          className="border border-gray-200 rounded-lg px-4 py-2 w-full sm:w-72 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
         />
-      </div>
-      <div className="mb-2 flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={allUsersSelected}
-          onChange={toggleSelectAllUsers}
-          className="accent-blue-200 w-5 h-3 rounded"
-        />
-        <span className="text-sm text-stone-800">Select All</span>
-        {selectedUsers.length > 0 && (
-          <span
-            onClick={handleBulkDeleteUsers}
-            className="ml-4 text-red-700 font-semibold hover:underline cursor-pointer select-none text-sm"
-          >
-            Delete Selected
-          </span>
-        )}
-        <span className="ml-auto text-sm text-gray-500">
+        <span className="text-sm text-zinc-600 font-light ml-auto">
           {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''}
         </span>
       </div>
-      <div className="overflow-x-auto rounded-lg border">
+
+      {selectedUsers.length > 0 && (
+        <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-center justify-between">
+          <span className="text-sm text-emerald-900 font-light">
+            {selectedUsers.length} user{selectedUsers.length !== 1 ? 's' : ''} selected
+          </span>
+          <button
+            onClick={handleBulkDeleteUsers}
+            className="px-4 py-1.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors font-light"
+          >
+            Delete Selected
+          </button>
+        </div>
+      )}
+
+      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
         <table className="min-w-full bg-white text-sm">
-          <thead className="bg-gray-100">
+          <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-2 py-3">
+              <th className="px-4 py-3 w-12">
                 <input
                   type="checkbox"
                   checked={allUsersSelected}
                   onChange={toggleSelectAllUsers}
-                  className="accent-blue-200 w-5 h-3 rounded"
+                  className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
                 />
               </th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Email</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Created</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">is_admin</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Auth User ID</th>
-              <th className="px-4 py-3 text-center font-semibold text-gray-700">Actions</th>
+              <th className="px-4 py-3 text-left font-light text-zinc-700">Email</th>
+              <th className="px-4 py-3 text-left font-light text-zinc-700">Created</th>
+              <th className="px-4 py-3 text-left font-light text-zinc-700">Role</th>
+              <th className="px-4 py-3 text-left font-light text-zinc-700">Auth User ID</th>
+              <th className="px-4 py-3 text-center font-light text-zinc-700">Actions</th>
             </tr>
           </thead>
           <tbody>
             {usersLoading ? (
               <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-500">
-                  Loading users...
+                <td colSpan={6} className="text-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+                  <p className="text-zinc-600 mt-2 font-light">Loading users...</p>
                 </td>
               </tr>
             ) : paginatedUsers.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-500">
-                  No users found.
+                <td colSpan={6} className="text-center py-12 text-zinc-500">
+                  <p className="font-light">No users found.</p>
                 </td>
               </tr>
             ) : (
               paginatedUsers.map((user) => (
-                <tr key={user.id} className="border-b hover:bg-gray-50">
-                  <td className="px-2 py-3">
+                <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3">
                     <input
                       type="checkbox"
                       checked={selectedUsers.includes(user.id)}
                       onChange={() => toggleSelectUser(user.id)}
-                      className="accent-blue-200 w-5 h-3 rounded"
+                      className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
                     />
                   </td>
-                  <td className="px-4 py-3 font-medium text-gray-900">{user.email}</td>
-                  <td className="px-4 py-3 text-gray-700">
+                  <td className="px-4 py-3 font-light text-zinc-900">{user.email}</td>
+                  <td className="px-4 py-3 text-zinc-600 font-light text-xs">
                     {new Date(user.created_at).toLocaleString()}
                   </td>
                   <td className="px-4 py-3">
                     <span
-                      className={`inline-block px-2 py-1 rounded text-xs font-semibold ${user.is_admin ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'}`}
+                      className={`inline-block px-2 py-1 rounded-full text-xs font-light ${
+                        user.is_admin
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-gray-100 text-zinc-600'
+                      }`}
                     >
-                      {user.is_admin ? 'Yes' : 'No'}
+                      {user.is_admin ? 'Admin' : 'User'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500 font-mono break-all">
+                  <td className="px-4 py-3 text-zinc-500 font-mono break-all text-xs font-light">
                     {user.auth_user_id}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <div className="flex gap-2 justify-center">
-                      <button
-                        onClick={() => handleAction(user, 'toggle')}
-                        className="text-stone-800 border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 transition"
-                      >
-                        {user.is_admin ? 'Revoke Admin' : 'Make Admin'}
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleAction(user, 'toggle')}
+                      className="px-3 py-1.5 bg-white border border-gray-200 text-zinc-700 rounded-lg hover:bg-gray-50 transition-colors text-xs font-light"
+                    >
+                      {user.is_admin ? 'Revoke Admin' : 'Make Admin'}
+                    </button>
                   </td>
                 </tr>
               ))
@@ -210,26 +215,29 @@ export default function AdminUsersPage() {
           </tbody>
         </table>
       </div>
+
       {/* Pagination */}
-      <div className="flex justify-between items-center mt-4">
-        <button
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-          className="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <span className="text-sm text-stone-800">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-          className="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-between items-center mt-6">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-light text-sm"
+          >
+            Previous
+          </button>
+          <span className="text-sm text-zinc-600 font-light">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-light text-sm"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   )
 }
