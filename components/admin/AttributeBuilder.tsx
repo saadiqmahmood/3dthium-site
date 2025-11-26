@@ -305,15 +305,15 @@ export default function AttributeBuilder({
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-semibold text-stone-800">Product Attributes</h3>
-          <p className="text-sm text-stone-600 mt-1">
+          <h3 className="text-lg font-light text-zinc-900">Product Attributes</h3>
+          <p className="text-sm text-zinc-600 mt-1 font-light">
             Define attributes that customers can choose from (e.g., Color, Size, Design)
           </p>
         </div>
         <button
           type="button"
           onClick={addAttribute}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-light"
         >
           + Add Attribute
         </button>
@@ -321,7 +321,7 @@ export default function AttributeBuilder({
 
       {/* How It Works Info Box */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+        <h4 className="font-light text-blue-900 mb-2 flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -338,7 +338,7 @@ export default function AttributeBuilder({
           </svg>
           How Attributes Work:
         </h4>
-        <ol className="text-sm text-blue-800 space-y-1.5 list-decimal list-inside">
+        <ol className="text-sm text-blue-800 space-y-1.5 list-decimal list-inside font-light">
           <li>
             <strong>Add an Attribute:</strong> Click &quot;+ Add Attribute&quot; and name it (e.g.,
             &quot;Color&quot;, &quot;Height&quot;, &quot;Material&quot;)
@@ -368,16 +368,16 @@ export default function AttributeBuilder({
             Generator&quot; section to automatically create all possible combinations
           </li>
         </ol>
-        <p className="text-xs text-blue-700 mt-3 font-medium">
+        <p className="text-xs text-blue-700 mt-3 font-light">
           💡 Example: Color (Red, Blue) × Height (150mm, 200mm) = 4 variations automatically
           created!
         </p>
       </div>
 
       {attributes.length === 0 && (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-          <p className="text-stone-600 mb-2">No attributes defined yet</p>
-          <p className="text-sm text-stone-500 mb-4">
+        <div className="border-2 border-dashed border-gray-200 rounded-lg p-12 text-center bg-gray-50">
+          <p className="text-zinc-600 mb-2 font-light">No attributes defined yet</p>
+          <p className="text-sm text-zinc-500 mb-4 font-light">
             Click &quot;Add Attribute&quot; to create attributes like Color, Size, or Design
           </p>
         </div>
@@ -389,18 +389,18 @@ export default function AttributeBuilder({
         const firstOptionImage = attr.options?.[0]?.images?.[0]
 
         return (
-          <div key={attrIdx} className="border rounded-lg bg-white shadow-sm mb-4">
+          <div key={attrIdx} className="border border-gray-200 rounded-lg bg-white shadow-sm mb-4">
             {/* Collapsed Summary View */}
             <div
               className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                !isExpanded ? 'border-b' : ''
+                !isExpanded ? 'border-b border-gray-100' : ''
               }`}
               onClick={() => toggleAttribute(attrIdx)}
             >
               <div className="flex items-center gap-4 flex-1">
                 {/* Expand/Collapse Icon */}
                 <svg
-                  className={`w-5 h-5 text-gray-400 transition-transform ${
+                  className={`w-5 h-5 text-zinc-400 transition-transform ${
                     isExpanded ? 'rotate-90' : ''
                   }`}
                   fill="none"
@@ -418,15 +418,15 @@ export default function AttributeBuilder({
                 {/* Attribute Preview */}
                 {hasName ? (
                   <div className="flex items-center gap-3 flex-1">
-                    <div className="font-semibold text-stone-800">{attr.name}</div>
-                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded capitalize">
+                    <div className="font-light text-zinc-900">{attr.name}</div>
+                    <span className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full capitalize font-light">
                       {attr.type}
                     </span>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-zinc-600 font-light">
                       {attr.options.length} option{attr.options.length !== 1 ? 's' : ''}
                     </span>
                     {firstOptionImage && (
-                      <div className="w-10 h-10 border rounded overflow-hidden">
+                      <div className="w-10 h-10 border border-gray-200 rounded-lg overflow-hidden">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={firstOptionImage}
@@ -437,7 +437,7 @@ export default function AttributeBuilder({
                     )}
                   </div>
                 ) : (
-                  <div className="text-gray-500 italic">New attribute (click to edit)</div>
+                  <div className="text-zinc-500 italic font-light">New attribute (click to edit)</div>
                 )}
               </div>
 
@@ -447,7 +447,7 @@ export default function AttributeBuilder({
                   e.stopPropagation()
                   removeAttribute(attrIdx)
                 }}
-                className="text-red-600 hover:text-red-800 font-medium text-sm px-2"
+                className="text-red-600 hover:text-red-700 font-light text-sm px-2"
               >
                 Remove
               </button>
@@ -455,10 +455,10 @@ export default function AttributeBuilder({
 
             {/* Expanded Edit View */}
             {isExpanded && (
-              <div className="p-6 border-t">
+              <div className="p-6 border-t border-gray-100">
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-stone-800">
+                    <label className="block text-sm font-light mb-2 text-zinc-700">
                       Attribute Name *
                     </label>
                     <input
@@ -466,15 +466,15 @@ export default function AttributeBuilder({
                       placeholder="e.g., Color, Height, Material"
                       value={attr.name || ''}
                       onChange={(e) => updateAttribute(attrIdx, 'name', e.target.value)}
-                      className="w-full px-3 py-2 border rounded text-stone-900 bg-white focus:ring-2 focus:ring-blue-200"
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg text-zinc-900 bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-stone-800">Type</label>
+                    <label className="block text-sm font-light mb-2 text-zinc-700">Type</label>
                     <select
                       value={attr.type}
                       onChange={(e) => updateAttribute(attrIdx, 'type', e.target.value)}
-                      className="w-full px-3 py-2 border rounded text-stone-900 bg-white focus:ring-2 focus:ring-blue-200"
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg text-zinc-900 bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
                     >
                       <option value="color">Color (with color picker)</option>
                       <option value="size">Size/Dimensions</option>
@@ -488,29 +488,29 @@ export default function AttributeBuilder({
                 {/* Options */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-sm font-medium text-stone-800">
+                    <label className="text-sm font-light text-zinc-700">
                       Options * ({attr.options.length})
                     </label>
                     <button
                       type="button"
                       onClick={() => addOption(attrIdx)}
-                      className="text-sm px-3 py-1 bg-gray-200 text-stone-800 rounded hover:bg-gray-300 transition"
+                      className="text-sm px-3 py-1.5 bg-white border border-gray-200 text-zinc-700 rounded-lg hover:bg-gray-50 transition-colors font-light"
                     >
                       + Add Option
                     </button>
                   </div>
 
                   {attr.options.length === 0 && (
-                    <div className="border border-dashed border-gray-300 rounded p-4 text-center text-sm text-stone-600">
-                      No options yet. Click &quot;Add Option&quot; to create options like Red, Blue,
-                      Small, Large, etc.
+                    <div className="border border-dashed border-gray-200 rounded-lg p-4 text-center text-sm text-zinc-600 bg-gray-50">
+                      <p className="font-light">No options yet. Click &quot;Add Option&quot; to create options like Red, Blue,
+                      Small, Large, etc.</p>
                     </div>
                   )}
 
                   {attr.options.map((option, optIdx) => (
                     <div
                       key={`attr-${attrIdx}-opt-${optIdx}`}
-                      className="grid grid-cols-12 gap-3 items-start p-3 bg-gray-50 rounded border"
+                      className="grid grid-cols-12 gap-3 items-start p-4 bg-gray-50 rounded-lg border border-gray-200"
                     >
                       {/* Value - Hidden, auto-generated from display name */}
                       <input
@@ -526,7 +526,7 @@ export default function AttributeBuilder({
 
                       {/* Display Name */}
                       <div className={attr.type === 'color' ? 'col-span-3' : 'col-span-4'}>
-                        <label className="block text-xs text-stone-600 mb-1">Display Name *</label>
+                        <label className="block text-xs text-zinc-600 mb-1 font-light">Display Name *</label>
                         <input
                           type="text"
                           placeholder="e.g., Crimson Red, 150mm"
@@ -534,32 +534,32 @@ export default function AttributeBuilder({
                           onChange={(e) =>
                             updateOption(attrIdx, optIdx, 'displayName', e.target.value)
                           }
-                          className="w-full px-2 py-1.5 border rounded text-sm text-stone-900 bg-white"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 font-light"
                           title="What customers see (can include units, spaces, etc.)"
                         />
-                        <p className="text-xs text-stone-500 mt-0.5">What customers see</p>
+                        <p className="text-xs text-zinc-500 mt-0.5 font-light">What customers see</p>
                       </div>
 
                       {/* Color Picker (only for color type) */}
                       {attr.type === 'color' && (
                         <div className="col-span-1">
-                          <label className="block text-xs text-stone-600 mb-1">Color</label>
+                          <label className="block text-xs text-zinc-600 mb-1 font-light">Color</label>
                           <input
                             type="color"
                             value={option.hexColor || '#000000'}
                             onChange={(e) =>
                               updateOption(attrIdx, optIdx, 'hexColor', e.target.value)
                             }
-                            className="w-full h-9 border rounded cursor-pointer"
+                            className="w-full h-9 border border-gray-200 rounded-lg cursor-pointer"
                             title="Color swatch for this option"
                           />
-                          <p className="text-xs text-stone-500 mt-0.5">Swatch</p>
+                          <p className="text-xs text-zinc-500 mt-0.5 font-light">Swatch</p>
                         </div>
                       )}
 
                       {/* Price Modifier */}
                       <div className={attr.type === 'color' ? 'col-span-2' : 'col-span-3'}>
-                        <label className="block text-xs text-stone-600 mb-1">Price Modifier</label>
+                        <label className="block text-xs text-zinc-600 mb-1 font-light">Price Modifier</label>
                         <input
                           type="number"
                           placeholder="0.00"
@@ -573,15 +573,15 @@ export default function AttributeBuilder({
                               parseFloat(e.target.value) || 0
                             )
                           }
-                          className="w-full px-2 py-1.5 border rounded text-sm text-stone-900 bg-white"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 font-light"
                           title="Price adjustment: +5 adds $5, -2 subtracts $2, 0 = no change"
                         />
-                        <p className="text-xs text-stone-500 mt-0.5">+5 adds $5, -2 subtracts $2</p>
+                        <p className="text-xs text-zinc-500 mt-0.5 font-light">+5 adds $5, -2 subtracts $2</p>
                       </div>
 
                       {/* Images */}
                       <div className={attr.type === 'color' ? 'col-span-3' : 'col-span-3'}>
-                        <div className="text-xs text-stone-700 mb-1">
+                        <div className="text-xs text-zinc-700 mb-1 font-light">
                           Images ({option.images?.length || 0})
                         </div>
                         {productSlug && attr.name && option.value ? (
@@ -600,9 +600,9 @@ export default function AttributeBuilder({
                             maxImages={5}
                           />
                         ) : (
-                          <div className="border-2 border-dashed border-gray-300 rounded p-4 text-center text-sm text-gray-500">
-                            Please fill in the attribute name and option value before uploading
-                            images
+                          <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center text-sm text-zinc-500 bg-gray-50">
+                            <p className="font-light">Please fill in the attribute name and option value before uploading
+                            images</p>
                           </div>
                         )}
                       </div>
@@ -612,7 +612,7 @@ export default function AttributeBuilder({
                         <button
                           type="button"
                           onClick={() => removeOption(attrIdx, optIdx)}
-                          className="text-red-600 hover:text-red-800 font-bold text-lg"
+                          className="text-red-600 hover:text-red-700 font-light text-lg"
                           title="Remove option"
                         >
                           ×
@@ -629,12 +629,12 @@ export default function AttributeBuilder({
 
       {/* Save Button */}
       {attributes.length > 0 && (
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
           <div>
             {message && (
               <span
-                className={`text-sm font-medium ${
-                  message.type === 'success' ? 'text-green-600' : 'text-red-600'
+                className={`text-sm font-light ${
+                  message.type === 'success' ? 'text-emerald-600' : 'text-red-600'
                 }`}
               >
                 {message.text}
@@ -645,7 +645,7 @@ export default function AttributeBuilder({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 transition"
+            className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-gray-400 transition-colors font-light"
           >
             {saving ? 'Saving...' : 'Save Attributes'}
           </button>

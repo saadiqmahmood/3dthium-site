@@ -229,7 +229,8 @@ export default function VariantManager({
   if (loading) {
     return (
       <div className="text-center py-8">
-        <p className="text-stone-800">Loading variants...</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+        <p className="text-zinc-600 mt-2 font-light">Loading variants...</p>
       </div>
     )
   }
@@ -237,13 +238,13 @@ export default function VariantManager({
   return (
     <div className="space-y-6">
       {/* Create Variant Form */}
-      <div className="border rounded-lg p-6 bg-gray-50">
-        <h3 className="text-lg font-semibold mb-4 text-stone-800">Add New Variant</h3>
+      <div className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
+        <h3 className="text-lg font-light mb-4 text-zinc-900">Add New Variant</h3>
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Size */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-stone-800">
+              <label className="block text-sm font-light mb-2 text-zinc-700">
                 Size (optional)
               </label>
               <input
@@ -251,13 +252,13 @@ export default function VariantManager({
                 value={formData.size}
                 onChange={(e) => setFormData({ ...formData, size: e.target.value })}
                 placeholder="e.g., 150mm, 180mm"
-                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 text-zinc-900 placeholder:text-zinc-500 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
               />
             </div>
 
             {/* Color */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-stone-800">
+              <label className="block text-sm font-light mb-2 text-zinc-700">
                 Color (optional)
               </label>
               <input
@@ -265,13 +266,13 @@ export default function VariantManager({
                 value={formData.color}
                 onChange={(e) => setFormData({ ...formData, color: e.target.value })}
                 placeholder="e.g., White, Black"
-                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 text-zinc-900 placeholder:text-zinc-500 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
               />
             </div>
 
             {/* Material */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-stone-800">
+              <label className="block text-sm font-light mb-2 text-zinc-700">
                 Material (optional)
               </label>
               <input
@@ -279,7 +280,7 @@ export default function VariantManager({
                 value={formData.material}
                 onChange={(e) => setFormData({ ...formData, material: e.target.value })}
                 placeholder="e.g., PLA, PETG"
-                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 text-zinc-900 placeholder:text-zinc-500 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
               />
             </div>
           </div>
@@ -287,9 +288,9 @@ export default function VariantManager({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Price Adjustment */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-stone-800">
+              <label className="block text-sm font-light mb-2 text-zinc-700">
                 Price Adjustment (£)
-                <span className="text-stone-700 text-xs ml-2">
+                <span className="text-zinc-600 text-xs ml-2 font-light">
                   Base: £{basePrice.toFixed(2)} → Final: £
                   {calculateFinalPrice(Number.parseFloat(formData.price_adjustment || '0')).toFixed(
                     2
@@ -302,25 +303,25 @@ export default function VariantManager({
                 value={formData.price_adjustment}
                 onChange={(e) => setFormData({ ...formData, price_adjustment: e.target.value })}
                 placeholder="0.00"
-                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 text-zinc-900 placeholder:text-zinc-500 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
               />
-              <p className="text-xs text-stone-700 mt-1">
+              <p className="text-xs text-zinc-600 mt-1 font-light">
                 Positive = more expensive, negative = cheaper
               </p>
             </div>
 
             {/* SKU */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-stone-800">
+              <label className="block text-sm font-light mb-2 text-zinc-700">
                 SKU (optional)
-                <span className="text-stone-700 text-xs ml-2">Auto-generated if empty</span>
+                <span className="text-zinc-600 text-xs ml-2 font-light">Auto-generated if empty</span>
               </label>
               <input
                 type="text"
                 value={formData.sku}
                 onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
                 placeholder="PROD-150-WHT-PLA"
-                className="w-full border rounded px-3 py-2 text-stone-900 placeholder:text-stone-500 bg-white"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 text-zinc-900 placeholder:text-zinc-500 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
               />
             </div>
           </div>
@@ -331,9 +332,9 @@ export default function VariantManager({
               id="is_available"
               checked={formData.is_available}
               onChange={(e) => setFormData({ ...formData, is_available: e.target.checked })}
-              className="rounded"
+              className="rounded w-4 h-4 text-emerald-600 focus:ring-emerald-500"
             />
-            <label htmlFor="is_available" className="text-sm font-medium text-stone-800">
+            <label htmlFor="is_available" className="text-sm font-light text-zinc-700">
               Available for purchase
             </label>
           </div>
@@ -342,7 +343,7 @@ export default function VariantManager({
             type="button"
             onClick={handleCreateVariant}
             disabled={saving}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
+            className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-gray-400 transition-colors font-light"
           >
             {saving ? 'Creating...' : 'Add Variant'}
           </button>
@@ -351,47 +352,47 @@ export default function VariantManager({
 
       {/* Variants List */}
       <div>
-        <h3 className="text-lg font-semibold mb-4 text-stone-800">
+        <h3 className="text-lg font-light mb-4 text-zinc-900">
           Existing Variants ({variants.length})
         </h3>
 
         {variants.length === 0 ? (
-          <div className="border rounded-lg p-8 text-center text-stone-700">
-            <p className="text-stone-800">No variants created yet. Add your first variant above.</p>
-            <p className="text-sm mt-2 text-stone-700">
+          <div className="border border-gray-200 rounded-lg p-8 text-center bg-gray-50">
+            <p className="text-zinc-900 font-light">No variants created yet. Add your first variant above.</p>
+            <p className="text-sm mt-2 text-zinc-600 font-light">
               Variants allow customers to choose size, color, and material options.
             </p>
           </div>
         ) : (
-          <div className="border rounded-lg overflow-hidden">
+          <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
             <table className="w-full">
-              <thead className="bg-gray-100">
+              <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">Size</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">
+                  <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">Size</th>
+                  <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">
                     Color
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">
+                  <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">
                     Material
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">
+                  <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">
                     Adjustment
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">
+                  <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">
                     Final Price
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">SKU</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-stone-800">
+                  <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">SKU</th>
+                  <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">
                     Status
                   </th>
-                  <th className="px-4 py-3 text-right text-sm font-semibold text-stone-800">
+                  <th className="px-4 py-3 text-right text-sm font-light text-zinc-700">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y divide-gray-100">
                 {variants.map((variant) => (
-                  <tr key={variant.id} className="hover:bg-gray-50">
+                  <tr key={variant.id} className="hover:bg-gray-50 transition-colors">
                     {editingId === variant.id ? (
                       // Edit mode
                       <>
@@ -402,7 +403,7 @@ export default function VariantManager({
                             onChange={(e) =>
                               setEditFormData({ ...editFormData, size: e.target.value })
                             }
-                            className="w-full border rounded px-2 py-1 text-sm"
+                            className="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm font-light focus:outline-none focus:ring-2 focus:ring-emerald-200"
                           />
                         </td>
                         <td className="px-4 py-3">
@@ -412,7 +413,7 @@ export default function VariantManager({
                             onChange={(e) =>
                               setEditFormData({ ...editFormData, color: e.target.value })
                             }
-                            className="w-full border rounded px-2 py-1 text-sm"
+                            className="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm font-light focus:outline-none focus:ring-2 focus:ring-emerald-200"
                           />
                         </td>
                         <td className="px-4 py-3">
@@ -422,7 +423,7 @@ export default function VariantManager({
                             onChange={(e) =>
                               setEditFormData({ ...editFormData, material: e.target.value })
                             }
-                            className="w-full border rounded px-2 py-1 text-sm"
+                            className="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm font-light focus:outline-none focus:ring-2 focus:ring-emerald-200"
                           />
                         </td>
                         <td className="px-4 py-3">
@@ -436,10 +437,10 @@ export default function VariantManager({
                                 price_adjustment: Number.parseFloat(e.target.value),
                               })
                             }
-                            className="w-full border rounded px-2 py-1 text-sm"
+                            className="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm font-light focus:outline-none focus:ring-2 focus:ring-emerald-200"
                           />
                         </td>
-                        <td className="px-4 py-3 text-sm">
+                        <td className="px-4 py-3 text-sm text-zinc-900 font-light">
                           £
                           {calculateFinalPrice(
                             (editFormData.price_adjustment as number) || 0
@@ -452,7 +453,7 @@ export default function VariantManager({
                             onChange={(e) =>
                               setEditFormData({ ...editFormData, sku: e.target.value })
                             }
-                            className="w-full border rounded px-2 py-1 text-sm"
+                            className="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm font-light focus:outline-none focus:ring-2 focus:ring-emerald-200"
                           />
                         </td>
                         <td className="px-4 py-3">
@@ -465,20 +466,20 @@ export default function VariantManager({
                                 is_available: e.target.checked,
                               })
                             }
-                            className="rounded"
+                            className="rounded w-4 h-4 text-emerald-600 focus:ring-emerald-500"
                           />
                         </td>
                         <td className="px-4 py-3 text-right space-x-2">
                           <button
                             onClick={() => handleUpdateVariant(variant.id)}
                             disabled={saving}
-                            className="text-green-600 hover:text-green-800 text-sm font-medium"
+                            className="text-emerald-600 hover:text-emerald-700 text-sm font-light"
                           >
                             Save
                           </button>
                           <button
                             onClick={cancelEditing}
-                            className="text-gray-600 hover:text-gray-800 text-sm font-medium"
+                            className="text-zinc-600 hover:text-zinc-700 text-sm font-light"
                           >
                             Cancel
                           </button>
@@ -487,31 +488,31 @@ export default function VariantManager({
                     ) : (
                       // View mode
                       <>
-                        <td className="px-4 py-3 text-sm text-stone-800">
+                        <td className="px-4 py-3 text-sm text-zinc-900 font-light">
                           {getDisplayName(variant.size)}
                         </td>
-                        <td className="px-4 py-3 text-sm text-stone-800">
+                        <td className="px-4 py-3 text-sm text-zinc-900 font-light">
                           {getDisplayName(variant.color)}
                         </td>
-                        <td className="px-4 py-3 text-sm text-stone-800">
+                        <td className="px-4 py-3 text-sm text-zinc-900 font-light">
                           {getDisplayName(variant.material)}
                         </td>
-                        <td className="px-4 py-3 text-sm text-stone-800">
+                        <td className="px-4 py-3 text-sm text-zinc-900 font-light">
                           {variant.price_adjustment >= 0 ? '+' : ''}£
                           {variant.price_adjustment.toFixed(2)}
                         </td>
-                        <td className="px-4 py-3 text-sm font-semibold text-stone-800">
+                        <td className="px-4 py-3 text-sm font-light text-zinc-900">
                           £{calculateFinalPrice(variant.price_adjustment).toFixed(2)}
                         </td>
-                        <td className="px-4 py-3 text-sm font-mono text-stone-700">
+                        <td className="px-4 py-3 text-sm font-mono text-zinc-700 font-light">
                           {variant.sku || '-'}
                         </td>
                         <td className="px-4 py-3">
                           <span
-                            className={`inline-block px-2 py-1 text-xs rounded-full ${
+                            className={`inline-block px-2 py-1 text-xs rounded-full font-light ${
                               variant.is_available
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'
+                                ? 'bg-emerald-50 text-emerald-700'
+                                : 'bg-gray-100 text-zinc-600'
                             }`}
                           >
                             {variant.is_available ? 'Available' : 'Hidden'}
@@ -520,14 +521,14 @@ export default function VariantManager({
                         <td className="px-4 py-3 text-right space-x-2">
                           <button
                             onClick={() => startEditing(variant)}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                            className="text-emerald-600 hover:text-emerald-700 text-sm font-light"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDeleteVariant(variant.id)}
                             disabled={saving}
-                            className="text-red-600 hover:text-red-800 text-sm font-medium"
+                            className="text-red-600 hover:text-red-700 text-sm font-light"
                           >
                             Delete
                           </button>

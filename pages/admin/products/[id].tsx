@@ -300,34 +300,34 @@ export default function EditProductPage() {
 
   if (loadingProduct) {
     return (
-      <div className="w-full mx-auto bg-white p-8">
+      <div className="w-full mx-auto">
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="ml-4 text-gray-600">Loading product...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+          <p className="ml-4 text-zinc-600 font-light">Loading product...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="w-full mx-auto bg-white p-8">
+    <div className="w-full mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <Link
             href="/admin/products"
-            className="text-blue-600 hover:underline text-sm mb-2 inline-block"
+            className="text-emerald-600 hover:text-emerald-700 text-sm mb-2 inline-block font-light"
           >
             ← Back to Products
           </Link>
-          <h2 className="text-2xl font-bold text-stone-800">Edit Product</h2>
-          <p className="text-sm text-gray-600 mt-1">{formData.name || 'Untitled Product'}</p>
+          <h1 className="text-3xl font-light text-zinc-900 mb-2">Edit Product</h1>
+          <p className="text-sm text-zinc-600 font-light">{formData.name || 'Untitled Product'}</p>
         </div>
       </div>
 
       {/* Clickable Tabs */}
-      <div className="mb-8 border-b border-gray-200">
-        <div className="flex space-x-1 max-w-4xl mx-auto">
+      <div className="mb-8 border-b border-gray-200 bg-white rounded-lg shadow-sm border border-gray-100 p-2">
+        <div className="flex space-x-1">
           {[
             { num: 1, label: 'Basic Info' },
             { num: 2, label: 'Images & Description' },
@@ -339,10 +339,10 @@ export default function EditProductPage() {
               key={step.num}
               type="button"
               onClick={() => setCurrentStep(step.num)}
-              className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+              className={`px-4 py-2 text-sm font-light transition-colors rounded-lg ${
                 currentStep === step.num
-                  ? 'border-blue-600 text-blue-600 bg-blue-50'
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                  ? 'bg-emerald-600 text-white'
+                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-gray-50'
               }`}
             >
               {step.label}
@@ -355,34 +355,34 @@ export default function EditProductPage() {
       <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
         {/* Step 1: Basic Info */}
         {currentStep === 1 && (
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-stone-800">Basic Information</h2>
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+            <h2 className="text-xl font-light mb-6 text-zinc-900">Basic Information</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-light text-zinc-700 mb-2">
                   Product Name *
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                    errors.name ? 'border-red-500' : ''
+                  className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light ${
+                    errors.name ? 'border-red-500' : 'border-gray-200'
                   }`}
                   placeholder="e.g., Blue Ceramic Vase"
                 />
-                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                {errors.name && <p className="text-red-500 text-sm mt-1 font-light">{errors.name}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                <label className="block text-sm font-light text-zinc-700 mb-2">Category *</label>
                 <select
                   value={formData.category_id}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, category_id: e.target.value }))
                   }
-                  className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                    errors.category_id ? 'border-red-500' : ''
+                  className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light ${
+                    errors.category_id ? 'border-red-500' : 'border-gray-200'
                   }`}
                 >
                   <option value="">Select a category</option>
@@ -409,12 +409,12 @@ export default function EditProductPage() {
                   })()}
                 </select>
                 {errors.category_id && (
-                  <p className="text-red-500 text-sm mt-1">{errors.category_id}</p>
+                  <p className="text-red-500 text-sm mt-1 font-light">{errors.category_id}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-light text-zinc-700 mb-2">
                   Base Price (£) *
                 </label>
                 <input
@@ -428,26 +428,26 @@ export default function EditProductPage() {
                       base_price: parseFloat(e.target.value) || 0,
                     }))
                   }
-                  className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                    errors.base_price ? 'border-red-500' : ''
+                  className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light ${
+                    errors.base_price ? 'border-red-500' : 'border-gray-200'
                   }`}
                   placeholder="29.99"
                 />
                 {errors.base_price && (
-                  <p className="text-red-500 text-sm mt-1">{errors.base_price}</p>
+                  <p className="text-red-500 text-sm mt-1 font-light">{errors.base_price}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">URL Slug *</label>
+                <label className="block text-sm font-light text-zinc-700 mb-2">URL Slug *</label>
                 <input
                   type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
-                  className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 bg-gray-100"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light bg-gray-50"
                   placeholder="blue-ceramic-vase"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-zinc-500 mt-1 font-light">
                   URL: /products/{formData.slug || 'product-slug'}
                 </p>
               </div>
@@ -457,11 +457,11 @@ export default function EditProductPage() {
 
         {/* Step 2: Images & Description */}
         {currentStep === 2 && (
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-stone-800">Images & Description</h2>
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+            <h2 className="text-xl font-light mb-6 text-zinc-900">Images & Description</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-light text-zinc-700 mb-2">
                   Description *
                 </label>
                 <textarea
@@ -470,20 +470,20 @@ export default function EditProductPage() {
                     setFormData((prev) => ({ ...prev, description: e.target.value }))
                   }
                   rows={6}
-                  className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 text-stone-800 ${
-                    errors.description ? 'border-red-500' : ''
+                  className={`w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light ${
+                    errors.description ? 'border-red-500' : 'border-gray-200'
                   }`}
                   placeholder="Describe your product..."
                 />
                 {errors.description && (
-                  <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                  <p className="text-red-500 text-sm mt-1 font-light">{errors.description}</p>
                 )}
               </div>
 
               {/* Image Management Component */}
               {selectedCategory && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-light text-zinc-700 mb-2">
                     Product Images *
                   </label>
                   <ImageManager
@@ -494,7 +494,7 @@ export default function EditProductPage() {
                     maxGalleryImages={9}
                   />
                   {errors.galleryImages && (
-                    <p className="text-red-500 text-sm mt-1">{errors.galleryImages}</p>
+                    <p className="text-red-500 text-sm mt-1 font-light">{errors.galleryImages}</p>
                   )}
                 </div>
               )}
@@ -507,9 +507,9 @@ export default function EditProductPage() {
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, is_active: e.target.checked }))
                     }
-                    className="mr-2"
+                    className="mr-2 w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
                   />
-                  <span className="text-sm text-gray-700">Active (visible to customers)</span>
+                  <span className="text-sm text-zinc-700 font-light">Active (visible to customers)</span>
                 </label>
                 <label className="flex items-center">
                   <input
@@ -518,9 +518,9 @@ export default function EditProductPage() {
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, customizable: e.target.checked }))
                     }
-                    className="mr-2"
+                    className="mr-2 w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
                   />
-                  <span className="text-sm text-gray-700">Customizable</span>
+                  <span className="text-sm text-zinc-700 font-light">Customizable</span>
                 </label>
               </div>
             </div>
@@ -529,7 +529,7 @@ export default function EditProductPage() {
 
         {/* Step 3: Attributes - Create and manage product attributes (Color, Size, etc.) */}
         {currentStep === 3 && id && (
-          <div className="bg-gray-50 rounded-lg p-6">
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
             <AttributeBuilder
               productId={id as string}
               productSlug={formData.slug}
@@ -548,22 +548,22 @@ export default function EditProductPage() {
         {currentStep === 4 && id && (
           <div className="space-y-6">
             {/* Variation Generator */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-2 text-stone-800">Generate Variants</h2>
-              <p className="text-stone-600 mb-4">
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+              <h2 className="text-xl font-light mb-2 text-zinc-900">Generate Variants</h2>
+              <p className="text-zinc-600 mb-4 font-light">
                 Create all possible combinations from your attributes. For example, 3 colors × 2
                 sizes = 6 variants.
               </p>
               {productAttributes.length === 0 ? (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <p className="text-gray-600 mb-2">No attributes defined yet</p>
-                  <p className="text-sm text-gray-500 mb-4">
+                <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center">
+                  <p className="text-zinc-600 mb-2 font-light">No attributes defined yet</p>
+                  <p className="text-sm text-zinc-500 mb-4 font-light">
                     Go to the &quot;Attributes&quot; tab to create attributes first
                   </p>
                   <button
                     type="button"
                     onClick={() => setCurrentStep(3)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-light"
                   >
                     Go to Attributes
                   </button>
@@ -583,9 +583,9 @@ export default function EditProductPage() {
             </div>
 
             {/* Variant Manager - View and manage all variants */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-2 text-stone-800">Manage Variants</h2>
-              <p className="text-stone-600 mb-4">
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+              <h2 className="text-xl font-light mb-2 text-zinc-900">Manage Variants</h2>
+              <p className="text-zinc-600 mb-4 font-light">
                 View, edit, and delete all variants (both auto-generated and manual).
               </p>
               <VariantManager
@@ -599,60 +599,67 @@ export default function EditProductPage() {
 
         {/* Step 5: Review */}
         {currentStep === 5 && (
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-stone-800">Review Changes</h2>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+            <h2 className="text-xl font-light mb-6 text-zinc-900">Review Changes</h2>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="font-medium text-gray-900">Basic Information</h3>
-                  <p>
-                    <strong>Name:</strong> {formData.name}
-                  </p>
-                  <p>
-                    <strong>Category:</strong> {selectedCategory?.name}
-                  </p>
-                  <p>
-                    <strong>Base Price:</strong> £{formData.base_price}
-                  </p>
-                  <p>
-                    <strong>Slug:</strong> {formData.slug}
-                  </p>
+                  <h3 className="font-light text-zinc-900 mb-3">Basic Information</h3>
+                  <div className="space-y-2">
+                    <p className="text-sm text-zinc-700 font-light">
+                      <span className="font-medium">Name:</span> {formData.name}
+                    </p>
+                    <p className="text-sm text-zinc-700 font-light">
+                      <span className="font-medium">Category:</span> {selectedCategory?.name}
+                    </p>
+                    <p className="text-sm text-zinc-700 font-light">
+                      <span className="font-medium">Base Price:</span> £{formData.base_price}
+                    </p>
+                    <p className="text-sm text-zinc-700 font-light">
+                      <span className="font-medium">Slug:</span> {formData.slug}
+                    </p>
+                  </div>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Settings</h3>
-                  <p>
-                    <strong>Status:</strong> {formData.is_active ? 'Active' : 'Inactive'}
-                  </p>
-                  <p>
-                    <strong>Customizable:</strong> {formData.customizable ? 'Yes' : 'No'}
-                  </p>
-                  <p>
-                    <strong>Images:</strong> {formData.galleryImages.length} uploaded
-                  </p>
+                  <h3 className="font-light text-zinc-900 mb-3">Settings</h3>
+                  <div className="space-y-2">
+                    <p className="text-sm text-zinc-700 font-light">
+                      <span className="font-medium">Status:</span>{' '}
+                      {formData.is_active ? 'Active' : 'Inactive'}
+                    </p>
+                    <p className="text-sm text-zinc-700 font-light">
+                      <span className="font-medium">Customizable:</span>{' '}
+                      {formData.customizable ? 'Yes' : 'No'}
+                    </p>
+                    <p className="text-sm text-zinc-700 font-light">
+                      <span className="font-medium">Images:</span> {formData.galleryImages.length}{' '}
+                      uploaded
+                    </p>
+                  </div>
                 </div>
               </div>
 
               {/* Attributes and Options Summary */}
               {productAttributes && productAttributes.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="font-medium text-gray-900 mb-3">Product Attributes & Options</h3>
+                <div>
+                  <h3 className="font-light text-zinc-900 mb-4">Product Attributes & Options</h3>
                   <div className="space-y-4">
                     {productAttributes.map((attr, idx) => (
-                      <div key={idx} className="border rounded-lg p-4 bg-white">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-semibold text-gray-800">{attr.name}</h4>
-                          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
+                      <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <h4 className="font-light text-zinc-900">{attr.name}</h4>
+                          <span className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full font-light">
                             {attr.type}
                           </span>
                           {attr.required && (
-                            <span className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded">
+                            <span className="text-xs px-2 py-1 bg-red-50 text-red-700 rounded-full font-light">
                               Required
                             </span>
                           )}
                         </div>
                         {attr.options && attr.options.length > 0 ? (
-                          <div className="mt-2">
-                            <p className="text-sm text-gray-600 mb-2">
+                          <div>
+                            <p className="text-sm text-zinc-600 mb-3 font-light">
                               Options ({attr.options.length}):
                             </p>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -668,13 +675,11 @@ export default function EditProductPage() {
                                 ) => (
                                   <div
                                     key={optIdx}
-                                    className="border rounded p-2 bg-gray-50 text-sm"
+                                    className="border border-gray-200 rounded-lg p-3 bg-white text-sm"
                                   >
-                                    <div className="font-medium text-gray-900">
-                                      {opt.displayName}
-                                    </div>
+                                    <div className="font-light text-zinc-900">{opt.displayName}</div>
                                     {opt.priceModifier !== undefined && opt.priceModifier !== 0 && (
-                                      <div className="text-xs text-gray-600 mt-1">
+                                      <div className="text-xs text-zinc-600 mt-1 font-light">
                                         {opt.priceModifier >= 0 ? '+' : ''}£
                                         {opt.priceModifier.toFixed(2)}
                                       </div>
@@ -682,7 +687,7 @@ export default function EditProductPage() {
                                     {opt.images &&
                                       Array.isArray(opt.images) &&
                                       opt.images.length > 0 && (
-                                        <div className="text-xs text-gray-500 mt-1">
+                                        <div className="text-xs text-zinc-500 mt-1 font-light">
                                           {opt.images.length} image
                                           {opt.images.length !== 1 ? 's' : ''}
                                         </div>
@@ -693,7 +698,7 @@ export default function EditProductPage() {
                             </div>
                           </div>
                         ) : (
-                          <p className="text-sm text-gray-500 italic">No options defined</p>
+                          <p className="text-sm text-zinc-500 italic font-light">No options defined</p>
                         )}
                       </div>
                     ))}
@@ -704,20 +709,20 @@ export default function EditProductPage() {
               {/* Gallery Preview */}
               {formData.galleryImages.length > 0 && (
                 <div>
-                  <h3 className="font-medium text-gray-900">
+                  <h3 className="font-light text-zinc-900 mb-3">
                     Images ({formData.galleryImages.length})
                   </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     {formData.galleryImages.map((imageUrl, index) => (
                       <div key={index} className="relative">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={imageUrl}
                           alt={`Gallery image ${index + 1}`}
-                          className="w-full h-16 object-cover rounded border"
+                          className="w-full h-16 object-cover rounded-lg border border-gray-200"
                         />
                         {index === 0 && (
-                          <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1 rounded">
+                          <div className="absolute top-1 left-1 bg-emerald-600 text-white text-xs px-2 py-0.5 rounded font-light">
                             Thumbnail
                           </div>
                         )}
@@ -729,11 +734,11 @@ export default function EditProductPage() {
 
               {Object.keys(formData.attributes).length > 0 && (
                 <div>
-                  <h3 className="font-medium text-gray-900">Attributes</h3>
+                  <h3 className="font-light text-zinc-900 mb-3">Attributes</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {Object.entries(formData.attributes).map(([key, value]) => (
-                      <p key={key}>
-                        <strong>{key}:</strong>{' '}
+                      <p key={key} className="text-sm text-zinc-700 font-light">
+                        <span className="font-medium">{key}:</span>{' '}
                         {Array.isArray(value) ? value.join(', ') : String(value)}
                       </p>
                     ))}
@@ -745,11 +750,11 @@ export default function EditProductPage() {
         )}
 
         {/* Save Button */}
-        <div className="flex justify-end mt-6">
+        <div className="flex justify-end mt-6 pt-6 border-t border-gray-100">
           <button
             type="submit"
             disabled={loading}
-            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 disabled:opacity-50 transition"
+            className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-light"
           >
             {loading ? 'Saving...' : 'Save Changes'}
           </button>
