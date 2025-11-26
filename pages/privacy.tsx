@@ -1,5 +1,5 @@
 const PrivacyPage = () => (
-  <div className="max-w-3xl mx-auto py-8 px-4">
+  <div className="max-w-3xl mx-auto py-8 pt-32 px-4">
     <h1 className="text-3xl font-bold text-gray-900 mb-2">Privacy Notice</h1>
     <p className="text-sm text-gray-500 mb-8 font-semibold">Last updated July 07, 2025</p>
 
