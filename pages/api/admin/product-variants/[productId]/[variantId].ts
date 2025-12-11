@@ -28,6 +28,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const updates = req.body
 
+      // Convert empty strings to null for optional fields (size, color, material, sku)
+      // This prevents unique constraint violations and ensures proper database handling
+      if (updates.size === '') {
+        updates.size = null
+      }
+      if (updates.color === '') {
+        updates.color = null
+      }
+      if (updates.material === '') {
+        updates.material = null
+      }
+      if (updates.sku === '') {
+        updates.sku = null
+      }
+
       // Validate price_adjustment if provided
       if (updates.price_adjustment !== undefined) {
         const adjustment = Number.parseFloat(updates.price_adjustment)
@@ -39,8 +54,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         updates.price_adjustment = adjustment
       }
 
-      // Don't allow updating product_id
+      // Don't allow updating product_id or id
       delete updates.product_id
+      delete updates.id
+
+      // Ensure at least one attribute is provided (size, color, or material)
+      const hasAttribute =
+        (updates.size !== undefined && updates.size !== null) ||
+        (updates.color !== undefined && updates.color !== null) ||
+        (updates.material !== undefined && updates.material !== null)
+
+      // If all attributes are being cleared, check if the variant will have at least one
+      if (!hasAttribute) {
+        // Fetch current variant to check existing attributes
+        const { data: currentVariant } = await supabaseAdmin
+          .from('product_variants_new')
+          .select('size, color, material')
+          .eq('id', variantId)
+          .eq('product_id', productId)
+          .single()
+
+        if (currentVariant) {
+          const willHaveAttribute =
+            (updates.size !== null || currentVariant.size) ||
+            (updates.color !== null || currentVariant.color) ||
+            (updates.material !== null || currentVariant.material)
+
+          if (!willHaveAttribute) {
+            return res.status(400).json({
+              error: 'At least one attribute (size, color, or material) must be provided',
+            })
+          }
+        }
+      }
+
+      // Log the update attempt for debugging
+      console.log('🔄 [VARIANT UPDATE] Updating variant:', {
+        variantId,
+        productId,
+        updates,
+        timestamp: new Date().toISOString(),
+      })
 
       // Update variant
       const { data: updatedVariant, error } = await supabaseAdmin
@@ -52,12 +106,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .single()
 
       if (error) {
-        console.error('Error updating variant:', error)
+        console.error('❌ [VARIANT UPDATE] Error updating variant:', {
+          variantId,
+          productId,
+          error: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        })
 
         // Check for unique constraint violation
         if (error.code === '23505') {
           return res.status(409).json({
             error: 'A variant with this size, color, and material combination already exists',
+            details: 'The combination you are trying to update to already exists for this product.',
           })
         }
 
@@ -65,8 +127,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       if (!updatedVariant) {
+        console.warn('⚠️ [VARIANT UPDATE] Variant not found after update:', {
+          variantId,
+          productId,
+        })
         return res.status(404).json({ error: 'Variant not found' })
       }
+
+      console.log('✅ [VARIANT UPDATE] Variant updated successfully:', {
+        variantId: updatedVariant.id,
+        productId,
+        size: updatedVariant.size,
+        color: updatedVariant.color,
+        material: updatedVariant.material,
+      })
 
       return res.status(200).json(updatedVariant)
     } catch (error) {
