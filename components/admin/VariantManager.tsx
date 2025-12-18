@@ -93,16 +93,41 @@ export default function VariantManager({
       return
     }
 
+    // Check for duplicate before submitting
+    const normalizedSize = formData.size?.trim() || null
+    const normalizedColor = formData.color?.trim() || null
+    const normalizedMaterial = formData.material?.trim() || null
+
+    const duplicate = variants.find((v) => {
+      const vSize = v.size?.trim() || null
+      const vColor = v.color?.trim() || null
+      const vMaterial = v.material?.trim() || null
+
+      return (
+        vSize === normalizedSize &&
+        vColor === normalizedColor &&
+        vMaterial === normalizedMaterial
+      )
+    })
+
+    if (duplicate) {
+      setToast({
+        message: `A variant with this combination already exists (SKU: ${duplicate.sku || 'N/A'})`,
+        type: 'error',
+      })
+      return
+    }
+
     setSaving(true)
 
     const payload = {
-          size: formData.size || null,
-          color: formData.color || null,
-          material: formData.material || null,
-          price_adjustment: Number.parseFloat(formData.price_adjustment) || 0,
-          sku: formData.sku || null,
-          is_available: formData.is_available,
-          stock_quantity: 0, // Print-on-demand
+      size: formData.size || null,
+      color: formData.color || null,
+      material: formData.material || null,
+      price_adjustment: Number.parseFloat(formData.price_adjustment) || 0,
+      sku: formData.sku || null,
+      is_available: formData.is_available,
+      stock_quantity: 0, // Print-on-demand
     }
 
     console.log('🚀 [VARIANT MANAGER] Creating variant:', payload)
@@ -134,8 +159,17 @@ export default function VariantManager({
       } else {
         const error = await response.json()
         console.error('❌ [VARIANT MANAGER] Error response:', error)
+        
+        // Provide detailed error message
+        let errorMessage = error.error || 'Failed to create variant'
+        if (error.existingVariant) {
+          errorMessage = `A variant with this combination already exists (ID: ${error.existingVariant.id}, SKU: ${error.existingVariant.sku || 'N/A'})`
+        } else if (error.details) {
+          errorMessage = `${errorMessage}: ${error.details}`
+        }
+        
         setToast({
-          message: error.details || error.hint || error.error || 'Failed to create variant',
+          message: errorMessage,
           type: 'error',
         })
       }
@@ -148,6 +182,27 @@ export default function VariantManager({
   }
 
   const handleUpdateVariant = async (variantId: string) => {
+    // Check for duplicate before submitting (excluding current variant)
+    const normalizedSize = (editFormData.size as string)?.trim() || null
+    const normalizedColor = (editFormData.color as string)?.trim() || null
+    const normalizedMaterial = (editFormData.material as string)?.trim() || null
+
+    const duplicate = variants.find(
+      (v) =>
+        v.id !== variantId &&
+        (v.size?.trim() || null) === normalizedSize &&
+        (v.color?.trim() || null) === normalizedColor &&
+        (v.material?.trim() || null) === normalizedMaterial
+    )
+
+    if (duplicate) {
+      setToast({
+        message: `Another variant already has this combination (ID: ${duplicate.id}, SKU: ${duplicate.sku || 'N/A'})`,
+        type: 'error',
+      })
+      return
+    }
+
     setSaving(true)
     try {
       const response = await fetch(`/api/admin/product-variants/${productId}/${variantId}`, {
@@ -163,7 +218,16 @@ export default function VariantManager({
         fetchVariants()
       } else {
         const error = await response.json()
-        setToast({ message: error.error || 'Failed to update variant', type: 'error' })
+        
+        // Provide detailed error message
+        let errorMessage = error.error || 'Failed to update variant'
+        if (error.conflictingVariant) {
+          errorMessage = `Another variant already has this combination (ID: ${error.conflictingVariant.id}, SKU: ${error.conflictingVariant.sku || 'N/A'})`
+        } else if (error.details) {
+          errorMessage = `${errorMessage}: ${error.details}`
+        }
+        
+        setToast({ message: errorMessage, type: 'error' })
       }
     } catch (error) {
       console.error('Error updating variant:', error)

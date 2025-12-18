@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabaseClient'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { normalizeVariantAttributes, getVariantCombinationKey } from '@/utils/variantHelpers'
 
 type AttributeOption = {
   id: string
@@ -125,20 +126,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const combinations = generateCombinations(attributes as Attribute[])
 
     console.log(
-      `🎲 [VARIATION GENERATOR] Generating ${combinations.length} variations for product: ${product.name}`
+      `🎲 [VARIATION GENERATOR] Generated ${combinations.length} combinations for product: ${product.name}`
     )
 
-    // 4. Create variation records
-    const variants = combinations.map((combo, index) => {
-      // Build SKU: SLUG-ATTR1VAL-ATTR2VAL-001
-      const skuParts = [
-        product.slug.toUpperCase().replace(/-/g, '').slice(0, 8),
-        ...Object.values(combo.values).map((v) =>
-          String(v).toUpperCase().replace(/\s+/g, '').slice(0, 4)
-        ),
-        String(index + 1).padStart(3, '0'),
-      ]
-      const sku = skuParts.join('-')
+    // 3.5. Fetch existing variants to check for duplicates
+    const { data: existingVariants, error: existingError } = await supabase
+      .from('product_variants_new')
+      .select('size, color, material, sku')
+      .eq('product_id', productId)
+
+    if (existingError) {
+      console.error('❌ [VARIATION GENERATOR] Error fetching existing variants:', existingError)
+      return res.status(500).json({ error: 'Failed to check existing variants' })
+    }
+
+    // Create a set of existing variant combination keys for fast lookup
+    const existingCombinations = new Set<string>()
+    const existingSkus = new Set<string>()
+
+    existingVariants?.forEach((variant) => {
+      const key = getVariantCombinationKey(variant.size, variant.color, variant.material)
+      existingCombinations.add(key)
+      if (variant.sku) existingSkus.add(variant.sku.toUpperCase())
+    })
+
+    console.log(
+      `📊 [VARIATION GENERATOR] Found ${existingVariants?.length || 0} existing variants`
+    )
+
+    // 4. Create variation records, filtering out existing combinations
+    const newVariants = []
+    const skippedVariants = []
+    let variantIndex = 0
+
+    for (const combo of combinations) {
+      variantIndex++
 
       // Calculate price adjustment
       let priceAdjustment = 0
@@ -189,25 +211,84 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       }
 
-      return {
+      // Normalize attributes
+      const normalized = normalizeVariantAttributes({ size, color, material })
+
+      // Check if this combination already exists
+      const combinationKey = getVariantCombinationKey(
+        normalized.size,
+        normalized.color,
+        normalized.material
+      )
+
+      if (existingCombinations.has(combinationKey)) {
+        skippedVariants.push({
+          size: normalized.size,
+          color: normalized.color,
+          material: normalized.material,
+          reason: 'duplicate_combination',
+        })
+        continue
+      }
+
+      // Build base SKU: SLUG-ATTR1VAL-ATTR2VAL-001
+      const skuParts = [
+        product.slug.toUpperCase().replace(/-/g, '').slice(0, 8),
+        ...Object.values(combo.values).map((v) =>
+          String(v).toUpperCase().replace(/\s+/g, '').slice(0, 4)
+        ),
+        String(variantIndex).padStart(3, '0'),
+      ]
+      const baseSku = skuParts.join('-')
+
+      // Generate SKU and ensure uniqueness
+      let finalSku = baseSku
+      let attemptSku = baseSku.toUpperCase()
+      let skuSuffixCounter = 1
+
+      // If SKU already exists, append counter
+      while (existingSkus.has(attemptSku)) {
+        const skuSuffix = `-${skuSuffixCounter}`
+        finalSku = `${baseSku}${skuSuffix}`
+        attemptSku = finalSku.toUpperCase()
+        skuSuffixCounter++
+      }
+
+      existingSkus.add(finalSku.toUpperCase())
+
+      newVariants.push({
         product_id: productId,
-        sku,
+        sku: finalSku,
         price_adjustment: priceAdjustment.toFixed(2),
         stock_quantity: defaultStock || 0,
         is_available: true,
-        size,
-        color,
-        material,
+        size: normalized.size,
+        color: normalized.color,
+        material: normalized.material,
         image_url: imageUrl,
-      }
-    })
+      })
+    }
 
-    // 5. Insert all variants in batches (Supabase limit: 1000 per request)
+    console.log(
+      `📈 [VARIATION GENERATOR] Prepared ${newVariants.length} new variants, skipped ${skippedVariants.length} duplicates`
+    )
+
+    if (newVariants.length === 0) {
+      return res.status(400).json({
+        error: 'All combinations already exist',
+        skipped: skippedVariants.length,
+        message: `All ${combinations.length} generated combinations already exist for this product.`,
+      })
+    }
+
+    // 5. Insert new variants in batches (Supabase limit: 1000 per request)
     const batchSize = 500
     const createdVariants = []
+    const failedBatches: Array<{ batchIndex: number; error: string }> = []
 
-    for (let i = 0; i < variants.length; i += batchSize) {
-      const batch = variants.slice(i, i + batchSize)
+    for (let i = 0; i < newVariants.length; i += batchSize) {
+      const batch = newVariants.slice(i, i + batchSize)
+      const batchIndex = Math.floor(i / batchSize) + 1
 
       const { data: created, error: insertError } = await supabase
         .from('product_variants_new')
@@ -215,26 +296,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .select()
 
       if (insertError) {
-        console.error('❌ [VARIATION GENERATOR] Batch insert failed:', insertError)
-        return res.status(500).json({
+        console.error(`❌ [VARIATION GENERATOR] Batch ${batchIndex} insert failed:`, insertError)
+        failedBatches.push({
+          batchIndex,
           error: insertError.message,
-          hint: insertError.hint,
-          details: insertError.details,
         })
+        // Continue with next batch instead of failing completely
+        continue
       }
 
       createdVariants.push(...(created || []))
     }
 
+    const successCount = createdVariants.length
+    const failedCount = newVariants.length - successCount
+
     console.log(
-      `✅ [VARIATION GENERATOR] Created ${createdVariants.length} variations successfully`
+      `✅ [VARIATION GENERATOR] Created ${successCount} variations successfully${failedCount > 0 ? `, ${failedCount} failed` : ''}`
     )
 
+    // Return success with details about what was created and what was skipped
     return res.status(201).json({
       success: true,
-      created: createdVariants.length,
+      created: successCount,
+      skipped: skippedVariants.length,
+      failed: failedCount,
       variants: createdVariants,
+      skippedVariants: skippedVariants.length > 0 ? skippedVariants : undefined,
+      errors: failedBatches.length > 0 ? failedBatches : undefined,
     })
+
   } catch (error) {
     console.error('❌ [VARIATION GENERATOR] Unexpected error:', error)
     return res.status(500).json({ error: 'Failed to generate variations' })

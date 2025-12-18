@@ -86,15 +86,28 @@ export default function VariationGenerator({
 
       if (response.ok) {
         const result = await response.json()
+        let messageText = `Successfully created ${result.created} variation${result.created !== 1 ? 's' : ''}!`
+        if (result.skipped > 0) {
+          messageText += ` (${result.skipped} already existed)`
+        }
+        if (result.failed > 0) {
+          messageText += ` (${result.failed} failed)`
+        }
         setMessage({
-          text: `Successfully created ${result.created} variations!`,
+          text: messageText,
           type: 'success',
         })
         onGenerated()
       } else {
         const error = await response.json()
+        let errorText = error.error || 'Failed to generate variations'
+        if (error.message) {
+          errorText = error.message
+        } else if (error.details) {
+          errorText = `${errorText}: ${error.details}`
+        }
         setMessage({
-          text: error.error || 'Failed to generate variations',
+          text: errorText,
           type: 'error',
         })
       }
@@ -279,8 +292,8 @@ export default function VariationGenerator({
         </h4>
         <ul className="text-sm text-yellow-800 space-y-1 font-light">
           <li>• This will create variations based on ALL selected attribute combinations</li>
-          <li>• If you already have auto-generated variations, they will be duplicated</li>
-          <li>• You can delete auto-generated variations and regenerate if needed</li>
+          <li>• Existing variants with the same combinations will be skipped (not duplicated)</li>
+          <li>• Only new combinations will be created</li>
           <li>• Images will be inherited from attribute options automatically</li>
         </ul>
       </div>
