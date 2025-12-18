@@ -437,7 +437,9 @@ export default function AttributeBuilder({
                     )}
                   </div>
                 ) : (
-                  <div className="text-zinc-500 italic font-light">New attribute (click to edit)</div>
+                  <div className="text-zinc-500 italic font-light">
+                    New attribute (click to edit)
+                  </div>
                 )}
               </div>
 
@@ -502,8 +504,10 @@ export default function AttributeBuilder({
 
                   {attr.options.length === 0 && (
                     <div className="border border-dashed border-gray-200 rounded-lg p-4 text-center text-sm text-zinc-600 bg-gray-50">
-                      <p className="font-light">No options yet. Click &quot;Add Option&quot; to create options like Red, Blue,
-                      Small, Large, etc.</p>
+                      <p className="font-light">
+                        No options yet. Click &quot;Add Option&quot; to create options like Red,
+                        Blue, Small, Large, etc.
+                      </p>
                     </div>
                   )}
 
@@ -526,7 +530,9 @@ export default function AttributeBuilder({
 
                       {/* Display Name */}
                       <div className={attr.type === 'color' ? 'col-span-3' : 'col-span-4'}>
-                        <label className="block text-xs text-zinc-600 mb-1 font-light">Display Name *</label>
+                        <label className="block text-xs text-zinc-600 mb-1 font-light">
+                          Display Name *
+                        </label>
                         <input
                           type="text"
                           placeholder="e.g., Crimson Red, 150mm"
@@ -537,13 +543,17 @@ export default function AttributeBuilder({
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 font-light"
                           title="What customers see (can include units, spaces, etc.)"
                         />
-                        <p className="text-xs text-zinc-500 mt-0.5 font-light">What customers see</p>
+                        <p className="text-xs text-zinc-500 mt-0.5 font-light">
+                          What customers see
+                        </p>
                       </div>
 
                       {/* Color Picker (only for color type) */}
                       {attr.type === 'color' && (
                         <div className="col-span-1">
-                          <label className="block text-xs text-zinc-600 mb-1 font-light">Color</label>
+                          <label className="block text-xs text-zinc-600 mb-1 font-light">
+                            Color
+                          </label>
                           <input
                             type="color"
                             value={option.hexColor || '#000000'}
@@ -559,7 +569,9 @@ export default function AttributeBuilder({
 
                       {/* Price Modifier */}
                       <div className={attr.type === 'color' ? 'col-span-2' : 'col-span-3'}>
-                        <label className="block text-xs text-zinc-600 mb-1 font-light">Price Modifier</label>
+                        <label className="block text-xs text-zinc-600 mb-1 font-light">
+                          Price Modifier
+                        </label>
                         <input
                           type="number"
                           placeholder="0.00"
@@ -576,7 +588,9 @@ export default function AttributeBuilder({
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 font-light"
                           title="Price adjustment: +5 adds $5, -2 subtracts $2, 0 = no change"
                         />
-                        <p className="text-xs text-zinc-500 mt-0.5 font-light">+5 adds $5, -2 subtracts $2</p>
+                        <p className="text-xs text-zinc-500 mt-0.5 font-light">
+                          +5 adds $5, -2 subtracts $2
+                        </p>
                       </div>
 
                       {/* Images */}
@@ -601,8 +615,10 @@ export default function AttributeBuilder({
                           />
                         ) : (
                           <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center text-sm text-zinc-500 bg-gray-50">
-                            <p className="font-light">Please fill in the attribute name and option value before uploading
-                            images</p>
+                            <p className="font-light">
+                              Please fill in the attribute name and option value before uploading
+                              images
+                            </p>
                           </div>
                         )}
                       </div>

@@ -540,9 +540,7 @@ export default function CreateProductPage() {
             <h2 className="text-xl font-light mb-6 text-zinc-900">Description & Media</h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-light text-zinc-700 mb-2">
-                  Description *
-                </label>
+                <label className="block text-sm font-light text-zinc-700 mb-2">Description *</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) =>

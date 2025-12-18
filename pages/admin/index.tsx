@@ -169,9 +169,7 @@ export default function AdminDashboard() {
                   {metrics.recentOrders.map((o: Order) => (
                     <li key={o.id} className="py-3 flex items-center justify-between text-sm">
                       <div className="flex items-center gap-3">
-                        <span className="font-mono text-zinc-900 text-xs">
-                          {o.id.slice(-8)}
-                        </span>
+                        <span className="font-mono text-zinc-900 text-xs">{o.id.slice(-8)}</span>
                         <span className="text-zinc-600 font-light">
                           {new Date(o.created_at).toLocaleDateString()}
                         </span>

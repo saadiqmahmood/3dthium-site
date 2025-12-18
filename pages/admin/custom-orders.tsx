@@ -199,7 +199,10 @@ export default function AdminCustomOrdersPage() {
               </tr>
             ) : (
               orders.map((order) => (
-                <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <tr
+                  key={order.id}
+                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-4 py-3">
                     <input
                       type="checkbox"

@@ -104,9 +104,7 @@ export default function VariantManager({
       const vMaterial = v.material?.trim() || null
 
       return (
-        vSize === normalizedSize &&
-        vColor === normalizedColor &&
-        vMaterial === normalizedMaterial
+        vSize === normalizedSize && vColor === normalizedColor && vMaterial === normalizedMaterial
       )
     })
 
@@ -159,7 +157,7 @@ export default function VariantManager({
       } else {
         const error = await response.json()
         console.error('❌ [VARIANT MANAGER] Error response:', error)
-        
+
         // Provide detailed error message
         let errorMessage = error.error || 'Failed to create variant'
         if (error.existingVariant) {
@@ -167,7 +165,7 @@ export default function VariantManager({
         } else if (error.details) {
           errorMessage = `${errorMessage}: ${error.details}`
         }
-        
+
         setToast({
           message: errorMessage,
           type: 'error',
@@ -218,7 +216,7 @@ export default function VariantManager({
         fetchVariants()
       } else {
         const error = await response.json()
-        
+
         // Provide detailed error message
         let errorMessage = error.error || 'Failed to update variant'
         if (error.conflictingVariant) {
@@ -226,7 +224,7 @@ export default function VariantManager({
         } else if (error.details) {
           errorMessage = `${errorMessage}: ${error.details}`
         }
-        
+
         setToast({ message: errorMessage, type: 'error' })
       }
     } catch (error) {
@@ -308,9 +306,7 @@ export default function VariantManager({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Size */}
             <div>
-              <label className="block text-sm font-light mb-2 text-zinc-700">
-                Size (optional)
-              </label>
+              <label className="block text-sm font-light mb-2 text-zinc-700">Size (optional)</label>
               <input
                 type="text"
                 value={formData.size}
@@ -378,7 +374,9 @@ export default function VariantManager({
             <div>
               <label className="block text-sm font-light mb-2 text-zinc-700">
                 SKU (optional)
-                <span className="text-zinc-600 text-xs ml-2 font-light">Auto-generated if empty</span>
+                <span className="text-zinc-600 text-xs ml-2 font-light">
+                  Auto-generated if empty
+                </span>
               </label>
               <input
                 type="text"
@@ -422,7 +420,9 @@ export default function VariantManager({
 
         {variants.length === 0 ? (
           <div className="border border-gray-200 rounded-lg p-8 text-center bg-gray-50">
-            <p className="text-zinc-900 font-light">No variants created yet. Add your first variant above.</p>
+            <p className="text-zinc-900 font-light">
+              No variants created yet. Add your first variant above.
+            </p>
             <p className="text-sm mt-2 text-zinc-600 font-light">
               Variants allow customers to choose size, color, and material options.
             </p>
@@ -433,12 +433,8 @@ export default function VariantManager({
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">Size</th>
-                  <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">
-                    Color
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">
-                    Material
-                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">Color</th>
+                  <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">Material</th>
                   <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">
                     Adjustment
                   </th>
@@ -446,12 +442,8 @@ export default function VariantManager({
                     Final Price
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">SKU</th>
-                  <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-right text-sm font-light text-zinc-700">
-                    Actions
-                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">Status</th>
+                  <th className="px-4 py-3 text-right text-sm font-light text-zinc-700">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">

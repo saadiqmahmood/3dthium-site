@@ -153,7 +153,9 @@ export default function VariationGenerator({
                   className="rounded w-4 h-4 text-emerald-600 focus:ring-emerald-500"
                 />
                 <span className="text-zinc-900 font-light">{attr.name}</span>
-                <span className="text-sm text-zinc-600 font-light">({attr.options.length} options)</span>
+                <span className="text-sm text-zinc-600 font-light">
+                  ({attr.options.length} options)
+                </span>
               </label>
             ))}
           </div>
@@ -192,9 +194,7 @@ export default function VariationGenerator({
         {/* Settings */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div>
-            <label className="block text-sm font-light mb-2 text-zinc-700">
-              Pricing Strategy
-            </label>
+            <label className="block text-sm font-light mb-2 text-zinc-700">Pricing Strategy</label>
             <select
               value={pricingStrategy}
               onChange={(e) => setPricingStrategy(e.target.value as 'base' | 'additive')}
