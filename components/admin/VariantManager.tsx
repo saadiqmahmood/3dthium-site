@@ -96,13 +96,13 @@ export default function VariantManager({
     setSaving(true)
 
     const payload = {
-      size: formData.size || null,
-      color: formData.color || null,
-      material: formData.material || null,
-      price_adjustment: Number.parseFloat(formData.price_adjustment) || 0,
-      sku: formData.sku || null,
-      is_available: formData.is_available,
-      stock_quantity: 0, // Print-on-demand
+          size: formData.size || null,
+          color: formData.color || null,
+          material: formData.material || null,
+          price_adjustment: Number.parseFloat(formData.price_adjustment) || 0,
+          sku: formData.sku || null,
+          is_available: formData.is_available,
+          stock_quantity: 0, // Print-on-demand
     }
 
     console.log('🚀 [VARIANT MANAGER] Creating variant:', payload)
