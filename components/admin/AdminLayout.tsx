@@ -41,14 +41,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
+        {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 h-screen bg-white border-r border-gray-200 z-40 transition-transform duration-300 ${
           sidebarCollapsed ? '-translate-x-full' : 'translate-x-0'
         }`}
       >
         <AdminSidebar onCollapse={() => setSidebarCollapsed(true)} />
-      </aside>
+        </aside>
 
       {/* Collapsed Sidebar Toggle Button */}
       {sidebarCollapsed && (
@@ -75,7 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </button>
       )}
 
-      {/* Main content */}
+        {/* Main content */}
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ${
           sidebarCollapsed ? 'pl-0' : 'pl-64'

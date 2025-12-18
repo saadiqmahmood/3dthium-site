@@ -587,7 +587,7 @@ export default function EditProductPage() {
               <h2 className="text-xl font-light mb-2 text-zinc-900">Manage Variants</h2>
               <p className="text-zinc-600 mb-4 font-light">
                 View, edit, and delete all variants (both auto-generated and manual).
-              </p>
+            </p>
               <VariantManager
                 productId={id as string}
                 basePrice={formData.base_price}
@@ -608,16 +608,16 @@ export default function EditProductPage() {
                   <div className="space-y-2">
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Name:</span> {formData.name}
-                    </p>
+                  </p>
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Category:</span> {selectedCategory?.name}
-                    </p>
+                  </p>
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Base Price:</span> £{formData.base_price}
-                    </p>
+                  </p>
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Slug:</span> {formData.slug}
-                    </p>
+                  </p>
                   </div>
                 </div>
                 <div>
@@ -626,15 +626,15 @@ export default function EditProductPage() {
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Status:</span>{' '}
                       {formData.is_active ? 'Active' : 'Inactive'}
-                    </p>
+                  </p>
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Customizable:</span>{' '}
                       {formData.customizable ? 'Yes' : 'No'}
-                    </p>
+                  </p>
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Images:</span> {formData.galleryImages.length}{' '}
                       uploaded
-                    </p>
+                  </p>
                   </div>
                 </div>
               </div>
@@ -751,13 +751,13 @@ export default function EditProductPage() {
 
         {/* Save Button */}
         <div className="flex justify-end mt-6 pt-6 border-t border-gray-100">
-          <button
-            type="submit"
-            disabled={loading}
+            <button
+              type="submit"
+              disabled={loading}
             className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-light"
-          >
-            {loading ? 'Saving...' : 'Save Changes'}
-          </button>
+            >
+              {loading ? 'Saving...' : 'Save Changes'}
+            </button>
         </div>
       </form>
 
