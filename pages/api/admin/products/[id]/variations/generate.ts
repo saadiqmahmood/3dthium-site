@@ -150,9 +150,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (variant.sku) existingSkus.add(variant.sku.toUpperCase())
     })
 
-    console.log(
-      `📊 [VARIATION GENERATOR] Found ${existingVariants?.length || 0} existing variants`
-    )
+    console.log(`📊 [VARIATION GENERATOR] Found ${existingVariants?.length || 0} existing variants`)
 
     // 4. Create variation records, filtering out existing combinations
     const newVariants = []
@@ -325,7 +323,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       skippedVariants: skippedVariants.length > 0 ? skippedVariants : undefined,
       errors: failedBatches.length > 0 ? failedBatches : undefined,
     })
-
   } catch (error) {
     console.error('❌ [VARIATION GENERATOR] Unexpected error:', error)
     return res.status(500).json({ error: 'Failed to generate variations' })

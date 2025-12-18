@@ -1,9 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import {
-  normalizeVariantAttributes,
-  hasAtLeastOneAttribute,
-} from '@/utils/variantHelpers'
+import { normalizeVariantAttributes, hasAtLeastOneAttribute } from '@/utils/variantHelpers'
 
 // Admin client with elevated privileges
 const supabaseAdmin = createClient(
@@ -67,7 +64,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Check for duplicate combination BEFORE updating
       // Build the final combination that will exist after update
       const finalSize = updates.size !== undefined ? normalizedUpdates.size : currentVariant.size
-      const finalColor = updates.color !== undefined ? normalizedUpdates.color : currentVariant.color
+      const finalColor =
+        updates.color !== undefined ? normalizedUpdates.color : currentVariant.color
       const finalMaterial =
         updates.material !== undefined ? normalizedUpdates.material : currentVariant.material
 

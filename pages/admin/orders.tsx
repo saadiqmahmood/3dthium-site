@@ -533,7 +533,10 @@ export default function AdminOrdersPage() {
               </tr>
             ) : (
               paginatedOrders.map((order) => (
-                <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <tr
+                  key={order.id}
+                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-4 py-3">
                     <input
                       type="checkbox"
@@ -542,7 +545,9 @@ export default function AdminOrdersPage() {
                       className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
                     />
                   </td>
-                  <td className="px-4 py-3 font-mono text-zinc-900 text-xs font-light">{order.id.slice(-8)}</td>
+                  <td className="px-4 py-3 font-mono text-zinc-900 text-xs font-light">
+                    {order.id.slice(-8)}
+                  </td>
                   <td className="px-4 py-3 text-zinc-900 font-light">
                     {order.user_email || order.guest_email || (
                       <span className="text-zinc-400 italic">Unknown</span>
@@ -556,7 +561,9 @@ export default function AdminOrdersPage() {
                       <div className="text-xs">
                         <div className="font-light">{order.shipping_method}</div>
                         {order.shipping_cost && (
-                          <div className="text-zinc-500 font-light">£{order.shipping_cost.toFixed(2)}</div>
+                          <div className="text-zinc-500 font-light">
+                            £{order.shipping_cost.toFixed(2)}
+                          </div>
                         )}
                         {order.tracking_number && (
                           <div className="text-emerald-600 cursor-pointer hover:text-emerald-700 font-light">
@@ -654,7 +661,9 @@ export default function AdminOrdersPage() {
                 </div>
                 <div className="mb-3 text-zinc-700 font-light">
                   <span className="font-medium">Total:</span>{' '}
-                  <span className="font-light text-zinc-900">£{Number(orderDetails.total_price).toFixed(2)}</span>
+                  <span className="font-light text-zinc-900">
+                    £{Number(orderDetails.total_price).toFixed(2)}
+                  </span>
                 </div>
                 <div className="mb-3 text-zinc-700 font-light">
                   <span className="font-medium">Status:</span>{' '}

@@ -400,9 +400,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   console.error('❌ [API] Error deleting orphaned variants:', deleteVariantError)
                   // Don't fail the attribute update, just log the error
                 } else {
-                  console.log(
-                    `✅ [API] Deleted ${variantsToDelete.length} orphaned variants`
-                  )
+                  console.log(`✅ [API] Deleted ${variantsToDelete.length} orphaned variants`)
                 }
               }
             }

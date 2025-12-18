@@ -1,9 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import {
-  normalizeVariantAttributes,
-  hasAtLeastOneAttribute,
-} from '@/utils/variantHelpers'
+import { normalizeVariantAttributes, hasAtLeastOneAttribute } from '@/utils/variantHelpers'
 
 // Admin client with elevated privileges
 const supabaseAdmin = createClient(

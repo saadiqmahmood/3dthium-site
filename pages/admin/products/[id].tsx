@@ -371,7 +371,9 @@ export default function EditProductPage() {
                   }`}
                   placeholder="e.g., Blue Ceramic Vase"
                 />
-                {errors.name && <p className="text-red-500 text-sm mt-1 font-light">{errors.name}</p>}
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1 font-light">{errors.name}</p>
+                )}
               </div>
 
               <div>
@@ -461,9 +463,7 @@ export default function EditProductPage() {
             <h2 className="text-xl font-light mb-6 text-zinc-900">Images & Description</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-light text-zinc-700 mb-2">
-                  Description *
-                </label>
+                <label className="block text-sm font-light text-zinc-700 mb-2">Description *</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) =>
@@ -509,7 +509,9 @@ export default function EditProductPage() {
                     }
                     className="mr-2 w-4 h-4 text-emerald-600 focus:ring-emerald-500 rounded"
                   />
-                  <span className="text-sm text-zinc-700 font-light">Active (visible to customers)</span>
+                  <span className="text-sm text-zinc-700 font-light">
+                    Active (visible to customers)
+                  </span>
                 </label>
                 <label className="flex items-center">
                   <input
@@ -587,7 +589,7 @@ export default function EditProductPage() {
               <h2 className="text-xl font-light mb-2 text-zinc-900">Manage Variants</h2>
               <p className="text-zinc-600 mb-4 font-light">
                 View, edit, and delete all variants (both auto-generated and manual).
-            </p>
+              </p>
               <VariantManager
                 productId={id as string}
                 basePrice={formData.base_price}
@@ -608,16 +610,16 @@ export default function EditProductPage() {
                   <div className="space-y-2">
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Name:</span> {formData.name}
-                  </p>
+                    </p>
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Category:</span> {selectedCategory?.name}
-                  </p>
+                    </p>
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Base Price:</span> £{formData.base_price}
-                  </p>
+                    </p>
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Slug:</span> {formData.slug}
-                  </p>
+                    </p>
                   </div>
                 </div>
                 <div>
@@ -626,15 +628,15 @@ export default function EditProductPage() {
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Status:</span>{' '}
                       {formData.is_active ? 'Active' : 'Inactive'}
-                  </p>
+                    </p>
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Customizable:</span>{' '}
                       {formData.customizable ? 'Yes' : 'No'}
-                  </p>
+                    </p>
                     <p className="text-sm text-zinc-700 font-light">
                       <span className="font-medium">Images:</span> {formData.galleryImages.length}{' '}
                       uploaded
-                  </p>
+                    </p>
                   </div>
                 </div>
               </div>
@@ -677,7 +679,9 @@ export default function EditProductPage() {
                                     key={optIdx}
                                     className="border border-gray-200 rounded-lg p-3 bg-white text-sm"
                                   >
-                                    <div className="font-light text-zinc-900">{opt.displayName}</div>
+                                    <div className="font-light text-zinc-900">
+                                      {opt.displayName}
+                                    </div>
                                     {opt.priceModifier !== undefined && opt.priceModifier !== 0 && (
                                       <div className="text-xs text-zinc-600 mt-1 font-light">
                                         {opt.priceModifier >= 0 ? '+' : ''}£
@@ -698,7 +702,9 @@ export default function EditProductPage() {
                             </div>
                           </div>
                         ) : (
-                          <p className="text-sm text-zinc-500 italic font-light">No options defined</p>
+                          <p className="text-sm text-zinc-500 italic font-light">
+                            No options defined
+                          </p>
                         )}
                       </div>
                     ))}
@@ -751,13 +757,13 @@ export default function EditProductPage() {
 
         {/* Save Button */}
         <div className="flex justify-end mt-6 pt-6 border-t border-gray-100">
-            <button
-              type="submit"
-              disabled={loading}
+          <button
+            type="submit"
+            disabled={loading}
             className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-light"
-            >
-              {loading ? 'Saving...' : 'Save Changes'}
-            </button>
+          >
+            {loading ? 'Saving...' : 'Save Changes'}
+          </button>
         </div>
       </form>
 

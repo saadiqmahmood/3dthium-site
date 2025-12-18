@@ -74,7 +74,7 @@ export default function AdminUsersPage() {
       setSelectedUsers([])
     } catch (error) {
       console.error('❌ [AdminUsers] Bulk delete error:', error)
-        console.error('Failed to delete users')
+      console.error('Failed to delete users')
     }
   }
   const handleAction = async (user: User, type: 'toggle') => {
@@ -96,7 +96,7 @@ export default function AdminUsersPage() {
       }
     } catch (error) {
       console.error('❌ [AdminUsers] Action error:', error)
-        console.error('Failed to update user')
+      console.error('Failed to update user')
     }
   }
 
@@ -174,7 +174,10 @@ export default function AdminUsersPage() {
               </tr>
             ) : (
               paginatedUsers.map((user) => (
-                <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <tr
+                  key={user.id}
+                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-4 py-3">
                     <input
                       type="checkbox"

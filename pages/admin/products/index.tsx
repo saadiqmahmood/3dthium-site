@@ -397,7 +397,10 @@ export default function AdminProductsPage() {
               </tr>
             ) : (
               paginatedProducts.map((product) => (
-                <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <tr
+                  key={product.id}
+                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-4 py-3">
                     <input
                       type="checkbox"

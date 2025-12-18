@@ -146,19 +146,19 @@ export default function FeaturedProducts() {
 
         {/* Call to Action */}
         <div className="text-center">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/products"
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/products"
               className="bg-zinc-900 hover:bg-zinc-800 text-white font-medium py-3 px-8 rounded-lg transition-colors"
-              >
-                View All Products
-              </Link>
-              <Link
-                href="/custom-order"
+            >
+              View All Products
+            </Link>
+            <Link
+              href="/custom-order"
               className="border border-gray-300 text-zinc-900 hover:bg-gray-100 hover:border-gray-400 font-medium py-3 px-8 rounded-lg transition-colors"
-              >
-                Custom Order
-              </Link>
+            >
+              Custom Order
+            </Link>
           </div>
         </div>
       </div>

@@ -57,4 +57,3 @@ export function getVariantCombinationKey(
   const normalized = normalizeVariantAttributes({ size, color, material })
   return `${normalized.size ?? 'null'}|${normalized.color ?? 'null'}|${normalized.material ?? 'null'}`
 }
-
