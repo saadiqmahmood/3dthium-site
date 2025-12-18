@@ -1,5 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import {
+  normalizeVariantAttributes,
+  hasAtLeastOneAttribute,
+} from '@/utils/variantHelpers'
 
 // Admin client with elevated privileges
 const supabaseAdmin = createClient(
@@ -53,8 +57,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         timestamp: new Date().toISOString(),
       })
 
+      // Normalize attributes (empty strings to null, trim whitespace)
+      const normalized = normalizeVariantAttributes({
+        size: variantData.size,
+        color: variantData.color,
+        material: variantData.material,
+      })
+
       // Validate at least one attribute is provided
-      if (!variantData.size && !variantData.color && !variantData.material) {
+      if (!hasAtLeastOneAttribute(normalized.size, normalized.color, normalized.material)) {
         console.error('❌ [VARIANT CREATE] Validation failed: No attributes provided')
         return res.status(400).json({
           error: 'At least one attribute (size, color, or material) is required',
@@ -74,6 +85,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         variantData.price_adjustment = 0
       }
 
+      // Check for duplicate variant combination BEFORE attempting insert
+      const { data: existingVariant, error: checkError } = await supabaseAdmin
+        .from('product_variants_new')
+        .select('id, size, color, material, sku')
+        .eq('product_id', productId)
+        .eq('size', normalized.size ?? null)
+        .eq('color', normalized.color ?? null)
+        .eq('material', normalized.material ?? null)
+        .single()
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        // PGRST116 = no rows returned (not an error, means no duplicate)
+        console.error('❌ [VARIANT CREATE] Error checking for duplicates:', checkError)
+        return res.status(500).json({ error: 'Failed to validate variant' })
+      }
+
+      if (existingVariant) {
+        console.warn('⚠️ [VARIANT CREATE] Duplicate variant found:', existingVariant)
+        return res.status(409).json({
+          error: 'A variant with this size, color, and material combination already exists',
+          existingVariant: {
+            id: existingVariant.id,
+            size: existingVariant.size,
+            color: existingVariant.color,
+            material: existingVariant.material,
+            sku: existingVariant.sku,
+          },
+        })
+      }
+
       // Auto-generate SKU if not provided
       if (!variantData.sku) {
         const { data: product } = await supabaseAdmin
@@ -85,12 +126,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (product) {
           const skuParts = [
             product.slug.toUpperCase().replace(/-/g, ''),
-            variantData.size,
-            variantData.color?.substring(0, 3).toUpperCase(),
-            variantData.material?.substring(0, 3).toUpperCase(),
+            normalized.size,
+            normalized.color?.substring(0, 3).toUpperCase(),
+            normalized.material?.substring(0, 3).toUpperCase(),
           ].filter(Boolean)
 
-          variantData.sku = skuParts.join('-')
+          const baseSku = skuParts.join('-')
+          let proposedSku = baseSku
+          let counter = 1
+
+          // Check for SKU collision and append counter if needed
+          const { data: existingSku } = await supabaseAdmin
+            .from('product_variants_new')
+            .select('id')
+            .eq('sku', proposedSku)
+            .single()
+
+          while (existingSku) {
+            proposedSku = `${baseSku}-${counter}`
+            const { data: checkSku } = await supabaseAdmin
+              .from('product_variants_new')
+              .select('id')
+              .eq('sku', proposedSku)
+              .single()
+            if (!checkSku) break
+            counter++
+          }
+
+          variantData.sku = proposedSku
+        }
+      } else {
+        // Check if provided SKU already exists
+        const { data: existingSku } = await supabaseAdmin
+          .from('product_variants_new')
+          .select('id, sku')
+          .eq('sku', variantData.sku)
+          .single()
+
+        if (existingSku) {
+          return res.status(409).json({
+            error: `SKU "${variantData.sku}" already exists`,
+            existingVariant: { id: existingSku.id, sku: existingSku.sku },
+          })
         }
       }
 
@@ -102,9 +179,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         variantData.is_available = true
       }
 
+      // Prepare final variant data with normalized attributes
+      const finalVariantData = {
+        ...variantData,
+        size: normalized.size,
+        color: normalized.color,
+        material: normalized.material,
+      }
+
       console.log('💾 [VARIANT CREATE] Attempting insert:', {
         product_id: productId,
-        ...variantData,
+        ...finalVariantData,
       })
 
       // Insert variant
@@ -113,7 +198,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .insert([
           {
             product_id: productId,
-            ...variantData,
+            ...finalVariantData,
           },
         ])
         .select()
@@ -128,10 +213,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           hint: error.hint,
         })
 
-        // Check for unique constraint violation
+        // Fallback: Check for unique constraint violation (shouldn't happen with pre-check)
         if (error.code === '23505') {
           return res.status(409).json({
-            error: 'A variant with this size, color, and material combination already exists',
+            error: 'A variant with this combination or SKU already exists',
+            details: error.details,
           })
         }
 

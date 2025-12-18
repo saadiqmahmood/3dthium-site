@@ -223,6 +223,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(500).json({ error: 'Failed to create or update attribute' })
         }
 
+        // Fetch existing options before deleting to check for orphaned variants
+        const { data: oldOptions } = await supabase
+          .from('product_attribute_options')
+          .select('value, display_name')
+          .eq('attribute_id', newAttr.id)
+
+        const oldOptionValues = new Set<string>(
+          oldOptions?.map((opt) => opt.value.toLowerCase().trim()) || []
+        )
+
         const { error: deleteError } = await supabase
           .from('product_attribute_options')
           .delete()
@@ -326,11 +336,88 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             ...newAttr,
             options: newOptions,
           })
+
+          // Check for orphaned variants (variants that reference deleted option values)
+          const newOptionValues = new Set<string>(
+            newOptions.map((opt: { value: string }) => opt.value.toLowerCase().trim())
+          )
+          const deletedOptionValues = Array.from(oldOptionValues).filter(
+            (val) => !newOptionValues.has(val)
+          )
+
+          if (deletedOptionValues.length > 0) {
+            // Find variants that reference deleted option values
+            // Map attribute name to database column (size/color/material)
+            const attrNameLower = newAttr.name.toLowerCase()
+            let columnName: 'size' | 'color' | 'material' | null = null
+
+            if (
+              newAttr.type?.toLowerCase() === 'size' ||
+              attrNameLower.includes('size') ||
+              attrNameLower.includes('height')
+            ) {
+              columnName = 'size'
+            } else if (
+              newAttr.type?.toLowerCase() === 'color' ||
+              attrNameLower.includes('color') ||
+              attrNameLower.includes('colour')
+            ) {
+              columnName = 'color'
+            } else if (
+              newAttr.type?.toLowerCase() === 'material' ||
+              attrNameLower.includes('material')
+            ) {
+              columnName = 'material'
+            }
+
+            if (columnName) {
+              // Fetch variants that reference deleted option values
+              // Note: We need to match by the option values (not display names)
+              // Variants store option values, which are normalized
+              const { data: orphanedVariants } = await supabase
+                .from('product_variants_new')
+                .select('id, size, color, material, sku')
+                .eq('product_id', productId)
+
+              const variantsToDelete = orphanedVariants?.filter((variant) => {
+                const variantValue = variant[columnName]?.toLowerCase().trim()
+                return variantValue && deletedOptionValues.includes(variantValue)
+              })
+
+              if (variantsToDelete && variantsToDelete.length > 0) {
+                console.log(
+                  `⚠️ [API] Found ${variantsToDelete.length} orphaned variants due to deleted option values`
+                )
+
+                // Delete orphaned variants
+                const variantIds = variantsToDelete.map((v) => v.id)
+                const { error: deleteVariantError } = await supabase
+                  .from('product_variants_new')
+                  .delete()
+                  .in('id', variantIds)
+
+                if (deleteVariantError) {
+                  console.error('❌ [API] Error deleting orphaned variants:', deleteVariantError)
+                  // Don't fail the attribute update, just log the error
+                } else {
+                  console.log(
+                    `✅ [API] Deleted ${variantsToDelete.length} orphaned variants`
+                  )
+                }
+              }
+            }
+          }
         } else {
           createdAttributes.push({
             ...newAttr,
             options: [],
           })
+
+          // If all options were removed, check if any variants reference this attribute
+          // (This is a conservative approach - we could delete all variants, but that might be too aggressive)
+          console.log(
+            `⚠️ [API] All options removed for attribute "${newAttr.name}". Existing variants may be affected.`
+          )
         }
       }
 

@@ -1,5 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import {
+  normalizeVariantAttributes,
+  hasAtLeastOneAttribute,
+} from '@/utils/variantHelpers'
 
 // Admin client with elevated privileges
 const supabaseAdmin = createClient(
@@ -28,19 +32,96 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const updates = req.body
 
-      // Convert empty strings to null for optional fields (size, color, material, sku)
-      // This prevents unique constraint violations and ensures proper database handling
-      if (updates.size === '') {
-        updates.size = null
+      // Fetch current variant first to get existing values
+      const { data: currentVariant, error: fetchError } = await supabaseAdmin
+        .from('product_variants_new')
+        .select('size, color, material, sku')
+        .eq('id', variantId)
+        .eq('product_id', productId)
+        .single()
+
+      if (fetchError || !currentVariant) {
+        return res.status(404).json({ error: 'Variant not found' })
       }
-      if (updates.color === '') {
-        updates.color = null
+
+      // Normalize attributes - convert empty strings to null and trim whitespace
+      const normalizedUpdates = normalizeVariantAttributes({
+        size: updates.size !== undefined ? updates.size : currentVariant.size,
+        color: updates.color !== undefined ? updates.color : currentVariant.color,
+        material: updates.material !== undefined ? updates.material : currentVariant.material,
+      })
+
+      // Check if at least one attribute will remain after update
+      if (
+        !hasAtLeastOneAttribute(
+          normalizedUpdates.size,
+          normalizedUpdates.color,
+          normalizedUpdates.material
+        )
+      ) {
+        return res.status(400).json({
+          error: 'At least one attribute (size, color, or material) must be provided',
+        })
       }
-      if (updates.material === '') {
-        updates.material = null
+
+      // Check for duplicate combination BEFORE updating
+      // Build the final combination that will exist after update
+      const finalSize = updates.size !== undefined ? normalizedUpdates.size : currentVariant.size
+      const finalColor = updates.color !== undefined ? normalizedUpdates.color : currentVariant.color
+      const finalMaterial =
+        updates.material !== undefined ? normalizedUpdates.material : currentVariant.material
+
+      const { data: conflictingVariant, error: checkError } = await supabaseAdmin
+        .from('product_variants_new')
+        .select('id, size, color, material, sku')
+        .eq('product_id', productId)
+        .eq('size', finalSize ?? null)
+        .eq('color', finalColor ?? null)
+        .eq('material', finalMaterial ?? null)
+        .neq('id', variantId) // Exclude the current variant
+        .single()
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        // PGRST116 = no rows returned (not an error)
+        console.error('❌ [VARIANT UPDATE] Error checking for duplicates:', checkError)
+        return res.status(500).json({ error: 'Failed to validate variant update' })
       }
-      if (updates.sku === '') {
-        updates.sku = null
+
+      if (conflictingVariant) {
+        console.warn('⚠️ [VARIANT UPDATE] Duplicate variant found:', conflictingVariant)
+        return res.status(409).json({
+          error: 'Another variant already has this size, color, and material combination',
+          conflictingVariant: {
+            id: conflictingVariant.id,
+            size: conflictingVariant.size,
+            color: conflictingVariant.color,
+            material: conflictingVariant.material,
+            sku: conflictingVariant.sku,
+          },
+        })
+      }
+
+      // Check for SKU collision if SKU is being updated
+      if (updates.sku !== undefined && updates.sku !== currentVariant.sku) {
+        const newSku = updates.sku === '' ? null : updates.sku.trim()
+        if (newSku) {
+          const { data: existingSku } = await supabaseAdmin
+            .from('product_variants_new')
+            .select('id, sku')
+            .eq('sku', newSku)
+            .neq('id', variantId)
+            .single()
+
+          if (existingSku) {
+            return res.status(409).json({
+              error: `SKU "${newSku}" already exists`,
+              existingVariant: { id: existingSku.id, sku: existingSku.sku },
+            })
+          }
+          updates.sku = newSku
+        } else {
+          updates.sku = null
+        }
       }
 
       // Validate price_adjustment if provided
@@ -58,35 +139,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       delete updates.product_id
       delete updates.id
 
-      // Ensure at least one attribute is provided (size, color, or material)
-      const hasAttribute =
-        (updates.size !== undefined && updates.size !== null) ||
-        (updates.color !== undefined && updates.color !== null) ||
-        (updates.material !== undefined && updates.material !== null)
-
-      // If all attributes are being cleared, check if the variant will have at least one
-      if (!hasAttribute) {
-        // Fetch current variant to check existing attributes
-        const { data: currentVariant } = await supabaseAdmin
-          .from('product_variants_new')
-          .select('size, color, material')
-          .eq('id', variantId)
-          .eq('product_id', productId)
-          .single()
-
-        if (currentVariant) {
-          const willHaveAttribute =
-            (updates.size !== null || currentVariant.size) ||
-            (updates.color !== null || currentVariant.color) ||
-            (updates.material !== null || currentVariant.material)
-
-          if (!willHaveAttribute) {
-            return res.status(400).json({
-              error: 'At least one attribute (size, color, or material) must be provided',
-            })
-          }
-        }
-      }
+      // Apply normalized attribute values to updates
+      if (updates.size !== undefined) updates.size = normalizedUpdates.size
+      if (updates.color !== undefined) updates.color = normalizedUpdates.color
+      if (updates.material !== undefined) updates.material = normalizedUpdates.material
 
       // Log the update attempt for debugging
       console.log('🔄 [VARIANT UPDATE] Updating variant:', {
@@ -115,11 +171,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           hint: error.hint,
         })
 
-        // Check for unique constraint violation
+        // Fallback: Check for unique constraint violation (shouldn't happen with pre-check)
         if (error.code === '23505') {
           return res.status(409).json({
-            error: 'A variant with this size, color, and material combination already exists',
-            details: 'The combination you are trying to update to already exists for this product.',
+            error: 'A variant with this combination or SKU already exists',
+            details: error.details,
           })
         }
 
