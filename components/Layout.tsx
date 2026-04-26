@@ -1,7 +1,11 @@
 import type { ReactNode } from 'react'
 import Footer from './Footer'
 import Navbar from './Navbar'
-import SessionDebug from './SessionDebug'
+
+const SessionDebug =
+  process.env.NODE_ENV !== 'production'
+    ? require('./SessionDebug').default
+    : () => null
 
 interface LayoutProps {
   children: ReactNode
