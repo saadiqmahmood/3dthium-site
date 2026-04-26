@@ -1,4 +1,7 @@
+import { createClient } from '@supabase/supabase-js'
 import { buffer } from 'micro'
+import type { NextApiRequest, NextApiResponse } from 'next'
+import Stripe from 'stripe'
 import { log } from '../../../lib/log'
 
 export const config = {
@@ -6,10 +9,6 @@ export const config = {
     bodyParser: false,
   },
 }
-
-import { createClient } from '@supabase/supabase-js'
-import type { NextApiRequest, NextApiResponse } from 'next'
-import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-05-28.basil',
