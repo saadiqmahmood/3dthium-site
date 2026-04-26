@@ -1,3 +1,4 @@
+-- DEPRECATED: Superseded by database/storage_rls.sql.
 -- Comprehensive fix for Supabase Storage RLS policies
 -- This script will resolve all storage upload issues
 

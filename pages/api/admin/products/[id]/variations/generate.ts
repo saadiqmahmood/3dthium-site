@@ -1,8 +1,8 @@
-import { log } from '../../../../../lib/log'
-import { requireAdmin } from '@/lib/auth/requireAdmin'
-import { getSupabaseAdmin } from '@/lib/supabaseClient'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { normalizeVariantAttributes, getVariantCombinationKey } from '@/utils/variantHelpers'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { log } from '@/lib/log'
+import { getSupabaseAdmin } from '@/lib/supabaseClient'
+import { getVariantCombinationKey, normalizeVariantAttributes } from '@/utils/variantHelpers'
 
 type AttributeOption = {
   id: string
@@ -97,7 +97,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: attrError.message })
     }
 
-    log.debug('Š [VARIATION GENERATOR] Found attributes:', {
+    log.debug('ï¿½ [VARIATION GENERATOR] Found attributes:', {
       requested: validAttributeIds.length,
       found: attributes?.length || 0,
       attributeNames: attributes?.map((a) => a.name) || [],

@@ -1,5 +1,5 @@
-import { log } from '../../../lib/log'
 import { buffer } from 'micro'
+import { log } from '../../../lib/log'
 
 export const config = {
   api: {

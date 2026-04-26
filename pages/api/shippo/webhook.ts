@@ -1,6 +1,6 @@
-import { log } from '../../../lib/log'
 import { createClient } from '@supabase/supabase-js'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { log } from '../../../lib/log'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

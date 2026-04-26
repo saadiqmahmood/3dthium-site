@@ -1,6 +1,6 @@
-import { log } from '../../../lib/log'
-import { getSupabaseAnon } from '@/lib/supabase/anon'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { getSupabaseAnon } from '@/lib/supabase/anon'
+import { log } from '../../../lib/log'
 
 const supabase = getSupabaseAnon()
 
@@ -140,11 +140,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     }
 
-    log.debug(
-      '[API/products/[slug]] Returning product with',
-      processedVariants.length,
-      'variants'
-    )
+    log.debug(`[API/products/[slug]] Returning product with ${processedVariants.length} variants`)
 
     // Set cache headers for better performance
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')

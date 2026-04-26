@@ -1,3 +1,4 @@
+-- DEPRECATED: Superseded by database/rls_final.sql.
 -- Comprehensive RLS policy setup for public access
 -- Run this in Supabase SQL Editor to ensure all policies are correct
 

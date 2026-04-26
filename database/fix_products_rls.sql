@@ -1,3 +1,4 @@
+-- DEPRECATED: Superseded by database/rls_final.sql.
 -- Fix RLS policies for products_new table
 -- This allows public read access to products for the frontend
 

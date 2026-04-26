@@ -1,3 +1,5 @@
+-- DEPRECATED: DO NOT RUN. This file disables RLS and is a security risk.
+-- Use database/storage_rls.sql instead.
 -- Quick fix: Disable RLS on storage bucket
 -- This is simpler but less secure - use only for testing
 

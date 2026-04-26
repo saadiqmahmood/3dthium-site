@@ -1,3 +1,5 @@
+-- DEPRECATED: DO NOT RUN. This file disables RLS and grants ALL to anon/public.
+-- Use database/storage_rls.sql instead.
 -- Nuclear Option: Completely disable RLS on storage.objects
 -- This will bypass ALL policy issues and allow uploads to work
 
