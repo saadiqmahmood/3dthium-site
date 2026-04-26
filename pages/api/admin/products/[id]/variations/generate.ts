@@ -1,3 +1,5 @@
+import { log } from '../../../../../lib/log'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { getSupabaseAdmin } from '@/lib/supabaseClient'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { normalizeVariantAttributes, getVariantCombinationKey } from '@/utils/variantHelpers'
@@ -29,6 +31,9 @@ type Combination = {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -51,14 +56,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   )
 
   if (validAttributeIds.length === 0) {
-    console.error('❌ [VARIATION GENERATOR] No valid attribute IDs provided:', attributeIds)
+    log.error('[VARIATION GENERATOR] No valid attribute IDs provided:', attributeIds)
     return res.status(400).json({
       error: 'No valid attribute IDs provided. Please save your attributes first.',
       received: attributeIds,
     })
   }
 
-  console.log('🔍 [VARIATION GENERATOR] Looking for attributes:', {
+  log.debug('[VARIATION GENERATOR] Looking for attributes:', {
     productId,
     attributeIds: validAttributeIds,
     count: validAttributeIds.length,
@@ -88,11 +93,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .order('display_order', { ascending: true })
 
     if (attrError) {
-      console.error('❌ [VARIATION GENERATOR] Error fetching attributes:', attrError)
+      log.error('[VARIATION GENERATOR] Error fetching attributes:', attrError)
       return res.status(500).json({ error: attrError.message })
     }
 
-    console.log('📊 [VARIATION GENERATOR] Found attributes:', {
+    log.debug('� [VARIATION GENERATOR] Found attributes:', {
       requested: validAttributeIds.length,
       found: attributes?.length || 0,
       attributeNames: attributes?.map((a) => a.name) || [],
@@ -105,7 +110,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .select('id, name, type')
         .eq('product_id', productId)
 
-      console.error('❌ [VARIATION GENERATOR] No attributes found. Available attributes:', allAttrs)
+      log.error('[VARIATION GENERATOR] No attributes found. Available attributes:', allAttrs)
       return res.status(400).json({
         error: 'No attributes found for the given IDs',
         requestedIds: validAttributeIds,
@@ -125,7 +130,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 3. Generate all combinations using cartesian product
     const combinations = generateCombinations(attributes as Attribute[])
 
-    console.log(
+    log.debug(
       `🎲 [VARIATION GENERATOR] Generated ${combinations.length} combinations for product: ${product.name}`
     )
 
@@ -136,7 +141,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .eq('product_id', productId)
 
     if (existingError) {
-      console.error('❌ [VARIATION GENERATOR] Error fetching existing variants:', existingError)
+      log.error('[VARIATION GENERATOR] Error fetching existing variants:', existingError)
       return res.status(500).json({ error: 'Failed to check existing variants' })
     }
 
@@ -150,7 +155,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (variant.sku) existingSkus.add(variant.sku.toUpperCase())
     })
 
-    console.log(`📊 [VARIATION GENERATOR] Found ${existingVariants?.length || 0} existing variants`)
+    log.debug(`📊 [VARIATION GENERATOR] Found ${existingVariants?.length || 0} existing variants`)
 
     // 4. Create variation records, filtering out existing combinations
     const newVariants = []
@@ -267,7 +272,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     }
 
-    console.log(
+    log.debug(
       `📈 [VARIATION GENERATOR] Prepared ${newVariants.length} new variants, skipped ${skippedVariants.length} duplicates`
     )
 
@@ -294,7 +299,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .select()
 
       if (insertError) {
-        console.error(`❌ [VARIATION GENERATOR] Batch ${batchIndex} insert failed:`, insertError)
+        log.error(`❌ [VARIATION GENERATOR] Batch ${batchIndex} insert failed:`, insertError)
         failedBatches.push({
           batchIndex,
           error: insertError.message,
@@ -309,7 +314,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const successCount = createdVariants.length
     const failedCount = newVariants.length - successCount
 
-    console.log(
+    log.debug(
       `✅ [VARIATION GENERATOR] Created ${successCount} variations successfully${failedCount > 0 ? `, ${failedCount} failed` : ''}`
     )
 
@@ -324,7 +329,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       errors: failedBatches.length > 0 ? failedBatches : undefined,
     })
   } catch (error) {
-    console.error('❌ [VARIATION GENERATOR] Unexpected error:', error)
+    log.error('[VARIATION GENERATOR] Unexpected error:', error)
     return res.status(500).json({ error: 'Failed to generate variations' })
   }
 }

@@ -1,13 +1,18 @@
+import { log } from '../../../lib/log'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSupabaseAdmin } from '../../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
   const supabaseAdmin = getSupabaseAdmin()
 
   try {
     switch (req.method) {
       case 'GET': {
-        console.log('🔍 [API/admin/categories] Fetching categories...')
+        log.debug('[API/admin/categories] Fetching categories...')
 
         // Fetch all categories with product counts
         const { data: categories, error: categoriesError } = await supabaseAdmin
@@ -28,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .order('name', { ascending: true })
 
         if (categoriesError) {
-          console.error('❌ [API/admin/categories] Error fetching categories:', categoriesError)
+          log.error('[API/admin/categories] Error fetching categories:', categoriesError)
           return res.status(500).json({ error: 'Failed to fetch categories' })
         }
 
@@ -39,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .eq('is_active', true)
 
         if (countsError) {
-          console.error('❌ [API/admin/categories] Error fetching product counts:', countsError)
+          log.error('[API/admin/categories] Error fetching product counts:', countsError)
           // Continue without counts rather than failing completely
         }
 
@@ -60,8 +65,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             product_count: categoryCounts[category.id] || 0,
           })) || []
 
-        console.log(
-          '✅ [API/admin/categories] Categories fetched successfully:',
+        log.debug(
+          '[API/admin/categories] Categories fetched successfully:',
           categoriesWithCounts.length
         )
         res.status(200).json(categoriesWithCounts)
@@ -69,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       case 'POST': {
-        console.log('🔍 [API/admin/categories] Creating new category...')
+        log.debug('[API/admin/categories] Creating new category...')
         const { name, slug, parent_id, description, image_url, sort_order, is_active } = req.body
 
         if (!name || !slug) {
@@ -85,7 +90,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (checkError && checkError.code !== 'PGRST116') {
           // PGRST116 = no rows returned
-          console.error('❌ [API/admin/categories] Error checking slug uniqueness:', checkError)
+          log.error('[API/admin/categories] Error checking slug uniqueness:', checkError)
           return res.status(500).json({ error: 'Failed to check slug uniqueness' })
         }
 
@@ -111,11 +116,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .single()
 
         if (createError) {
-          console.error('❌ [API/admin/categories] Error creating category:', createError)
+          log.error('[API/admin/categories] Error creating category:', createError)
           return res.status(500).json({ error: 'Failed to create category' })
         }
 
-        console.log('✅ [API/admin/categories] Category created successfully:', newCategory.id)
+        log.debug('[API/admin/categories] Category created successfully:', newCategory.id)
         res.status(201).json(newCategory)
         break
       }
@@ -124,7 +129,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(405).json({ error: 'Method not allowed' })
     }
   } catch (error) {
-    console.error('❌ [API/admin/categories] Error:', error)
+    log.error('[API/admin/categories] Error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 }

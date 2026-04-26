@@ -1,7 +1,12 @@
+import { log } from '../../../../lib/log'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSupabaseAdmin } from '../../../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
   const { id } = req.query
 
   if (!id || typeof id !== 'string') {
@@ -13,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     switch (req.method) {
       case 'GET': {
-        console.log('🔍 [API/admin/products/[id]] Fetching product:', id)
+        log.debug('[API/admin/products/[id]] Fetching product:', id)
 
         const { data: product, error: fetchError } = await supabaseAdmin
           .from('products_new')
@@ -38,17 +43,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .single()
 
         if (fetchError) {
-          console.error('❌ [API/admin/products/[id]] Error fetching product:', fetchError)
+          log.error('[API/admin/products/[id]] Error fetching product:', fetchError)
           return res.status(500).json({ error: 'Failed to fetch product' })
         }
 
-        console.log('✅ [API/admin/products/[id]] Product fetched successfully')
+        log.debug('[API/admin/products/[id]] Product fetched successfully')
         res.status(200).json(product)
         break
       }
 
       case 'PUT': {
-        console.log('🔍 [API/admin/products/[id]] Updating product:', id)
+        log.debug('[API/admin/products/[id]] Updating product:', id)
 
         const updateData: Record<string, unknown> = {}
 
@@ -76,8 +81,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .single()
 
           if (checkError && checkError.code !== 'PGRST116') {
-            console.error(
-              '❌ [API/admin/products/[id]] Error checking slug uniqueness:',
+            log.error(
+              '[API/admin/products/[id]] Error checking slug uniqueness:',
               checkError
             )
             return res.status(500).json({ error: 'Failed to check slug uniqueness' })
@@ -91,7 +96,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Update timestamp
         updateData.updated_at = new Date().toISOString()
 
-        console.log('📝 [API/admin/products/[id]] Updating with data:', updateData)
+        log.debug('[API/admin/products/[id]] Updating with data:', updateData)
 
         const { data: updatedProduct, error: updateError } = await supabaseAdmin
           .from('products_new')
@@ -101,17 +106,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .single()
 
         if (updateError) {
-          console.error('❌ [API/admin/products/[id]] Error updating product:', updateError)
+          log.error('[API/admin/products/[id]] Error updating product:', updateError)
           return res.status(500).json({ error: `Failed to update product: ${updateError.message}` })
         }
 
-        console.log('✅ [API/admin/products/[id]] Product updated successfully')
+        log.debug('[API/admin/products/[id]] Product updated successfully')
         res.status(200).json(updatedProduct)
         break
       }
 
       case 'DELETE': {
-        console.log('🔍 [API/admin/products/[id]] Deleting product:', id)
+        log.debug('[API/admin/products/[id]] Deleting product:', id)
 
         const { error: deleteError } = await supabaseAdmin
           .from('products_new')
@@ -119,11 +124,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .eq('id', id)
 
         if (deleteError) {
-          console.error('❌ [API/admin/products/[id]] Error deleting product:', deleteError)
+          log.error('[API/admin/products/[id]] Error deleting product:', deleteError)
           return res.status(500).json({ error: 'Failed to delete product' })
         }
 
-        console.log('✅ [API/admin/products/[id]] Product deleted successfully')
+        log.debug('[API/admin/products/[id]] Product deleted successfully')
         res.status(200).json({ success: true })
         break
       }
@@ -132,7 +137,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(405).json({ error: 'Method not allowed' })
     }
   } catch (error) {
-    console.error('❌ [API/admin/products/[id]] Error:', error)
+    log.error('[API/admin/products/[id]] Error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 }

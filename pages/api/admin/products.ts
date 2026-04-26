@@ -1,13 +1,18 @@
+import { log } from '../../../lib/log'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSupabaseAdmin } from '../../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
   const supabaseAdmin = getSupabaseAdmin()
 
   try {
     switch (req.method) {
       case 'GET': {
-        console.log('🔍 [API/admin/products] Fetching products...')
+        log.debug('[API/admin/products] Fetching products...')
 
         const { data: products, error: productsError } = await supabaseAdmin
           .from('products_new')
@@ -30,17 +35,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .order('created_at', { ascending: false })
 
         if (productsError) {
-          console.error('❌ [API/admin/products] Error fetching products:', productsError)
+          log.error('[API/admin/products] Error fetching products:', productsError)
           return res.status(500).json({ error: 'Failed to fetch products' })
         }
 
-        console.log('✅ [API/admin/products] Products fetched successfully:', products?.length || 0)
+        log.debug('[API/admin/products] Products fetched successfully:', products?.length || 0)
         res.status(200).json(products || [])
         break
       }
 
       case 'POST': {
-        console.log('🔍 [API/admin/products] Creating new product...')
+        log.debug('[API/admin/products] Creating new product...')
         const {
           name,
           description,
@@ -55,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           gallery_images,
         } = req.body
 
-        console.log('📝 [API/admin/products] Received data:', {
+        log.debug('[API/admin/products] Received data:', {
           name,
           category_id,
           slug,
@@ -86,7 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (checkError && checkError.code !== 'PGRST116') {
           // PGRST116 = no rows returned
-          console.error('❌ [API/admin/products] Error checking slug uniqueness:', checkError)
+          log.error('[API/admin/products] Error checking slug uniqueness:', checkError)
           return res.status(500).json({ error: 'Failed to check slug uniqueness' })
         }
 
@@ -109,7 +114,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           gallery_images: gallery_images || [],
         }
 
-        console.log('💾 [API/admin/products] Inserting product:', productData)
+        log.debug('� [API/admin/products] Inserting product:', productData)
 
         const { data: newProduct, error: createError } = await supabaseAdmin
           .from('products_new')
@@ -118,11 +123,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .single()
 
         if (createError) {
-          console.error('❌ [API/admin/products] Error creating product:', createError)
+          log.error('[API/admin/products] Error creating product:', createError)
           return res.status(500).json({ error: `Failed to create product: ${createError.message}` })
         }
 
-        console.log('✅ [API/admin/products] Product created successfully:', newProduct.id)
+        log.debug('[API/admin/products] Product created successfully:', newProduct.id)
         res.status(201).json(newProduct)
         break
       }
@@ -131,7 +136,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(405).json({ error: 'Method not allowed' })
     }
   } catch (error) {
-    console.error('❌ [API/admin/products] Error:', error)
+    log.error('[API/admin/products] Error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 }

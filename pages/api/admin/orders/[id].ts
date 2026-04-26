@@ -1,7 +1,12 @@
+import { log } from '../../../../lib/log'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSupabaseAdmin } from '../../../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
   const { id } = req.query
 
   if (!id || typeof id !== 'string') {
@@ -13,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     switch (req.method) {
       case 'GET': {
-        console.log('🔍 [API/admin/orders/[id]] Fetching order details:', id)
+        log.debug('[API/admin/orders/[id]] Fetching order details:', id)
 
         // First fetch order with old schema items
         const { data, error } = await supabaseAdmin
@@ -25,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .single()
 
         if (error || !data) {
-          console.error('❌ [API/admin/orders/[id]] Error fetching order:', error)
+          log.error('[API/admin/orders/[id]] Error fetching order:', error)
           return res.status(500).json({ error: 'Failed to fetch order' })
         }
 
@@ -83,38 +88,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           data.order_items = enrichedItems as any
         }
 
-        console.log('✅ [API/admin/orders/[id]] Order details fetched successfully')
+        log.debug('[API/admin/orders/[id]] Order details fetched successfully')
         res.status(200).json(data)
         break
       }
 
       case 'PUT': {
-        console.log('🔍 [API/admin/orders/[id]] Updating order:', id)
+        log.debug('[API/admin/orders/[id]] Updating order:', id)
         const { error: updateError } = await supabaseAdmin
           .from('orders')
           .update(req.body)
           .eq('id', id)
 
         if (updateError) {
-          console.error('❌ [API/admin/orders/[id]] Error updating order:', updateError)
+          log.error('[API/admin/orders/[id]] Error updating order:', updateError)
           return res.status(500).json({ error: 'Failed to update order' })
         }
 
-        console.log('✅ [API/admin/orders/[id]] Order updated successfully')
+        log.debug('[API/admin/orders/[id]] Order updated successfully')
         res.status(200).json({ success: true })
         break
       }
 
       case 'DELETE': {
-        console.log('🔍 [API/admin/orders/[id]] Deleting order:', id)
+        log.debug('[API/admin/orders/[id]] Deleting order:', id)
         const { error: deleteError } = await supabaseAdmin.from('orders').delete().eq('id', id)
 
         if (deleteError) {
-          console.error('❌ [API/admin/orders/[id]] Error deleting order:', deleteError)
+          log.error('[API/admin/orders/[id]] Error deleting order:', deleteError)
           return res.status(500).json({ error: 'Failed to delete order' })
         }
 
-        console.log('✅ [API/admin/orders/[id]] Order deleted successfully')
+        log.debug('[API/admin/orders/[id]] Order deleted successfully')
         res.status(200).json({ success: true })
         break
       }
@@ -123,7 +128,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(405).json({ error: 'Method not allowed' })
     }
   } catch (error) {
-    console.error('❌ [API/admin/orders/[id]] Error:', error)
+    log.error('[API/admin/orders/[id]] Error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 }

@@ -1,3 +1,4 @@
+import { log } from '../../lib/log'
 import { createClient } from '@supabase/supabase-js'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Stripe from 'stripe'
@@ -86,7 +87,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       shipping_service: shipping_service || null,
     })
     if (insertError) {
-      console.error('Error saving checkout cart:', insertError)
+      log.error('Error saving checkout cart:', insertError)
       return res.status(500).json({ message: 'Failed to save checkout cart' })
     }
 
@@ -121,7 +122,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Debug: log all line items before sending to Stripe
-    console.log('Line items for Stripe:', JSON.stringify(lineItems, null, 2))
+    log.debug('Line items for Stripe:', JSON.stringify(lineItems, null, 2))
     // Validate all unit_amounts
     for (const item of lineItems) {
       if (
@@ -159,7 +160,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(200).json({ sessionId: session.id, url: session.url })
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error)
-    console.error('Error creating checkout session:', error)
+    log.error('Error creating checkout session:', error)
     res.status(500).json({ message: errMsg || 'Error creating checkout session' })
   }
 }

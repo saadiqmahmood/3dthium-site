@@ -1,3 +1,5 @@
+import { log } from '../../../../../lib/log'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { createClient } from '@supabase/supabase-js'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { normalizeVariantAttributes, hasAtLeastOneAttribute } from '@/utils/variantHelpers'
@@ -14,6 +16,9 @@ const supabaseAdmin = createClient(
 )
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
   const { productId, variantId } = req.query
 
   if (!productId || typeof productId !== 'string') {
@@ -81,12 +86,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (checkError && checkError.code !== 'PGRST116') {
         // PGRST116 = no rows returned (not an error)
-        console.error('❌ [VARIANT UPDATE] Error checking for duplicates:', checkError)
+        log.error('[VARIANT UPDATE] Error checking for duplicates:', checkError)
         return res.status(500).json({ error: 'Failed to validate variant update' })
       }
 
       if (conflictingVariant) {
-        console.warn('⚠️ [VARIANT UPDATE] Duplicate variant found:', conflictingVariant)
+        log.warn('[VARIANT UPDATE] Duplicate variant found:', conflictingVariant)
         return res.status(409).json({
           error: 'Another variant already has this size, color, and material combination',
           conflictingVariant: {
@@ -143,7 +148,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (updates.material !== undefined) updates.material = normalizedUpdates.material
 
       // Log the update attempt for debugging
-      console.log('🔄 [VARIANT UPDATE] Updating variant:', {
+      log.debug('[VARIANT UPDATE] Updating variant:', {
         variantId,
         productId,
         updates,
@@ -160,7 +165,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .single()
 
       if (error) {
-        console.error('❌ [VARIANT UPDATE] Error updating variant:', {
+        log.error('[VARIANT UPDATE] Error updating variant:', {
           variantId,
           productId,
           error: error.message,
@@ -181,14 +186,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       if (!updatedVariant) {
-        console.warn('⚠️ [VARIANT UPDATE] Variant not found after update:', {
+        log.warn('[VARIANT UPDATE] Variant not found after update:', {
           variantId,
           productId,
         })
         return res.status(404).json({ error: 'Variant not found' })
       }
 
-      console.log('✅ [VARIANT UPDATE] Variant updated successfully:', {
+      log.debug('[VARIANT UPDATE] Variant updated successfully:', {
         variantId: updatedVariant.id,
         productId,
         size: updatedVariant.size,
@@ -198,7 +203,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       return res.status(200).json(updatedVariant)
     } catch (error) {
-      console.error('Unexpected error:', error)
+      log.error('Unexpected error:', error)
       return res.status(500).json({ error: 'Failed to update variant' })
     }
   }
@@ -214,7 +219,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .eq('product_id', productId) // Ensure variant belongs to this product
 
       if (error) {
-        console.error('Error deleting variant:', error)
+        log.error('Error deleting variant:', error)
         return res.status(500).json({ error: error.message })
       }
 
@@ -225,12 +230,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .eq('product_id', productId)
 
       if (countError) {
-        console.error('Error checking remaining variants:', countError)
+        log.error('Error checking remaining variants:', countError)
         // Don't fail the deletion, just log the error
       } else if (count === 0) {
         // No variants remaining - clean up attributes and options
-        console.log(
-          '🧹 [VARIANT DELETE] No variants remaining, cleaning up attributes for product:',
+        log.debug(
+          '� [VARIANT DELETE] No variants remaining, cleaning up attributes for product:',
           productId
         )
 
@@ -241,16 +246,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .eq('product_id', productId)
 
         if (attrError) {
-          console.error('Error cleaning up attributes:', attrError)
+          log.error('Error cleaning up attributes:', attrError)
           // Don't fail the deletion, just log the error
         } else {
-          console.log('✅ [VARIANT DELETE] Attributes cleaned up successfully')
+          log.debug('[VARIANT DELETE] Attributes cleaned up successfully')
         }
       }
 
       return res.status(200).json({ message: 'Variant deleted successfully' })
     } catch (error) {
-      console.error('Unexpected error:', error)
+      log.error('Unexpected error:', error)
       return res.status(500).json({ error: 'Failed to delete variant' })
     }
   }
@@ -266,7 +271,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .single()
 
       if (error) {
-        console.error('Error fetching variant:', error)
+        log.error('Error fetching variant:', error)
         return res.status(500).json({ error: error.message })
       }
 
@@ -276,7 +281,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       return res.status(200).json(variant)
     } catch (error) {
-      console.error('Unexpected error:', error)
+      log.error('Unexpected error:', error)
       return res.status(500).json({ error: 'Failed to fetch variant' })
     }
   }

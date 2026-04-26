@@ -1,3 +1,5 @@
+import { log } from '../../../../lib/log'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { createClient } from '@supabase/supabase-js'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { normalizeVariantAttributes, hasAtLeastOneAttribute } from '@/utils/variantHelpers'
@@ -14,6 +16,9 @@ const supabaseAdmin = createClient(
 )
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
   const { productId } = req.query
 
   if (!productId || typeof productId !== 'string') {
@@ -32,13 +37,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .order('material', { ascending: true })
 
       if (error) {
-        console.error('Error fetching variants:', error)
+        log.error('Error fetching variants:', error)
         return res.status(500).json({ error: error.message })
       }
 
       return res.status(200).json(variants || [])
     } catch (error) {
-      console.error('Unexpected error:', error)
+      log.error('Unexpected error:', error)
       return res.status(500).json({ error: 'Failed to fetch variants' })
     }
   }
@@ -48,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const variantData = req.body
 
-      console.log('🔍 [VARIANT CREATE] Starting creation:', {
+      log.debug('[VARIANT CREATE] Starting creation:', {
         productId,
         variantData,
         timestamp: new Date().toISOString(),
@@ -63,7 +68,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Validate at least one attribute is provided
       if (!hasAtLeastOneAttribute(normalized.size, normalized.color, normalized.material)) {
-        console.error('❌ [VARIANT CREATE] Validation failed: No attributes provided')
+        log.error('[VARIANT CREATE] Validation failed: No attributes provided')
         return res.status(400).json({
           error: 'At least one attribute (size, color, or material) is required',
         })
@@ -94,12 +99,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (checkError && checkError.code !== 'PGRST116') {
         // PGRST116 = no rows returned (not an error, means no duplicate)
-        console.error('❌ [VARIANT CREATE] Error checking for duplicates:', checkError)
+        log.error('[VARIANT CREATE] Error checking for duplicates:', checkError)
         return res.status(500).json({ error: 'Failed to validate variant' })
       }
 
       if (existingVariant) {
-        console.warn('⚠️ [VARIANT CREATE] Duplicate variant found:', existingVariant)
+        log.warn('[VARIANT CREATE] Duplicate variant found:', existingVariant)
         return res.status(409).json({
           error: 'A variant with this size, color, and material combination already exists',
           existingVariant: {
@@ -184,7 +189,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         material: normalized.material,
       }
 
-      console.log('💾 [VARIANT CREATE] Attempting insert:', {
+      log.debug('� [VARIANT CREATE] Attempting insert:', {
         product_id: productId,
         ...finalVariantData,
       })
@@ -202,7 +207,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .single()
 
       if (error) {
-        console.error('❌ [VARIANT CREATE] Database error:', {
+        log.error('[VARIANT CREATE] Database error:', {
           error,
           code: error.code,
           message: error.message,
@@ -225,14 +230,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
       }
 
-      console.log('✅ [VARIANT CREATE] Success:', {
+      log.debug('[VARIANT CREATE] Success:', {
         variantId: newVariant?.id,
         sku: newVariant?.sku,
       })
 
       return res.status(201).json(newVariant)
     } catch (error) {
-      console.error('Unexpected error:', error)
+      log.error('Unexpected error:', error)
       return res.status(500).json({ error: 'Failed to create variant' })
     }
   }

@@ -1,3 +1,5 @@
+import { log } from '../../../lib/log'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import formidable from 'formidable'
 import { promises as fs } from 'fs'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -10,6 +12,9 @@ export const config = {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
   }
@@ -42,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
 
     if (error) {
-      console.error('Storage upload error:', error)
+      log.error('Storage upload error:', error)
       return res.status(500).json({ message: `Upload failed: ${error.message}` })
     }
 
@@ -60,7 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       path: data.path,
     })
   } catch (error) {
-    console.error('Upload error:', error)
+    log.error('Upload error:', error)
     return res.status(500).json({ message: 'Internal server error' })
   }
 }

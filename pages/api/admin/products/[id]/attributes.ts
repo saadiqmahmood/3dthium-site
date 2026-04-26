@@ -1,7 +1,12 @@
+import { log } from '../../../../../lib/log'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { getSupabaseAdmin } from '@/lib/supabaseClient'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
   const supabase = getSupabaseAdmin()
   const { id: productId } = req.query
 
@@ -12,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // GET: Fetch all attributes and their options for a product
   if (req.method === 'GET') {
     try {
-      console.log('🔍 [API] Fetching attributes for product:', productId)
+      log.debug('[API] Fetching attributes for product:', productId)
 
       // Fetch attributes
       const { data: attributes, error: attrError } = await supabase
@@ -22,12 +27,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .order('display_order', { ascending: true })
 
       if (attrError) {
-        console.error('❌ [API] Error fetching attributes:', attrError)
+        log.error('[API] Error fetching attributes:', attrError)
         return res.status(500).json({ error: attrError.message })
       }
 
       if (!attributes || attributes.length === 0) {
-        console.log('✅ [API] No attributes found for product')
+        log.debug('[API] No attributes found for product')
         return res.json({ attributes: [] })
       }
 
@@ -40,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .order('display_order', { ascending: true })
 
       if (optError) {
-        console.error('❌ [API] Error fetching options:', optError)
+        log.error('[API] Error fetching options:', optError)
         return res.status(500).json({ error: optError.message })
       }
 
@@ -81,10 +86,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ),
       }))
 
-      console.log('✅ [API] Attributes fetched:', sortedAttributes.length)
+      log.debug('[API] Attributes fetched:', sortedAttributes.length)
       return res.json({ attributes: sortedAttributes })
     } catch (error) {
-      console.error('❌ [API] Exception fetching attributes:', error)
+      log.error('[API] Exception fetching attributes:', error)
       return res.status(500).json({
         error: 'Failed to fetch attributes',
         details: error instanceof Error ? error.message : 'Unknown error',
@@ -95,7 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // POST: Create attributes with options for a product
   if (req.method === 'POST') {
     try {
-      console.log('📤 [API] Saving attributes for product:', productId)
+      log.debug('� [API] Saving attributes for product:', productId)
       const { attributes } = req.body
 
       if (!Array.isArray(attributes) || attributes.length === 0) {
@@ -129,7 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .single()
 
           if (fetchError || !existingAttr) {
-            console.error('❌ [API] Error fetching attribute by ID:', fetchError)
+            log.error('[API] Error fetching attribute by ID:', fetchError)
             // If ID doesn't exist, treat as new attribute
             const { data: insertedAttr, error: attrError } = await supabase
               .from('product_attributes')
@@ -144,7 +149,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               .single()
 
             if (attrError) {
-              console.error('❌ [API] Error inserting attribute:', attrError)
+              log.error('[API] Error inserting attribute:', attrError)
               return res.status(500).json({ error: attrError.message })
             }
             newAttr = insertedAttr
@@ -163,7 +168,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               .single()
 
             if (updateError) {
-              console.error('❌ [API] Error updating attribute:', updateError)
+              log.error('[API] Error updating attribute:', updateError)
               return res.status(500).json({ error: updateError.message })
             }
             newAttr = updatedAttr
@@ -191,7 +196,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               .single()
 
             if (updateError) {
-              console.error('❌ [API] Error updating attribute by name:', updateError)
+              log.error('[API] Error updating attribute by name:', updateError)
               return res.status(500).json({ error: updateError.message })
             }
             newAttr = updatedAttr
@@ -210,7 +215,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               .single()
 
             if (attrError) {
-              console.error('❌ [API] Error inserting new attribute:', attrError)
+              log.error('[API] Error inserting new attribute:', attrError)
               return res.status(500).json({ error: attrError.message })
             }
             newAttr = insertedAttr
@@ -239,7 +244,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .eq('attribute_id', newAttr.id)
 
         if (deleteError) {
-          console.error('❌ [API] Error deleting existing options:', deleteError)
+          log.error('[API] Error deleting existing options:', deleteError)
           return res.status(500).json({
             error: deleteError.message,
             details: `Failed to delete existing options for attribute "${attr.name}"`,
@@ -312,7 +317,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .select()
 
           if (optError) {
-            console.error('❌ [API] Error inserting options:', {
+            log.error('[API] Error inserting options:', {
               attributeId: newAttr.id,
               attributeName: attr.name,
               optionsCount: optionsToInsert.length,
@@ -385,7 +390,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               })
 
               if (variantsToDelete && variantsToDelete.length > 0) {
-                console.log(
+                log.debug(
                   `⚠️ [API] Found ${variantsToDelete.length} orphaned variants due to deleted option values`
                 )
 
@@ -397,10 +402,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   .in('id', variantIds)
 
                 if (deleteVariantError) {
-                  console.error('❌ [API] Error deleting orphaned variants:', deleteVariantError)
+                  log.error('[API] Error deleting orphaned variants:', deleteVariantError)
                   // Don't fail the attribute update, just log the error
                 } else {
-                  console.log(`✅ [API] Deleted ${variantsToDelete.length} orphaned variants`)
+                  log.debug(`✅ [API] Deleted ${variantsToDelete.length} orphaned variants`)
                 }
               }
             }
@@ -413,16 +418,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
           // If all options were removed, check if any variants reference this attribute
           // (This is a conservative approach - we could delete all variants, but that might be too aggressive)
-          console.log(
+          log.debug(
             `⚠️ [API] All options removed for attribute "${newAttr.name}". Existing variants may be affected.`
           )
         }
       }
 
-      console.log('✅ [API] Attributes saved successfully')
+      log.debug('[API] Attributes saved successfully')
       return res.status(201).json({ attributes: createdAttributes })
     } catch (error) {
-      console.error('❌ [API] Exception creating attributes:', error)
+      log.error('[API] Exception creating attributes:', error)
       return res.status(500).json({
         error: 'Failed to create attributes',
         details: error instanceof Error ? error.message : 'Unknown error',

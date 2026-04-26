@@ -1,7 +1,12 @@
+import { log } from '../../../../lib/log'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSupabaseAdmin } from '../../../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
   const { id } = req.query
 
   if (!id || typeof id !== 'string') {
@@ -15,18 +20,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const supabaseAdmin = getSupabaseAdmin()
 
   try {
-    console.log('🔍 [API/admin/custom-orders/[id]] Deleting custom order:', id)
+    log.debug('[API/admin/custom-orders/[id]] Deleting custom order:', id)
     const { error } = await supabaseAdmin.from('custom_orders').delete().eq('id', parseInt(id))
 
     if (error) {
-      console.error('❌ [API/admin/custom-orders/[id]] Error deleting custom order:', error)
+      log.error('[API/admin/custom-orders/[id]] Error deleting custom order:', error)
       return res.status(500).json({ error: 'Failed to delete custom order' })
     }
 
-    console.log('✅ [API/admin/custom-orders/[id]] Custom order deleted successfully')
+    log.debug('[API/admin/custom-orders/[id]] Custom order deleted successfully')
     res.status(200).json({ success: true })
   } catch (error) {
-    console.error('❌ [API/admin/custom-orders/[id]] Error:', error)
+    log.error('[API/admin/custom-orders/[id]] Error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 }

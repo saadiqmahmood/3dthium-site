@@ -1,3 +1,5 @@
+import { log } from '../../../lib/log'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSupabaseAdmin } from '../../../lib/supabaseClient'
 
@@ -13,6 +15,9 @@ import { getSupabaseAdmin } from '../../../lib/supabaseClient'
  */
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -36,7 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .single()
 
     if (orderError || !order) {
-      console.error('❌ [API/admin/send-order-confirmation] Error fetching order:', orderError)
+      log.error('[API/admin/send-order-confirmation] Error fetching order:', orderError)
       return res.status(500).json({ error: 'Failed to fetch order' })
     }
 
@@ -92,8 +97,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     //   html: emailHtml,
     // })
 
-    console.log('📧 [API/admin/send-order-confirmation] Email would be sent to:', customerEmail)
-    console.log('📧 [API/admin/send-order-confirmation] Email HTML length:', emailHtml.length)
+    log.debug('[API/admin/send-order-confirmation] Email would be sent to:', customerEmail)
+    log.debug('[API/admin/send-order-confirmation] Email HTML length:', emailHtml.length)
 
     // For now, return success (implement actual email sending when service is configured)
     return res.status(200).json({
@@ -103,7 +108,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       orderId: order.id,
     })
   } catch (error) {
-    console.error('❌ [API/admin/send-order-confirmation] Error:', error)
+    log.error('[API/admin/send-order-confirmation] Error:', error)
     return res.status(500).json({ error: 'Failed to send confirmation email' })
   }
 }

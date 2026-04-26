@@ -1,13 +1,18 @@
+import { log } from '../../../lib/log'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSupabaseAdmin } from '../../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
   try {
-    console.log('🔍 [API/admin/metrics] Fetching admin metrics...')
+    log.debug('[API/admin/metrics] Fetching admin metrics...')
     const supabaseAdmin = getSupabaseAdmin()
 
     // Fetch all metrics in parallel
@@ -41,10 +46,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       totalProducts: (products || []).length,
     }
 
-    console.log('✅ [API/admin/metrics] Metrics fetched successfully')
+    log.debug('[API/admin/metrics] Metrics fetched successfully')
     res.status(200).json(metrics)
   } catch (error) {
-    console.error('❌ [API/admin/metrics] Error fetching metrics:', error)
+    log.error('[API/admin/metrics] Error fetching metrics:', error)
     res.status(500).json({ error: 'Failed to fetch metrics' })
   }
 }

@@ -1,3 +1,4 @@
+import { log } from '../../../lib/log'
 import { createClient } from '@supabase/supabase-js'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -21,22 +22,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
+  // Verify shared-secret bearer token.
+  // Configure the same value in Shippo Dashboard → Webhooks → Custom Headers:
+  //   Header name: Authorization  Value: Bearer <SHIPPO_WEBHOOK_SECRET>
+  const webhookSecret = process.env.SHIPPO_WEBHOOK_SECRET
+  if (!webhookSecret) {
+    log.error('SHIPPO_WEBHOOK_SECRET is not set')
+    return res.status(500).json({ error: 'Webhook secret not configured' })
+  }
+
+  const authHeader = req.headers['authorization']
+  if (!authHeader || authHeader !== `Bearer ${webhookSecret}`) {
+    log.warn('Shippo webhook: invalid or missing Authorization header')
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
   try {
-    console.log('Shippo webhook received:', JSON.stringify(req.body, null, 2))
+    log.debug('Shippo webhook received:', JSON.stringify(req.body, null, 2))
     const event = req.body
 
     // Extract tracking info - prefer event.data structure (standard Shippo format)
     const trackingNumber = event.data?.tracking_number || event.tracking_number
     const trackingStatus = event.data?.tracking_status?.status || event.tracking_status?.status
 
-    console.log('Extracted tracking info:', { trackingNumber, trackingStatus })
+    log.debug('Extracted tracking info:', { trackingNumber, trackingStatus })
 
     if (!trackingNumber || !trackingStatus) {
-      console.error('Missing tracking data:', { event })
+      log.error('Missing tracking data:', { event })
       return res.status(400).json({ error: 'Missing tracking number or status' })
     }
     const mappedStatus = statusMap[trackingStatus] || 'unknown'
-    console.log('Mapped status:', { trackingStatus, mappedStatus })
+    log.debug('Mapped status:', { trackingStatus, mappedStatus })
 
     // Update the order in the database
     const { data, error, count } = await supabase
@@ -45,22 +61,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .eq('tracking_number', trackingNumber)
       .select()
 
-    console.log('Database update result:', { data, error, count })
+    log.debug('Database update result:', { data, error, count })
 
     if (error) {
-      console.error('Error updating order status from Shippo webhook:', error)
+      log.error('Error updating order status from Shippo webhook:', error)
       return res.status(500).json({ error: 'Failed to update order status' })
     }
 
     if (count === 0) {
-      console.warn(`No order found with tracking number: ${trackingNumber}`)
+      log.warn(`No order found with tracking number: ${trackingNumber}`)
       return res.status(404).json({ error: 'Order not found' })
     }
 
-    console.log(`Successfully updated order status to: ${mappedStatus}`)
+    log.debug(`Successfully updated order status to: ${mappedStatus}`)
     res.status(200).json({ success: true, updatedCount: count })
   } catch (err) {
-    console.error('Error handling Shippo webhook:', err)
+    log.error('Error handling Shippo webhook:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 }

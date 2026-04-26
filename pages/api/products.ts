@@ -1,17 +1,9 @@
-import { createClient } from '@supabase/supabase-js'
+import { log } from '../../lib/log'
+import { getSupabaseAnon } from '@/lib/supabase/anon'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { ProductVariantNew } from '@/types'
 
-// Public client for frontend consumption
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      persistSession: false,
-    },
-  }
-)
+const supabase = getSupabaseAnon()
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -42,12 +34,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .order('created_at', { ascending: false })
 
     if (productsError) {
-      console.error('❌ [API/products] Error fetching products:', productsError)
+      log.error('[API/products] Error fetching products:', productsError)
       return res.status(500).json({ error: 'Failed to fetch products' })
     }
 
     if (!products || products.length === 0) {
-      console.log('⚠️ [API/products] No active products found')
+      log.debug('[API/products] No active products found')
       return res.status(200).json({ products: [] })
     }
 

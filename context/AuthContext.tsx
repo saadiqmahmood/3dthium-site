@@ -43,26 +43,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
   const { client } = supabaseContext
 
-  // Helper function to check admin status
-  const checkAdminStatus = async (userId: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const checkAdminStatus = async (_userId: string) => {
     try {
-      // Use API route to bypass RLS issues
-      const response = await fetch('/api/auth/check-admin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
-      })
-
+      const response = await fetch('/api/auth/me')
       if (!response.ok) {
         setIsAdmin(false)
         return
       }
-
       const data = await response.json()
       setIsAdmin(!!data.isAdmin)
-    } catch (err) {
+    } catch {
       setIsAdmin(false)
     }
   }

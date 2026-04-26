@@ -1,7 +1,12 @@
+import { log } from '../../../../lib/log'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSupabaseAdmin } from '../../../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
   const { id } = req.query
 
   if (!id || typeof id !== 'string') {
@@ -13,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     switch (req.method) {
       case 'GET': {
-        console.log('🔍 [API/admin/categories/[id]] Fetching category:', id)
+        log.debug('[API/admin/categories/[id]] Fetching category:', id)
 
         const { data: category, error: fetchError } = await supabaseAdmin
           .from('categories')
@@ -22,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .single()
 
         if (fetchError) {
-          console.error('❌ [API/admin/categories/[id]] Error fetching category:', fetchError)
+          log.error('[API/admin/categories/[id]] Error fetching category:', fetchError)
           return res.status(500).json({ error: 'Failed to fetch category' })
         }
 
@@ -30,13 +35,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(404).json({ error: 'Category not found' })
         }
 
-        console.log('✅ [API/admin/categories/[id]] Category fetched successfully')
+        log.debug('[API/admin/categories/[id]] Category fetched successfully')
         res.status(200).json(category)
         break
       }
 
       case 'PUT': {
-        console.log('🔍 [API/admin/categories/[id]] Updating category:', id)
+        log.debug('[API/admin/categories/[id]] Updating category:', id)
         const { name, slug, parent_id, description, image_url, sort_order, is_active } = req.body
 
         if (!name || !slug) {
@@ -53,8 +58,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (checkError && checkError.code !== 'PGRST116') {
           // PGRST116 = no rows returned
-          console.error(
-            '❌ [API/admin/categories/[id]] Error checking slug uniqueness:',
+          log.error(
+            '[API/admin/categories/[id]] Error checking slug uniqueness:',
             checkError
           )
           return res.status(500).json({ error: 'Failed to check slug uniqueness' })
@@ -86,17 +91,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .single()
 
         if (updateError) {
-          console.error('❌ [API/admin/categories/[id]] Error updating category:', updateError)
+          log.error('[API/admin/categories/[id]] Error updating category:', updateError)
           return res.status(500).json({ error: 'Failed to update category' })
         }
 
-        console.log('✅ [API/admin/categories/[id]] Category updated successfully')
+        log.debug('[API/admin/categories/[id]] Category updated successfully')
         res.status(200).json(updatedCategory)
         break
       }
 
       case 'DELETE': {
-        console.log('🔍 [API/admin/categories/[id]] Deleting category:', id)
+        log.debug('[API/admin/categories/[id]] Deleting category:', id)
 
         // Check if category has products
         const { data: products, error: productsError } = await supabaseAdmin
@@ -106,7 +111,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .limit(1)
 
         if (productsError) {
-          console.error('❌ [API/admin/categories/[id]] Error checking products:', productsError)
+          log.error('[API/admin/categories/[id]] Error checking products:', productsError)
           return res.status(500).json({ error: 'Failed to check category products' })
         }
 
@@ -125,8 +130,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .limit(1)
 
         if (subcategoriesError) {
-          console.error(
-            '❌ [API/admin/categories/[id]] Error checking subcategories:',
+          log.error(
+            '[API/admin/categories/[id]] Error checking subcategories:',
             subcategoriesError
           )
           return res.status(500).json({ error: 'Failed to check category subcategories' })
@@ -142,11 +147,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { error: deleteError } = await supabaseAdmin.from('categories').delete().eq('id', id)
 
         if (deleteError) {
-          console.error('❌ [API/admin/categories/[id]] Error deleting category:', deleteError)
+          log.error('[API/admin/categories/[id]] Error deleting category:', deleteError)
           return res.status(500).json({ error: 'Failed to delete category' })
         }
 
-        console.log('✅ [API/admin/categories/[id]] Category deleted successfully')
+        log.debug('[API/admin/categories/[id]] Category deleted successfully')
         res.status(200).json({ success: true })
         break
       }
@@ -155,7 +160,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(405).json({ error: 'Method not allowed' })
     }
   } catch (error) {
-    console.error('❌ [API/admin/categories/[id]] Error:', error)
+    log.error('[API/admin/categories/[id]] Error:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 }

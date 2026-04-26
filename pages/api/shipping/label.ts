@@ -1,3 +1,4 @@
+import { log } from '../../../lib/log'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { createShippingLabel } from '../../../lib/shippoClient'
 import { getSupabaseAdmin } from '../../../lib/supabaseClient'
@@ -31,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .eq('id', order_id)
 
       if (updateError) {
-        console.error('Error updating order:', updateError)
+        log.error('Error updating order:', updateError)
         return res.status(500).json({ error: 'Failed to update order' })
       }
 
@@ -48,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     }
   } catch (error) {
-    console.error('Error creating shipping label:', error)
+    log.error('Error creating shipping label:', error)
     res.status(500).json({ error: 'Failed to create shipping label' })
   }
 }

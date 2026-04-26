@@ -1,16 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
+import { log } from '../../../../lib/log'
+import { getSupabaseAnon } from '@/lib/supabase/anon'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-// Public client for frontend consumption
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      persistSession: false,
-    },
-  }
-)
+const supabase = getSupabaseAnon()
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -25,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    console.log('🔄 [API/products/[slug]/variants] Fetching variants for:', slug)
+    log.debug('[API/products/[slug]/variants] Fetching variants for:', slug)
 
     // First get the product ID from slug
     const { data: product, error: productError } = await supabase
@@ -36,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .single()
 
     if (productError) {
-      console.error('❌ [API/products/[slug]/variants] Error fetching product:', productError)
+      log.error('[API/products/[slug]/variants] Error fetching product:', productError)
       if (productError.code === 'PGRST116') {
         return res.status(404).json({ error: 'Product not found' })
       }
@@ -44,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (!product) {
-      console.log('⚠️ [API/products/[slug]/variants] Product not found:', slug)
+      log.debug('[API/products/[slug]/variants] Product not found:', slug)
       return res.status(404).json({ error: 'Product not found' })
     }
 
@@ -70,11 +62,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .order('material', { ascending: true })
 
     if (variantsError) {
-      console.error('❌ [API/products/[slug]/variants] Error fetching variants:', variantsError)
+      log.error('[API/products/[slug]/variants] Error fetching variants:', variantsError)
       return res.status(500).json({ error: 'Failed to fetch variants' })
     }
 
-    console.log('✅ [API/products/[slug]/variants] Variants fetched:', variants?.length || 0)
+    log.debug('[API/products/[slug]/variants] Variants fetched:', variants?.length || 0)
 
     // Process variants with final prices
     const processedVariants =
@@ -98,14 +90,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     }
 
-    console.log('✅ [API/products/[slug]/variants] Returning', processedVariants.length, 'variants')
+    log.debug('[API/products/[slug]/variants] Returning', processedVariants.length, 'variants')
 
     // Set cache headers for better performance
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
 
     return res.status(200).json(result)
   } catch (error) {
-    console.error('❌ [API/products/[slug]/variants] Unexpected error:', error)
+    log.error('[API/products/[slug]/variants] Unexpected error:', error)
     return res.status(500).json({ error: 'Internal server error' })
   }
 }

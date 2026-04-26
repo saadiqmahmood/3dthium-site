@@ -1,3 +1,4 @@
+import { log } from '../../../lib/log'
 import { buffer } from 'micro'
 
 export const config = {
@@ -38,6 +39,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
+  // Fail closed — never process events if the signing secret is absent.
+  if (!endpointSecret) {
+    log.error('STRIPE_WEBHOOK_SECRET is not set')
+    return res.status(500).json({ message: 'Webhook secret not configured' })
+  }
+
   const buf = await buffer(req)
   const sig = req.headers['stripe-signature'] as string
   let event: Stripe.Event
@@ -45,8 +52,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     event = stripe.webhooks.constructEvent(buf, sig, endpointSecret)
   } catch (err) {
-    console.error('Webhook signature verification failed:', err)
+    log.error('Webhook signature verification failed:', err)
     return res.status(400).json({ message: 'Webhook signature verification failed' })
+  }
+
+  // Idempotency: record the event ID and skip if already processed.
+  const { error: insertError } = await supabase
+    .from('stripe_webhook_events')
+    .insert({ id: event.id, type: event.type, payload: event })
+
+  if (insertError) {
+    if (insertError.code === '23505') {
+      // Duplicate — already handled.
+      log.debug('Duplicate Stripe event, skipping:', event.id)
+      return res.status(200).json({ received: true, duplicate: true })
+    }
+    log.error('Failed to record webhook event:', insertError)
+    return res.status(500).json({ message: 'Failed to record event' })
   }
 
   try {
@@ -60,22 +82,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         break
 
       default:
-        console.log(`Unhandled event type: ${event.type}`)
+        log.debug(`Unhandled event type: ${event.type}`)
     }
 
     res.status(200).json({ received: true })
   } catch (error) {
-    console.error('Webhook handler error:', error)
+    log.error('Webhook handler error:', error)
     res.status(500).json({ message: 'Webhook handler failed' })
   }
 }
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-  console.log('Processing completed checkout session:', session.id)
+  log.debug('Processing completed checkout session:', session.id)
 
   const checkout_cart_id = session.metadata?.checkout_cart_id
   if (!checkout_cart_id) {
-    console.error('Missing checkout_cart_id in session metadata:', session.id)
+    log.error('Missing checkout_cart_id in session metadata:', session.id)
     return
   }
 
@@ -87,7 +109,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     .single()
 
   if (cartError || !checkoutCart) {
-    console.error('Could not find checkout cart:', cartError)
+    log.error('Could not find checkout cart:', cartError)
     return
   }
 
@@ -112,7 +134,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       .single()
 
     if (userError) {
-      console.error('Error looking up user record:', userError)
+      log.error('Error looking up user record:', userError)
       // Continue with guest checkout if user lookup fails
     } else if (userRecord) {
       user_id = userRecord.id
@@ -146,7 +168,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       .single()
 
     if (orderError) {
-      console.error('Error creating order:', orderError)
+      log.error('Error creating order:', orderError)
       return
     }
 
@@ -165,11 +187,11 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
 
     if (itemsError) {
-      console.error('Error creating order items:', itemsError)
+      log.error('Error creating order items:', itemsError)
       return
     }
 
-    console.log('Order created successfully:', order.id)
+    log.debug('Order created successfully:', order.id)
     // Optionally: send confirmation email, update inventory, etc.
 
     // AUTOMATE SHIPPING LABEL CREATION
@@ -188,18 +210,18 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
           .json()
           .catch((e) => ({ error: 'Invalid JSON', details: e }))
         if (!labelRes.ok || !labelData.success) {
-          console.error('[AutoLabel] Auto label creation failed:', labelData.error || labelData)
+          log.error('[AutoLabel] Auto label creation failed:', labelData.error || labelData)
         }
       } catch (err) {
-        console.error('[AutoLabel] Error auto-creating shipping label:', err)
+        log.error('[AutoLabel] Error auto-creating shipping label:', err)
       }
     }
   } catch (error) {
-    console.error('Error processing checkout session:', error)
+    log.error('Error processing checkout session:', error)
   }
 }
 
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  console.log('Payment intent succeeded:', paymentIntent.id)
+  log.debug('Payment intent succeeded:', paymentIntent.id)
   // Additional payment success logic if needed
 }

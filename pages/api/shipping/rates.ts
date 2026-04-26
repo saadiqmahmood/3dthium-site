@@ -1,3 +1,4 @@
+import { log } from '../../../lib/log'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getShippingRates, type ShipmentRequest, type ShippingAddress } from '@/lib/shippoClient'
 
@@ -93,8 +94,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Return all rates as received from Shippo
     res.status(200).json({ rates })
   } catch (error) {
-    console.error('Error calculating shipping rates:', error)
-    console.error('Error details:', {
+    log.error('Error calculating shipping rates:', error)
+    log.error('Error details:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
     })
