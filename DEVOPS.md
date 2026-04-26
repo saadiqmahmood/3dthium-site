@@ -8,14 +8,14 @@
 
 | # | Item | Status |
 |---|------|--------|
-| 1 | Repo hygiene | 🔄 In Progress |
-| 2 | Environment management (lib/env.ts + env.example cleanup) | ⏳ Pending |
-| 3 | Logging strategy (lib/log.ts + replace console.log) | ⏳ Pending |
-| 4 | CI pipeline (.github/workflows/ci.yml) | ⏳ Pending |
-| 5 | Pre-commit guard (husky + lint-staged) | ⏳ Pending |
-| 6 | Deploy config (vercel.json + DEPLOY.md) | ⏳ Pending |
-| 7 | Database operational scripts | ⏳ Pending |
-| 8 | Observability minimum (/api/health) | ⏳ Pending |
+| 1 | Repo hygiene | ✅ Done — commit cb9cc0a |
+| 2 | Environment management (lib/env.ts + env.example cleanup) | ✅ Done — commit 7afb3c4 |
+| 3 | Logging strategy (lib/log.ts + replace console.log) | ✅ Done — commit 7afb3c4 |
+| 4 | CI pipeline (.github/workflows/ci.yml) | ✅ Done — commit c192a46 |
+| 5 | Pre-commit guard (husky + lint-staged) | ✅ Done — commit c192a46 |
+| 6 | Deploy config (vercel.json + DEPLOY.md) | ✅ Done — commit c192a46 |
+| 7 | Database operational scripts | ⏳ Deferred to DBA role |
+| 8 | Observability minimum (/api/health) | ✅ Done — commit c192a46 |
 
 ---
 
@@ -93,7 +93,8 @@
 
 ## Item 7 — Database Operational Scripts
 
-**Status**: Deferred to DBA role. Added `npm run db:check` script pointing at drizzle/migrate.ts.
+**Status**: Deferred to DBA role.  
+`npm run db:check` added, pointing at `drizzle/migrate.ts`. The CI will not auto-run DB migrations — that must be done manually before deploying schema changes.
 
 ---
 
@@ -101,11 +102,15 @@
 
 **Actions taken:**
 - Created `pages/api/health.ts` — DB ping + 200, no secrets exposed
+- Note: Sentry was deferred (backend role). Document it as open item.
 
 ---
 
 ## Open Items / Hand-offs
 
-- **Security role**: rotate all keys listed in SECURITY_ROTATION.md before launch; the env.example real values are now replaced but the keys themselves are still live
-- **Backend role**: wire `lib/env.ts` imports into all routes that still use `process.env` directly
-- **DBA role**: coordinate on `npm run db:migrate` CI step once migrations folder is clean
+- **CRITICAL: Key rotation required** — see `SECURITY_ROTATION.md`. The real credentials that were in `env.example` are now placeholders, but the actual keys are still live in Supabase/Stripe/Shippo dashboards and must be rotated before launch.
+- **Backend role**: wire `lib/env.ts` imports into routes still using `process.env` directly. Also remove the `noNonNullAssertion` warnings by using `env.VARIABLE` instead of `process.env.VARIABLE!`.
+- **DBA role**: once `drizzle/migrations/` baseline is committed, wire `npm run db:migrate` as a CI pre-check (dry-run mode).
+- **Frontend role**: 276 pre-existing Biome a11y errors in `components/admin/**` and `pages/` must be fixed before CI `biome ci .` can be widened to the full project. Primary issues: SVGs without `<title>`, buttons without `type`, `<a>` without valid `href`, missing `label` associations.
+- **Sentry (observability)**: not yet wired. Backend role to add `@sentry/nextjs` in API routes + scrub PII in `beforeSend`.
+- **CI biome scope**: currently set to `lib/ pages/api/` only. Expand to `.` once frontend fixes pre-existing errors.
