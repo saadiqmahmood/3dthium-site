@@ -1,6 +1,6 @@
-import { log } from '../../../../lib/log'
-import { requireAdmin } from '@/lib/auth/requireAdmin'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { log } from '../../../../lib/log'
 import { getSupabaseAdmin } from '../../../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -81,10 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .single()
 
           if (checkError && checkError.code !== 'PGRST116') {
-            log.error(
-              '[API/admin/products/[id]] Error checking slug uniqueness:',
-              checkError
-            )
+            log.error('[API/admin/products/[id]] Error checking slug uniqueness:', checkError)
             return res.status(500).json({ error: 'Failed to check slug uniqueness' })
           }
 

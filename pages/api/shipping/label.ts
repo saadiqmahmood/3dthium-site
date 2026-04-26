@@ -1,5 +1,5 @@
-import { log } from '../../../lib/log'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { log } from '../../../lib/log'
 import { createShippingLabel } from '../../../lib/shippoClient'
 import { getSupabaseAdmin } from '../../../lib/supabaseClient'
 

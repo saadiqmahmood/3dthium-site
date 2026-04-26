@@ -1,9 +1,9 @@
-import { log } from '../../../lib/log'
-import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { promises as fs } from 'node:fs'
 import formidable from 'formidable'
-import { promises as fs } from 'fs'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { getSupabaseAdmin } from '@/lib/supabaseClient'
+import { log } from '../../../lib/log'
 
 export const config = {
   api: {

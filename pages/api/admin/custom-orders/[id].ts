@@ -1,6 +1,6 @@
-import { log } from '../../../../lib/log'
-import { requireAdmin } from '@/lib/auth/requireAdmin'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { log } from '../../../../lib/log'
 import { getSupabaseAdmin } from '../../../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     log.debug('[API/admin/custom-orders/[id]] Deleting custom order:', id)
-    const { error } = await supabaseAdmin.from('custom_orders').delete().eq('id', parseInt(id))
+    const { error } = await supabaseAdmin.from('custom_orders').delete().eq('id', parseInt(id, 10))
 
     if (error) {
       log.error('[API/admin/custom-orders/[id]] Error deleting custom order:', error)

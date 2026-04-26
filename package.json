@@ -19,7 +19,8 @@
     "db:seed": "tsx drizzle/seed.ts",
     "db:reset": "npm run db:push && npm run db:seed",
     "typecheck": "tsc --noEmit",
-    "db:check": "tsx drizzle/migrate.ts"
+    "db:check": "tsx drizzle/migrate.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^3.7.0",
@@ -54,9 +55,19 @@
     "drizzle-kit": "^0.31.5",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "postcss": "^8.5.5",
     "tailwindcss": "^4.1.10",
     "tsx": "^4.20.6",
     "typescript": "^5"
+  },
+  "lint-staged": {
+    "{lib,pages/api}/**/*.{ts,js}": [
+      "biome check --write --no-errors-on-unmatched"
+    ],
+    "*.json": [
+      "biome format --write --no-errors-on-unmatched"
+    ]
   }
 }

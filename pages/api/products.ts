@@ -1,7 +1,7 @@
-import { log } from '../../lib/log'
-import { getSupabaseAnon } from '@/lib/supabase/anon'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { getSupabaseAnon } from '@/lib/supabase/anon'
 import type { ProductVariantNew } from '@/types'
+import { log } from '../../lib/log'
 
 const supabase = getSupabaseAnon()
 

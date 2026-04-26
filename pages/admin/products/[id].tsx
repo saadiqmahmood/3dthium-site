@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import AttributeBuilder from '@/components/admin/AttributeBuilder'
 import ImageManager from '@/components/admin/ImageManager'
 import VariantManager from '@/components/admin/VariantManager'
-import AttributeBuilder from '@/components/admin/AttributeBuilder'
 import VariationGenerator from '@/components/admin/VariationGenerator'
 import Toast from '@/components/ui/Toast'
 

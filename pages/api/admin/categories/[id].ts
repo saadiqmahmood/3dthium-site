@@ -1,6 +1,6 @@
-import { log } from '../../../../lib/log'
-import { requireAdmin } from '@/lib/auth/requireAdmin'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { log } from '../../../../lib/log'
 import { getSupabaseAdmin } from '../../../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -58,10 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (checkError && checkError.code !== 'PGRST116') {
           // PGRST116 = no rows returned
-          log.error(
-            '[API/admin/categories/[id]] Error checking slug uniqueness:',
-            checkError
-          )
+          log.error('[API/admin/categories/[id]] Error checking slug uniqueness:', checkError)
           return res.status(500).json({ error: 'Failed to check slug uniqueness' })
         }
 
@@ -130,10 +127,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .limit(1)
 
         if (subcategoriesError) {
-          log.error(
-            '[API/admin/categories/[id]] Error checking subcategories:',
-            subcategoriesError
-          )
+          log.error('[API/admin/categories/[id]] Error checking subcategories:', subcategoriesError)
           return res.status(500).json({ error: 'Failed to check category subcategories' })
         }
 

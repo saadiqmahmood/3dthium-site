@@ -1,5 +1,5 @@
-import { getSupabaseAnon } from '@/lib/supabase/anon'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { getSupabaseAnon } from '@/lib/supabase/anon'
 
 const supabase = getSupabaseAnon()
 

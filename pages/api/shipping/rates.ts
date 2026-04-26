@@ -1,6 +1,6 @@
-import { log } from '../../../lib/log'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getShippingRates, type ShipmentRequest, type ShippingAddress } from '@/lib/shippoClient'
+import { log } from '../../../lib/log'
 
 // Helper function to get size multiplier
 function getSizeMultiplier(size: string): number {

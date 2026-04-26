@@ -3,9 +3,7 @@ import Footer from './Footer'
 import Navbar from './Navbar'
 
 const SessionDebug =
-  process.env.NODE_ENV !== 'production'
-    ? require('./SessionDebug').default
-    : () => null
+  process.env.NODE_ENV !== 'production' ? require('./SessionDebug').default : () => null
 
 interface LayoutProps {
   children: ReactNode

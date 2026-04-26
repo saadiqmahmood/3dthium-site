@@ -1,8 +1,8 @@
-import { log } from '../../lib/log'
 import { createClient } from '@supabase/supabase-js'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Stripe from 'stripe'
 import { v4 as uuidv4 } from 'uuid'
+import { log } from '../../lib/log'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-05-28.basil',
@@ -129,7 +129,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         typeof item.price_data.unit_amount !== 'number' ||
         !Number.isInteger(item.price_data.unit_amount) ||
         item.price_data.unit_amount === 0 ||
-        isNaN(item.price_data.unit_amount)
+        Number.isNaN(item.price_data.unit_amount)
       ) {
         throw new Error(`Invalid unit_amount in line item: ${JSON.stringify(item)}`)
       }
