@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const [
       { count: orderCount, data: orders },
       { count: userCount, data: users },
-      { data: products },
+      { count: productCount },
     ] = await Promise.all([
       supabaseAdmin
         .from('orders')
@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .select('id, email, created_at', { count: 'exact' })
         .order('created_at', { ascending: false })
         .limit(5),
-      supabaseAdmin.from('products').select('id'),
+      supabaseAdmin.from('products_new').select('id', { count: 'exact', head: true }),
     ])
 
     // Calculate total revenue from recent orders
@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       totalRevenue,
       recentOrders: orders || [],
       recentUsers: users || [],
-      totalProducts: (products || []).length,
+      totalProducts: productCount || 0,
     }
 
     log.debug('[API/admin/metrics] Metrics fetched successfully')
