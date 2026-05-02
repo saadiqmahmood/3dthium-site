@@ -3,6 +3,7 @@ import { buffer } from 'micro'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Stripe from 'stripe'
 import { log } from '../../../lib/log'
+import { createLabelForOrder } from '../shipping/label'
 
 export const config = {
   api: {
@@ -171,17 +172,38 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       return
     }
 
-    // Create order items - match the actual database schema
-    const orderItems = (cartItems as CartItem[]).map((item) => ({
-      order_id: order.id,
-      product_id: item.product_id,
-      variant_id: item.variant_id || null,
-      quantity: item.quantity,
-      size: item.size || null,
-      color: item.color || null,
-      material: item.material || null,
-      price_at_purchase: item.price, // Use the price stored in cart
-    }))
+    // Re-fetch server-side prices to store authoritative price_at_purchase
+    const productIds = [...new Set((cartItems as CartItem[]).map((i) => i.product_id))]
+    const variantIds = (cartItems as CartItem[])
+      .map((i) => i.variant_id)
+      .filter(Boolean) as string[]
+
+    const [productsRes, variantsRes] = await Promise.all([
+      supabase.from('products').select('id, base_price').in('id', productIds),
+      variantIds.length > 0
+        ? supabase.from('product_variants').select('id, price_adjustment').in('id', variantIds)
+        : Promise.resolve({ data: [] as Array<{ id: string; price_adjustment: string }> }),
+    ])
+
+    const productMap = new Map((productsRes.data ?? []).map((p) => [p.id, Number(p.base_price)]))
+    const variantMap = new Map(
+      (variantsRes.data ?? []).map((v) => [v.id, Number(v.price_adjustment)])
+    )
+
+    const orderItems = (cartItems as CartItem[]).map((item) => {
+      const basePrice = productMap.get(item.product_id) ?? 0
+      const adjustment = item.variant_id ? (variantMap.get(item.variant_id) ?? 0) : 0
+      return {
+        order_id: order.id,
+        product_id: item.product_id,
+        variant_id: item.variant_id || null,
+        quantity: item.quantity,
+        size: item.size || null,
+        color: item.color || null,
+        material: item.material || null,
+        price_at_purchase: basePrice + adjustment,
+      }
+    })
 
     const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
 
@@ -191,28 +213,11 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     }
 
     log.debug('Order created successfully:', order.id)
-    // Optionally: send confirmation email, update inventory, etc.
 
-    // AUTOMATE SHIPPING LABEL CREATION
-    if (order.shipping_rate_id && order.id) {
-      try {
-        const labelUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shipping/label`
-        const labelRes = await fetch(labelUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            rate_id: order.shipping_rate_id,
-            order_id: order.id,
-          }),
-        })
-        const labelData = await labelRes
-          .json()
-          .catch((e) => ({ error: 'Invalid JSON', details: e }))
-        if (!labelRes.ok || !labelData.success) {
-          log.error('[AutoLabel] Auto label creation failed:', labelData.error || labelData)
-        }
-      } catch (err) {
-        log.error('[AutoLabel] Error auto-creating shipping label:', err)
+    if (order.shipping_rate_id) {
+      const labelResult = await createLabelForOrder(order.shipping_rate_id, order.id)
+      if (!labelResult.success) {
+        log.error('[AutoLabel] Auto label creation failed:', labelResult.error)
       }
     }
   } catch (error) {
