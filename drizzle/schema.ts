@@ -1,6 +1,7 @@
 import { relations } from 'drizzle-orm'
 import {
   boolean,
+  index,
   integer,
   jsonb,
   numeric,
@@ -41,7 +42,7 @@ export const categories = pgTable('categories', {
 
 export const categoryAttributes = pgTable('category_attributes', {
   id: uuid('id').defaultRandom().primaryKey(),
-  categoryId: uuid('category_id'),
+  categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
   name: text('name').notNull(),
   type: text('type').notNull().default('text'),
   unit: text('unit'),
@@ -53,7 +54,7 @@ export const categoryAttributes = pgTable('category_attributes', {
 })
 
 // ============================================
-// PRODUCTS (NEW SCHEMA)
+// PRODUCTS (CANONICAL — table: products_new, to be renamed to products)
 // ============================================
 
 export const productsNew = pgTable('products_new', {
@@ -61,7 +62,7 @@ export const productsNew = pgTable('products_new', {
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
   description: text('description'),
-  categoryId: uuid('category_id'),
+  categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
   basePrice: numeric('base_price').notNull(),
   thumbnailUrl: text('thumbnail_url'),
   images: jsonb('images').default([]).notNull(),
@@ -74,31 +75,33 @@ export const productsNew = pgTable('products_new', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
-export const productVariantsNew = pgTable('product_variants_new', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  productId: uuid('product_id').notNull(),
+export const productVariantsNew = pgTable(
+  'product_variants_new',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    productId: uuid('product_id')
+      .notNull()
+      .references(() => productsNew.id, { onDelete: 'cascade' }),
 
-  // Variant attributes (at least one required)
-  size: varchar('size', { length: 50 }),
-  color: varchar('color', { length: 50 }),
-  material: varchar('material', { length: 50 }),
+    size: varchar('size', { length: 50 }),
+    color: varchar('color', { length: 50 }),
+    material: varchar('material', { length: 50 }),
 
-  // Pricing
-  priceAdjustment: numeric('price_adjustment').default('0').notNull(),
+    priceAdjustment: numeric('price_adjustment').default('0').notNull(),
 
-  // Optional fields
-  sku: varchar('sku', { length: 100 }).unique(),
-  imageUrl: text('image_url'),
-  stockQuantity: integer('stock_quantity').default(0).notNull(),
-  isAvailable: boolean('is_available').default(true).notNull(),
+    sku: varchar('sku', { length: 100 }).unique(),
+    imageUrl: text('image_url'),
+    stockQuantity: integer('stock_quantity').default(0).notNull(),
+    isAvailable: boolean('is_available').default(true).notNull(),
 
-  // Timestamps
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-})
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [index('idx_variants_product_id').on(table.productId)]
+)
 
 // ============================================
-// LEGACY PRODUCTS (OLD SCHEMA)
+// LEGACY PRODUCTS (READ-ONLY — to be renamed to products_legacy)
 // ============================================
 
 export const products = pgTable('products', {
@@ -169,40 +172,48 @@ export const checkoutCarts = pgTable('checkout_carts', {
 // ORDERS
 // ============================================
 
-export const orders = pgTable('orders', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id'),
-  guestEmail: text('guest_email'),
-  totalPrice: numeric('total_price').notNull(),
-  status: orderStatusEnum('status').notNull().default('pending'),
-  stripeSessionId: text('stripe_session_id').unique(),
-  stripePaymentIntentId: text('stripe_payment_intent_id'),
-  stripeCustomerId: text('stripe_customer_id'),
-  shippingName: text('shipping_name'),
-  shippingAddress: text('shipping_address'),
-  shippingCity: text('shipping_city'),
-  shippingPostcode: text('shipping_postcode'),
-  shippingCountry: text('shipping_country').default('GB'),
-  shippingPhone: text('shipping_phone'),
-  shippingMethod: text('shipping_method'),
-  shippingRateId: text('shipping_rate_id'),
-  shippingCost: numeric('shipping_cost').default('0.00'),
-  trackingNumber: text('tracking_number'),
-  trackingUrl: text('tracking_url'),
-  shippingLabelUrl: text('shipping_label_url'),
-  shippedAt: timestamp('shipped_at'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+export const orders = pgTable(
+  'orders',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id'),
+    guestEmail: text('guest_email'),
+    totalPrice: numeric('total_price').notNull(),
+    status: orderStatusEnum('status').notNull().default('pending'),
+    stripeSessionId: text('stripe_session_id').unique(),
+    stripePaymentIntentId: text('stripe_payment_intent_id'),
+    stripeCustomerId: text('stripe_customer_id'),
+    shippingName: text('shipping_name'),
+    shippingAddress: text('shipping_address'),
+    shippingCity: text('shipping_city'),
+    shippingPostcode: text('shipping_postcode'),
+    shippingCountry: text('shipping_country').default('GB'),
+    shippingPhone: text('shipping_phone'),
+    shippingMethod: text('shipping_method'),
+    shippingRateId: text('shipping_rate_id'),
+    shippingCost: numeric('shipping_cost').default('0.00'),
+    trackingNumber: text('tracking_number'),
+    trackingUrl: text('tracking_url'),
+    shippingLabelUrl: text('shipping_label_url'),
+    shippedAt: timestamp('shipped_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [index('idx_orders_created_at').on(table.createdAt)]
+)
 
-export const orderItems = pgTable('order_items', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  orderId: uuid('order_id'),
-  variantId: uuid('variant_id'),
-  productId: uuid('product_id'),
-  quantity: integer('quantity').notNull(),
-  priceAtPurchase: numeric('price_at_purchase').notNull(),
-  size: text('size'),
-})
+export const orderItems = pgTable(
+  'order_items',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orderId: uuid('order_id').references(() => orders.id, { onDelete: 'cascade' }),
+    variantId: uuid('variant_id'),
+    productId: uuid('product_id'),
+    quantity: integer('quantity').notNull(),
+    priceAtPurchase: numeric('price_at_purchase').notNull(),
+    size: text('size'),
+  },
+  (table) => [index('idx_order_items_order_id').on(table.orderId)]
+)
 
 // ============================================
 // CUSTOM ORDERS
@@ -222,6 +233,34 @@ export const customOrders = pgTable('custom_orders', {
   fileUrl: text('file_url').notNull(),
   status: varchar('status').default('pending'),
   createdAt: timestamp('created_at').defaultNow(),
+})
+
+// ============================================
+// PROMO CODES
+// ============================================
+
+export const promoCodes = pgTable('promo_codes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  code: text('code').notNull().unique(),
+  type: text('type').notNull(),
+  value: numeric('value').notNull(),
+  minOrderValue: numeric('min_order_value'),
+  maxUses: integer('max_uses'),
+  uses: integer('uses').notNull().default(0),
+  expiresAt: timestamp('expires_at'),
+  active: boolean('active').notNull().default(true),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+// ============================================
+// STRIPE WEBHOOK IDEMPOTENCY
+// ============================================
+
+export const stripeWebhookEvents = pgTable('stripe_webhook_events', {
+  id: text('id').primaryKey(),
+  type: text('type').notNull(),
+  payload: jsonb('payload').notNull(),
+  receivedAt: timestamp('received_at').defaultNow().notNull(),
 })
 
 // ============================================
@@ -285,9 +324,9 @@ export const cartItemsRelations = relations(cartItems, ({ one }) => ({
     fields: [cartItems.cartId],
     references: [carts.id],
   }),
-  variant: one(productVariants, {
+  variant: one(productVariantsNew, {
     fields: [cartItems.variantId],
-    references: [productVariants.id],
+    references: [productVariantsNew.id],
   }),
 }))
 
@@ -304,13 +343,13 @@ export const orderItemsRelations = relations(orderItems, ({ one }) => ({
     fields: [orderItems.orderId],
     references: [orders.id],
   }),
-  variant: one(productVariants, {
+  variant: one(productVariantsNew, {
     fields: [orderItems.variantId],
-    references: [productVariants.id],
+    references: [productVariantsNew.id],
   }),
-  product: one(products, {
+  product: one(productsNew, {
     fields: [orderItems.productId],
-    references: [products.id],
+    references: [productsNew.id],
   }),
 }))
 
@@ -338,3 +377,8 @@ export type NewOrder = typeof orders.$inferInsert
 
 export type OrderItem = typeof orderItems.$inferSelect
 export type NewOrderItem = typeof orderItems.$inferInsert
+
+export type PromoCode = typeof promoCodes.$inferSelect
+export type NewPromoCode = typeof promoCodes.$inferInsert
+
+export type StripeWebhookEvent = typeof stripeWebhookEvents.$inferSelect
