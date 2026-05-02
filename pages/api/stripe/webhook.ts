@@ -3,6 +3,7 @@ import { buffer } from 'micro'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Stripe from 'stripe'
 import { log } from '../../../lib/log'
+import { applyPromoCode } from '../promo_code/apply'
 import { createLabelForOrder } from '../shipping/label'
 
 export const config = {
@@ -213,6 +214,18 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     }
 
     log.debug('Order created successfully:', order.id)
+
+    const promoCode = session.metadata?.promo_code
+    if (promoCode) {
+      const { data: promo } = await supabase
+        .from('promo_codes')
+        .select('id')
+        .eq('code', promoCode)
+        .single()
+      if (promo) {
+        await applyPromoCode(promo.id)
+      }
+    }
 
     if (order.shipping_rate_id) {
       const labelResult = await createLabelForOrder(order.shipping_rate_id, order.id)
