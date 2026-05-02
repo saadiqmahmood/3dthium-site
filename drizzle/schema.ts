@@ -206,8 +206,8 @@ export const orderItems = pgTable(
   {
     id: uuid('id').defaultRandom().primaryKey(),
     orderId: uuid('order_id').references(() => orders.id, { onDelete: 'cascade' }),
-    variantId: uuid('variant_id'),
-    productId: uuid('product_id'),
+    variantId: uuid('variant_id').references(() => productVariantsNew.id, { onDelete: 'set null' }),
+    productId: uuid('product_id').references(() => productsNew.id, { onDelete: 'set null' }),
     quantity: integer('quantity').notNull(),
     priceAtPurchase: numeric('price_at_purchase').notNull(),
     size: text('size'),
