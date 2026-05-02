@@ -34,58 +34,69 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(500).json({ error: 'Failed to fetch order' })
         }
 
-        // Enrich order items with product_variants data if available
+        // Enrich order items with product_variants and products data (batch, no N+1)
         if (data.order_items && Array.isArray(data.order_items)) {
-          const enrichedItems = await Promise.all(
-            data.order_items.map(
-              async (item: {
+          type RawItem = {
+            id: string
+            quantity: number
+            size: string | null
+            price_at_purchase: number
+            variant_id?: string
+            product_id?: string
+            products_legacy?: unknown
+            product_variants_legacy?: unknown
+          }
+          const items = data.order_items as RawItem[]
+
+          const variantIds = items.map((i) => i.variant_id).filter(Boolean) as string[]
+          const productIds = items.map((i) => i.product_id).filter(Boolean) as string[]
+
+          const [variantsRes, productsRes] = await Promise.all([
+            variantIds.length > 0
+              ? supabaseAdmin
+                  .from('product_variants')
+                  .select('id, size, color, material, image_url')
+                  .in('id', variantIds)
+              : Promise.resolve({ data: [] }),
+            productIds.length > 0
+              ? supabaseAdmin.from('products').select('id, name').in('id', productIds)
+              : Promise.resolve({ data: [] }),
+          ])
+
+          const variantMap = new Map(
+            (variantsRes.data ?? []).map(
+              (v: {
                 id: string
-                quantity: number
                 size: string | null
-                price_at_purchase: number
-                variant_id?: string
-                product_id?: string
-                products?: unknown
-                product_variants?: unknown
-              }) => {
-                const enrichedItem = { ...item }
-
-                if (item.variant_id) {
-                  // Try fetching from product_variants first
-                  const { data: newVariant } = await supabaseAdmin
-                    .from('product_variants')
-                    .select('id, size, color, material, image_url, price_adjustment')
-                    .eq('id', item.variant_id)
-                    .single()
-
-                  if (newVariant) {
-                    // Fetch product from products for consistency
-                    const { data: newProduct } = await supabaseAdmin
-                      .from('products')
-                      .select('id, name')
-                      .eq('id', item.product_id)
-                      .single()
-
-                    Object.assign(enrichedItem, {
-                      variant_new: {
-                        size: newVariant.size,
-                        color: newVariant.color,
-                        material: newVariant.material,
-                        image_url: newVariant.image_url,
-                      },
-                      product_new: newProduct ? { id: newProduct.id, name: newProduct.name } : null,
-                    })
-                  }
-                }
-
-                return enrichedItem
-              }
+                color: string | null
+                material: string | null
+                image_url: string | null
+              }) => [v.id, v]
             )
           )
+          const productMap = new Map(
+            (productsRes.data ?? []).map((p: { id: string; name: string }) => [p.id, p])
+          )
 
-          // Type assertion needed because we're enriching the data structure with additional fields
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          data.order_items = enrichedItems as any
+          data.order_items = items.map((item) => {
+            const variant = item.variant_id ? variantMap.get(item.variant_id) : null
+            const product = item.product_id ? productMap.get(item.product_id) : null
+            return {
+              ...item,
+              ...(variant
+                ? {
+                    variant_new: {
+                      size: variant.size,
+                      color: variant.color,
+                      material: variant.material,
+                      image_url: variant.image_url,
+                    },
+                  }
+                : {}),
+              ...(product ? { product_new: { id: product.id, name: product.name } } : {}),
+            }
+          }) as any
         }
 
         log.debug('[API/admin/orders/[id]] Order details fetched successfully')

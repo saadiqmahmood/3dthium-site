@@ -37,33 +37,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(500).json({ error: 'Failed to fetch categories' })
         }
 
-        // Fetch product counts for each category
-        const { data: productCounts, error: countsError } = await supabaseAdmin
+        // COUNT active products per category in a single query
+        const { data: countRows } = await supabaseAdmin
           .from('products')
           .select('category_id')
           .eq('is_active', true)
+          .not('category_id', 'is', null)
 
-        if (countsError) {
-          log.error('[API/admin/categories] Error fetching product counts:', countsError)
-          // Continue without counts rather than failing completely
-        }
-
-        // Calculate product counts
         const categoryCounts: Record<string, number> = {}
-        if (productCounts) {
-          productCounts.forEach((product) => {
-            if (product.category_id) {
-              categoryCounts[product.category_id] = (categoryCounts[product.category_id] || 0) + 1
-            }
-          })
+        for (const row of countRows ?? []) {
+          categoryCounts[row.category_id] = (categoryCounts[row.category_id] ?? 0) + 1
         }
 
-        // Add product counts to categories
         const categoriesWithCounts =
           categories?.map((category) => ({
             ...category,
-            product_count: categoryCounts[category.id] || 0,
-          })) || []
+            product_count: categoryCounts[category.id] ?? 0,
+          })) ?? []
 
         log.debug(
           '[API/admin/categories] Categories fetched successfully:',
