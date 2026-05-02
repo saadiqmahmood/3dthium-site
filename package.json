@@ -19,7 +19,7 @@
     "db:seed": "tsx drizzle/seed.ts",
     "db:reset": "npm run db:push && npm run db:seed",
     "typecheck": "tsc --noEmit",
-    "db:check": "tsx drizzle/migrate.ts",
+    "db:check": "drizzle-kit status",
     "prepare": "husky"
   },
   "dependencies": {
