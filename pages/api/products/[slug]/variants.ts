@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // First get the product ID from slug
     const { data: product, error: productError } = await supabase
-      .from('products_new')
+      .from('products')
       .select('id, base_price')
       .eq('slug', slug)
       .eq('is_active', true)
@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Fetch variants for this product
     const { data: variants, error: variantsError } = await supabase
-      .from('product_variants_new')
+      .from('product_variants')
       .select(`
         id,
         product_id,

@@ -54,10 +54,10 @@ export const categoryAttributes = pgTable('category_attributes', {
 })
 
 // ============================================
-// PRODUCTS (CANONICAL — table: products_new, to be renamed to products)
+// PRODUCTS (CANONICAL)
 // ============================================
 
-export const productsNew = pgTable('products_new', {
+export const productsNew = pgTable('products', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
@@ -76,7 +76,7 @@ export const productsNew = pgTable('products_new', {
 })
 
 export const productVariantsNew = pgTable(
-  'product_variants_new',
+  'product_variants',
   {
     id: uuid('id').defaultRandom().primaryKey(),
     productId: uuid('product_id')
@@ -101,10 +101,10 @@ export const productVariantsNew = pgTable(
 )
 
 // ============================================
-// LEGACY PRODUCTS (READ-ONLY — to be renamed to products_legacy)
+// LEGACY PRODUCTS (READ-ONLY)
 // ============================================
 
-export const products = pgTable('products', {
+export const productsLegacy = pgTable('products_legacy', {
   id: uuid('id').primaryKey(),
   slug: text('slug').notNull().unique(),
   title: text('title').notNull(),
@@ -114,7 +114,7 @@ export const products = pgTable('products', {
   createdAt: timestamp('created_at').defaultNow(),
 })
 
-export const productVariants = pgTable('product_variants', {
+export const productVariantsLegacy = pgTable('product_variants_legacy', {
   id: uuid('id').defaultRandom().primaryKey(),
   productId: uuid('product_id'),
   color: text('color').notNull(),
@@ -300,14 +300,14 @@ export const productVariantsNewRelations = relations(productVariantsNew, ({ one 
   }),
 }))
 
-export const productsRelations = relations(products, ({ many }) => ({
-  variants: many(productVariants),
+export const productsLegacyRelations = relations(productsLegacy, ({ many }) => ({
+  variants: many(productVariantsLegacy),
 }))
 
-export const productVariantsRelations = relations(productVariants, ({ one }) => ({
-  product: one(products, {
-    fields: [productVariants.productId],
-    references: [products.id],
+export const productVariantsLegacyRelations = relations(productVariantsLegacy, ({ one }) => ({
+  product: one(productsLegacy, {
+    fields: [productVariantsLegacy.productId],
+    references: [productsLegacy.id],
   }),
 }))
 

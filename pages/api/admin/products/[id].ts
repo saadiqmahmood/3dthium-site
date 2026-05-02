@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         log.debug('[API/admin/products/[id]] Fetching product:', id)
 
         const { data: product, error: fetchError } = await supabaseAdmin
-          .from('products_new')
+          .from('products')
           .select(`
             id,
             name,
@@ -74,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // If slug is being updated, check for uniqueness
         if (updateData.slug) {
           const { data: existingProduct, error: checkError } = await supabaseAdmin
-            .from('products_new')
+            .from('products')
             .select('id')
             .eq('slug', updateData.slug)
             .neq('id', id)
@@ -96,7 +96,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         log.debug('[API/admin/products/[id]] Updating with data:', updateData)
 
         const { data: updatedProduct, error: updateError } = await supabaseAdmin
-          .from('products_new')
+          .from('products')
           .update(updateData)
           .eq('id', id)
           .select()
@@ -115,10 +115,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       case 'DELETE': {
         log.debug('[API/admin/products/[id]] Deleting product:', id)
 
-        const { error: deleteError } = await supabaseAdmin
-          .from('products_new')
-          .delete()
-          .eq('id', id)
+        const { error: deleteError } = await supabaseAdmin.from('products').delete().eq('id', id)
 
         if (deleteError) {
           log.error('[API/admin/products/[id]] Error deleting product:', deleteError)

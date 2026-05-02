@@ -1,6 +1,6 @@
-import { log } from '../../../lib/log'
-import { requireAdmin } from '@/lib/auth/requireAdmin'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { log } from '../../../lib/log'
 import { getSupabaseAdmin } from '../../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         log.debug('[API/admin/products] Fetching products...')
 
         const { data: products, error: productsError } = await supabaseAdmin
-          .from('products_new')
+          .from('products')
           .select(`
             id,
             name,
@@ -84,7 +84,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Check if slug already exists
         const { data: existingProduct, error: checkError } = await supabaseAdmin
-          .from('products_new')
+          .from('products')
           .select('id')
           .eq('slug', slug)
           .single()
@@ -114,10 +114,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           gallery_images: gallery_images || [],
         }
 
-        log.debug('¾ [API/admin/products] Inserting product:', productData)
+        log.debug('ï¿½ [API/admin/products] Inserting product:', productData)
 
         const { data: newProduct, error: createError } = await supabaseAdmin
-          .from('products_new')
+          .from('products')
           .insert([productData])
           .select()
           .single()

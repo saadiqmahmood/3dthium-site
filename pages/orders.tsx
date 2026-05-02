@@ -108,7 +108,7 @@ export default function OrdersPage() {
         return
       }
 
-      // Enrich order items with product_variants_new data if available
+      // Enrich order items with product_variants data if available
       const enrichedOrders = await Promise.all(
         (ordersData || []).map(async (order: unknown) => {
           const o = order as Record<string, unknown>
@@ -121,9 +121,8 @@ export default function OrdersPage() {
             items.map(async (item) => {
               if (!item.variant_id) return item
 
-              // Try fetching from product_variants_new
               const { data: newVariant } = await supabase
-                .from('product_variants_new')
+                .from('product_variants')
                 .select('id, size, color, material, image_url')
                 .eq('id', item.variant_id)
                 .single()

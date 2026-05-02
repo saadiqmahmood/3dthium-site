@@ -1,8 +1,8 @@
-import { log } from '../../../../../lib/log'
-import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { createClient } from '@supabase/supabase-js'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { normalizeVariantAttributes, hasAtLeastOneAttribute } from '@/utils/variantHelpers'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { hasAtLeastOneAttribute, normalizeVariantAttributes } from '@/utils/variantHelpers'
+import { log } from '../../../../../lib/log'
 
 // Admin client with elevated privileges
 const supabaseAdmin = createClient(
@@ -36,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Fetch current variant first to get existing values
       const { data: currentVariant, error: fetchError } = await supabaseAdmin
-        .from('product_variants_new')
+        .from('product_variants')
         .select('size, color, material, sku')
         .eq('id', variantId)
         .eq('product_id', productId)
@@ -75,7 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         updates.material !== undefined ? normalizedUpdates.material : currentVariant.material
 
       const { data: conflictingVariant, error: checkError } = await supabaseAdmin
-        .from('product_variants_new')
+        .from('product_variants')
         .select('id, size, color, material, sku')
         .eq('product_id', productId)
         .eq('size', finalSize ?? null)
@@ -109,7 +109,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const newSku = updates.sku === '' ? null : updates.sku.trim()
         if (newSku) {
           const { data: existingSku } = await supabaseAdmin
-            .from('product_variants_new')
+            .from('product_variants')
             .select('id, sku')
             .eq('sku', newSku)
             .neq('id', variantId)
@@ -157,7 +157,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Update variant
       const { data: updatedVariant, error } = await supabaseAdmin
-        .from('product_variants_new')
+        .from('product_variants')
         .update(updates)
         .eq('id', variantId)
         .eq('product_id', productId) // Ensure variant belongs to this product
@@ -213,7 +213,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       // Delete the variant
       const { error } = await supabaseAdmin
-        .from('product_variants_new')
+        .from('product_variants')
         .delete()
         .eq('id', variantId)
         .eq('product_id', productId) // Ensure variant belongs to this product
@@ -225,7 +225,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Check if there are any remaining variants for this product
       const { count, error: countError } = await supabaseAdmin
-        .from('product_variants_new')
+        .from('product_variants')
         .select('*', { count: 'exact', head: true })
         .eq('product_id', productId)
 
@@ -235,7 +235,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       } else if (count === 0) {
         // No variants remaining - clean up attributes and options
         log.debug(
-          '¹ [VARIANT DELETE] No variants remaining, cleaning up attributes for product:',
+          'ï¿½ [VARIANT DELETE] No variants remaining, cleaning up attributes for product:',
           productId
         )
 
@@ -264,7 +264,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       const { data: variant, error } = await supabaseAdmin
-        .from('product_variants_new')
+        .from('product_variants')
         .select('*')
         .eq('id', variantId)
         .eq('product_id', productId)

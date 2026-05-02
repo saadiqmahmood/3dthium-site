@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Fetch product counts for each category
         const { data: productCounts, error: countsError } = await supabaseAdmin
-          .from('products_new')
+          .from('products')
           .select('category_id')
           .eq('is_active', true)
 

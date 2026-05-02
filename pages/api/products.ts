@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Fetch active products with category information
     const { data: products, error: productsError } = await supabase
-      .from('products_new')
+      .from('products')
       .select(`
         id,
         name,
@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Fetch variants for all products
     const productIds = products.map((p) => p.id)
     const { data: variants, error: variantsError } = await supabase
-      .from('product_variants_new')
+      .from('product_variants')
       .select(`
         id,
         product_id,

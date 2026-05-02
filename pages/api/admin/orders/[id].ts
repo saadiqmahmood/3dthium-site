@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { data, error } = await supabaseAdmin
           .from('orders')
           .select(
-            `id, user_id, guest_email, total_price, status, created_at, shipping_name, shipping_address, shipping_city, shipping_postcode, shipping_country, shipping_phone, shipping_method, shipping_rate_id, shipping_cost, tracking_number, tracking_url, shipped_at, shipping_label_url, order_items(id, quantity, size, price_at_purchase, variant_id, product_id, products(id, title), product_variants(id, color, image_url))`
+            `id, user_id, guest_email, total_price, status, created_at, shipping_name, shipping_address, shipping_city, shipping_postcode, shipping_country, shipping_phone, shipping_method, shipping_rate_id, shipping_cost, tracking_number, tracking_url, shipped_at, shipping_label_url, order_items(id, quantity, size, price_at_purchase, variant_id, product_id, products_legacy(id, title), product_variants_legacy(id, color, image_url))`
           )
           .eq('id', id)
           .single()
@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(500).json({ error: 'Failed to fetch order' })
         }
 
-        // Enrich order items with product_variants_new data if available
+        // Enrich order items with product_variants data if available
         if (data.order_items && Array.isArray(data.order_items)) {
           const enrichedItems = await Promise.all(
             data.order_items.map(
@@ -51,17 +51,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const enrichedItem = { ...item }
 
                 if (item.variant_id) {
-                  // Try fetching from product_variants_new first
+                  // Try fetching from product_variants first
                   const { data: newVariant } = await supabaseAdmin
-                    .from('product_variants_new')
+                    .from('product_variants')
                     .select('id, size, color, material, image_url, price_adjustment')
                     .eq('id', item.variant_id)
                     .single()
 
                   if (newVariant) {
-                    // Fetch product from products_new for consistency
+                    // Fetch product from products for consistency
                     const { data: newProduct } = await supabaseAdmin
-                      .from('products_new')
+                      .from('products')
                       .select('id, name')
                       .eq('id', item.product_id)
                       .single()

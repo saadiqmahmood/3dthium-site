@@ -1,8 +1,8 @@
-import { log } from '../../../../lib/log'
-import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { createClient } from '@supabase/supabase-js'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { normalizeVariantAttributes, hasAtLeastOneAttribute } from '@/utils/variantHelpers'
+import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { hasAtLeastOneAttribute, normalizeVariantAttributes } from '@/utils/variantHelpers'
+import { log } from '../../../../lib/log'
 
 // Admin client with elevated privileges
 const supabaseAdmin = createClient(
@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       const { data: variants, error } = await supabaseAdmin
-        .from('product_variants_new')
+        .from('product_variants')
         .select('*')
         .eq('product_id', productId)
         .order('size', { ascending: true })
@@ -89,7 +89,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Check for duplicate variant combination BEFORE attempting insert
       const { data: existingVariant, error: checkError } = await supabaseAdmin
-        .from('product_variants_new')
+        .from('product_variants')
         .select('id, size, color, material, sku')
         .eq('product_id', productId)
         .eq('size', normalized.size ?? null)
@@ -120,7 +120,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Auto-generate SKU if not provided
       if (!variantData.sku) {
         const { data: product } = await supabaseAdmin
-          .from('products_new')
+          .from('products')
           .select('slug')
           .eq('id', productId)
           .single()
@@ -139,7 +139,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
           // Check for SKU collision and append counter if needed
           const { data: existingSku } = await supabaseAdmin
-            .from('product_variants_new')
+            .from('product_variants')
             .select('id')
             .eq('sku', proposedSku)
             .single()
@@ -147,7 +147,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           while (existingSku) {
             proposedSku = `${baseSku}-${counter}`
             const { data: checkSku } = await supabaseAdmin
-              .from('product_variants_new')
+              .from('product_variants')
               .select('id')
               .eq('sku', proposedSku)
               .single()
@@ -160,7 +160,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       } else {
         // Check if provided SKU already exists
         const { data: existingSku } = await supabaseAdmin
-          .from('product_variants_new')
+          .from('product_variants')
           .select('id, sku')
           .eq('sku', variantData.sku)
           .single()
@@ -189,14 +189,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         material: normalized.material,
       }
 
-      log.debug('¾ [VARIANT CREATE] Attempting insert:', {
+      log.debug('ï¿½ [VARIANT CREATE] Attempting insert:', {
         product_id: productId,
         ...finalVariantData,
       })
 
       // Insert variant
       const { data: newVariant, error } = await supabaseAdmin
-        .from('product_variants_new')
+        .from('product_variants')
         .insert([
           {
             product_id: productId,

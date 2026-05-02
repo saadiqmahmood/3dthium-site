@@ -560,7 +560,7 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
 
     // Test basic connection first
     const { data: testData, error: testError } = await supabaseServer
-      .from('products_new')
+      .from('products')
       .select('id, name, slug')
       .eq('slug', slug)
       .eq('is_active', true)
@@ -580,7 +580,7 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
 
     // Now try the full query
     const { data: product, error: productError } = await supabaseServer
-      .from('products_new')
+      .from('products')
       .select(`
         id,
         name,
@@ -614,7 +614,7 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
 
     // Fetch variants
     const { data: variants, error: variantsError } = await supabaseServer
-      .from('product_variants_new')
+      .from('product_variants')
       .select('*')
       .eq('product_id', product.id)
       .eq('is_available', true)

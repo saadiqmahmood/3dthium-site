@@ -102,7 +102,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Check if category has products
         const { data: products, error: productsError } = await supabaseAdmin
-          .from('products_new')
+          .from('products')
           .select('id')
           .eq('category_id', id)
           .limit(1)

@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .select('id, email, created_at', { count: 'exact' })
         .order('created_at', { ascending: false })
         .limit(5),
-      supabaseAdmin.from('products_new').select('id', { count: 'exact', head: true }),
+      supabaseAdmin.from('products').select('id', { count: 'exact', head: true }),
     ])
 
     // Calculate total revenue from recent orders

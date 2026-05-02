@@ -72,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // 1. Fetch the product
     const { data: product, error: prodError } = await supabase
-      .from('products_new')
+      .from('products')
       .select('id, name, slug, base_price')
       .eq('id', productId)
       .single()
@@ -136,7 +136,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 3.5. Fetch existing variants to check for duplicates
     const { data: existingVariants, error: existingError } = await supabase
-      .from('product_variants_new')
+      .from('product_variants')
       .select('size, color, material, sku')
       .eq('product_id', productId)
 
@@ -294,7 +294,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const batchIndex = Math.floor(i / batchSize) + 1
 
       const { data: created, error: insertError } = await supabase
-        .from('product_variants_new')
+        .from('product_variants')
         .insert(batch)
         .select()
 
