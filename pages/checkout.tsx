@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
+import Toast from '@/components/ui/Toast'
 import type { ShippingAddress, ShippingRate } from '@/types'
 
 export default function CheckoutPage() {
@@ -12,6 +13,7 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [checkoutMode, setCheckoutMode] = useState<'choice' | 'guest'>('choice')
   const [shippingStep, setShippingStep] = useState<'address' | 'rates' | 'payment'>('address')
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>([])
@@ -64,7 +66,7 @@ export default function CheckoutPage() {
       setShippingStep('rates')
     } catch (error) {
       console.error('Error calculating shipping rates:', error)
-      alert('Failed to calculate shipping rates. Please try again.')
+      setToast({ message: 'Failed to calculate shipping rates. Please try again.', type: 'error' })
     } finally {
       setIsLoadingRates(false)
     }
@@ -78,7 +80,7 @@ export default function CheckoutPage() {
       !shippingAddress.city ||
       !shippingAddress.zip
     ) {
-      alert('Please fill in all required fields')
+      setToast({ message: 'Please fill in all required fields', type: 'error' })
       return
     }
     calculateShippingRates()
@@ -86,7 +88,7 @@ export default function CheckoutPage() {
 
   const handleCheckout = async (customerEmail: string) => {
     if (!selectedRate) {
-      alert('Please select a shipping method')
+      setToast({ message: 'Please select a shipping method', type: 'error' })
       return
     }
 
@@ -118,7 +120,7 @@ export default function CheckoutPage() {
       window.location.href = url
     } catch (error) {
       console.error('Checkout error:', error)
-      alert('Failed to create checkout session. Please try again.')
+      setToast({ message: 'Failed to create checkout session. Please try again.', type: 'error' })
     } finally {
       setIsLoading(false)
     }
@@ -532,6 +534,7 @@ export default function CheckoutPage() {
           )}
         </div>
       </div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

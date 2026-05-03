@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { useSupabase } from '@/context/SupabaseContext'
+import Toast from '@/components/ui/Toast'
 
 interface ImageManagerProps {
   categorySlug: string
@@ -19,6 +20,7 @@ export default function ImageManager({
   const supabaseContext = useSupabase()
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<string>('')
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const galleryInputRef = useRef<HTMLInputElement>(null)
 
   if (!supabaseContext) {
@@ -118,7 +120,7 @@ export default function ImageManager({
 
     const remainingSlots = maxGalleryImages - galleryImages.length
     if (remainingSlots <= 0) {
-      alert(`Maximum ${maxGalleryImages} images allowed`)
+      setToast({ message: `Maximum ${maxGalleryImages} images allowed`, type: 'error' })
       return
     }
 
@@ -152,7 +154,7 @@ export default function ImageManager({
           console.log(`✅ Image ${i + 1} complete:`, url)
         } catch (error) {
           console.error(`Error processing image ${file.name}:`, error)
-          alert(`Failed to upload ${file.name}: ${error}`)
+          setToast({ message: `Failed to upload ${file.name}: ${error}`, type: 'error' })
           // Continue with other images
         }
       }
@@ -164,7 +166,7 @@ export default function ImageManager({
       }
     } catch (error) {
       console.error('Gallery upload error:', error)
-      alert(`Upload failed: ${error}`)
+      setToast({ message: `Upload failed: ${error}`, type: 'error' })
     } finally {
       setUploading(false)
       setUploadProgress('')
@@ -340,6 +342,7 @@ export default function ImageManager({
           </div>
         )}
       </div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

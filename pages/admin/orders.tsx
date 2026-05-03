@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { useCallback, useEffect, useState } from 'react'
+import Toast from '@/components/ui/Toast'
 import type { ProductVariant } from '@/types'
 
 const ORDER_STATUSES = [
@@ -68,6 +69,7 @@ export default function AdminOrdersPage() {
   const [filterPriceMin, setFilterPriceMin] = useState('')
   const [filterPriceMax, setFilterPriceMax] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const ORDERS_PER_PAGE = 10
   const [selectedOrders, setSelectedOrders] = useState<string[]>([])
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
@@ -118,7 +120,7 @@ export default function AdminOrdersPage() {
       )
     } catch (error) {
       console.error('❌ [AdminOrders] Error:', error)
-      alert('Failed to load orders')
+      setToast({ message: 'Failed to load orders', type: 'error' })
     } finally {
       setOrdersLoading(false)
     }
@@ -999,6 +1001,7 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

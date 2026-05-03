@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useSupabase } from '@/context/SupabaseContext'
+import Toast from '@/components/ui/Toast'
 
 interface ImageUploadProps {
   categorySlug: string
@@ -19,6 +20,7 @@ export default function ImageUpload({
   const [images, setImages] = useState<string[]>(initialImages)
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const fileUploadId = useId()
 
   const supabaseContext = useSupabase()
@@ -77,7 +79,7 @@ export default function ImageUpload({
   const handleFileUpload = useCallback(
     async (files: FileList) => {
       if (images.length + files.length > maxImages) {
-        alert(`Maximum ${maxImages} images allowed`)
+        setToast({ message: `Maximum ${maxImages} images allowed`, type: 'error' })
         return
       }
 
@@ -90,13 +92,13 @@ export default function ImageUpload({
 
           // Validate file type
           if (!file.type.startsWith('image/')) {
-            alert(`${file.name} is not an image file`)
+            setToast({ message: `${file.name} is not an image file`, type: 'error' })
             continue
           }
 
           // Validate file size (5MB limit)
           if (file.size > 5 * 1024 * 1024) {
-            alert(`${file.name} is too large. Maximum size is 5MB`)
+            setToast({ message: `${file.name} is too large. Maximum size is 5MB`, type: 'error' })
             continue
           }
 
@@ -113,9 +115,7 @@ export default function ImageUpload({
       } catch (error) {
         console.error('Upload error:', error)
         const errorMessage = error instanceof Error ? error.message : 'Failed to upload images'
-        alert(
-          `Upload Error: ${errorMessage}\n\nPlease check:\n- You have a valid product slug\n- You are logged in as an admin\n- Storage bucket exists and has correct permissions`
-        )
+        setToast({ message: `Upload error: ${errorMessage}`, type: 'error' })
       } finally {
         setUploading(false)
       }
@@ -304,6 +304,7 @@ export default function ImageUpload({
           </p>
         </div>
       )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }
