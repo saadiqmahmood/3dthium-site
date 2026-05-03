@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useCart } from '@/context/CartContext'
 import type { ProductVariantNew } from '@/types'
+import { formatMoney } from '@/lib/format/money'
 
 // Server-side client for static generation
 const supabaseServer = createClient(
@@ -463,13 +464,13 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
             <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
               <div className="text-base text-zinc-600 font-light mb-2">Price</div>
               <div className="text-4xl font-semibold text-zinc-900">
-                £{displayPrice.toFixed(2)}
+                {formatMoney(displayPrice)}
                 {variants.length > 0 && !hasCompleteVariantMatch && (
                   <span className="text-xl text-zinc-600 ml-2 font-light">(preview)</span>
                 )}
                 {variants.length === 0 && priceRange.has_variants && (
                   <span className="text-xl text-zinc-600 ml-2 font-light">
-                    (from £{priceRange.min.toFixed(2)})
+                    {'(from '}{formatMoney(priceRange.min)}{')'}
                   </span>
                 )}
               </div>

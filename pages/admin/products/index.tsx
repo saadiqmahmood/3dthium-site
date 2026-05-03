@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
+import { formatMoney } from '@/lib/format/money'
 
 interface Category {
   id: string
@@ -448,7 +449,7 @@ export default function AdminProductsPage() {
 
                   <td className="px-4 py-3">
                     <span className="font-light text-zinc-900">
-                      £{Number(product.base_price).toFixed(2)}
+                      {formatMoney(product.base_price)}
                     </span>
                   </td>
 

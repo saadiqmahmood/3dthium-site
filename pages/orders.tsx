@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useSupabase } from '@/context/SupabaseContext'
 import Toast from '@/components/ui/Toast'
+import { formatMoney } from '@/lib/format/money'
 
 interface Product {
   title?: string
@@ -343,7 +344,7 @@ export default function OrdersPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-blue-600">
-                        £{order.total_price.toFixed(2)}
+                        {formatMoney(order.total_price)}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">Total Amount</p>
                     </div>
@@ -423,7 +424,7 @@ export default function OrdersPage() {
                               <span className="font-medium">Quantity: {item.quantity}</span>
                               <span>×</span>
                               <span className="font-medium">
-                                £{item.price_at_purchase.toFixed(2)}
+                                {formatMoney(item.price_at_purchase)}
                               </span>
                             </div>
                           </div>
@@ -431,10 +432,10 @@ export default function OrdersPage() {
                           {/* Price */}
                           <div className="flex-shrink-0 text-right">
                             <p className="text-xl font-bold text-gray-900">
-                              £{(item.price_at_purchase * item.quantity).toFixed(2)}
+                              {formatMoney(item.price_at_purchase * item.quantity)}
                             </p>
                             <p className="text-xs text-gray-500 mt-1">
-                              {item.quantity} × £{item.price_at_purchase.toFixed(2)}
+                              {item.quantity} × {formatMoney(item.price_at_purchase)}
                             </p>
                           </div>
                         </div>

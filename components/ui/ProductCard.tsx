@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ProductVariantNew } from '@/types'
+import { formatMoney } from '@/lib/format/money'
 
 // New product type from products_new API
 type ProductNew = {
@@ -33,9 +34,9 @@ export default function ProductCard({ product }: Props) {
   // Calculate display price
   const displayPrice = product.price_range.has_variants
     ? product.price_range.min === product.price_range.max
-      ? `£${product.price_range.min.toFixed(2)}`
-      : `£${product.price_range.min.toFixed(2)} - £${product.price_range.max.toFixed(2)}`
-    : `£${product.base_price.toFixed(2)}`
+      ? formatMoney(product.price_range.min)
+      : `${formatMoney(product.price_range.min)} - ${formatMoney(product.price_range.max)}`
+    : formatMoney(product.base_price)
 
   return (
     <Link href={`/products/${product.slug}`} className="block w-full">

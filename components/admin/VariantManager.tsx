@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import type { ProductVariantNew } from '@/types'
+import { formatMoney } from '@/lib/format/money'
 
 interface VariantManagerProps {
   productId: string
@@ -336,10 +337,8 @@ export default function VariantManager({
               <label className="block text-sm font-light mb-2 text-zinc-700">
                 Price Adjustment (£)
                 <span className="text-zinc-600 text-xs ml-2 font-light">
-                  Base: £{basePrice.toFixed(2)} → Final: £
-                  {calculateFinalPrice(Number.parseFloat(formData.price_adjustment || '0')).toFixed(
-                    2
-                  )}
+                  Base: {formatMoney(basePrice)} → Final:{' '}
+                  {formatMoney(calculateFinalPrice(Number.parseFloat(formData.price_adjustment || '0')))}
                 </span>
               </label>
               <input
@@ -539,11 +538,10 @@ export default function VariantManager({
                           {getDisplayName(variant.material)}
                         </td>
                         <td className="px-4 py-3 text-sm text-zinc-900 font-light">
-                          {variant.price_adjustment >= 0 ? '+' : ''}£
-                          {variant.price_adjustment.toFixed(2)}
+                          {variant.price_adjustment >= 0 ? '+' : ''}{formatMoney(variant.price_adjustment)}
                         </td>
                         <td className="px-4 py-3 text-sm font-light text-zinc-900">
-                          £{calculateFinalPrice(variant.price_adjustment).toFixed(2)}
+                          {formatMoney(calculateFinalPrice(variant.price_adjustment))}
                         </td>
                         <td className="px-4 py-3 text-sm font-mono text-zinc-700 font-light">
                           {variant.sku || '-'}

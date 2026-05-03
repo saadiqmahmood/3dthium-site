@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { useCart } from '../context/CartContext'
+import { formatMoney } from '@/lib/format/money'
 
 export default function SuccessPage() {
   const router = useRouter()
@@ -91,7 +92,7 @@ export default function SuccessPage() {
             )}
             {discount && (
               <p className="text-green-700 text-sm">
-                Discount: -£{parseFloat(discount).toFixed(2)}
+                Discount: -{formatMoney(discount)}
               </p>
             )}
           </div>

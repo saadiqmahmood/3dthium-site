@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Spinner from '@/components/ui/Spinner'
 import Toast from '@/components/ui/Toast'
+import { formatMoney } from '@/lib/format/money'
 
 type Order = {
   id: string
@@ -151,7 +152,7 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
               <div className="text-2xl font-light text-zinc-400 mb-1">Total Revenue</div>
               <div className="text-4xl font-light text-zinc-900">
-                £{metrics.totalRevenue.toFixed(2)}
+                {formatMoney(metrics.totalRevenue)}
               </div>
             </div>
           </div>
@@ -173,7 +174,7 @@ export default function AdminDashboard() {
                         </span>
                       </div>
                       <span className="text-zinc-900 font-medium">
-                        £{Number(o.total_price).toFixed(2)}
+                        {formatMoney(o.total_price)}
                       </span>
                     </li>
                   ))}

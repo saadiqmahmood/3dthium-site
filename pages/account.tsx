@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useSupabase } from '@/context/SupabaseContext'
 import Toast from '@/components/ui/Toast'
+import { formatMoney } from '@/lib/format/money'
 
 // Define types for order and order item
 interface Product {
@@ -476,7 +477,7 @@ export default function AccountPage() {
                           selectedOrder.status.slice(1)}
                       </span>
                       <p className="text-2xl font-semibold text-zinc-900 mt-2">
-                        £{selectedOrder.total_price.toFixed(2)}
+                        {formatMoney(selectedOrder.total_price)}
                       </p>
                     </div>
                   </div>
@@ -507,7 +508,7 @@ export default function AccountPage() {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="font-semibold text-zinc-900 text-lg">
-                            £{(item.price_at_purchase * item.quantity).toFixed(2)}
+                            {formatMoney(item.price_at_purchase * item.quantity)}
                           </p>
                         </div>
                       </div>
@@ -587,7 +588,7 @@ export default function AccountPage() {
                             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                           </span>
                           <p className="text-xl font-semibold text-zinc-900">
-                            £{order.total_price.toFixed(2)}
+                            {formatMoney(order.total_price)}
                           </p>
                         </div>
                       </div>

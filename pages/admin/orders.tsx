@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { useCallback, useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import type { ProductVariant } from '@/types'
+import { formatMoney } from '@/lib/format/money'
 
 const ORDER_STATUSES = [
   'pending',
@@ -556,7 +557,7 @@ export default function AdminOrdersPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-zinc-900 font-light">
-                    £{Number(order.total_price).toFixed(2)}
+                    {formatMoney(order.total_price)}
                   </td>
                   <td className="px-4 py-3 text-zinc-700 font-light">
                     {order.shipping_method ? (
@@ -564,7 +565,7 @@ export default function AdminOrdersPage() {
                         <div className="font-light">{order.shipping_method}</div>
                         {order.shipping_cost && (
                           <div className="text-zinc-500 font-light">
-                            £{order.shipping_cost.toFixed(2)}
+                            {formatMoney(order.shipping_cost)}
                           </div>
                         )}
                         {order.tracking_number && (
@@ -664,7 +665,7 @@ export default function AdminOrdersPage() {
                 <div className="mb-3 text-zinc-700 font-light">
                   <span className="font-medium">Total:</span>{' '}
                   <span className="font-light text-zinc-900">
-                    £{Number(orderDetails.total_price).toFixed(2)}
+                    {formatMoney(orderDetails.total_price)}
                   </span>
                 </div>
                 <div className="mb-3 text-zinc-700 font-light">
@@ -728,8 +729,8 @@ export default function AdminOrdersPage() {
                       )}
                       {orderDetails.shipping_cost && (
                         <div className="text-zinc-700 font-light">
-                          <span className="font-medium">Cost:</span> £
-                          {orderDetails.shipping_cost.toFixed(2)}
+                          <span className="font-medium">Cost:</span>{' '}
+                          {formatMoney(orderDetails.shipping_cost)}
                         </div>
                       )}
                       {orderDetails.tracking_number && (
@@ -937,10 +938,10 @@ export default function AdminOrdersPage() {
                             {/* Price */}
                             <div className="flex-shrink-0 text-right">
                               <p className="text-xl font-light text-zinc-900">
-                                £{(item.price_at_purchase * item.quantity).toFixed(2)}
+                                {formatMoney(item.price_at_purchase * item.quantity)}
                               </p>
                               <p className="text-xs text-zinc-500 mt-1 font-light">
-                                {item.quantity} × £{item.price_at_purchase.toFixed(2)}
+                                {item.quantity} × {formatMoney(item.price_at_purchase)}
                               </p>
                             </div>
                           </div>

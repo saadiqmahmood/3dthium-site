@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
 import Toast from '@/components/ui/Toast'
 import type { ShippingAddress, ShippingRate } from '@/types'
+import { formatMoney } from '@/lib/format/money'
 
 export default function CheckoutPage() {
   const { cart } = useCart()
@@ -360,7 +361,7 @@ export default function CheckoutPage() {
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-gray-800">
-                          £{parseFloat(rate.rate).toFixed(2)}
+                          {formatMoney(rate.rate)}
                         </p>
                       </div>
                     </div>
@@ -490,7 +491,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="ml-auto text-right">
                   <p className="text-white font-medium">
-                    £{(item.price * item.quantity).toFixed(2)}
+                    {formatMoney(item.price * item.quantity)}
                   </p>
                 </div>
               </div>
@@ -502,7 +503,7 @@ export default function CheckoutPage() {
             <div className="mt-6 pt-6 border-t border-gray-200">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-zinc-400">Shipping ({selectedRate.servicelevel.name})</span>
-                <span className="text-white">£{shippingCost.toFixed(2)}</span>
+                <span className="text-white">{formatMoney(shippingCost)}</span>
               </div>
             </div>
           )}
@@ -511,7 +512,7 @@ export default function CheckoutPage() {
             <div>
               <p className="text-lg font-semibold text-gray-900">Total:</p>
             </div>
-            <p className="text-xl font-bold text-blue-600">£{total.toFixed(2)}</p>
+            <p className="text-xl font-bold text-blue-600">{formatMoney(total)}</p>
           </div>
 
           {/* Complete Purchase button for logged-in users */}

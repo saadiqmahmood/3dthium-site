@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { useCart } from '@/context/CartContext'
+import { formatMoney } from '@/lib/format/money'
 
 export default function CartPage() {
   const { cart, removeFromCart, clearCart, updateCartItemQuantity } = useCart()
@@ -90,7 +91,7 @@ export default function CartPage() {
               </div>
               <div className="text-right">
                 <p className="text-zinc-900 font-semibold text-lg">
-                  £{(item.price * item.quantity).toFixed(2)}
+                  {formatMoney(item.price * item.quantity)}
                 </p>
                 <button
                   onClick={() => removeFromCart(item.product_id, item.variant_id || undefined)}
@@ -106,7 +107,7 @@ export default function CartPage() {
         <div className="mt-8 p-6 bg-gray-50 border border-gray-200 rounded-2xl">
           <div className="flex justify-between items-center mb-6">
             <p className="text-xl font-light text-zinc-700">Total:</p>
-            <p className="text-2xl font-semibold text-zinc-900">£{total.toFixed(2)}</p>
+            <p className="text-2xl font-semibold text-zinc-900">{formatMoney(total)}</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link href="/products" className="flex-1">
