@@ -1,0 +1,167 @@
+/**
+ * 3dthium Design Tokens
+ *
+ * All CSS custom properties are the single source of truth for the design system.
+ * Tailwind classes should reference these via the @theme block.
+ * Do NOT use hard-coded Tailwind colour classes (e.g. emerald-500, zinc-900)
+ * outside this file and globals.css — use the token-backed aliases below.
+ */
+
+@theme {
+  /* ─── Colour: Brand ──────────────────────────────────────────────────── */
+  --color-brand-primary:        #10b981; /* emerald-500 */
+  --color-brand-primary-hover:  #059669; /* emerald-600 */
+  --color-brand-primary-subtle: #d1fae5; /* emerald-100 */
+  --color-brand-primary-muted:  #6ee7b7; /* emerald-300 — hover borders, light rings */
+
+  --color-brand-secondary:      #18181b; /* zinc-900 — dark CTA buttons, headings */
+  --color-brand-secondary-hover:#27272a; /* zinc-800 */
+
+  /* Gradient accent — gradient only, never solid fills */
+  --color-brand-accent:         #22d3ee; /* cyan-400 */
+
+  /* ─── Colour: Neutrals ───────────────────────────────────────────────── */
+  --color-neutral-0:   #ffffff;
+  --color-neutral-50:  #fafafa;
+  --color-neutral-100: #f4f4f5;
+  --color-neutral-200: #e4e4e7;
+  --color-neutral-300: #d4d4d8;
+  --color-neutral-400: #a1a1aa;
+  --color-neutral-500: #71717a;
+  --color-neutral-600: #52525b;
+  --color-neutral-700: #3f3f46;
+  --color-neutral-800: #27272a;
+  --color-neutral-900: #18181b;
+
+  /* ─── Colour: Semantic ───────────────────────────────────────────────── */
+  --color-success:        #16a34a; /* green-600 */
+  --color-success-subtle: #f0fdf4; /* green-50  */
+  --color-success-border: #bbf7d0; /* green-200 */
+
+  --color-warning:        #ca8a04; /* yellow-600 */
+  --color-warning-subtle: #fefce8; /* yellow-50  */
+  --color-warning-border: #fde68a; /* yellow-200 */
+
+  --color-danger:         #dc2626; /* red-600 */
+  --color-danger-subtle:  #fef2f2; /* red-50   */
+  --color-danger-border:  #fecaca; /* red-200  */
+
+  --color-info:           #2563eb; /* blue-600 */
+  --color-info-subtle:    #eff6ff; /* blue-50  */
+  --color-info-border:    #bfdbfe; /* blue-200 */
+
+  /* ─── Colour: Surface & Border ───────────────────────────────────────── */
+  --color-surface:         var(--color-neutral-0);
+  --color-surface-raised:  var(--color-neutral-50);
+  --color-surface-overlay: var(--color-neutral-100);
+
+  --color-border:          var(--color-neutral-200);
+  --color-border-strong:   var(--color-neutral-300);
+  --color-border-focus:    var(--color-brand-primary);
+
+  /* ─── Colour: Text ───────────────────────────────────────────────────── */
+  --color-text-primary:   var(--color-neutral-900);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-tertiary:  var(--color-neutral-400);
+  --color-text-on-dark:   var(--color-neutral-0);
+  --color-text-link:      var(--color-brand-primary-hover);
+
+  /* ─── Typography ─────────────────────────────────────────────────────── */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* Scale — 18 px base (globals.css sets html font-size: 18px) */
+  --text-xs:   0.694rem;  /* ~12.5px */
+  --text-sm:   0.833rem;  /* ~15px   */
+  --text-base: 1rem;      /* 18px    */
+  --text-lg:   1.2rem;    /* ~21.6px */
+  --text-xl:   1.44rem;   /* ~26px   */
+  --text-2xl:  1.728rem;  /* ~31px   */
+  --text-3xl:  2.074rem;  /* ~37px   */
+  --text-4xl:  2.488rem;  /* ~45px   */
+  --text-5xl:  3.157rem;  /* ~57px   */
+  --text-6xl:  3.953rem;  /* ~71px   */
+
+  /* Line heights */
+  --leading-tight:   1.25;
+  --leading-snug:    1.375;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.625;
+
+  /* Weights — max 3 in use */
+  --font-light:    300;
+  --font-regular:  400;  /* body copy, table cells */
+  --font-medium:   500;  /* labels, nav links, buttons */
+  --font-semibold: 600;  /* headings h3–h5, card prices */
+  --font-bold:     700;  /* h1–h2 only */
+
+  /* ─── Spacing (4 px base) ────────────────────────────────────────────── */
+  --space-0:   0;
+  --space-1:   0.25rem;  /* 4px  */
+  --space-2:   0.5rem;   /* 8px  */
+  --space-3:   0.75rem;  /* 12px */
+  --space-4:   1rem;     /* 16px */
+  --space-5:   1.25rem;  /* 20px */
+  --space-6:   1.5rem;   /* 24px */
+  --space-8:   2rem;     /* 32px */
+  --space-10:  2.5rem;   /* 40px */
+  --space-12:  3rem;     /* 48px */
+  --space-16:  4rem;     /* 64px */
+  --space-20:  5rem;     /* 80px */
+  --space-24:  6rem;     /* 96px */
+
+  /* ─── Border radius ──────────────────────────────────────────────────── */
+  --radius-none: 0;
+  --radius-sm:   0.25rem;  /* 4px  — badges, small pills */
+  --radius-md:   0.5rem;   /* 8px  — inputs, buttons, small cards */
+  --radius-lg:   0.75rem;  /* 12px — cards */
+  --radius-xl:   1rem;     /* 16px — large cards */
+  --radius-2xl:  1.5rem;   /* 24px — section containers */
+  --radius-3xl:  2rem;     /* 32px — hero blocks */
+  --radius-full: 9999px;   /* pills, avatars */
+
+  /* ─── Shadow ─────────────────────────────────────────────────────────── */
+  --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg:  0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl:  0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* ─── Z-index ─────────────────────────────────────────────────────────── */
+  --z-base:    0;
+  --z-raised:  10;
+  --z-dropdown: 100;
+  --z-sticky:  200;
+  --z-navbar:  300;
+  --z-overlay: 400;
+  --z-modal:   500;
+  --z-toast:   600;
+
+  /* ─── Focus ring ─────────────────────────────────────────────────────── */
+  --focus-ring: 0 0 0 3px rgb(16 185 129 / 0.4); /* brand-primary at 40% opacity */
+
+  /* ─── Transition ─────────────────────────────────────────────────────── */
+  --transition-fast:   150ms ease-out;
+  --transition-base:   200ms ease-out;
+  --transition-slow:   300ms ease-out;
+
+  /* ─── Layout ─────────────────────────────────────────────────────────── */
+  --max-w-content:  80rem;   /* 1280px — max-w-7xl */
+  --navbar-height:  4rem;    /* 64px  */
+  --sidebar-width:  16rem;   /* 256px */
+}
+
+/* ─── Component-level token aliases (used in component class definitions) */
+:root {
+  /* Surfaces */
+  --surface:           var(--color-surface);
+  --surface-raised:    var(--color-surface-raised);
+  --border:            var(--color-border);
+  --border-focus:      var(--color-border-focus);
+
+  /* Input */
+  --input-bg:          var(--color-surface);
+  --input-border:      var(--color-border);
+  --input-text:        var(--color-text-primary);
+  --input-placeholder: var(--color-text-tertiary);
+  --input-focus-ring:  var(--focus-ring);
+}

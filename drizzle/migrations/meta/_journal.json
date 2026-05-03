@@ -15,6 +15,20 @@
       "when": 1777726049415,
       "tag": "0001_nervous_yellowjacket",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1746144000000,
+      "tag": "0002_rename_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1746144060000,
+      "tag": "0003_order_items_fk",
+      "breakpoints": true
     }
   ]
 }
