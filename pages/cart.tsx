@@ -1,20 +1,38 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useCart } from '@/context/CartContext'
 import { formatMoney } from '@/lib/format/money'
+import type { CartQuote } from '@/lib/pricing/quoteCart'
 
 export default function CartPage() {
   const { cart, removeFromCart, clearCart, updateCartItemQuantity } = useCart()
-  const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0)
   const router = useRouter()
   const { from } = router.query
+  const [quote, setQuote] = useState<CartQuote | null>(null)
 
   useEffect(() => {
     if (cart.length === 0) {
       router.replace(from && typeof from === 'string' ? from : '/')
+      return
     }
+    fetch('/api/cart/quote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cart: cart.map((i) => ({
+          product_id: i.product_id,
+          variant_id: i.variant_id ?? null,
+          quantity: i.quantity,
+          name: i.name,
+          image_url: i.image_url,
+        })),
+      }),
+    })
+      .then((r) => r.json())
+      .then((q) => { if (q.total !== undefined) setQuote(q) })
+      .catch(() => {}) // keep showing client-side fallback on network error
   }, [cart, from, router])
 
   return (
@@ -91,7 +109,11 @@ export default function CartPage() {
               </div>
               <div className="text-right">
                 <p className="text-zinc-900 font-semibold text-lg">
-                  {formatMoney(item.price * item.quantity)}
+                  {formatMoney(
+                    quote?.items.find(
+                      (qi) => qi.product_id === item.product_id && qi.variant_id === (item.variant_id ?? null)
+                    )?.line_total ?? item.price * item.quantity
+                  )}
                 </p>
                 <button
                   onClick={() => removeFromCart(item.product_id, item.variant_id || undefined)}
@@ -107,7 +129,9 @@ export default function CartPage() {
         <div className="mt-8 p-6 bg-gray-50 border border-gray-200 rounded-2xl">
           <div className="flex justify-between items-center mb-6">
             <p className="text-xl font-light text-zinc-700">Total:</p>
-            <p className="text-2xl font-semibold text-zinc-900">{formatMoney(total)}</p>
+            <p className="text-2xl font-semibold text-zinc-900">
+              {formatMoney(quote?.total ?? cart.reduce((acc, item) => acc + item.price * item.quantity, 0))}
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link href="/products" className="flex-1">
