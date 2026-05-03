@@ -1,9 +1,24 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import AttributeBuilder from '@/components/admin/AttributeBuilder'
 import ImageManager from '@/components/admin/ImageManager'
 import VariantManager from '@/components/admin/VariantManager'
+import VariationGenerator from '@/components/admin/VariationGenerator'
 import Toast from '@/components/ui/Toast'
+
+type ProductAttribute = {
+  id?: string
+  name: string
+  type: 'color' | 'size' | 'material' | 'design' | 'custom'
+  options: {
+    value: string
+    displayName: string
+    hexColor?: string
+    images?: string[]
+    priceModifier?: number
+  }[]
+}
 
 interface Category {
   id: string
@@ -41,6 +56,9 @@ export default function EditProductPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [originalSlug, setOriginalSlug] = useState('')
+  const [productAttributes, setProductAttributes] = useState<ProductAttribute[]>([])
+  const [showGenerator, setShowGenerator] = useState(false)
+  const [variantRefreshTrigger, setVariantRefreshTrigger] = useState(0)
   const [formData, setFormData] = useState<FormData>({
     name: '',
     description: '',
@@ -83,6 +101,43 @@ export default function EditProductPage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false))
+  }, [id])
+
+  useEffect(() => {
+    if (!id) return
+    fetch(`/api/admin/products/${id}/attributes`)
+      .then((r) => r.json())
+      .then((data) => {
+        const raw = data.attributes ?? data.data?.attributes ?? []
+        const attrs: ProductAttribute[] = raw.map(
+          (a: {
+            id?: string
+            name: string
+            type: string
+            options?: Array<{
+              value: string
+              display_name: string
+              hex_color?: string
+              images?: string[]
+              price_modifier?: number
+            }>
+          }) => ({
+            id: a.id,
+            name: a.name,
+            type: a.type as ProductAttribute['type'],
+            options: (a.options ?? []).map((o) => ({
+              value: o.value,
+              displayName: o.display_name,
+              hexColor: o.hex_color,
+              images: o.images ?? [],
+              priceModifier: o.price_modifier ?? 0,
+            })),
+          })
+        )
+        setProductAttributes(attrs)
+        if (attrs.length > 0) setShowGenerator(true)
+      })
+      .catch(console.error)
   }, [id])
 
   const set = (field: keyof FormData, value: unknown) =>
@@ -345,7 +400,72 @@ export default function EditProductPage() {
 
       {/* Variants tab */}
       {tab === 'variants' && id && (
-        <VariantManager productId={id} basePrice={Number(formData.base_price)} />
+        <div className="space-y-6">
+          <VariantManager
+            productId={id}
+            basePrice={Number(formData.base_price)}
+            refreshTrigger={variantRefreshTrigger}
+          />
+
+          {/* Generator — collapsible */}
+          <div className="border border-gray-200 rounded-lg bg-white shadow-sm">
+            <button
+              type="button"
+              onClick={() => setShowGenerator((v) => !v)}
+              className="w-full flex items-center justify-between px-5 py-4 text-sm font-light text-zinc-700 hover:bg-gray-50 transition-colors rounded-lg"
+            >
+              <span className="flex items-center gap-2">
+                <svg
+                  className={`w-4 h-4 text-zinc-400 transition-transform ${showGenerator ? 'rotate-90' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                Generate variants from a template
+              </span>
+              <span className="text-xs text-zinc-400">
+                {productAttributes.length > 0
+                  ? `${productAttributes.length} attribute${productAttributes.length !== 1 ? 's' : ''} defined`
+                  : 'Define options like Color, Size, Material — then auto-create all combinations'}
+              </span>
+            </button>
+
+            {showGenerator && (
+              <div className="px-5 pb-6 border-t border-gray-100 space-y-8 pt-6">
+                {/* Step 1 — define attributes */}
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-400 mb-4">
+                    Step 1 — Define your options
+                  </p>
+                  <AttributeBuilder
+                    productId={id}
+                    productSlug={formData.slug}
+                    categorySlug={selectedCategory?.slug ?? 'products'}
+                    initialAttributes={productAttributes}
+                    onAttributesChange={setProductAttributes}
+                  />
+                </div>
+
+                {/* Step 2 — generate (only once at least one attribute is saved) */}
+                {productAttributes.some((a) => a.id) && (
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-zinc-400 mb-4">
+                      Step 2 — Generate all combinations
+                    </p>
+                    <VariationGenerator
+                      productId={id}
+                      attributes={productAttributes.filter((a): a is ProductAttribute & { id: string } => Boolean(a.id))}
+                      basePrice={Number(formData.base_price)}
+                      onGenerated={() => setVariantRefreshTrigger((n) => n + 1)}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
