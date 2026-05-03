@@ -1,142 +1,100 @@
+import { desc, eq } from 'drizzle-orm'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { z } from 'zod'
+import { err, ok } from '@/lib/api/respond'
 import { requireAdmin } from '@/lib/auth/requireAdmin'
-import { log } from '../../../lib/log'
-import { getSupabaseAdmin } from '../../../lib/supabaseClient'
+import { categories, db, productsNew } from '@/lib/db'
+import { log } from '@/lib/log'
+
+const CreateProductSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().min(1, 'Description is required'),
+  category_id: z.string().uuid('Invalid category ID'),
+  base_price: z.coerce.number().positive('Base price must be greater than 0'),
+  slug: z
+    .string()
+    .min(1, 'Slug is required')
+    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase letters, numbers, and hyphens'),
+  thumbnail_url: z.string().url().nullable().optional(),
+  images: z.array(z.string()).min(1, 'At least one image is required'),
+  gallery_images: z.array(z.string()).optional().default([]),
+  is_active: z.boolean().optional().default(true),
+  customizable: z.boolean().optional().default(false),
+  attributes: z.record(z.unknown()).optional().default({}),
+})
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const admin = await requireAdmin(req, res)
   if (!admin) return
 
-  const supabaseAdmin = getSupabaseAdmin()
-
   try {
-    switch (req.method) {
-      case 'GET': {
-        log.debug('[API/admin/products] Fetching products...')
-
-        const { data: products, error: productsError } = await supabaseAdmin
-          .from('products')
-          .select(`
-            id,
-            name,
-            description,
-            category_id,
-            base_price,
-            thumbnail_url,
-            slug,
-            is_active,
-            customizable,
-            attributes,
-            images,
-            created_at,
-            updated_at,
-            categories!inner(name, slug)
-          `)
-          .order('created_at', { ascending: false })
-
-        if (productsError) {
-          log.error('[API/admin/products] Error fetching products:', productsError)
-          return res.status(500).json({ error: 'Failed to fetch products' })
-        }
-
-        log.debug('[API/admin/products] Products fetched successfully:', products?.length || 0)
-        res.status(200).json(products || [])
-        break
-      }
-
-      case 'POST': {
-        log.debug('[API/admin/products] Creating new product...')
-        const {
-          name,
-          description,
-          category_id,
-          base_price,
-          thumbnail_url,
-          slug,
-          is_active,
-          customizable,
-          attributes,
-          images,
-          gallery_images,
-        } = req.body
-
-        log.debug('[API/admin/products] Received data:', {
-          name,
-          category_id,
-          slug,
-          imagesCount: images?.length || 0,
-          galleryCount: gallery_images?.length || 0,
+    if (req.method === 'GET') {
+      const rows = await db
+        .select({
+          id: productsNew.id,
+          name: productsNew.name,
+          description: productsNew.description,
+          category_id: productsNew.categoryId,
+          base_price: productsNew.basePrice,
+          thumbnail_url: productsNew.thumbnailUrl,
+          slug: productsNew.slug,
+          is_active: productsNew.isActive,
+          customizable: productsNew.customizable,
+          attributes: productsNew.attributes,
+          images: productsNew.images,
+          created_at: productsNew.createdAt,
+          updated_at: productsNew.updatedAt,
+          categories: {
+            name: categories.name,
+            slug: categories.slug,
+          },
         })
+        .from(productsNew)
+        .leftJoin(categories, eq(productsNew.categoryId, categories.id))
+        .orderBy(desc(productsNew.createdAt))
 
-        if (!name || !description || !category_id || !slug) {
-          return res
-            .status(400)
-            .json({ error: 'Name, description, category, and slug are required' })
-        }
+      return ok(res, rows)
+    }
 
-        if (base_price <= 0) {
-          return res.status(400).json({ error: 'Base price must be greater than 0' })
-        }
-
-        if (!images || images.length === 0) {
-          return res.status(400).json({ error: 'At least one product image is required' })
-        }
-
-        // Check if slug already exists
-        const { data: existingProduct, error: checkError } = await supabaseAdmin
-          .from('products')
-          .select('id')
-          .eq('slug', slug)
-          .single()
-
-        if (checkError && checkError.code !== 'PGRST116') {
-          // PGRST116 = no rows returned
-          log.error('[API/admin/products] Error checking slug uniqueness:', checkError)
-          return res.status(500).json({ error: 'Failed to check slug uniqueness' })
-        }
-
-        if (existingProduct) {
-          return res.status(400).json({ error: 'Slug already exists' })
-        }
-
-        // Create the product
-        const productData = {
-          name,
-          description,
-          category_id,
-          base_price,
-          thumbnail_url: thumbnail_url || images[0], // Use first image as thumbnail if not specified
-          slug,
-          is_active: is_active !== undefined ? is_active : true,
-          customizable: customizable !== undefined ? customizable : false,
-          attributes: attributes || {},
-          images: images || [],
-          gallery_images: gallery_images || [],
-        }
-
-        log.debug('� [API/admin/products] Inserting product:', productData)
-
-        const { data: newProduct, error: createError } = await supabaseAdmin
-          .from('products')
-          .insert([productData])
-          .select()
-          .single()
-
-        if (createError) {
-          log.error('[API/admin/products] Error creating product:', createError)
-          return res.status(500).json({ error: `Failed to create product: ${createError.message}` })
-        }
-
-        log.debug('[API/admin/products] Product created successfully:', newProduct.id)
-        res.status(201).json(newProduct)
-        break
+    if (req.method === 'POST') {
+      const parsed = CreateProductSchema.safeParse(req.body)
+      if (!parsed.success) {
+        return err(res, 'Validation failed', 400, parsed.error.flatten().fieldErrors)
       }
 
-      default:
-        res.status(405).json({ error: 'Method not allowed' })
+      const body = parsed.data
+
+      const [existing] = await db
+        .select({ id: productsNew.id })
+        .from(productsNew)
+        .where(eq(productsNew.slug, body.slug))
+        .limit(1)
+      if (existing) return err(res, 'Slug already exists', 400)
+
+      const [newProduct] = await db
+        .insert(productsNew)
+        .values({
+          name: body.name,
+          description: body.description,
+          categoryId: body.category_id,
+          basePrice: String(body.base_price),
+          thumbnailUrl: body.thumbnail_url ?? body.images[0],
+          slug: body.slug,
+          isActive: body.is_active ?? true,
+          customizable: body.customizable ?? false,
+          attributes: body.attributes ?? {},
+          images: body.images,
+          galleryImages: body.gallery_images ?? [],
+        })
+        .returning()
+
+      log.debug('[API/admin/products] Created product:', newProduct.id)
+      return ok(res, newProduct, 201)
     }
+
+    return err(res, 'Method not allowed', 405)
   } catch (error) {
-    log.error('[API/admin/products] Error:', error)
-    res.status(500).json({ error: 'Internal server error' })
+    log.error('[API/admin/products]', error)
+    return err(res, 'Internal server error', 500)
   }
 }

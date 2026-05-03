@@ -1,137 +1,119 @@
+import { and, eq, ne } from 'drizzle-orm'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { z } from 'zod'
+import { err, ok } from '@/lib/api/respond'
 import { requireAdmin } from '@/lib/auth/requireAdmin'
-import { log } from '../../../../lib/log'
-import { getSupabaseAdmin } from '../../../../lib/supabaseClient'
+import { categories, db, productsNew } from '@/lib/db'
+import { log } from '@/lib/log'
+
+const UpdateProductSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    description: z.string().optional(),
+    category_id: z.string().uuid().optional(),
+    base_price: z.coerce.number().positive().optional(),
+    slug: z
+      .string()
+      .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase letters, numbers, and hyphens')
+      .optional(),
+    thumbnail_url: z.string().url().nullable().optional(),
+    images: z.array(z.string()).optional(),
+    gallery_images: z.array(z.string()).optional(),
+    is_active: z.boolean().optional(),
+    customizable: z.boolean().optional(),
+    attributes: z.record(z.unknown()).optional(),
+  })
+  .strict()
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const admin = await requireAdmin(req, res)
   if (!admin) return
 
   const { id } = req.query
-
-  if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'Invalid product ID' })
-  }
-
-  const supabaseAdmin = getSupabaseAdmin()
+  if (!id || typeof id !== 'string') return err(res, 'Invalid product ID', 400)
 
   try {
-    switch (req.method) {
-      case 'GET': {
-        log.debug('[API/admin/products/[id]] Fetching product:', id)
+    if (req.method === 'GET') {
+      const [product] = await db
+        .select({
+          id: productsNew.id,
+          name: productsNew.name,
+          description: productsNew.description,
+          category_id: productsNew.categoryId,
+          base_price: productsNew.basePrice,
+          thumbnail_url: productsNew.thumbnailUrl,
+          images: productsNew.images,
+          gallery_images: productsNew.galleryImages,
+          slug: productsNew.slug,
+          is_active: productsNew.isActive,
+          customizable: productsNew.customizable,
+          attributes: productsNew.attributes,
+          created_at: productsNew.createdAt,
+          updated_at: productsNew.updatedAt,
+          categories: {
+            name: categories.name,
+            slug: categories.slug,
+          },
+        })
+        .from(productsNew)
+        .leftJoin(categories, eq(productsNew.categoryId, categories.id))
+        .where(eq(productsNew.id, id))
+        .limit(1)
 
-        const { data: product, error: fetchError } = await supabaseAdmin
-          .from('products')
-          .select(`
-            id,
-            name,
-            description,
-            category_id,
-            base_price,
-            thumbnail_url,
-            images,
-            gallery_images,
-            slug,
-            is_active,
-            customizable,
-            attributes,
-            created_at,
-            updated_at,
-            categories(name, slug)
-          `)
-          .eq('id', id)
-          .single()
-
-        if (fetchError) {
-          log.error('[API/admin/products/[id]] Error fetching product:', fetchError)
-          return res.status(500).json({ error: 'Failed to fetch product' })
-        }
-
-        log.debug('[API/admin/products/[id]] Product fetched successfully')
-        res.status(200).json(product)
-        break
-      }
-
-      case 'PUT': {
-        log.debug('[API/admin/products/[id]] Updating product:', id)
-
-        const updateData: Record<string, unknown> = {}
-
-        // Only update fields that are provided in the request body
-        if (req.body.name !== undefined) updateData.name = req.body.name
-        if (req.body.description !== undefined) updateData.description = req.body.description
-        if (req.body.category_id !== undefined) updateData.category_id = req.body.category_id
-        if (req.body.base_price !== undefined) updateData.base_price = req.body.base_price
-        if (req.body.thumbnail_url !== undefined) updateData.thumbnail_url = req.body.thumbnail_url
-        if (req.body.images !== undefined) updateData.images = req.body.images
-        if (req.body.gallery_images !== undefined)
-          updateData.gallery_images = req.body.gallery_images
-        if (req.body.slug !== undefined) updateData.slug = req.body.slug
-        if (req.body.is_active !== undefined) updateData.is_active = req.body.is_active
-        if (req.body.customizable !== undefined) updateData.customizable = req.body.customizable
-        if (req.body.attributes !== undefined) updateData.attributes = req.body.attributes
-
-        // If slug is being updated, check for uniqueness
-        if (updateData.slug) {
-          const { data: existingProduct, error: checkError } = await supabaseAdmin
-            .from('products')
-            .select('id')
-            .eq('slug', updateData.slug)
-            .neq('id', id)
-            .single()
-
-          if (checkError && checkError.code !== 'PGRST116') {
-            log.error('[API/admin/products/[id]] Error checking slug uniqueness:', checkError)
-            return res.status(500).json({ error: 'Failed to check slug uniqueness' })
-          }
-
-          if (existingProduct) {
-            return res.status(400).json({ error: 'Slug already exists' })
-          }
-        }
-
-        // Update timestamp
-        updateData.updated_at = new Date().toISOString()
-
-        log.debug('[API/admin/products/[id]] Updating with data:', updateData)
-
-        const { data: updatedProduct, error: updateError } = await supabaseAdmin
-          .from('products')
-          .update(updateData)
-          .eq('id', id)
-          .select()
-          .single()
-
-        if (updateError) {
-          log.error('[API/admin/products/[id]] Error updating product:', updateError)
-          return res.status(500).json({ error: `Failed to update product: ${updateError.message}` })
-        }
-
-        log.debug('[API/admin/products/[id]] Product updated successfully')
-        res.status(200).json(updatedProduct)
-        break
-      }
-
-      case 'DELETE': {
-        log.debug('[API/admin/products/[id]] Deleting product:', id)
-
-        const { error: deleteError } = await supabaseAdmin.from('products').delete().eq('id', id)
-
-        if (deleteError) {
-          log.error('[API/admin/products/[id]] Error deleting product:', deleteError)
-          return res.status(500).json({ error: 'Failed to delete product' })
-        }
-
-        log.debug('[API/admin/products/[id]] Product deleted successfully')
-        res.status(200).json({ success: true })
-        break
-      }
-
-      default:
-        res.status(405).json({ error: 'Method not allowed' })
+      if (!product) return err(res, 'Product not found', 404)
+      return ok(res, product)
     }
+
+    if (req.method === 'PUT') {
+      const parsed = UpdateProductSchema.safeParse(req.body)
+      if (!parsed.success) {
+        return err(res, 'Validation failed', 400, parsed.error.flatten().fieldErrors)
+      }
+
+      const body = parsed.data
+
+      if (body.slug) {
+        const [conflict] = await db
+          .select({ id: productsNew.id })
+          .from(productsNew)
+          .where(and(eq(productsNew.slug, body.slug), ne(productsNew.id, id)))
+          .limit(1)
+        if (conflict) return err(res, 'Slug already exists', 400)
+      }
+
+      const updateValues: Record<string, unknown> = { updatedAt: new Date() }
+      if (body.name !== undefined) updateValues.name = body.name
+      if (body.description !== undefined) updateValues.description = body.description
+      if (body.category_id !== undefined) updateValues.categoryId = body.category_id
+      if (body.base_price !== undefined) updateValues.basePrice = String(body.base_price)
+      if (body.slug !== undefined) updateValues.slug = body.slug
+      if (body.thumbnail_url !== undefined) updateValues.thumbnailUrl = body.thumbnail_url
+      if (body.images !== undefined) updateValues.images = body.images
+      if (body.gallery_images !== undefined) updateValues.galleryImages = body.gallery_images
+      if (body.is_active !== undefined) updateValues.isActive = body.is_active
+      if (body.customizable !== undefined) updateValues.customizable = body.customizable
+      if (body.attributes !== undefined) updateValues.attributes = body.attributes
+
+      const [updated] = await db
+        .update(productsNew)
+        .set(updateValues)
+        .where(eq(productsNew.id, id))
+        .returning()
+
+      if (!updated) return err(res, 'Product not found', 404)
+      log.debug('[API/admin/products/[id]] Updated product:', id)
+      return ok(res, updated)
+    }
+
+    if (req.method === 'DELETE') {
+      await db.delete(productsNew).where(eq(productsNew.id, id))
+      log.debug('[API/admin/products/[id]] Deleted product:', id)
+      return ok(res, { success: true })
+    }
+
+    return err(res, 'Method not allowed', 405)
   } catch (error) {
-    log.error('[API/admin/products/[id]] Error:', error)
-    res.status(500).json({ error: 'Internal server error' })
+    log.error('[API/admin/products/[id]]', error)
+    return err(res, 'Internal server error', 500)
   }
 }

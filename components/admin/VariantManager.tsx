@@ -69,11 +69,12 @@ export default function VariantManager({
     try {
       const response = await fetch(`/api/admin/product-variants/${productId}`)
       if (response.ok) {
-        const data = await response.json()
-        setVariants(data)
+        const json = await response.json()
+        setVariants(Array.isArray(json) ? json : (json.data ?? []))
       } else {
-        const error = await response.json()
-        setToast({ message: error.error || 'Failed to fetch variants', type: 'error' })
+        const json = await response.json()
+        const msg = json.error?.message ?? json.error ?? 'Failed to fetch variants'
+        setToast({ message: msg, type: 'error' })
       }
     } catch (error) {
       console.error('Error fetching variants:', error)
@@ -156,15 +157,7 @@ export default function VariantManager({
         fetchVariants()
       } else {
         const error = await response.json()
-        console.error('❌ [VARIANT MANAGER] Error response:', error)
-
-        // Provide detailed error message
-        let errorMessage = error.error || 'Failed to create variant'
-        if (error.existingVariant) {
-          errorMessage = `A variant with this combination already exists (ID: ${error.existingVariant.id}, SKU: ${error.existingVariant.sku || 'N/A'})`
-        } else if (error.details) {
-          errorMessage = `${errorMessage}: ${error.details}`
-        }
+        const errorMessage = error.error?.message ?? error.error ?? 'Failed to create variant'
 
         setToast({
           message: errorMessage,
@@ -217,15 +210,7 @@ export default function VariantManager({
       } else {
         const error = await response.json()
 
-        // Provide detailed error message
-        let errorMessage = error.error || 'Failed to update variant'
-        if (error.conflictingVariant) {
-          errorMessage = `Another variant already has this combination (ID: ${error.conflictingVariant.id}, SKU: ${error.conflictingVariant.sku || 'N/A'})`
-        } else if (error.details) {
-          errorMessage = `${errorMessage}: ${error.details}`
-        }
-
-        setToast({ message: errorMessage, type: 'error' })
+        setToast({ message: error.error?.message ?? error.error ?? 'Failed to update variant', type: 'error' })
       }
     } catch (error) {
       console.error('Error updating variant:', error)
@@ -251,7 +236,7 @@ export default function VariantManager({
         fetchVariants()
       } else {
         const error = await response.json()
-        setToast({ message: error.error || 'Failed to delete variant', type: 'error' })
+        setToast({ message: error.error?.message ?? error.error ?? 'Failed to delete variant', type: 'error' })
       }
     } catch (error) {
       console.error('Error deleting variant:', error)

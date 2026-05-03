@@ -48,8 +48,8 @@ export default function AdminProductsPage() {
     try {
       const response = await fetch('/api/admin/products')
       if (response.ok) {
-        const data = await response.json()
-        setProducts(data || [])
+        const json = await response.json()
+        setProducts(Array.isArray(json) ? json : (json.data ?? []))
       } else {
         setToast({ message: 'Failed to fetch products', type: 'error' })
       }

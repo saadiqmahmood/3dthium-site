@@ -1,246 +1,165 @@
-import { createClient } from '@supabase/supabase-js'
+import { and, asc, eq, isNull } from 'drizzle-orm'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { z } from 'zod'
+import { err, ok } from '@/lib/api/respond'
 import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { db, productsNew, productVariantsNew } from '@/lib/db'
+import { log } from '@/lib/log'
 import { hasAtLeastOneAttribute, normalizeVariantAttributes } from '@/utils/variantHelpers'
-import { log } from '../../../../lib/log'
 
-// Admin client with elevated privileges
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      persistSession: false,
+const CreateVariantSchema = z
+  .object({
+    size: z.string().nullable().optional(),
+    color: z.string().nullable().optional(),
+    material: z.string().nullable().optional(),
+    price_adjustment: z.coerce.number().default(0),
+    sku: z.string().nullable().optional(),
+    stock_quantity: z.coerce.number().int().min(0).default(0),
+    is_available: z.boolean().default(true),
+  })
+  .refine(
+    (d) => {
+      const n = normalizeVariantAttributes(d)
+      return hasAtLeastOneAttribute(n.size, n.color, n.material)
     },
-  }
-)
+    { message: 'At least one attribute (size, color, or material) is required' }
+  )
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const admin = await requireAdmin(req, res)
   if (!admin) return
 
   const { productId } = req.query
+  if (!productId || typeof productId !== 'string') return err(res, 'Product ID is required', 400)
 
-  if (!productId || typeof productId !== 'string') {
-    return res.status(400).json({ error: 'Product ID is required' })
-  }
+  try {
+    if (req.method === 'GET') {
+      const variants = await db
+        .select({
+          id: productVariantsNew.id,
+          product_id: productVariantsNew.productId,
+          size: productVariantsNew.size,
+          color: productVariantsNew.color,
+          material: productVariantsNew.material,
+          price_adjustment: productVariantsNew.priceAdjustment,
+          sku: productVariantsNew.sku,
+          image_url: productVariantsNew.imageUrl,
+          stock_quantity: productVariantsNew.stockQuantity,
+          is_available: productVariantsNew.isAvailable,
+          created_at: productVariantsNew.createdAt,
+          updated_at: productVariantsNew.updatedAt,
+        })
+        .from(productVariantsNew)
+        .where(eq(productVariantsNew.productId, productId))
+        .orderBy(
+          asc(productVariantsNew.size),
+          asc(productVariantsNew.color),
+          asc(productVariantsNew.material)
+        )
 
-  // GET: Fetch all variants for a product
-  if (req.method === 'GET') {
-    try {
-      const { data: variants, error } = await supabaseAdmin
-        .from('product_variants')
-        .select('*')
-        .eq('product_id', productId)
-        .order('size', { ascending: true })
-        .order('color', { ascending: true })
-        .order('material', { ascending: true })
-
-      if (error) {
-        log.error('Error fetching variants:', error)
-        return res.status(500).json({ error: error.message })
-      }
-
-      return res.status(200).json(variants || [])
-    } catch (error) {
-      log.error('Unexpected error:', error)
-      return res.status(500).json({ error: 'Failed to fetch variants' })
+      return ok(res, variants)
     }
-  }
 
-  // POST: Create a new variant
-  if (req.method === 'POST') {
-    try {
-      const variantData = req.body
-
-      log.debug('[VARIANT CREATE] Starting creation:', {
-        productId,
-        variantData,
-        timestamp: new Date().toISOString(),
-      })
-
-      // Normalize attributes (empty strings to null, trim whitespace)
-      const normalized = normalizeVariantAttributes({
-        size: variantData.size,
-        color: variantData.color,
-        material: variantData.material,
-      })
-
-      // Validate at least one attribute is provided
-      if (!hasAtLeastOneAttribute(normalized.size, normalized.color, normalized.material)) {
-        log.error('[VARIANT CREATE] Validation failed: No attributes provided')
-        return res.status(400).json({
-          error: 'At least one attribute (size, color, or material) is required',
-        })
+    if (req.method === 'POST') {
+      const parsed = CreateVariantSchema.safeParse(req.body)
+      if (!parsed.success) {
+        return err(res, parsed.error.errors[0]?.message ?? 'Validation failed', 400)
       }
 
-      // Validate price_adjustment is a number
-      if (variantData.price_adjustment !== undefined) {
-        const adjustment = Number.parseFloat(variantData.price_adjustment)
-        if (Number.isNaN(adjustment)) {
-          return res.status(400).json({
-            error: 'price_adjustment must be a valid number',
-          })
-        }
-        variantData.price_adjustment = adjustment
-      } else {
-        variantData.price_adjustment = 0
+      const body = parsed.data
+      const norm = normalizeVariantAttributes(body)
+
+      // Duplicate combination check
+      const sizeCondition = norm.size
+        ? eq(productVariantsNew.size, norm.size)
+        : isNull(productVariantsNew.size)
+      const colorCondition = norm.color
+        ? eq(productVariantsNew.color, norm.color)
+        : isNull(productVariantsNew.color)
+      const materialCondition = norm.material
+        ? eq(productVariantsNew.material, norm.material)
+        : isNull(productVariantsNew.material)
+
+      const [duplicate] = await db
+        .select({ id: productVariantsNew.id })
+        .from(productVariantsNew)
+        .where(
+          and(
+            eq(productVariantsNew.productId, productId),
+            sizeCondition,
+            colorCondition,
+            materialCondition
+          )
+        )
+        .limit(1)
+
+      if (duplicate) {
+        return err(
+          res,
+          'A variant with this size, color, and material combination already exists',
+          409
+        )
       }
 
-      // Check for duplicate variant combination BEFORE attempting insert
-      const { data: existingVariant, error: checkError } = await supabaseAdmin
-        .from('product_variants')
-        .select('id, size, color, material, sku')
-        .eq('product_id', productId)
-        .eq('size', normalized.size ?? null)
-        .eq('color', normalized.color ?? null)
-        .eq('material', normalized.material ?? null)
-        .single()
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        // PGRST116 = no rows returned (not an error, means no duplicate)
-        log.error('[VARIANT CREATE] Error checking for duplicates:', checkError)
-        return res.status(500).json({ error: 'Failed to validate variant' })
-      }
-
-      if (existingVariant) {
-        log.warn('[VARIANT CREATE] Duplicate variant found:', existingVariant)
-        return res.status(409).json({
-          error: 'A variant with this size, color, and material combination already exists',
-          existingVariant: {
-            id: existingVariant.id,
-            size: existingVariant.size,
-            color: existingVariant.color,
-            material: existingVariant.material,
-            sku: existingVariant.sku,
-          },
-        })
-      }
-
-      // Auto-generate SKU if not provided
-      if (!variantData.sku) {
-        const { data: product } = await supabaseAdmin
-          .from('products')
-          .select('slug')
-          .eq('id', productId)
-          .single()
+      // Resolve SKU
+      let sku = body.sku?.trim() || null
+      if (!sku) {
+        const [product] = await db
+          .select({ slug: productsNew.slug })
+          .from(productsNew)
+          .where(eq(productsNew.id, productId))
+          .limit(1)
 
         if (product) {
-          const skuParts = [
+          const parts = [
             product.slug.toUpperCase().replace(/-/g, ''),
-            normalized.size,
-            normalized.color?.substring(0, 3).toUpperCase(),
-            normalized.material?.substring(0, 3).toUpperCase(),
+            norm.size,
+            norm.color?.substring(0, 3).toUpperCase(),
+            norm.material?.substring(0, 3).toUpperCase(),
           ].filter(Boolean)
-
-          const baseSku = skuParts.join('-')
-          let proposedSku = baseSku
+          const base = parts.join('-')
+          sku = base
           let counter = 1
-
-          // Check for SKU collision and append counter if needed
-          const { data: existingSku } = await supabaseAdmin
-            .from('product_variants')
-            .select('id')
-            .eq('sku', proposedSku)
-            .single()
-
-          while (existingSku) {
-            proposedSku = `${baseSku}-${counter}`
-            const { data: checkSku } = await supabaseAdmin
-              .from('product_variants')
-              .select('id')
-              .eq('sku', proposedSku)
-              .single()
-            if (!checkSku) break
-            counter++
+          while (true) {
+            const [taken] = await db
+              .select({ id: productVariantsNew.id })
+              .from(productVariantsNew)
+              .where(eq(productVariantsNew.sku, sku as string))
+              .limit(1)
+            if (!taken) break
+            sku = `${base}-${counter++}`
           }
-
-          variantData.sku = proposedSku
         }
       } else {
-        // Check if provided SKU already exists
-        const { data: existingSku } = await supabaseAdmin
-          .from('product_variants')
-          .select('id, sku')
-          .eq('sku', variantData.sku)
-          .single()
-
-        if (existingSku) {
-          return res.status(409).json({
-            error: `SKU "${variantData.sku}" already exists`,
-            existingVariant: { id: existingSku.id, sku: existingSku.sku },
-          })
-        }
+        const [skuConflict] = await db
+          .select({ id: productVariantsNew.id })
+          .from(productVariantsNew)
+          .where(eq(productVariantsNew.sku, sku))
+          .limit(1)
+        if (skuConflict) return err(res, `SKU "${sku}" already exists`, 409)
       }
 
-      // Set defaults
-      if (variantData.stock_quantity === undefined) {
-        variantData.stock_quantity = 0 // Print-on-demand by default
-      }
-      if (variantData.is_available === undefined) {
-        variantData.is_available = true
-      }
-
-      // Prepare final variant data with normalized attributes
-      const finalVariantData = {
-        ...variantData,
-        size: normalized.size,
-        color: normalized.color,
-        material: normalized.material,
-      }
-
-      log.debug('� [VARIANT CREATE] Attempting insert:', {
-        product_id: productId,
-        ...finalVariantData,
-      })
-
-      // Insert variant
-      const { data: newVariant, error } = await supabaseAdmin
-        .from('product_variants')
-        .insert([
-          {
-            product_id: productId,
-            ...finalVariantData,
-          },
-        ])
-        .select()
-        .single()
-
-      if (error) {
-        log.error('[VARIANT CREATE] Database error:', {
-          error,
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
+      const [newVariant] = await db
+        .insert(productVariantsNew)
+        .values({
+          productId,
+          size: norm.size,
+          color: norm.color,
+          material: norm.material,
+          priceAdjustment: String(body.price_adjustment),
+          sku,
+          stockQuantity: body.stock_quantity,
+          isAvailable: body.is_available,
         })
+        .returning()
 
-        // Fallback: Check for unique constraint violation (shouldn't happen with pre-check)
-        if (error.code === '23505') {
-          return res.status(409).json({
-            error: 'A variant with this combination or SKU already exists',
-            details: error.details,
-          })
-        }
-
-        return res.status(500).json({
-          error: error.message,
-          details: error.details,
-          hint: error.hint,
-        })
-      }
-
-      log.debug('[VARIANT CREATE] Success:', {
-        variantId: newVariant?.id,
-        sku: newVariant?.sku,
-      })
-
-      return res.status(201).json(newVariant)
-    } catch (error) {
-      log.error('Unexpected error:', error)
-      return res.status(500).json({ error: 'Failed to create variant' })
+      log.debug('[API/admin/product-variants] Created variant:', newVariant.id)
+      return ok(res, newVariant, 201)
     }
-  }
 
-  return res.status(405).json({ error: 'Method not allowed' })
+    return err(res, 'Method not allowed', 405)
+  } catch (error) {
+    log.error('[API/admin/product-variants/[productId]]', error)
+    return err(res, 'Internal server error', 500)
+  }
 }
