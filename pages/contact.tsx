@@ -8,12 +8,23 @@ export default function ContactPage() {
     e.preventDefault()
     setStatus('loading')
 
+    const form = e.target as HTMLFormElement
+    const data = Object.fromEntries(new FormData(form))
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      setStatus('success')
-      ;(e.target as HTMLFormElement).reset()
-    } catch (err) {
-      console.error(err)
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+
+      if (res.ok) {
+        setStatus('success')
+        form.reset()
+      } else {
+        setStatus('error')
+      }
+    } catch {
       setStatus('error')
     }
   }
