@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import Spinner from '@/components/ui/Spinner'
+import Toast from '@/components/ui/Toast'
 
 interface Category {
   id: string
@@ -27,6 +29,7 @@ interface CategoryFormData {
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [formData, setFormData] = useState<CategoryFormData>({
@@ -47,10 +50,11 @@ export default function AdminCategoriesPage() {
         const data = await response.json()
         setCategories(data)
       } else {
-        console.error('Failed to fetch categories')
+        setToast({ message: 'Failed to fetch categories', type: 'error' })
       }
     } catch (error) {
       console.error('Error fetching categories:', error)
+      setToast({ message: 'Failed to fetch categories', type: 'error' })
     } finally {
       setLoading(false)
     }
@@ -94,13 +98,14 @@ export default function AdminCategoriesPage() {
         setEditingCategory(null)
         resetForm()
         fetchCategories()
+        setToast({ message: editingCategory ? 'Category updated' : 'Category created', type: 'success' })
       } else {
-        const error = await response.json()
-        console.error(`Error: ${error.message || 'Failed to save category'}`)
+        const json = await response.json()
+        setToast({ message: json.message || 'Failed to save category', type: 'error' })
       }
     } catch (error) {
       console.error('Error saving category:', error)
-      console.error('Failed to save category')
+      setToast({ message: 'Failed to save category', type: 'error' })
     }
   }
 
@@ -130,13 +135,14 @@ export default function AdminCategoriesPage() {
 
       if (response.ok) {
         fetchCategories()
+        setToast({ message: 'Category deleted', type: 'success' })
       } else {
-        const error = await response.json()
-        console.error(`Error: ${error.message || 'Failed to delete category'}`)
+        const json = await response.json()
+        setToast({ message: json.message || 'Failed to delete category', type: 'error' })
       }
     } catch (error) {
       console.error('Error deleting category:', error)
-      console.error('Failed to delete category')
+      setToast({ message: 'Failed to delete category', type: 'error' })
     }
   }
 
@@ -244,10 +250,7 @@ export default function AdminCategoriesPage() {
   if (loading) {
     return (
       <div className="w-full mx-auto">
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
-          <p className="mt-4 text-zinc-600 font-light">Loading categories...</p>
-        </div>
+        <Spinner label="Loading categories..." />
       </div>
     )
   }
@@ -402,6 +405,7 @@ export default function AdminCategoriesPage() {
           )}
         </div>
       </div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useSupabase } from '@/context/SupabaseContext'
+import Toast from '@/components/ui/Toast'
 
 interface Product {
   title?: string
@@ -46,10 +47,11 @@ export default function OrdersPage() {
   const supabaseContext = useSupabase()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   const fetchOrders = useCallback(async () => {
     if (!supabaseContext) {
-      console.error('Supabase client not available')
+      setToast({ message: 'Unable to connect. Please refresh the page.', type: 'error' })
       return
     }
     const { client: supabase } = supabaseContext
@@ -57,7 +59,6 @@ export default function OrdersPage() {
     try {
       setLoading(true)
       if (!user) {
-        console.error('No authenticated user')
         return
       }
       // First, look up the user record in the users table
@@ -69,11 +70,12 @@ export default function OrdersPage() {
 
       if (userError) {
         console.error('Error looking up user record:', userError)
+        setToast({ message: 'Failed to load your orders', type: 'error' })
         return
       }
 
       if (!userRecord) {
-        console.error('User record not found')
+        setToast({ message: 'Account not found. Please contact support.', type: 'error' })
         return
       }
 
@@ -105,6 +107,7 @@ export default function OrdersPage() {
 
       if (ordersError) {
         console.error('Error fetching orders:', ordersError)
+        setToast({ message: 'Failed to load your orders', type: 'error' })
         return
       }
 
@@ -176,6 +179,7 @@ export default function OrdersPage() {
     } catch (error) {
       console.error('Error fetching orders:', error)
       setOrders([])
+      setToast({ message: 'Failed to load your orders', type: 'error' })
     } finally {
       setLoading(false)
     }
@@ -443,6 +447,7 @@ export default function OrdersPage() {
           </div>
         )}
       </div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

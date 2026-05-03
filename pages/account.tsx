@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useSupabase } from '@/context/SupabaseContext'
+import Toast from '@/components/ui/Toast'
 
 // Define types for order and order item
 interface Product {
@@ -38,6 +39,7 @@ export default function AccountPage() {
   const [ordersLoading, setOrdersLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [reorderLoading, setReorderLoading] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   useEffect(() => {
     console.log('📄 [AccountPage] Component mounted, checking auth state:', {
@@ -70,7 +72,7 @@ export default function AccountPage() {
 
   const fetchOrders = async () => {
     if (!supabaseContext) {
-      console.error('❌ [AccountPage] Supabase client not available')
+      setToast({ message: 'Unable to connect. Please refresh the page.', type: 'error' })
       return
     }
     const { client: supabaseClient } = supabaseContext
@@ -93,11 +95,12 @@ export default function AccountPage() {
 
       if (userError) {
         console.error('❌ [AccountPage] Error looking up user record:', userError)
+        setToast({ message: 'Failed to load your orders', type: 'error' })
         return
       }
 
       if (!userRecord) {
-        console.error('❌ [AccountPage] User record not found for:', user.id)
+        setToast({ message: 'Account not found. Please contact support.', type: 'error' })
         return
       }
 
@@ -131,6 +134,7 @@ export default function AccountPage() {
 
       if (ordersError) {
         console.error('❌ [AccountPage] Error fetching orders:', ordersError)
+        setToast({ message: 'Failed to load your orders', type: 'error' })
         return
       }
 
@@ -616,6 +620,7 @@ export default function AccountPage() {
           )}
         </div>
       </div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Toast from '@/components/ui/Toast'
 
 type User = {
   id: string
@@ -11,6 +12,7 @@ type User = {
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [usersLoading, setUsersLoading] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [search, setSearch] = useState('')
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
   const filteredUsers = users.filter(
@@ -43,7 +45,7 @@ export default function AdminUsersPage() {
         setUsers(data || [])
       } catch (error) {
         console.error('❌ [AdminUsers] Error:', error)
-        console.error('Failed to load users')
+        setToast({ message: 'Failed to load users', type: 'error' })
       } finally {
         setUsersLoading(false)
       }
@@ -74,7 +76,7 @@ export default function AdminUsersPage() {
       setSelectedUsers([])
     } catch (error) {
       console.error('❌ [AdminUsers] Bulk delete error:', error)
-      console.error('Failed to delete users')
+      setToast({ message: 'Failed to delete users', type: 'error' })
     }
   }
   const handleAction = async (user: User, type: 'toggle') => {
@@ -90,13 +92,14 @@ export default function AdminUsersPage() {
           setUsers((users) =>
             users.map((u) => (u.id === user.id ? { ...u, is_admin: !u.is_admin } : u))
           )
+          setToast({ message: 'User updated', type: 'success' })
         } else {
           throw new Error('Failed to update user')
         }
       }
     } catch (error) {
       console.error('❌ [AdminUsers] Action error:', error)
-      console.error('Failed to update user')
+      setToast({ message: 'Failed to update user', type: 'error' })
     }
   }
 
@@ -241,6 +244,7 @@ export default function AdminUsersPage() {
           </button>
         </div>
       )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

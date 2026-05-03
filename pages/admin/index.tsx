@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import Spinner from '@/components/ui/Spinner'
+import Toast from '@/components/ui/Toast'
 
 type Order = {
   id: string
@@ -31,6 +33,7 @@ export default function AdminDashboard() {
     totalProducts: 0,
   })
   const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -49,7 +52,7 @@ export default function AdminDashboard() {
         setMetrics(data)
       } catch (error) {
         console.error('❌ [AdminDashboard] Error:', error)
-        console.error('Failed to load dashboard data')
+        setToast({ message: 'Failed to load dashboard data', type: 'error' })
       } finally {
         setLoading(false)
       }
@@ -65,7 +68,7 @@ export default function AdminDashboard() {
 
       const data = await response.json()
       if (!data || data.length === 0) {
-        console.warn('No data to export')
+        setToast({ message: 'No data to export', type: 'error' })
         return
       }
 
@@ -86,7 +89,7 @@ export default function AdminDashboard() {
       URL.revokeObjectURL(url)
     } catch (error) {
       console.error('❌ [AdminDashboard] Export error:', error)
-      console.error('Export failed')
+      setToast({ message: 'Export failed', type: 'error' })
     }
   }
 
@@ -113,12 +116,10 @@ export default function AdminDashboard() {
 
       if (!response.ok) throw new Error('Import failed')
 
-      console.log('Import complete!')
-      // Refresh metrics
       window.location.reload()
     } catch (error) {
       console.error('❌ [AdminDashboard] Import error:', error)
-      console.error('Import failed')
+      setToast({ message: 'Import failed', type: 'error' })
     }
   }
 
@@ -130,10 +131,7 @@ export default function AdminDashboard() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
-          <span className="ml-3 text-zinc-600 font-light">Loading metrics...</span>
-        </div>
+        <Spinner label="Loading metrics..." />
       ) : (
         <>
           {/* Metrics Cards */}
@@ -267,6 +265,7 @@ export default function AdminDashboard() {
           </div>
         </>
       )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }
