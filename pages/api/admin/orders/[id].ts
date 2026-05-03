@@ -78,7 +78,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             (productsRes.data ?? []).map((p: { id: string; name: string }) => [p.id, p])
           )
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           data.order_items = items.map((item) => {
             const variant = item.variant_id ? variantMap.get(item.variant_id) : null
             const product = item.product_id ? productMap.get(item.product_id) : null
@@ -96,7 +95,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 : {}),
               ...(product ? { product_new: { id: product.id, name: product.name } } : {}),
             }
-          }) as any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          }) as any[]
         }
 
         log.debug('[API/admin/orders/[id]] Order details fetched successfully')

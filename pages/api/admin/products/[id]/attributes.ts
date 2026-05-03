@@ -1,7 +1,7 @@
-import { log } from '../../../../../lib/log'
+import type { NextApiRequest, NextApiResponse } from 'next'
 import { requireAdmin } from '@/lib/auth/requireAdmin'
 import { getSupabaseAdmin } from '@/lib/supabaseClient'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { log } from '../../../../../lib/log'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const admin = await requireAdmin(req, res)
@@ -100,7 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // POST: Create attributes with options for a product
   if (req.method === 'POST') {
     try {
-      log.debug('¤ [API] Saving attributes for product:', productId)
+      log.debug(' [API] Saving attributes for product:', productId)
       const { attributes } = req.body
 
       if (!Array.isArray(attributes) || attributes.length === 0) {
