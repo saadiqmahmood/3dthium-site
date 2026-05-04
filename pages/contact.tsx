@@ -1,32 +1,43 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import Head from 'next/head'
 import { useId, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+
+const schema = z.object({
+  name: z.string().min(1, 'Name is required').max(120),
+  email: z.string().email('Enter a valid email address'),
+  subject: z.string().min(1, 'Subject is required').max(200),
+  message: z.string().min(10, 'Message must be at least 10 characters').max(5000),
+})
+type ContactFormValues = z.infer<typeof schema>
 
 export default function ContactPage() {
-  const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>('idle')
+  const [apiStatus, setApiStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const fId = useId()
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ContactFormValues>({ resolver: zodResolver(schema) })
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setStatus('loading')
-
-    const form = e.target as HTMLFormElement
-    const data = Object.fromEntries(new FormData(form))
-
+  const onSubmit = async (data: ContactFormValues) => {
+    setApiStatus('idle')
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
-
       if (res.ok) {
-        setStatus('success')
-        form.reset()
+        setApiStatus('success')
+        reset()
       } else {
-        setStatus('error')
+        setApiStatus('error')
       }
     } catch {
-      setStatus('error')
+      setApiStatus('error')
     }
   }
 
@@ -171,8 +182,8 @@ export default function ContactPage() {
 
               {/* Form Content */}
               <div className="p-8">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {status === 'success' && (
+                <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
+                  {apiStatus === 'success' && (
                     <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-lg flex items-center gap-3">
                       <svg
                         aria-hidden="true"
@@ -194,7 +205,7 @@ export default function ContactPage() {
                       </span>
                     </div>
                   )}
-                  {status === 'error' && (
+                  {apiStatus === 'error' && (
                     <div className="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-lg flex items-center gap-3">
                       <svg
                         aria-hidden="true"
@@ -228,11 +239,13 @@ export default function ContactPage() {
                       <input
                         type="text"
                         id={`${fId}-name`}
-                        name="name"
-                        required
+                        {...register('name')}
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         placeholder="John Smith"
                       />
+                      {errors.name && (
+                        <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                      )}
                     </div>
 
                     {/* Email */}
@@ -246,11 +259,13 @@ export default function ContactPage() {
                       <input
                         type="email"
                         id={`${fId}-email`}
-                        name="email"
-                        required
+                        {...register('email')}
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         placeholder="john@example.com"
                       />
+                      {errors.email && (
+                        <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                      )}
                     </div>
                   </div>
 
@@ -265,11 +280,13 @@ export default function ContactPage() {
                     <input
                       type="text"
                       id={`${fId}-subject`}
-                      name="subject"
-                      required
+                      {...register('subject')}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       placeholder="How can we help you?"
                     />
+                    {errors.subject && (
+                      <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
+                    )}
                   </div>
 
                   {/* Message */}
@@ -282,22 +299,24 @@ export default function ContactPage() {
                     </label>
                     <textarea
                       id={`${fId}-message`}
-                      name="message"
+                      {...register('message')}
                       rows={6}
-                      required
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                       placeholder="Tell us more about your inquiry..."
                     />
+                    {errors.message && (
+                      <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
+                    )}
                   </div>
 
                   {/* Submit Button */}
                   <div>
                     <button
                       type="submit"
-                      disabled={status === 'loading'}
+                      disabled={isSubmitting}
                       className="w-full md:w-auto bg-zinc-900 text-white px-8 py-4 rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {status === 'loading' ? 'Sending...' : 'Send Message'}
+                      {isSubmitting ? 'Sending...' : 'Send Message'}
                     </button>
                   </div>
                 </form>

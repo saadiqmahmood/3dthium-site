@@ -1,95 +1,41 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
-import type React from 'react'
-import { useId, useState } from 'react'
+import { useId, useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { useSupabase } from '@/context/SupabaseContext'
+
+const dimField = z.number().int().min(1, 'Must be at least 1mm').max(250, 'Max 250mm').optional()
+const dimSetValueAs = (v: string) => (v === '' || v == null ? undefined : Number(v))
+
+const schema = z.object({
+  name: z.string().min(1, 'Name is required').max(120),
+  email: z.string().email('Enter a valid email address'),
+  phone: z.string().max(30).optional(),
+  material: z.string().min(1, 'Please select a material'),
+  address: z.string().min(1, 'Delivery address is required').max(500),
+  width: dimField,
+  height: dimField,
+  depth: dimField,
+  description: z.string().min(10, 'Description must be at least 10 characters').max(5000),
+})
+type CustomOrderFormValues = z.infer<typeof schema>
 
 export default function CustomOrderForm() {
   const fId = useId()
-  const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>('idle')
   const [fileError, setFileError] = useState<string | null>(null)
-  const [formError, setFormError] = useState<string | null>(null)
+  const [apiStatus, setApiStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Use hook unconditionally - must be at top level
   const supabaseContext = useSupabase()
   const supabase = supabaseContext?.client
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setStatus('loading')
-    setFileError(null)
-    setFormError(null)
-
-    const form = e.target as HTMLFormElement
-    const fileInput = form.file as HTMLInputElement
-    const file = fileInput?.files?.[0]
-
-    if (!file) {
-      setStatus('idle')
-      setFileError('Please upload a file.')
-      return
-    }
-    if (file.size > 20 * 1024 * 1024) {
-      setStatus('idle')
-      setFileError('File size must be 20MB or less.')
-      return
-    }
-
-    // Upload file to Supabase Storage
-    let fileUrl = ''
-    try {
-      if (!supabase) {
-        setStatus('idle')
-        setFileError('Supabase client is not available. Please refresh the page.')
-        return
-      }
-
-      const filePath = `${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`
-      const { error: uploadError } = await supabase.storage
-        .from('custom-orders')
-        .upload(filePath, file)
-      if (uploadError) {
-        console.error('Supabase upload error:', uploadError)
-        setStatus('idle')
-        setFileError(uploadError.message || 'File upload failed. Please try again.')
-        return
-      }
-      const { data: publicUrlData } = supabase.storage.from('custom-orders').getPublicUrl(filePath)
-      fileUrl = publicUrlData.publicUrl
-    } catch (err: unknown) {
-      setStatus('idle')
-      setFileError(err instanceof Error ? err.message : 'File upload failed. Please try again.')
-      return
-    }
-
-    // Gather form data
-    const formData = {
-      name: (form.name as unknown as HTMLInputElement).value,
-      email: (form.email as unknown as HTMLInputElement).value,
-      phone: (form.phone as unknown as HTMLInputElement).value,
-      material: (form.material as unknown as HTMLSelectElement).value,
-      address: (form.address as unknown as HTMLInputElement).value,
-      width: (form.width as unknown as HTMLInputElement).value,
-      height: (form.height as unknown as HTMLInputElement).value,
-      depth: (form.depth as unknown as HTMLInputElement).value,
-      description: (form.description as unknown as HTMLTextAreaElement).value,
-      file_url: fileUrl,
-    }
-
-    // Submit to API
-    try {
-      const res = await fetch('/api/custom-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      if (!res.ok) throw new Error('Failed to submit custom order.')
-      setStatus('success')
-      form.reset()
-    } catch {
-      setStatus('error')
-      setFormError('Failed to submit custom order. Please try again.')
-    }
-  }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CustomOrderFormValues>({ resolver: zodResolver(schema) })
 
   if (!supabase) {
     return (
@@ -101,17 +47,67 @@ export default function CustomOrderForm() {
     )
   }
 
+  const onSubmit = async (data: CustomOrderFormValues) => {
+    setFileError(null)
+    setApiStatus('idle')
+
+    const file = fileInputRef.current?.files?.[0]
+    if (!file) {
+      setFileError('Please upload a file.')
+      return
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      setFileError('File size must be 20MB or less.')
+      return
+    }
+
+    if (!supabase) {
+      setFileError('Supabase client is not available. Please refresh the page.')
+      return
+    }
+
+    let fileUrl = ''
+    try {
+      const filePath = `${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`
+      const { error: uploadError } = await supabase.storage
+        .from('custom-orders')
+        .upload(filePath, file)
+      if (uploadError) {
+        console.error('Supabase upload error:', uploadError)
+        setFileError(uploadError.message || 'File upload failed. Please try again.')
+        return
+      }
+      const { data: publicUrlData } = supabase.storage.from('custom-orders').getPublicUrl(filePath)
+      fileUrl = publicUrlData.publicUrl
+    } catch (err: unknown) {
+      setFileError(err instanceof Error ? err.message : 'File upload failed. Please try again.')
+      return
+    }
+
+    try {
+      const res = await fetch('/api/custom-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, file_url: fileUrl }),
+      })
+      if (!res.ok) throw new Error('Failed to submit custom order.')
+      setApiStatus('success')
+      reset()
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    } catch {
+      setApiStatus('error')
+    }
+  }
+
   return (
     <div>
-      <form onSubmit={handleSubmit} className="space-y-6 px-8 rounded-xl">
-        {/* Success Message */}
-        {status === 'success' && (
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6 px-8 rounded-xl">
+        {apiStatus === 'success' && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
             Your request has been submitted successfully!
           </div>
         )}
-        {/* Error Message */}
-        {status === 'error' && (
+        {apiStatus === 'error' && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             Something went wrong. Please try again.
           </div>
@@ -121,11 +117,7 @@ export default function CustomOrderForm() {
             {fileError}
           </div>
         )}
-        {formError && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {formError}
-          </div>
-        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Full Name */}
           <div>
@@ -135,10 +127,10 @@ export default function CustomOrderForm() {
             <input
               type="text"
               id={`${fId}-name`}
-              name="name"
-              required
+              {...register('name')}
               className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
             />
+            {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
           </div>
 
           {/* Email */}
@@ -149,10 +141,10 @@ export default function CustomOrderForm() {
             <input
               type="email"
               id={`${fId}-email`}
-              name="email"
-              required
+              {...register('email')}
               className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
             />
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
           </div>
 
           {/* Phone */}
@@ -163,9 +155,10 @@ export default function CustomOrderForm() {
             <input
               type="tel"
               id={`${fId}-phone`}
-              name="phone"
+              {...register('phone')}
               className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
             />
+            {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
           </div>
 
           {/* Preferred Material */}
@@ -178,8 +171,7 @@ export default function CustomOrderForm() {
             </label>
             <select
               id={`${fId}-material`}
-              name="material"
-              required
+              {...register('material')}
               className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
             >
               <option value="">Select material</option>
@@ -187,6 +179,9 @@ export default function CustomOrderForm() {
               <option value="Resin">Resin</option>
               <option value="Eco-Plastic">Eco-Plastic</option>
             </select>
+            {errors.material && (
+              <p className="mt-1 text-sm text-red-600">{errors.material.message}</p>
+            )}
           </div>
 
           {/* Delivery Address */}
@@ -197,39 +192,56 @@ export default function CustomOrderForm() {
             <input
               type="text"
               id={`${fId}-address`}
-              name="address"
-              required
+              {...register('address')}
               className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
             />
+            {errors.address && (
+              <p className="mt-1 text-sm text-red-600">{errors.address.message}</p>
+            )}
           </div>
 
-          {/* Scale */}
+          {/* Dimensions */}
           <div className="md:col-span-2">
             <p className="block text-base font-medium text-zinc-900 mb-1">
               Object Dimensions (in mm)
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <input
-                type="number"
-                name="width"
-                placeholder="Width"
-                max={250}
-                className="p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
-              />
-              <input
-                type="number"
-                name="height"
-                placeholder="Height"
-                max={250}
-                className="p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
-              />
-              <input
-                type="number"
-                name="depth"
-                placeholder="Depth"
-                max={250}
-                className="p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
-              />
+              <div>
+                <input
+                  type="number"
+                  {...register('width', { setValueAs: dimSetValueAs })}
+                  placeholder="Width"
+                  max={250}
+                  className="p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+                {errors.width && (
+                  <p className="mt-1 text-sm text-red-600">{errors.width.message}</p>
+                )}
+              </div>
+              <div>
+                <input
+                  type="number"
+                  {...register('height', { setValueAs: dimSetValueAs })}
+                  placeholder="Height"
+                  max={250}
+                  className="p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+                {errors.height && (
+                  <p className="mt-1 text-sm text-red-600">{errors.height.message}</p>
+                )}
+              </div>
+              <div>
+                <input
+                  type="number"
+                  {...register('depth', { setValueAs: dimSetValueAs })}
+                  placeholder="Depth"
+                  max={250}
+                  className="p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+                {errors.depth && (
+                  <p className="mt-1 text-sm text-red-600">{errors.depth.message}</p>
+                )}
+              </div>
             </div>
             <p className="text-xs text-gray-500 mt-1">Maximum dimensions: 250 x 250 x 250 mm</p>
           </div>
@@ -242,11 +254,13 @@ export default function CustomOrderForm() {
           </label>
           <textarea
             id={`${fId}-desc`}
-            name="description"
+            {...register('description')}
             rows={4}
-            required
             className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
           />
+          {errors.description && (
+            <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+          )}
         </div>
 
         {/* File Upload */}
@@ -257,9 +271,8 @@ export default function CustomOrderForm() {
           <input
             type="file"
             id={`${fId}-file`}
-            name="file"
+            ref={fileInputRef}
             accept=".stl,.dwg,.sldprt,.3mf"
-            required
             className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
             file:rounded-md file:border-0 file:text-sm file:font-semibold
             file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
@@ -271,10 +284,10 @@ export default function CustomOrderForm() {
         <div>
           <button
             type="submit"
-            disabled={status === 'loading'}
+            disabled={isSubmitting}
             className="bg-zinc-900 text-white px-8 py-3 rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50"
           >
-            {status === 'loading' ? 'Submitting...' : 'Submit Request'}
+            {isSubmitting ? 'Submitting...' : 'Submit Request'}
           </button>
         </div>
       </form>

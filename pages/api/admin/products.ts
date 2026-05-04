@@ -20,7 +20,7 @@ const CreateProductSchema = z.object({
   gallery_images: z.array(z.string()).optional().default([]),
   is_active: z.boolean().optional().default(true),
   customizable: z.boolean().optional().default(false),
-  attributes: z.record(z.unknown()).optional().default({}),
+  attributes: z.record(z.string(), z.unknown()).optional().default({}),
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

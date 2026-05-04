@@ -1,9 +1,23 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useId, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 import Toast from '@/components/ui/Toast'
 import { useAuth } from '@/context/AuthContext'
 import { useSupabase } from '@/context/SupabaseContext'
+
+const authSchema = z.object({
+  email: z.string().email('Enter a valid email'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+})
+type AuthFormValues = z.infer<typeof authSchema>
+
+const resetSchema = z.object({
+  email: z.string().email('Enter a valid email'),
+})
+type ResetFormValues = z.infer<typeof resetSchema>
 
 export default function AuthPage() {
   const router = useRouter()
@@ -11,18 +25,33 @@ export default function AuthPage() {
   const supabaseContext = useSupabase()
   const fId = useId()
   const [isLogin, setIsLogin] = useState(true)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
   const [resetMode, setResetMode] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+
+  const {
+    register: authRegister,
+    handleSubmit: authHandleSubmit,
+    getValues: authGetValues,
+    watch: authWatch,
+    setError: authSetError,
+    clearErrors: authClearErrors,
+    formState: { errors: authErrors, isSubmitting: authSubmitting },
+  } = useForm<AuthFormValues>({ resolver: zodResolver(authSchema) })
+
+  const {
+    register: resetRegister,
+    handleSubmit: resetHandleSubmit,
+    setValue: resetSetValue,
+    formState: { errors: resetErrors, isSubmitting: resetSubmitting },
+  } = useForm<ResetFormValues>({ resolver: zodResolver(resetSchema) })
+
+  const watchedEmail = authWatch('email')
 
   useEffect(() => {
     if (router.query.reset === 'success') {
       setToast({ message: 'Password updated! You can now log in.', type: 'success' })
 
-      // Optionally remove the query from the URL after showing the toast
       const cleaned = { ...router.query }
       delete cleaned.reset
       router.replace({ pathname: router.pathname, query: cleaned }, undefined, { shallow: true })
@@ -34,43 +63,31 @@ export default function AuthPage() {
   }
   const { client: supabase } = supabaseContext
 
-  const handlePasswordReset = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  const onResetSubmit = async (data: ResetFormValues) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
       redirectTo: `${window.location.origin}/auth/reset`,
     })
-
     if (error) {
       setToast({ message: error.message, type: 'error' })
-      setLoading(false)
       return
     }
-
     setToast({ message: 'Password reset email sent!', type: 'success' })
-    setLoading(false)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    setToast(null) // Clear any previous toast
+  const onAuthSubmit = async (data: AuthFormValues) => {
+    authClearErrors()
+    setToast(null)
 
     try {
-      console.log('Attempting auth:', isLogin ? 'signIn' : 'signUp', { email })
+      console.log('Attempting auth:', isLogin ? 'signIn' : 'signUp', { email: data.email })
 
       const action = isLogin ? signIn : signUp
-      const { error } = await action(email, password)
+      const { error } = await action(data.email, data.password)
 
       if (error) {
-        // Provide user-friendly error messages
         let errorMessage = error.message
         if (error.message.includes('Invalid login credentials')) {
           errorMessage = 'Invalid email or password. Please check your credentials and try again.'
-          // Only log unexpected errors, not expected auth failures
           console.log('Login failed: Invalid credentials')
         } else if (error.message.includes('Email not confirmed')) {
           errorMessage = 'Please check your email and confirm your account before logging in.'
@@ -79,53 +96,44 @@ export default function AuthPage() {
           errorMessage = 'An account with this email already exists. Please log in instead.'
           console.log('Signup failed: User already exists')
         } else {
-          // Log unexpected errors for debugging
           console.error('Unexpected auth error:', error)
         }
-
-        setError(errorMessage)
-        setLoading(false)
+        authSetError('root', { message: errorMessage })
         return
       }
 
       console.log('Auth successful:', isLogin ? 'signIn' : 'signUp')
 
-      // ✅ Success
-      setError('')
       setToast({
         message: isLogin ? 'Logged in successfully!' : 'Account created successfully!',
         type: 'success',
       })
 
-      // ✅ Delay redirect to show toast
       const redirectTo = (router.query.from as string) || '/'
-      setTimeout(() => {
-        setLoading(false)
-        router.push(redirectTo)
-      }, 1500)
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      router.push(redirectTo)
     } catch (err) {
-      // Catch any unexpected errors
       console.error('Unexpected auth error:', err)
       const errorMessage =
         err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.'
-      setError(errorMessage)
-      setLoading(false)
+      authSetError('root', { message: errorMessage })
     }
   }
 
   const handleResendConfirmation = async () => {
+    const email = authGetValues('email')
     if (!email) {
       setToast({ message: 'Please enter your email address first.', type: 'error' })
       return
     }
-    setLoading(true)
+    setResendLoading(true)
     const { error } = await supabase.auth.resend({ type: 'signup', email })
     if (error) {
       setToast({ message: error.message, type: 'error' })
     } else {
       setToast({ message: 'Confirmation email resent! Please check your inbox.', type: 'success' })
     }
-    setLoading(false)
+    setResendLoading(false)
   }
 
   return (
@@ -151,7 +159,8 @@ export default function AuthPage() {
           </h1>
           {resetMode ? (
             <form
-              onSubmit={handlePasswordReset}
+              onSubmit={resetHandleSubmit(onResetSubmit)}
+              noValidate
               className="space-y-6 bg-gray-50 border border-gray-200 p-8 rounded-2xl"
             >
               <h2 className="text-xl font-semibold text-center text-zinc-900">
@@ -168,29 +177,19 @@ export default function AuthPage() {
                 <input
                   type="email"
                   id={`${fId}-reset-email`}
+                  {...resetRegister('email')}
                   className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
                 />
+                {resetErrors.email && (
+                  <p className="mt-1 text-sm text-red-600">{resetErrors.email.message}</p>
+                )}
               </div>
-              {isLogin && (
-                <p className="text-right text-base">
-                  <button
-                    type="button"
-                    className="text-emerald-600 hover:underline"
-                    onClick={() => setResetMode(true)}
-                  >
-                    Forgot password?
-                  </button>
-                </p>
-              )}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={resetSubmitting}
                 className="w-full bg-zinc-900 text-white py-3 rounded-lg hover:bg-zinc-800 transition-colors disabled:opacity-50 font-medium"
               >
-                {loading ? 'Sending...' : 'Send Reset Link'}
+                {resetSubmitting ? 'Sending...' : 'Send Reset Link'}
               </button>
 
               <p className="text-center text-sm text-gray-600">
@@ -205,10 +204,11 @@ export default function AuthPage() {
             </form>
           ) : (
             <form
-              onSubmit={handleSubmit}
+              onSubmit={authHandleSubmit(onAuthSubmit)}
+              noValidate
               className="space-y-6 bg-gray-50 border border-gray-200 p-8 rounded-2xl"
             >
-              {error && (
+              {authErrors.root && (
                 <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm">
                   <div className="flex items-center gap-2">
                     <svg
@@ -225,7 +225,7 @@ export default function AuthPage() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span>{error}</span>
+                    <span>{authErrors.root.message}</span>
                   </div>
                 </div>
               )}
@@ -240,11 +240,12 @@ export default function AuthPage() {
                 <input
                   type="email"
                   id={`${fId}-email`}
+                  {...authRegister('email')}
                   className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
                 />
+                {authErrors.email && (
+                  <p className="mt-1 text-sm text-red-600">{authErrors.email.message}</p>
+                )}
               </div>
 
               <div>
@@ -257,11 +258,12 @@ export default function AuthPage() {
                 <input
                   type="password"
                   id={`${fId}-password`}
+                  {...authRegister('password')}
                   className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
                 />
+                {authErrors.password && (
+                  <p className="mt-1 text-sm text-red-600">{authErrors.password.message}</p>
+                )}
               </div>
               {isLogin && !resetMode && (
                 <>
@@ -269,32 +271,36 @@ export default function AuthPage() {
                     <button
                       type="button"
                       className="text-emerald-600 hover:underline"
-                      onClick={() => setResetMode(true)}
+                      onClick={() => {
+                        resetSetValue('email', authGetValues('email') || '')
+                        setResetMode(true)
+                      }}
                     >
                       Forgot password?
                     </button>
                   </p>
-                  {/* Only show resend link if error message indicates email not confirmed */}
-                  {email && error && /confirm/i.test(error) && (
-                    <p className="text-right text-xs mt-1">
-                      <button
-                        type="button"
-                        className="text-emerald-600 hover:underline"
-                        onClick={handleResendConfirmation}
-                        disabled={loading}
-                      >
-                        Resend confirmation email
-                      </button>
-                    </p>
-                  )}
+                  {watchedEmail &&
+                    authErrors.root?.message &&
+                    /confirm/i.test(authErrors.root.message) && (
+                      <p className="text-right text-xs mt-1">
+                        <button
+                          type="button"
+                          className="text-emerald-600 hover:underline"
+                          onClick={handleResendConfirmation}
+                          disabled={resendLoading}
+                        >
+                          Resend confirmation email
+                        </button>
+                      </p>
+                    )}
                 </>
               )}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={authSubmitting}
                 className="w-full bg-zinc-900 text-white py-3 rounded-lg hover:bg-zinc-800 transition-colors disabled:opacity-50 font-medium"
               >
-                {loading ? 'Please wait...' : isLogin ? 'Login' : 'Sign Up'}
+                {authSubmitting ? 'Please wait...' : isLogin ? 'Login' : 'Sign Up'}
               </button>
 
               {!isLogin && (
@@ -311,7 +317,10 @@ export default function AuthPage() {
                 <button
                   type="button"
                   className="text-emerald-400 hover:underline"
-                  onClick={() => setIsLogin(!isLogin)}
+                  onClick={() => {
+                    setIsLogin(!isLogin)
+                    authClearErrors()
+                  }}
                 >
                   {isLogin ? 'Sign Up' : 'Login'}
                 </button>
