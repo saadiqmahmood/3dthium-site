@@ -52,6 +52,8 @@ export default function AboutPage() {
               </div>
               <div className="bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border border-gray-200 rounded-2xl p-12 text-center">
                 <svg
+                  aria-hidden="true"
+                  focusable="false"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="none"
@@ -84,6 +86,8 @@ export default function AboutPage() {
               <div className="bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl p-8 transition-all">
                 <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mb-6">
                   <svg
+                    aria-hidden="true"
+                    focusable="false"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -113,6 +117,8 @@ export default function AboutPage() {
               <div className="bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl p-8 transition-all">
                 <div className="w-16 h-16 bg-cyan-500/10 border border-cyan-500/20 rounded-full flex items-center justify-center mb-6">
                   <svg
+                    aria-hidden="true"
+                    focusable="false"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -137,6 +143,8 @@ export default function AboutPage() {
               <div className="bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl p-8 transition-all">
                 <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mb-6">
                   <svg
+                    aria-hidden="true"
+                    focusable="false"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"

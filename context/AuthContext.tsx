@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } = await client.auth.getSession()
 
         // Check if session is expired
-        if (session && session.expires_at) {
+        if (session?.expires_at) {
           const now = Math.floor(Date.now() / 1000)
           if (session.expires_at < now) {
             await client.auth.signOut()
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setIsAdmin(false)
         }
-      } catch (error) {
+      } catch (_error) {
         setIsAdmin(false)
       } finally {
         setLoading(false)
@@ -100,9 +100,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = client.auth.onAuthStateChange(async (event, session) => {
+    } = client.auth.onAuthStateChange(async (_event, session) => {
       // Handle session expiry
-      if (session && session.expires_at) {
+      if (session?.expires_at) {
         const now = Math.floor(Date.now() / 1000)
         if (session.expires_at < now) {
           setSession(null)
@@ -127,7 +127,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       subscription.unsubscribe()
     }
-  }, [client])
+  }, [client, checkAdminStatus])
 
   const signOut = async () => {
     try {
@@ -135,7 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(null)
       setUser(null)
       setIsAdmin(false)
-    } catch (error) {
+    } catch (_error) {
       // Silently handle error
     }
   }

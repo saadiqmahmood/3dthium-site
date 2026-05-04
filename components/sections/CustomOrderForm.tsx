@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import type React from 'react'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useSupabase } from '@/context/SupabaseContext'
 
 export default function CustomOrderForm() {
+  const fId = useId()
   const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>('idle')
   const [fileError, setFileError] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
@@ -128,12 +129,12 @@ export default function CustomOrderForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Full Name */}
           <div>
-            <label htmlFor="name" className="block text-base font-medium text-zinc-900">
+            <label htmlFor={`${fId}-name`} className="block text-base font-medium text-zinc-900">
               Full Name
             </label>
             <input
               type="text"
-              id="name"
+              id={`${fId}-name`}
               name="name"
               required
               className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
@@ -142,12 +143,12 @@ export default function CustomOrderForm() {
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-base font-medium text-zinc-900">
+            <label htmlFor={`${fId}-email`} className="block text-base font-medium text-zinc-900">
               Email Address
             </label>
             <input
               type="email"
-              id="email"
+              id={`${fId}-email`}
               name="email"
               required
               className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
@@ -156,12 +157,12 @@ export default function CustomOrderForm() {
 
           {/* Phone */}
           <div>
-            <label htmlFor="phone" className="block text-base font-medium text-zinc-900">
+            <label htmlFor={`${fId}-phone`} className="block text-base font-medium text-zinc-900">
               Phone Number
             </label>
             <input
               type="tel"
-              id="phone"
+              id={`${fId}-phone`}
               name="phone"
               className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
             />
@@ -169,11 +170,14 @@ export default function CustomOrderForm() {
 
           {/* Preferred Material */}
           <div>
-            <label htmlFor="material" className="block text-base font-medium text-zinc-900">
+            <label
+              htmlFor={`${fId}-material`}
+              className="block text-base font-medium text-zinc-900"
+            >
               Preferred Material
             </label>
             <select
-              id="material"
+              id={`${fId}-material`}
               name="material"
               required
               className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
@@ -187,12 +191,12 @@ export default function CustomOrderForm() {
 
           {/* Delivery Address */}
           <div className="md:col-span-2">
-            <label htmlFor="address" className="block text-base font-medium text-zinc-900">
+            <label htmlFor={`${fId}-address`} className="block text-base font-medium text-zinc-900">
               Delivery Address
             </label>
             <input
               type="text"
-              id="address"
+              id={`${fId}-address`}
               name="address"
               required
               className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
@@ -201,9 +205,9 @@ export default function CustomOrderForm() {
 
           {/* Scale */}
           <div className="md:col-span-2">
-            <label className="block text-base font-medium text-zinc-900 mb-1">
+            <p className="block text-base font-medium text-zinc-900 mb-1">
               Object Dimensions (in mm)
-            </label>
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <input
                 type="number"
@@ -233,11 +237,11 @@ export default function CustomOrderForm() {
 
         {/* Description */}
         <div>
-          <label htmlFor="description" className="block text-base font-medium text-zinc-900">
+          <label htmlFor={`${fId}-desc`} className="block text-base font-medium text-zinc-900">
             Project Description
           </label>
           <textarea
-            id="description"
+            id={`${fId}-desc`}
             name="description"
             rows={4}
             required
@@ -247,12 +251,12 @@ export default function CustomOrderForm() {
 
         {/* File Upload */}
         <div>
-          <label htmlFor="file" className="block text-base font-medium text-zinc-900">
+          <label htmlFor={`${fId}-file`} className="block text-base font-medium text-zinc-900">
             Upload Design File (STL, DWG, SLDPRT, 3MF)
           </label>
           <input
             type="file"
-            id="file"
+            id={`${fId}-file`}
             name="file"
             accept=".stl,.dwg,.sldprt,.3mf"
             required

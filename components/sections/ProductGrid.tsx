@@ -81,6 +81,7 @@ export default function ProductGrid() {
           <div className="flex flex-wrap justify-center gap-3">
             {categories.map((category) => (
               <button
+                type="button"
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={`px-6 py-3 rounded-lg text-base font-light transition-all duration-200 ${
@@ -108,6 +109,8 @@ export default function ProductGrid() {
           <div className="text-center py-20">
             <div className="max-w-md mx-auto">
               <svg
+                aria-hidden="true"
+                focusable="false"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -124,6 +127,7 @@ export default function ProductGrid() {
               <h3 className="text-lg font-medium text-zinc-900 mb-2">Unable to Load Products</h3>
               <p className="text-zinc-600 mb-6 font-light">{error}</p>
               <button
+                type="button"
                 onClick={() => window.location.reload()}
                 className="bg-zinc-900 text-white font-medium py-3 px-6 rounded-lg hover:bg-zinc-800 transition-colors"
               >
@@ -155,6 +159,8 @@ export default function ProductGrid() {
           <div className="text-center py-20">
             <div className="max-w-md mx-auto">
               <svg
+                aria-hidden="true"
+                focusable="false"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -175,6 +181,7 @@ export default function ProductGrid() {
               </p>
               {selectedCategory !== 'All' && (
                 <button
+                  type="button"
                   onClick={() => setSelectedCategory('All')}
                   className="bg-zinc-900 text-white font-medium py-2 px-4 rounded-lg hover:bg-zinc-800 transition-colors"
                 >

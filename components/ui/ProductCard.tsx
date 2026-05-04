@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import type { ProductVariantNew } from '@/types'
 import { formatMoney } from '@/lib/format/money'
+import type { ProductVariantNew } from '@/types'
 
 // New product type from products_new API
 type ProductNew = {

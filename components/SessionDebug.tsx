@@ -65,10 +65,18 @@ export default function SessionDebug() {
       </div>
 
       <div className="mt-3 space-y-1">
-        <button onClick={checkSession} className="bg-blue-600 px-2 py-1 rounded text-xs mr-2">
+        <button
+          type="button"
+          onClick={checkSession}
+          className="bg-blue-600 px-2 py-1 rounded text-xs mr-2"
+        >
           Check Session
         </button>
-        <button onClick={testUserQuery} className="bg-green-600 px-2 py-1 rounded text-xs">
+        <button
+          type="button"
+          onClick={testUserQuery}
+          className="bg-green-600 px-2 py-1 rounded text-xs"
+        >
           Test Query
         </button>
       </div>

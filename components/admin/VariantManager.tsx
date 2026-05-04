@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import Toast from '@/components/ui/Toast'
-import type { ProductVariantNew } from '@/types'
 import { formatMoney } from '@/lib/format/money'
+import type { ProductVariantNew } from '@/types'
 
 interface VariantManagerProps {
   productId: string
@@ -19,6 +19,7 @@ export default function VariantManager({
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
   const [valueToDisplayNameMap, setValueToDisplayNameMap] = useState<Record<string, string>>({})
+  const fId = useId()
 
   // Form state for new variant
   const [formData, setFormData] = useState({
@@ -34,13 +35,13 @@ export default function VariantManager({
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editFormData, setEditFormData] = useState<Record<string, unknown>>({})
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fetchVariants and fetchAttributeOptions are stable async fetchers
   useEffect(() => {
     if (productId) {
       fetchVariants()
       fetchAttributeOptions()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId, refreshTrigger]) // Add refreshTrigger to dependencies
+  }, [productId])
 
   const fetchAttributeOptions = async () => {
     try {
@@ -211,7 +212,10 @@ export default function VariantManager({
       } else {
         const error = await response.json()
 
-        setToast({ message: error.error?.message ?? error.error ?? 'Failed to update variant', type: 'error' })
+        setToast({
+          message: error.error?.message ?? error.error ?? 'Failed to update variant',
+          type: 'error',
+        })
       }
     } catch (error) {
       console.error('Error updating variant:', error)
@@ -237,7 +241,10 @@ export default function VariantManager({
         fetchVariants()
       } else {
         const error = await response.json()
-        setToast({ message: error.error?.message ?? error.error ?? 'Failed to delete variant', type: 'error' })
+        setToast({
+          message: error.error?.message ?? error.error ?? 'Failed to delete variant',
+          type: 'error',
+        })
       }
     } catch (error) {
       console.error('Error deleting variant:', error)
@@ -292,8 +299,14 @@ export default function VariantManager({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Size */}
             <div>
-              <label className="block text-sm font-light mb-2 text-zinc-700">Size (optional)</label>
+              <label
+                htmlFor={`${fId}-size`}
+                className="block text-sm font-light mb-2 text-zinc-700"
+              >
+                Size (optional)
+              </label>
               <input
+                id={`${fId}-size`}
                 type="text"
                 value={formData.size}
                 onChange={(e) => setFormData({ ...formData, size: e.target.value })}
@@ -304,10 +317,14 @@ export default function VariantManager({
 
             {/* Color */}
             <div>
-              <label className="block text-sm font-light mb-2 text-zinc-700">
+              <label
+                htmlFor={`${fId}-color`}
+                className="block text-sm font-light mb-2 text-zinc-700"
+              >
                 Color (optional)
               </label>
               <input
+                id={`${fId}-color`}
                 type="text"
                 value={formData.color}
                 onChange={(e) => setFormData({ ...formData, color: e.target.value })}
@@ -318,10 +335,14 @@ export default function VariantManager({
 
             {/* Material */}
             <div>
-              <label className="block text-sm font-light mb-2 text-zinc-700">
+              <label
+                htmlFor={`${fId}-material`}
+                className="block text-sm font-light mb-2 text-zinc-700"
+              >
                 Material (optional)
               </label>
               <input
+                id={`${fId}-material`}
                 type="text"
                 value={formData.material}
                 onChange={(e) => setFormData({ ...formData, material: e.target.value })}
@@ -334,14 +355,20 @@ export default function VariantManager({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Price Adjustment */}
             <div>
-              <label className="block text-sm font-light mb-2 text-zinc-700">
+              <label
+                htmlFor={`${fId}-price`}
+                className="block text-sm font-light mb-2 text-zinc-700"
+              >
                 Price Adjustment (£)
                 <span className="text-zinc-600 text-xs ml-2 font-light">
                   Base: {formatMoney(basePrice)} → Final:{' '}
-                  {formatMoney(calculateFinalPrice(Number.parseFloat(formData.price_adjustment || '0')))}
+                  {formatMoney(
+                    calculateFinalPrice(Number.parseFloat(formData.price_adjustment || '0'))
+                  )}
                 </span>
               </label>
               <input
+                id={`${fId}-price`}
                 type="number"
                 step="0.01"
                 value={formData.price_adjustment}
@@ -356,13 +383,14 @@ export default function VariantManager({
 
             {/* SKU */}
             <div>
-              <label className="block text-sm font-light mb-2 text-zinc-700">
+              <label htmlFor={`${fId}-sku`} className="block text-sm font-light mb-2 text-zinc-700">
                 SKU (optional)
                 <span className="text-zinc-600 text-xs ml-2 font-light">
                   Auto-generated if empty
                 </span>
               </label>
               <input
+                id={`${fId}-sku`}
                 type="text"
                 value={formData.sku}
                 onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
@@ -375,12 +403,12 @@ export default function VariantManager({
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
-              id="is_available"
+              id={`${fId}-available`}
               checked={formData.is_available}
               onChange={(e) => setFormData({ ...formData, is_available: e.target.checked })}
               className="rounded w-4 h-4 text-emerald-600 focus:ring-emerald-500"
             />
-            <label htmlFor="is_available" className="text-sm font-light text-zinc-700">
+            <label htmlFor={`${fId}-available`} className="text-sm font-light text-zinc-700">
               Available for purchase
             </label>
           </div>
@@ -511,6 +539,7 @@ export default function VariantManager({
                         </td>
                         <td className="px-4 py-3 text-right space-x-2">
                           <button
+                            type="button"
                             onClick={() => handleUpdateVariant(variant.id)}
                             disabled={saving}
                             className="text-emerald-600 hover:text-emerald-700 text-sm font-light"
@@ -518,6 +547,7 @@ export default function VariantManager({
                             Save
                           </button>
                           <button
+                            type="button"
                             onClick={cancelEditing}
                             className="text-zinc-600 hover:text-zinc-700 text-sm font-light"
                           >
@@ -538,7 +568,8 @@ export default function VariantManager({
                           {getDisplayName(variant.material)}
                         </td>
                         <td className="px-4 py-3 text-sm text-zinc-900 font-light">
-                          {variant.price_adjustment >= 0 ? '+' : ''}{formatMoney(variant.price_adjustment)}
+                          {variant.price_adjustment >= 0 ? '+' : ''}
+                          {formatMoney(variant.price_adjustment)}
                         </td>
                         <td className="px-4 py-3 text-sm font-light text-zinc-900">
                           {formatMoney(calculateFinalPrice(variant.price_adjustment))}
@@ -559,12 +590,14 @@ export default function VariantManager({
                         </td>
                         <td className="px-4 py-3 text-right space-x-2">
                           <button
+                            type="button"
                             onClick={() => startEditing(variant)}
                             className="text-emerald-600 hover:text-emerald-700 text-sm font-light"
                           >
                             Edit
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleDeleteVariant(variant.id)}
                             disabled={saving}
                             className="text-red-600 hover:text-red-700 text-sm font-light"

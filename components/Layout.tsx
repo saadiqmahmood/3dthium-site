@@ -1,12 +1,10 @@
-import type { ReactNode } from 'react'
 import dynamic from 'next/dynamic'
+import type { ReactNode } from 'react'
 import Footer from './Footer'
 import Navbar from './Navbar'
 
 const SessionDebug =
-  process.env.NODE_ENV !== 'production'
-    ? dynamic(() => import('./SessionDebug'))
-    : () => null
+  process.env.NODE_ENV !== 'production' ? dynamic(() => import('./SessionDebug')) : () => null
 
 interface LayoutProps {
   children: ReactNode

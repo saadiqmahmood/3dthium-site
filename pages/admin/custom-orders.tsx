@@ -123,6 +123,7 @@ export default function AdminCustomOrdersPage() {
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800 font-light">{error}</p>
           <button
+            type="button"
             onClick={() => window.location.reload()}
             className="mt-2 text-red-600 hover:text-red-700 underline text-sm font-light"
           >
@@ -138,6 +139,7 @@ export default function AdminCustomOrdersPage() {
             {selectedOrders.length} order{selectedOrders.length !== 1 ? 's' : ''} selected
           </span>
           <button
+            type="button"
             onClick={handleBulkDelete}
             className="px-4 py-1.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors font-light"
           >

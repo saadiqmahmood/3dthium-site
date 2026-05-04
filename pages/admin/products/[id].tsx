@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import AttributeBuilder from '@/components/admin/AttributeBuilder'
 import ImageManager from '@/components/admin/ImageManager'
 import VariantManager from '@/components/admin/VariantManager'
@@ -69,6 +69,7 @@ export default function EditProductPage() {
     customizable: false,
     galleryImages: [],
   })
+  const fId = useId()
 
   useEffect(() => {
     fetch('/api/admin/categories')
@@ -234,6 +235,7 @@ export default function EditProductPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={handleDelete}
             className="px-4 py-2 text-sm font-light text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
           >
@@ -252,6 +254,7 @@ export default function EditProductPage() {
       <div className="flex gap-1 mb-6 border-b border-gray-200">
         {(['details', 'variants'] as const).map((t) => (
           <button
+            type="button"
             key={t}
             onClick={() => setTab(t)}
             className={`px-5 py-2.5 text-sm font-light capitalize transition-colors ${
@@ -273,8 +276,14 @@ export default function EditProductPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-light text-zinc-700 mb-1">Name *</label>
+                <label
+                  htmlFor={`${fId}-name`}
+                  className="block text-sm font-light text-zinc-700 mb-1"
+                >
+                  Name *
+                </label>
                 <input
+                  id={`${fId}-name`}
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
@@ -284,11 +293,14 @@ export default function EditProductPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light text-zinc-700 mb-1">
-                  Slug{' '}
-                  <span className="text-zinc-400 text-xs">(editable)</span>
+                <label
+                  htmlFor={`${fId}-slug`}
+                  className="block text-sm font-light text-zinc-700 mb-1"
+                >
+                  Slug <span className="text-zinc-400 text-xs">(editable)</span>
                 </label>
                 <input
+                  id={`${fId}-slug`}
                   type="text"
                   value={formData.slug}
                   onChange={(e) =>
@@ -299,8 +311,14 @@ export default function EditProductPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light text-zinc-700 mb-1">Category *</label>
+                <label
+                  htmlFor={`${fId}-category`}
+                  className="block text-sm font-light text-zinc-700 mb-1"
+                >
+                  Category *
+                </label>
                 <select
+                  id={`${fId}-category`}
                   value={formData.category_id}
                   onChange={(e) => set('category_id', e.target.value)}
                   className={fieldClass('category_id')}
@@ -321,8 +339,14 @@ export default function EditProductPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-light text-zinc-700 mb-1">Base price (£) *</label>
+                <label
+                  htmlFor={`${fId}-price`}
+                  className="block text-sm font-light text-zinc-700 mb-1"
+                >
+                  Base price (£) *
+                </label>
                 <input
+                  id={`${fId}-price`}
                   type="number"
                   step="0.01"
                   min="0.01"
@@ -337,8 +361,14 @@ export default function EditProductPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-light text-zinc-700 mb-1">Description *</label>
+              <label
+                htmlFor={`${fId}-desc`}
+                className="block text-sm font-light text-zinc-700 mb-1"
+              >
+                Description *
+              </label>
               <textarea
+                id={`${fId}-desc`}
                 value={formData.description}
                 onChange={(e) => set('description', e.target.value)}
                 rows={4}
@@ -388,6 +418,7 @@ export default function EditProductPage() {
 
           <div className="flex justify-end">
             <button
+              type="button"
               onClick={handleSave}
               disabled={saving}
               className="px-8 py-2.5 bg-emerald-600 text-white text-sm font-light rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors"
@@ -416,12 +447,19 @@ export default function EditProductPage() {
             >
               <span className="flex items-center gap-2">
                 <svg
+                  aria-hidden="true"
+                  focusable="false"
                   className={`w-4 h-4 text-zinc-400 transition-transform ${showGenerator ? 'rotate-90' : ''}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
                 Generate variants from a template
               </span>
@@ -456,7 +494,9 @@ export default function EditProductPage() {
                     </p>
                     <VariationGenerator
                       productId={id}
-                      attributes={productAttributes.filter((a): a is ProductAttribute & { id: string } => Boolean(a.id))}
+                      attributes={productAttributes.filter(
+                        (a): a is ProductAttribute & { id: string } => Boolean(a.id)
+                      )}
                       basePrice={Number(formData.base_price)}
                       onGenerated={() => setVariantRefreshTrigger((n) => n + 1)}
                     />

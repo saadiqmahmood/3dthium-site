@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import Spinner from '@/components/ui/Spinner'
 import Toast from '@/components/ui/Toast'
 
@@ -42,6 +42,7 @@ export default function AdminCategoriesPage() {
     is_active: true,
   })
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
+  const fId = useId()
 
   const fetchCategories = async () => {
     try {
@@ -73,6 +74,7 @@ export default function AdminCategoriesPage() {
       }))
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fetchCategories is a stable async fetcher
   useEffect(() => {
     fetchCategories()
   }, [])
@@ -98,7 +100,10 @@ export default function AdminCategoriesPage() {
         setEditingCategory(null)
         resetForm()
         fetchCategories()
-        setToast({ message: editingCategory ? 'Category updated' : 'Category created', type: 'success' })
+        setToast({
+          message: editingCategory ? 'Category updated' : 'Category created',
+          type: 'success',
+        })
       } else {
         const json = await response.json()
         setToast({ message: json.message || 'Failed to save category', type: 'error' })
@@ -192,6 +197,7 @@ export default function AdminCategoriesPage() {
           <div className="flex items-center space-x-3">
             {category.children && category.children.length > 0 && (
               <button
+                type="button"
                 onClick={() => toggleExpanded(category.id)}
                 className="text-zinc-400 hover:text-zinc-600 transition-colors"
               >
@@ -223,12 +229,14 @@ export default function AdminCategoriesPage() {
           </div>
           <div className="flex items-center space-x-2">
             <button
+              type="button"
               onClick={() => handleEdit(category)}
               className="text-emerald-600 hover:text-emerald-700 border border-emerald-300 px-3 py-1 rounded-lg hover:bg-emerald-50 transition-colors text-xs font-light"
             >
               Edit
             </button>
             <button
+              type="button"
               onClick={() => handleDelete(category.id)}
               className="text-red-600 hover:text-red-700 border border-red-300 px-3 py-1 rounded-lg hover:bg-red-50 transition-colors text-xs font-light"
             >
@@ -263,6 +271,7 @@ export default function AdminCategoriesPage() {
           <p className="text-sm text-zinc-600 font-light">Manage product categories</p>
         </div>
         <button
+          type="button"
           onClick={() => {
             setShowForm(true)
             setEditingCategory(null)
@@ -283,8 +292,14 @@ export default function AdminCategoriesPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-light text-zinc-700 mb-2">Name *</label>
+                <label
+                  htmlFor={`${fId}-name`}
+                  className="block text-sm font-light text-zinc-700 mb-2"
+                >
+                  Name *
+                </label>
                 <input
+                  id={`${fId}-name`}
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
@@ -293,8 +308,14 @@ export default function AdminCategoriesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-light text-zinc-700 mb-2">Slug *</label>
+                <label
+                  htmlFor={`${fId}-slug`}
+                  className="block text-sm font-light text-zinc-700 mb-2"
+                >
+                  Slug *
+                </label>
                 <input
+                  id={`${fId}-slug`}
                   type="text"
                   value={formData.slug}
                   onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
@@ -303,10 +324,14 @@ export default function AdminCategoriesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-light text-zinc-700 mb-2">
+                <label
+                  htmlFor={`${fId}-parent`}
+                  className="block text-sm font-light text-zinc-700 mb-2"
+                >
                   Parent Category
                 </label>
                 <select
+                  id={`${fId}-parent`}
                   value={formData.parent_id || ''}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, parent_id: e.target.value || null }))
@@ -324,20 +349,35 @@ export default function AdminCategoriesPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-light text-zinc-700 mb-2">Sort Order</label>
+                <label
+                  htmlFor={`${fId}-sort`}
+                  className="block text-sm font-light text-zinc-700 mb-2"
+                >
+                  Sort Order
+                </label>
                 <input
+                  id={`${fId}-sort`}
                   type="number"
                   value={formData.sort_order}
                   onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))
+                    setFormData((prev) => ({
+                      ...prev,
+                      sort_order: parseInt(e.target.value, 10) || 0,
+                    }))
                   }
                   className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-zinc-900 text-sm font-light"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-light text-zinc-700 mb-2">Description</label>
+              <label
+                htmlFor={`${fId}-desc`}
+                className="block text-sm font-light text-zinc-700 mb-2"
+              >
+                Description
+              </label>
               <textarea
+                id={`${fId}-desc`}
                 value={formData.description}
                 onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                 rows={3}
@@ -345,8 +385,14 @@ export default function AdminCategoriesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-light text-zinc-700 mb-2">Image URL</label>
+              <label
+                htmlFor={`${fId}-image`}
+                className="block text-sm font-light text-zinc-700 mb-2"
+              >
+                Image URL
+              </label>
               <input
+                id={`${fId}-image`}
                 type="url"
                 value={formData.image_url}
                 onChange={(e) => setFormData((prev) => ({ ...prev, image_url: e.target.value }))}

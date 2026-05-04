@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Webhook secret not configured' })
   }
 
-  const authHeader = req.headers['authorization']
+  const authHeader = req.headers.authorization
   if (!authHeader || authHeader !== `Bearer ${webhookSecret}`) {
     log.warn('Shippo webhook: invalid or missing Authorization header')
     return res.status(401).json({ error: 'Unauthorized' })

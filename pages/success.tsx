@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { useCart } from '../context/CartContext'
 import { formatMoney } from '@/lib/format/money'
+import { useCart } from '../context/CartContext'
 
 export default function SuccessPage() {
   const router = useRouter()
@@ -55,6 +55,8 @@ export default function SuccessPage() {
         <div className="mb-6">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
+              aria-hidden="true"
+              focusable="false"
               className="w-8 h-8 text-green-600"
               fill="none"
               stroke="currentColor"
@@ -91,21 +93,21 @@ export default function SuccessPage() {
               </p>
             )}
             {discount && (
-              <p className="text-green-700 text-sm">
-                Discount: -{formatMoney(discount)}
-              </p>
+              <p className="text-green-700 text-sm">Discount: -{formatMoney(discount)}</p>
             )}
           </div>
         )}
 
         <div className="space-y-4">
           <button
+            type="button"
             onClick={handleContinueShopping}
             className="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition"
           >
             Continue Shopping
           </button>
           <button
+            type="button"
             onClick={handleContactSupport}
             className="block w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition"
           >

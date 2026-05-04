@@ -31,7 +31,9 @@ export default function CartPage() {
       }),
     })
       .then((r) => r.json())
-      .then((q) => { if (q.total !== undefined) setQuote(q) })
+      .then((q) => {
+        if (q.total !== undefined) setQuote(q)
+      })
       .catch(() => {}) // keep showing client-side fallback on network error
   }, [cart, from, router])
 
@@ -39,6 +41,7 @@ export default function CartPage() {
     <div className="min-h-screen bg-white pt-24 pb-12">
       <div className="max-w-4xl mx-auto px-6">
         <button
+          type="button"
           onClick={() => {
             if (from && typeof from === 'string') {
               router.push(from)
@@ -56,7 +59,7 @@ export default function CartPage() {
         <div className="space-y-4">
           {cart.map((item) => (
             <div
-              key={item.product_id + '-' + (item.variant_id || 'base')}
+              key={`${item.product_id}-${item.variant_id || 'base'}`}
               className="flex items-center justify-between p-6 bg-gray-50 border border-gray-200 rounded-2xl"
             >
               <div className="flex items-center gap-4">
@@ -75,6 +78,7 @@ export default function CartPage() {
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     <button
+                      type="button"
                       aria-label="Decrease quantity"
                       className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300 text-zinc-900 border border-gray-300 disabled:opacity-50"
                       onClick={() =>
@@ -92,6 +96,7 @@ export default function CartPage() {
                       {item.quantity}
                     </span>
                     <button
+                      type="button"
                       aria-label="Increase quantity"
                       className="px-3 py-1 bg-zinc-800 rounded-lg hover:bg-zinc-700 text-white border border-zinc-700"
                       onClick={() =>
@@ -111,11 +116,14 @@ export default function CartPage() {
                 <p className="text-zinc-900 font-semibold text-lg">
                   {formatMoney(
                     quote?.items.find(
-                      (qi) => qi.product_id === item.product_id && qi.variant_id === (item.variant_id ?? null)
+                      (qi) =>
+                        qi.product_id === item.product_id &&
+                        qi.variant_id === (item.variant_id ?? null)
                     )?.line_total ?? item.price * item.quantity
                   )}
                 </p>
                 <button
+                  type="button"
                   onClick={() => removeFromCart(item.product_id, item.variant_id || undefined)}
                   className="text-red-600 text-base hover:text-red-700 transition-colors mt-2 font-light"
                 >
@@ -130,22 +138,31 @@ export default function CartPage() {
           <div className="flex justify-between items-center mb-6">
             <p className="text-xl font-light text-zinc-700">Total:</p>
             <p className="text-2xl font-semibold text-zinc-900">
-              {formatMoney(quote?.total ?? cart.reduce((acc, item) => acc + item.price * item.quantity, 0))}
+              {formatMoney(
+                quote?.total ?? cart.reduce((acc, item) => acc + item.price * item.quantity, 0)
+              )}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link href="/products" className="flex-1">
-              <button className="w-full border border-gray-300 text-zinc-900 px-6 py-3 rounded-lg hover:bg-gray-100 hover:border-gray-400 transition-colors font-medium">
+              <button
+                type="button"
+                className="w-full border border-gray-300 text-zinc-900 px-6 py-3 rounded-lg hover:bg-gray-100 hover:border-gray-400 transition-colors font-medium"
+              >
                 Continue Shopping
               </button>
             </Link>
             <Link href="/checkout" className="flex-1">
-              <button className="w-full bg-zinc-900 text-white px-6 py-3 rounded-lg hover:bg-zinc-800 transition-colors font-medium">
+              <button
+                type="button"
+                className="w-full bg-zinc-900 text-white px-6 py-3 rounded-lg hover:bg-zinc-800 transition-colors font-medium"
+              >
                 Checkout
               </button>
             </Link>
           </div>
           <button
+            type="button"
             onClick={() => {
               setTimeout(() => clearCart(), 300)
             }}

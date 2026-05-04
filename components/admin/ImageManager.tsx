@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import { useSupabase } from '@/context/SupabaseContext'
 import Toast from '@/components/ui/Toast'
+import { useSupabase } from '@/context/SupabaseContext'
 
 interface ImageManagerProps {
   categorySlug: string
@@ -252,7 +252,7 @@ export default function ImageManager({
           <div className="space-y-4">
             <div className="flex flex-wrap gap-4">
               {galleryImages.map((imageUrl, index) => (
-                <div key={`gallery-${index}`} className="space-y-2">
+                <div key={imageUrl} className="space-y-2">
                   {/* Image Preview */}
                   <div className="relative">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -292,6 +292,7 @@ export default function ImageManager({
                   <div className="flex gap-1 justify-center flex-wrap">
                     {index > 0 && (
                       <button
+                        type="button"
                         onClick={() => reorderGalleryImages(index, index - 1)}
                         className="bg-emerald-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-emerald-700 transition-colors font-light"
                         title="Move left"
@@ -301,6 +302,7 @@ export default function ImageManager({
                     )}
                     {index < galleryImages.length - 1 && (
                       <button
+                        type="button"
                         onClick={() => reorderGalleryImages(index, index + 1)}
                         className="bg-emerald-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-emerald-700 transition-colors font-light"
                         title="Move right"
@@ -309,6 +311,7 @@ export default function ImageManager({
                       </button>
                     )}
                     <button
+                      type="button"
                       onClick={() => removeGalleryImage(index)}
                       className="bg-red-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-red-700 transition-colors font-light"
                       title="Remove"
@@ -323,6 +326,8 @@ export default function ImageManager({
         ) : (
           <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
             <svg
+              aria-hidden="true"
+              focusable="false"
               className="mx-auto h-12 w-12 text-zinc-400"
               fill="none"
               viewBox="0 0 24 24"

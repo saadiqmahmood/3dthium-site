@@ -71,6 +71,8 @@ export default function FeaturedProducts() {
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="max-w-md mx-auto">
             <svg
+              aria-hidden="true"
+              focusable="false"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="none"
@@ -87,6 +89,7 @@ export default function FeaturedProducts() {
             <h3 className="text-lg font-medium text-zinc-900 mb-2">Unable to Load Products</h3>
             <p className="text-zinc-600 mb-6 font-light">{error}</p>
             <button
+              type="button"
               onClick={() => window.location.reload()}
               className="bg-zinc-900 text-white font-medium py-3 px-6 rounded-lg hover:bg-zinc-800 transition-colors"
             >
@@ -104,6 +107,8 @@ export default function FeaturedProducts() {
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="max-w-md mx-auto">
             <svg
+              aria-hidden="true"
+              focusable="false"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="none"

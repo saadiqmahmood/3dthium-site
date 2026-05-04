@@ -1,8 +1,9 @@
 import Head from 'next/head'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 
 export default function ContactPage() {
   const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'loading'>('idle')
+  const fId = useId()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -67,6 +68,8 @@ export default function ContactPage() {
               <div className="bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl p-8 text-center transition-all">
                 <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg
+                    aria-hidden="true"
+                    focusable="false"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -96,6 +99,8 @@ export default function ContactPage() {
               <div className="bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl p-8 text-center transition-all">
                 <div className="w-16 h-16 bg-cyan-500/10 border border-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg
+                    aria-hidden="true"
+                    focusable="false"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -122,6 +127,8 @@ export default function ContactPage() {
               <div className="bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl p-8 text-center transition-all">
                 <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg
+                    aria-hidden="true"
+                    focusable="false"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -168,6 +175,8 @@ export default function ContactPage() {
                   {status === 'success' && (
                     <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-lg flex items-center gap-3">
                       <svg
+                        aria-hidden="true"
+                        focusable="false"
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
                         fill="none"
@@ -188,6 +197,8 @@ export default function ContactPage() {
                   {status === 'error' && (
                     <div className="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-lg flex items-center gap-3">
                       <svg
+                        aria-hidden="true"
+                        focusable="false"
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
                         fill="none"
@@ -209,14 +220,14 @@ export default function ContactPage() {
                     {/* Name */}
                     <div>
                       <label
-                        htmlFor="name"
+                        htmlFor={`${fId}-name`}
                         className="block text-base font-medium text-zinc-900 mb-2"
                       >
                         Full Name *
                       </label>
                       <input
                         type="text"
-                        id="name"
+                        id={`${fId}-name`}
                         name="name"
                         required
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -227,14 +238,14 @@ export default function ContactPage() {
                     {/* Email */}
                     <div>
                       <label
-                        htmlFor="email"
+                        htmlFor={`${fId}-email`}
                         className="block text-base font-medium text-zinc-900 mb-2"
                       >
                         Email Address *
                       </label>
                       <input
                         type="email"
-                        id="email"
+                        id={`${fId}-email`}
                         name="email"
                         required
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -246,14 +257,14 @@ export default function ContactPage() {
                   {/* Subject */}
                   <div>
                     <label
-                      htmlFor="subject"
+                      htmlFor={`${fId}-subject`}
                       className="block text-base font-medium text-zinc-900 mb-2"
                     >
                       Subject *
                     </label>
                     <input
                       type="text"
-                      id="subject"
+                      id={`${fId}-subject`}
                       name="subject"
                       required
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -264,13 +275,13 @@ export default function ContactPage() {
                   {/* Message */}
                   <div>
                     <label
-                      htmlFor="message"
+                      htmlFor={`${fId}-message`}
                       className="block text-base font-medium text-zinc-900 mb-2"
                     >
                       Message *
                     </label>
                     <textarea
-                      id="message"
+                      id={`${fId}-message`}
                       name="message"
                       rows={6}
                       required

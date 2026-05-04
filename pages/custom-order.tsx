@@ -117,6 +117,8 @@ export default function CustomOrderPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex gap-4 p-6 bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl transition-all">
               <svg
+                aria-hidden="true"
+                focusable="false"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -145,6 +147,8 @@ export default function CustomOrderPage() {
 
             <div className="flex gap-4 p-6 bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl transition-all">
               <svg
+                aria-hidden="true"
+                focusable="false"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -166,6 +170,8 @@ export default function CustomOrderPage() {
 
             <div className="flex gap-4 p-6 bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl transition-all">
               <svg
+                aria-hidden="true"
+                focusable="false"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -187,6 +193,8 @@ export default function CustomOrderPage() {
 
             <div className="flex gap-4 p-6 bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl transition-all">
               <svg
+                aria-hidden="true"
+                focusable="false"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"

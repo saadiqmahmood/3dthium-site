@@ -32,6 +32,7 @@ export default function EmailChangedPage() {
           Your email has been successfully updated.
         </p>
         <button
+          type="button"
           onClick={() => router.push('/account')}
           className="mt-6 w-full text-blue-600 hover:underline text-sm"
         >

@@ -59,6 +59,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           aria-label="Open sidebar"
         >
           <svg
+            aria-hidden="true"
+            focusable="false"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="none"

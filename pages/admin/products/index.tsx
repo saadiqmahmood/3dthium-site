@@ -104,7 +104,7 @@ export default function AdminProductsPage() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1)
-  }, [search, filterCategory, filterStatus])
+  }, [])
 
   // Toggle product status
   const toggleProductStatus = async (productId: string, currentStatus: boolean) => {
@@ -294,6 +294,7 @@ export default function AdminProductsPage() {
         </select>
 
         <button
+          type="button"
           onClick={() => {
             setSearch('')
             setFilterCategory('')
@@ -313,18 +314,21 @@ export default function AdminProductsPage() {
           </span>
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={() => handleBulkStatusChange(true)}
               className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700 transition-colors font-light"
             >
               Activate Selected
             </button>
             <button
+              type="button"
               onClick={() => handleBulkStatusChange(false)}
               className="px-3 py-1.5 bg-zinc-600 text-white rounded-lg text-sm hover:bg-zinc-700 transition-colors font-light"
             >
               Deactivate Selected
             </button>
             <button
+              type="button"
               onClick={handleBulkDelete}
               className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors font-light"
             >
@@ -373,6 +377,7 @@ export default function AdminProductsPage() {
                     <>
                       <p className="text-lg mb-2 font-light">No products match your filters</p>
                       <button
+                        type="button"
                         onClick={() => {
                           setSearch('')
                           setFilterCategory('')
@@ -455,6 +460,7 @@ export default function AdminProductsPage() {
 
                   <td className="px-4 py-3 text-center">
                     <button
+                      type="button"
                       onClick={() => toggleProductStatus(product.id, product.is_active)}
                       className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-light transition-colors ${
                         product.is_active
@@ -478,6 +484,7 @@ export default function AdminProductsPage() {
                         Edit
                       </Link>
                       <button
+                        type="button"
                         onClick={() => handleDelete(product.id)}
                         className="text-red-600 hover:text-red-700 border border-red-300 px-3 py-1 rounded-lg text-xs hover:bg-red-50 transition-colors font-light"
                       >
@@ -496,6 +503,7 @@ export default function AdminProductsPage() {
       {totalPages > 1 && (
         <div className="flex justify-between items-center mt-6">
           <button
+            type="button"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-light text-sm"
@@ -506,6 +514,7 @@ export default function AdminProductsPage() {
             Page {currentPage} of {totalPages} ({filteredProducts.length} products)
           </span>
           <button
+            type="button"
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-light text-sm"

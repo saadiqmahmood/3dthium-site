@@ -13,7 +13,7 @@ export function createServerSupabase(req: NextRequest, res?: NextResponse) {
             res.cookies.set(name, value, options)
           }
         },
-        remove: (name: string, options: any) => {
+        remove: (name: string, _options: any) => {
           if (res) {
             res.cookies.delete(name)
           }

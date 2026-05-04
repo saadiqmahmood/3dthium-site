@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import ImageUpload from './ImageUpload'
 
 type AttributeOption = {
@@ -38,6 +38,7 @@ export default function AttributeBuilder({
 
   // Only sync from props when not actively editing
   // This prevents the disappearing issue when adding new attributes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: lastSyncedLengthRef is a plain object ref, not a reactive dep
   useEffect(() => {
     if (isEditingRef.current) {
       return // Don't sync while user is editing
@@ -56,11 +57,11 @@ export default function AttributeBuilder({
       setExpandedAttributes(new Set())
       lastSyncedLengthRef.current = initialAttributes.length
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialAttributes])
+  }, [initialAttributes, attributes])
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
   const [expandedAttributes, setExpandedAttributes] = useState<Set<number>>(new Set())
+  const fId = useId()
 
   const updateAttributes = (newAttrs: Attribute[]) => {
     isEditingRef.current = true // Mark that we're editing
@@ -323,6 +324,8 @@ export default function AttributeBuilder({
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h4 className="font-light text-blue-900 mb-2 flex items-center gap-2">
           <svg
+            aria-hidden="true"
+            focusable="false"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="none"
@@ -389,17 +392,25 @@ export default function AttributeBuilder({
         const firstOptionImage = attr.options?.[0]?.images?.[0]
 
         return (
-          <div key={attrIdx} className="border border-gray-200 rounded-lg bg-white shadow-sm mb-4">
+          <div
+            key={attr.id ?? `attr-${attrIdx}`}
+            className="border border-gray-200 rounded-lg bg-white shadow-sm mb-4"
+          >
             {/* Collapsed Summary View */}
             <div
-              className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+              className={`flex items-center justify-between p-4 hover:bg-gray-50 transition-colors ${
                 !isExpanded ? 'border-b border-gray-100' : ''
               }`}
-              onClick={() => toggleAttribute(attrIdx)}
             >
-              <div className="flex items-center gap-4 flex-1">
+              <button
+                type="button"
+                className="flex items-center gap-4 flex-1 text-left cursor-pointer"
+                onClick={() => toggleAttribute(attrIdx)}
+              >
                 {/* Expand/Collapse Icon */}
                 <svg
+                  aria-hidden="true"
+                  focusable="false"
                   className={`w-5 h-5 text-zinc-400 transition-transform ${
                     isExpanded ? 'rotate-90' : ''
                   }`}
@@ -441,14 +452,11 @@ export default function AttributeBuilder({
                     New attribute (click to edit)
                   </div>
                 )}
-              </div>
+              </button>
 
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  removeAttribute(attrIdx)
-                }}
+                onClick={() => removeAttribute(attrIdx)}
                 className="text-red-600 hover:text-red-700 font-light text-sm px-2"
               >
                 Remove
@@ -460,10 +468,14 @@ export default function AttributeBuilder({
               <div className="p-6 border-t border-gray-100">
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="block text-sm font-light mb-2 text-zinc-700">
+                    <label
+                      htmlFor={`${fId}-attr-${attrIdx}-name`}
+                      className="block text-sm font-light mb-2 text-zinc-700"
+                    >
                       Attribute Name *
                     </label>
                     <input
+                      id={`${fId}-attr-${attrIdx}-name`}
                       type="text"
                       placeholder="e.g., Color, Height, Material"
                       value={attr.name || ''}
@@ -472,8 +484,14 @@ export default function AttributeBuilder({
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-light mb-2 text-zinc-700">Type</label>
+                    <label
+                      htmlFor={`${fId}-attr-${attrIdx}-type`}
+                      className="block text-sm font-light mb-2 text-zinc-700"
+                    >
+                      Type
+                    </label>
                     <select
+                      id={`${fId}-attr-${attrIdx}-type`}
                       value={attr.type}
                       onChange={(e) => updateAttribute(attrIdx, 'type', e.target.value)}
                       className="w-full px-4 py-2 border border-gray-200 rounded-lg text-zinc-900 bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
@@ -490,9 +508,9 @@ export default function AttributeBuilder({
                 {/* Options */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-sm font-light text-zinc-700">
+                    <span className="text-sm font-light text-zinc-700">
                       Options * ({attr.options.length})
-                    </label>
+                    </span>
                     <button
                       type="button"
                       onClick={() => addOption(attrIdx)}
@@ -513,7 +531,7 @@ export default function AttributeBuilder({
 
                   {attr.options.map((option, optIdx) => (
                     <div
-                      key={`attr-${attrIdx}-opt-${optIdx}`}
+                      key={option.value || option.displayName}
                       className="grid grid-cols-12 gap-3 items-start p-4 bg-gray-50 rounded-lg border border-gray-200"
                     >
                       {/* Value - Hidden, auto-generated from display name */}
@@ -530,10 +548,14 @@ export default function AttributeBuilder({
 
                       {/* Display Name */}
                       <div className={attr.type === 'color' ? 'col-span-3' : 'col-span-4'}>
-                        <label className="block text-xs text-zinc-600 mb-1 font-light">
+                        <label
+                          htmlFor={`${fId}-opt-${attrIdx}-${optIdx}-dn`}
+                          className="block text-xs text-zinc-600 mb-1 font-light"
+                        >
                           Display Name *
                         </label>
                         <input
+                          id={`${fId}-opt-${attrIdx}-${optIdx}-dn`}
                           type="text"
                           placeholder="e.g., Crimson Red, 150mm"
                           value={option.displayName || ''}
@@ -551,10 +573,14 @@ export default function AttributeBuilder({
                       {/* Color Picker (only for color type) */}
                       {attr.type === 'color' && (
                         <div className="col-span-1">
-                          <label className="block text-xs text-zinc-600 mb-1 font-light">
+                          <label
+                            htmlFor={`${fId}-opt-${attrIdx}-${optIdx}-color`}
+                            className="block text-xs text-zinc-600 mb-1 font-light"
+                          >
                             Color
                           </label>
                           <input
+                            id={`${fId}-opt-${attrIdx}-${optIdx}-color`}
                             type="color"
                             value={option.hexColor || '#000000'}
                             onChange={(e) =>
@@ -569,10 +595,14 @@ export default function AttributeBuilder({
 
                       {/* Price Modifier */}
                       <div className={attr.type === 'color' ? 'col-span-2' : 'col-span-3'}>
-                        <label className="block text-xs text-zinc-600 mb-1 font-light">
+                        <label
+                          htmlFor={`${fId}-opt-${attrIdx}-${optIdx}-price`}
+                          className="block text-xs text-zinc-600 mb-1 font-light"
+                        >
                           Price Modifier
                         </label>
                         <input
+                          id={`${fId}-opt-${attrIdx}-${optIdx}-price`}
                           type="number"
                           placeholder="0.00"
                           step="0.01"

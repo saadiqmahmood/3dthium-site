@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 
 type Attribute = {
   id: string
@@ -26,6 +26,7 @@ export default function VariationGenerator({
   const [defaultStock, setDefaultStock] = useState(0)
   const [generating, setGenerating] = useState(false)
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
+  const fId = useId()
 
   // Filter out attributes without IDs (unsaved attributes)
   const savedAttributes = attributes.filter((attr) => attr.id && attr.id.trim() !== '')
@@ -137,9 +138,9 @@ export default function VariationGenerator({
 
         {/* Attribute Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-light mb-3 text-zinc-700">
+          <p className="block text-sm font-light mb-3 text-zinc-700">
             Select Attributes to Combine:
-          </label>
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {savedAttributes.map((attr) => (
               <label
@@ -194,8 +195,14 @@ export default function VariationGenerator({
         {/* Settings */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div>
-            <label className="block text-sm font-light mb-2 text-zinc-700">Pricing Strategy</label>
+            <label
+              htmlFor={`${fId}-pricing`}
+              className="block text-sm font-light mb-2 text-zinc-700"
+            >
+              Pricing Strategy
+            </label>
             <select
+              id={`${fId}-pricing`}
               value={pricingStrategy}
               onChange={(e) => setPricingStrategy(e.target.value as 'base' | 'additive')}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg text-zinc-900 bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
@@ -210,11 +217,14 @@ export default function VariationGenerator({
             </p>
           </div>
           <div>
-            <label className="block text-sm font-light mb-2 text-zinc-700">Default Stock</label>
+            <label htmlFor={`${fId}-stock`} className="block text-sm font-light mb-2 text-zinc-700">
+              Default Stock
+            </label>
             <input
+              id={`${fId}-stock`}
               type="number"
               value={defaultStock}
-              onChange={(e) => setDefaultStock(parseInt(e.target.value) || 0)}
+              onChange={(e) => setDefaultStock(parseInt(e.target.value, 10) || 0)}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg text-zinc-900 bg-white focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
               min="0"
             />
@@ -240,6 +250,8 @@ export default function VariationGenerator({
         {combinationCount > 200 && (
           <p className="text-sm text-orange-600 mt-2 text-center flex items-center justify-center gap-1">
             <svg
+              aria-hidden="true"
+              focusable="false"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="none"
@@ -275,6 +287,8 @@ export default function VariationGenerator({
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <h4 className="font-light text-yellow-900 mb-2 flex items-center gap-2">
           <svg
+            aria-hidden="true"
+            focusable="false"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="none"

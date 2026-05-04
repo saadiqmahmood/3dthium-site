@@ -2,9 +2,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import Toast from '@/components/ui/Toast'
 import { useAuth } from '@/context/AuthContext'
 import { useSupabase } from '@/context/SupabaseContext'
-import Toast from '@/components/ui/Toast'
 import { formatMoney } from '@/lib/format/money'
 
 // Define types for order and order item
@@ -55,6 +55,7 @@ export default function AccountPage() {
     }
   }, [user, loading, router])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fetchOrders is a stable async fetcher defined below
   useEffect(() => {
     if (!supabaseContext) return
 
@@ -68,7 +69,6 @@ export default function AccountPage() {
       console.log('📄 [AccountPage] Fetching orders for user:', user.id)
       fetchOrders()
     }
-    // eslint-disable-next-line
   }, [user, section, supabaseContext])
 
   const fetchOrders = async () => {
@@ -276,6 +276,8 @@ export default function AccountPage() {
             }`}
           >
             <svg
+              aria-hidden="true"
+              focusable="false"
               className="w-5 h-5 inline mr-2"
               fill="none"
               stroke="currentColor"
@@ -303,6 +305,8 @@ export default function AccountPage() {
             }`}
           >
             <svg
+              aria-hidden="true"
+              focusable="false"
               className="w-5 h-5 inline mr-2"
               fill="none"
               stroke="currentColor"
@@ -323,6 +327,8 @@ export default function AccountPage() {
             className="ml-auto px-6 py-3 rounded-lg font-light bg-gray-100 text-zinc-700 border border-gray-200 hover:border-red-300 hover:text-red-600 transition-all"
           >
             <svg
+              aria-hidden="true"
+              focusable="false"
               className="w-5 h-5 inline mr-2"
               fill="none"
               stroke="currentColor"
@@ -345,7 +351,14 @@ export default function AccountPage() {
             <div className="max-w-2xl">
               <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 mb-6">
                 <h2 className="text-2xl font-light text-zinc-900 mb-6 flex items-center gap-3">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    aria-hidden="true"
+                    focusable="false"
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -357,9 +370,7 @@ export default function AccountPage() {
                 </h2>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-base font-light text-zinc-400 mb-2">
-                      Email Address
-                    </label>
+                    <p className="block text-base font-light text-zinc-400 mb-2">Email Address</p>
                     <p className="text-lg text-zinc-900 font-light bg-white border border-gray-200 rounded-lg px-4 py-3">
                       {user.email}
                     </p>
@@ -373,6 +384,8 @@ export default function AccountPage() {
                     <div className="flex items-start gap-4">
                       <div className="bg-emerald-500/10 p-3 rounded-lg group-hover:bg-emerald-500/20 transition">
                         <svg
+                          aria-hidden="true"
+                          focusable="false"
                           className="w-6 h-6 text-emerald-400"
                           fill="none"
                           stroke="currentColor"
@@ -401,6 +414,8 @@ export default function AccountPage() {
                     <div className="flex items-start gap-4">
                       <div className="bg-emerald-500/10 p-3 rounded-lg group-hover:bg-emerald-500/20 transition">
                         <svg
+                          aria-hidden="true"
+                          focusable="false"
                           className="w-6 h-6 text-emerald-400"
                           fill="none"
                           stroke="currentColor"
@@ -438,7 +453,14 @@ export default function AccountPage() {
                     onClick={() => setSelectedOrder(null)}
                     className="mb-6 text-emerald-400 hover:text-emerald-300 font-light flex items-center gap-2 transition"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      aria-hidden="true"
+                      focusable="false"
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -529,6 +551,8 @@ export default function AccountPage() {
                 <div className="text-center py-20 bg-gray-50 border border-gray-200 rounded-2xl">
                   <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg
+                      aria-hidden="true"
+                      focusable="false"
                       className="w-10 h-10 text-zinc-600"
                       fill="none"
                       stroke="currentColor"
@@ -557,9 +581,10 @@ export default function AccountPage() {
               ) : (
                 <div className="grid gap-4">
                   {orders.map((order) => (
-                    <div
+                    <button
                       key={order.id}
-                      className="bg-gray-50 border border-gray-200 rounded-2xl p-6 cursor-pointer hover:border-gray-300 transition-all group"
+                      type="button"
+                      className="w-full text-left bg-gray-50 border border-gray-200 rounded-2xl p-6 cursor-pointer hover:border-gray-300 transition-all group"
                       onClick={() => setSelectedOrder(order)}
                     >
                       <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
@@ -594,6 +619,8 @@ export default function AccountPage() {
                       </div>
                       <div className="flex items-center gap-2 text-base text-zinc-600 font-light">
                         <svg
+                          aria-hidden="true"
+                          focusable="false"
                           className="w-4 h-4"
                           fill="none"
                           stroke="currentColor"
@@ -613,7 +640,7 @@ export default function AccountPage() {
                           View details →
                         </span>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}

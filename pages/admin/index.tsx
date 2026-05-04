@@ -210,18 +210,21 @@ export default function AdminDashboard() {
               <h4 className="text-sm font-medium text-zinc-700 mb-3">Export Data</h4>
               <div className="flex flex-wrap gap-3">
                 <button
+                  type="button"
                   onClick={() => exportTable('orders')}
                   className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-light"
                 >
                   Export Orders CSV
                 </button>
                 <button
+                  type="button"
                   onClick={() => exportTable('users')}
                   className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-light"
                 >
                   Export Users CSV
                 </button>
                 <button
+                  type="button"
                   onClick={() => exportTable('products')}
                   className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-light"
                 >

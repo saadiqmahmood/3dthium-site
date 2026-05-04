@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import ImageManager from '@/components/admin/ImageManager'
 import Toast from '@/components/ui/Toast'
 
@@ -45,6 +45,7 @@ export default function CreateProductPage() {
     customizable: false,
     galleryImages: [],
   })
+  const fId = useId()
 
   useEffect(() => {
     fetch('/api/admin/categories')
@@ -65,7 +66,8 @@ export default function CreateProductPage() {
       ...prev,
       name,
       // Only auto-generate if slug hasn't been manually edited
-      slug: prev.slug === generateSlug(prev.name) || prev.slug === '' ? generateSlug(name) : prev.slug,
+      slug:
+        prev.slug === generateSlug(prev.name) || prev.slug === '' ? generateSlug(name) : prev.slug,
     }))
   }
 
@@ -111,7 +113,10 @@ export default function CreateProductPage() {
         setToast({ message: 'Product created', type: 'success' })
         setTimeout(() => router.push(`/admin/products/${newId}`), 1000)
       } else {
-        setToast({ message: json.error?.message ?? json.error ?? 'Failed to create product', type: 'error' })
+        setToast({
+          message: json.error?.message ?? json.error ?? 'Failed to create product',
+          type: 'error',
+        })
       }
     } catch {
       setToast({ message: 'Failed to create product', type: 'error' })
@@ -132,7 +137,9 @@ export default function CreateProductPage() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-light text-zinc-900">New Product</h1>
-          <p className="text-sm text-zinc-500 font-light mt-1">Fill in the details and upload images, then save.</p>
+          <p className="text-sm text-zinc-500 font-light mt-1">
+            Fill in the details and upload images, then save.
+          </p>
         </div>
         <Link
           href="/admin/products"
@@ -149,8 +156,14 @@ export default function CreateProductPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-light text-zinc-700 mb-1">Name *</label>
+              <label
+                htmlFor={`${fId}-name`}
+                className="block text-sm font-light text-zinc-700 mb-1"
+              >
+                Name *
+              </label>
               <input
+                id={`${fId}-name`}
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleNameChange(e.target.value)}
@@ -161,22 +174,33 @@ export default function CreateProductPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-light text-zinc-700 mb-1">
-                Slug{' '}
-                <span className="text-zinc-400 text-xs">(auto-generated, editable)</span>
+              <label
+                htmlFor={`${fId}-slug`}
+                className="block text-sm font-light text-zinc-700 mb-1"
+              >
+                Slug <span className="text-zinc-400 text-xs">(auto-generated, editable)</span>
               </label>
               <input
+                id={`${fId}-slug`}
                 type="text"
                 value={formData.slug}
-                onChange={(e) => set('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                onChange={(e) =>
+                  set('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+                }
                 className={fieldClass('slug')}
                 placeholder="blue-ceramic-vase"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-light text-zinc-700 mb-1">Category *</label>
+              <label
+                htmlFor={`${fId}-category`}
+                className="block text-sm font-light text-zinc-700 mb-1"
+              >
+                Category *
+              </label>
               <select
+                id={`${fId}-category`}
                 value={formData.category_id}
                 onChange={(e) => set('category_id', e.target.value)}
                 className={fieldClass('category_id')}
@@ -197,8 +221,14 @@ export default function CreateProductPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-light text-zinc-700 mb-1">Base price (£) *</label>
+              <label
+                htmlFor={`${fId}-price`}
+                className="block text-sm font-light text-zinc-700 mb-1"
+              >
+                Base price (£) *
+              </label>
               <input
+                id={`${fId}-price`}
                 type="number"
                 step="0.01"
                 min="0.01"
@@ -214,8 +244,11 @@ export default function CreateProductPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-light text-zinc-700 mb-1">Description *</label>
+            <label htmlFor={`${fId}-desc`} className="block text-sm font-light text-zinc-700 mb-1">
+              Description *
+            </label>
             <textarea
+              id={`${fId}-desc`}
               value={formData.description}
               onChange={(e) => set('description', e.target.value)}
               rows={4}
@@ -266,7 +299,9 @@ export default function CreateProductPage() {
               )}
             </>
           ) : (
-            <p className="text-sm text-zinc-400 font-light">Select a category first to upload images.</p>
+            <p className="text-sm text-zinc-400 font-light">
+              Select a category first to upload images.
+            </p>
           )}
         </div>
 

@@ -1,8 +1,8 @@
 import Image from 'next/image'
 import { useCallback, useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
-import type { ProductVariant } from '@/types'
 import { formatMoney } from '@/lib/format/money'
+import type { ProductVariant } from '@/types'
 
 const ORDER_STATUSES = [
   'pending',
@@ -458,6 +458,7 @@ export default function AdminOrdersPage() {
           className="border border-gray-200 rounded-lg px-4 py-2 w-24 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
         />
         <button
+          type="button"
           onClick={() => {
             setFilterStatus('')
             setFilterDateFrom('')
@@ -477,6 +478,7 @@ export default function AdminOrdersPage() {
             {selectedOrders.length} order{selectedOrders.length !== 1 ? 's' : ''} selected
           </span>
           <button
+            type="button"
             onClick={handleBulkDelete}
             className="px-4 py-1.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors font-light"
           >
@@ -598,6 +600,7 @@ export default function AdminOrdersPage() {
                   </td>
                   <td className="px-4 py-3 text-center">
                     <button
+                      type="button"
                       onClick={() => setSelectedOrder(order)}
                       className="text-emerald-600 hover:text-emerald-700 border border-emerald-300 px-3 py-1 rounded-lg hover:bg-emerald-50 transition-colors text-xs font-light"
                     >
@@ -614,6 +617,7 @@ export default function AdminOrdersPage() {
       {totalPages > 1 && (
         <div className="flex justify-between items-center mt-6">
           <button
+            type="button"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-light text-sm"
@@ -624,6 +628,7 @@ export default function AdminOrdersPage() {
             Page {currentPage} of {totalPages}
           </span>
           <button
+            type="button"
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-light text-sm"
@@ -634,13 +639,19 @@ export default function AdminOrdersPage() {
       )}
       {/* Order details modal */}
       {selectedOrder && (
+        // biome-ignore lint/a11y/noStaticElementInteractions: Modal backdrop dismiss on click
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onClick={() => setSelectedOrder(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setSelectedOrder(null)
+          }}
         >
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: Modal content stop propagation */}
           <div
             className="bg-white rounded-xl shadow-lg p-8 max-w-3xl w-full border border-gray-200 max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
           >
             <h3 className="text-xl font-light mb-6 text-zinc-900">Order Details</h3>
             {orderDetailsLoading ? (
@@ -827,6 +838,8 @@ export default function AdminOrdersPage() {
                                 {color && (
                                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-light bg-blue-50 text-blue-700 border border-blue-200">
                                     <svg
+                                      aria-hidden="true"
+                                      focusable="false"
                                       className="w-4 h-4 mr-1.5"
                                       fill="currentColor"
                                       viewBox="0 0 20 20"
@@ -843,6 +856,8 @@ export default function AdminOrdersPage() {
                                 {size && (
                                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-light bg-purple-50 text-purple-700 border border-purple-200">
                                     <svg
+                                      aria-hidden="true"
+                                      focusable="false"
                                       className="w-4 h-4 mr-1.5"
                                       fill="none"
                                       stroke="currentColor"
@@ -861,6 +876,8 @@ export default function AdminOrdersPage() {
                                 {material && (
                                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-light bg-emerald-50 text-emerald-700 border border-emerald-200">
                                     <svg
+                                      aria-hidden="true"
+                                      focusable="false"
                                       className="w-4 h-4 mr-1.5"
                                       fill="none"
                                       stroke="currentColor"
@@ -881,10 +898,14 @@ export default function AdminOrdersPage() {
                               {/* Editable Fields */}
                               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div>
-                                  <label className="block text-xs font-light text-zinc-700 mb-2">
+                                  <label
+                                    htmlFor={`item-size-${idx}`}
+                                    className="block text-xs font-light text-zinc-700 mb-2"
+                                  >
                                     Size
                                   </label>
                                   <select
+                                    id={`item-size-${idx}`}
                                     value={item.size || ''}
                                     onChange={(e) =>
                                       handleOrderItemChange(idx, 'size', e.target.value)
@@ -899,10 +920,14 @@ export default function AdminOrdersPage() {
                                   </select>
                                 </div>
                                 <div>
-                                  <label className="block text-xs font-light text-zinc-700 mb-2">
+                                  <label
+                                    htmlFor={`item-qty-${idx}`}
+                                    className="block text-xs font-light text-zinc-700 mb-2"
+                                  >
                                     Quantity
                                   </label>
                                   <input
+                                    id={`item-qty-${idx}`}
                                     type="number"
                                     min={1}
                                     value={item.quantity}
@@ -913,10 +938,14 @@ export default function AdminOrdersPage() {
                                   />
                                 </div>
                                 <div>
-                                  <label className="block text-xs font-light text-zinc-700 mb-2">
+                                  <label
+                                    htmlFor={`item-variant-${idx}`}
+                                    className="block text-xs font-light text-zinc-700 mb-2"
+                                  >
                                     Variant
                                   </label>
                                   <select
+                                    id={`item-variant-${idx}`}
                                     value={item.variant_id || ''}
                                     onChange={(e) =>
                                       handleOrderItemChange(idx, 'variant_id', e.target.value)
@@ -961,8 +990,15 @@ export default function AdminOrdersPage() {
                 </div>
                 <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-gray-100">
                   <div>
-                    <label className="block text-sm font-light text-zinc-700 mb-2">Status</label>
+                    <label
+                      htmlFor="order-status-select"
+                      className="block text-sm font-light text-zinc-700 mb-2"
+                    >
+                      Status
+                    </label>
+                    {/* biome-ignore lint/correctness/useUniqueElementIds: Single modal instance */}
                     <select
+                      id="order-status-select"
                       value={orderStatusInput}
                       onChange={(e) => setOrderStatusInput(e.target.value)}
                       className="border border-gray-200 rounded-lg px-4 py-2 w-full text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
@@ -976,18 +1012,21 @@ export default function AdminOrdersPage() {
                   </div>
                   <div className="flex gap-3">
                     <button
+                      type="button"
                       onClick={handleUpdateOrderStatus}
                       className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-light text-sm"
                     >
                       Update Status
                     </button>
                     <button
+                      type="button"
                       onClick={handleDeleteOrderFromModal}
                       className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-light text-sm"
                     >
                       Delete Order
                     </button>
                     <button
+                      type="button"
                       onClick={() => setSelectedOrder(null)}
                       className="ml-auto px-4 py-2 bg-white border border-gray-200 text-zinc-700 rounded-lg hover:bg-gray-50 transition-colors font-light text-sm"
                     >

@@ -106,7 +106,7 @@ export default function AdminUsersPage() {
   // Reset to page 1 when search changes
   useEffect(() => {
     setCurrentPage(1)
-  }, [search])
+  }, [])
 
   return (
     <div className="w-full mx-auto">
@@ -134,6 +134,7 @@ export default function AdminUsersPage() {
             {selectedUsers.length} user{selectedUsers.length !== 1 ? 's' : ''} selected
           </span>
           <button
+            type="button"
             onClick={handleBulkDeleteUsers}
             className="px-4 py-1.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors font-light"
           >
@@ -209,6 +210,7 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="px-4 py-3 text-center">
                     <button
+                      type="button"
                       onClick={() => handleAction(user, 'toggle')}
                       className="px-3 py-1.5 bg-white border border-gray-200 text-zinc-700 rounded-lg hover:bg-gray-50 transition-colors text-xs font-light"
                     >
@@ -226,6 +228,7 @@ export default function AdminUsersPage() {
       {totalPages > 1 && (
         <div className="flex justify-between items-center mt-6">
           <button
+            type="button"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-light text-sm"
@@ -236,6 +239,7 @@ export default function AdminUsersPage() {
             Page {currentPage} of {totalPages}
           </span>
           <button
+            type="button"
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors font-light text-sm"

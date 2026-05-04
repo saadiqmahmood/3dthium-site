@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useState } from 'react'
-import { useSupabase } from '@/context/SupabaseContext'
 import Toast from '@/components/ui/Toast'
+import { useSupabase } from '@/context/SupabaseContext'
 
 interface ImageUploadProps {
   categorySlug: string

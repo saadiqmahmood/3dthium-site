@@ -18,6 +18,8 @@ type NavSection = {
 
 const DashboardIcon = () => (
   <svg
+    aria-hidden="true"
+    focusable="false"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -36,6 +38,8 @@ const DashboardIcon = () => (
 
 const PackageIcon = () => (
   <svg
+    aria-hidden="true"
+    focusable="false"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -54,6 +58,8 @@ const PackageIcon = () => (
 
 const ShoppingCartIcon = () => (
   <svg
+    aria-hidden="true"
+    focusable="false"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -71,6 +77,8 @@ const ShoppingCartIcon = () => (
 
 const UsersIcon = () => (
   <svg
+    aria-hidden="true"
+    focusable="false"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -89,6 +97,8 @@ const UsersIcon = () => (
 
 const TagIcon = () => (
   <svg
+    aria-hidden="true"
+    focusable="false"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -105,6 +115,8 @@ const TagIcon = () => (
 
 const PlusIcon = () => (
   <svg
+    aria-hidden="true"
+    focusable="false"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -121,6 +133,8 @@ const PlusIcon = () => (
 
 const ListIcon = () => (
   <svg
+    aria-hidden="true"
+    focusable="false"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -141,6 +155,8 @@ const ListIcon = () => (
 
 const FileTextIcon = () => (
   <svg
+    aria-hidden="true"
+    focusable="false"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -160,6 +176,8 @@ const FileTextIcon = () => (
 
 const ChevronRightIcon = ({ className }: { className?: string }) => (
   <svg
+    aria-hidden="true"
+    focusable="false"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -175,6 +193,8 @@ const ChevronRightIcon = ({ className }: { className?: string }) => (
 
 const PanelLeftIcon = ({ className }: { className?: string }) => (
   <svg
+    aria-hidden="true"
+    focusable="false"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="none"
@@ -367,7 +387,7 @@ export default function AdminSidebar({ onCollapse }: AdminSidebarProps) {
     return false
   }
 
-  // Auto-open sections containing active items
+  // biome-ignore lint/correctness/useExhaustiveDependencies: isItemActive depends on router which is stable
   useEffect(() => {
     navSections.forEach((section) => {
       section.items.forEach((item) => {
@@ -376,8 +396,7 @@ export default function AdminSidebar({ onCollapse }: AdminSidebarProps) {
         }
       })
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.asPath])
+  }, [navSections])
 
   return (
     <div className="flex flex-col h-full bg-white border-r border-gray-200">
@@ -460,6 +479,8 @@ export default function AdminSidebar({ onCollapse }: AdminSidebarProps) {
             className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 hover:text-zinc-900 hover:bg-gray-50 rounded-lg transition-colors"
           >
             <svg
+              aria-hidden="true"
+              focusable="false"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="none"

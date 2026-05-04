@@ -5,8 +5,8 @@ import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useCart } from '@/context/CartContext'
-import type { ProductVariantNew } from '@/types'
 import { formatMoney } from '@/lib/format/money'
+import type { ProductVariantNew } from '@/types'
 
 // Server-side client for static generation
 const supabaseServer = createClient(
@@ -320,7 +320,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                     {/* Gallery images */}
                     {product.gallery_images.slice(0, 3).map((image, index) => (
                       <button
-                        key={index}
+                        key={image}
                         type="button"
                         onClick={() => setMainImage(image)}
                         className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 transition-all ${
@@ -364,12 +364,13 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                 {/* Size Selector */}
                 {variantOptions.sizes.length > 0 && (
                   <div>
-                    <label className="block font-semibold mb-2 text-zinc-900 text-lg">Size</label>
+                    <p className="block font-semibold mb-2 text-zinc-900 text-lg">Size</p>
                     <div className="flex flex-wrap gap-2">
                       {variantOptions.sizes.map((sizeOption) => {
                         const isDisabled = !isSizeAvailable(sizeOption.value)
                         return (
                           <button
+                            type="button"
                             key={sizeOption.value}
                             onClick={() => !isDisabled && handleSizeSelect(sizeOption.value)}
                             disabled={isDisabled}
@@ -392,7 +393,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                 {/* Color Selector */}
                 {variantOptions.colors.length > 0 && (
                   <div>
-                    <label className="block font-semibold mb-2 text-zinc-900 text-lg">Color</label>
+                    <p className="block font-semibold mb-2 text-zinc-900 text-lg">Color</p>
                     <div className="flex flex-wrap gap-2">
                       {variantOptions.colors.map((colorOption) => {
                         const isDisabled = !isColorAvailable(colorOption.value)
@@ -400,6 +401,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                           colorOption.hexColor && colorOption.hexColor.trim() !== ''
                         return (
                           <button
+                            type="button"
                             key={colorOption.value}
                             onClick={() => !isDisabled && setSelectedColor(colorOption.value)}
                             disabled={isDisabled}
@@ -437,12 +439,11 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                 {/* Material Selector */}
                 {variantOptions.materials.length > 0 && (
                   <div>
-                    <label className="block font-semibold mb-2 text-zinc-900 text-lg">
-                      Material
-                    </label>
+                    <p className="block font-semibold mb-2 text-zinc-900 text-lg">Material</p>
                     <div className="flex flex-wrap gap-2">
                       {variantOptions.materials.map((materialOption) => (
                         <button
+                          type="button"
                           key={materialOption.value}
                           onClick={() => setSelectedMaterial(materialOption.value)}
                           className={`px-4 py-2 rounded-lg border text-base font-light transition ${
@@ -470,7 +471,9 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                 )}
                 {variants.length === 0 && priceRange.has_variants && (
                   <span className="text-xl text-zinc-600 ml-2 font-light">
-                    {'(from '}{formatMoney(priceRange.min)}{')'}
+                    {'(from '}
+                    {formatMoney(priceRange.min)}
+                    {')'}
                   </span>
                 )}
               </div>
@@ -479,7 +482,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
             {/* Quantity & Add to Cart */}
             <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-4">
               <div>
-                <label className="block font-medium mb-3 text-zinc-900 text-base">Quantity</label>
+                <p className="block font-medium mb-3 text-zinc-900 text-base">Quantity</p>
                 <div className="flex items-center space-x-3">
                   <button
                     type="button"

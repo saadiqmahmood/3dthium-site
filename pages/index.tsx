@@ -50,6 +50,8 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="group p-8 rounded-2xl bg-gray-50 border border-gray-200 hover:border-gray-300 transition-all duration-300">
               <svg
+                aria-hidden="true"
+                focusable="false"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -76,6 +78,8 @@ export default function Home() {
 
             <div className="group p-8 rounded-2xl bg-gray-50 border border-gray-200 hover:border-gray-300 transition-all duration-300">
               <svg
+                aria-hidden="true"
+                focusable="false"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -95,6 +99,8 @@ export default function Home() {
 
             <div className="group p-8 rounded-2xl bg-gray-50 border border-gray-200 hover:border-gray-300 transition-all duration-300">
               <svg
+                aria-hidden="true"
+                focusable="false"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -114,6 +120,8 @@ export default function Home() {
 
             <div className="group p-8 rounded-2xl bg-gray-50 border border-gray-200 hover:border-gray-300 transition-all duration-300">
               <svg
+                aria-hidden="true"
+                focusable="false"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -265,9 +273,11 @@ export default function Home() {
               className={`bg-white p-8 rounded-2xl border border-gray-200 hover:border-gray-300 transition-all duration-300 transition-all duration-1000 delay-1300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
             >
               <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
+                {(['s1', 's2', 's3', 's4', 's5'] as const).map((id) => (
                   <svg
-                    key={i}
+                    aria-hidden="true"
+                    focusable="false"
+                    key={id}
                     className="w-5 h-5 text-emerald-500"
                     fill="currentColor"
                     viewBox="0 0 20 20"
@@ -288,9 +298,11 @@ export default function Home() {
               className={`bg-white p-8 rounded-2xl border border-gray-200 hover:border-gray-300 transition-all duration-300 transition-all duration-1000 delay-1500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
             >
               <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
+                {(['s1', 's2', 's3', 's4', 's5'] as const).map((id) => (
                   <svg
-                    key={i}
+                    aria-hidden="true"
+                    focusable="false"
+                    key={id}
                     className="w-5 h-5 text-emerald-500"
                     fill="currentColor"
                     viewBox="0 0 20 20"
@@ -311,9 +323,11 @@ export default function Home() {
               className={`bg-white p-8 rounded-2xl border border-gray-200 hover:border-gray-300 transition-all duration-300 transition-all duration-1000 delay-1700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
             >
               <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
+                {(['s1', 's2', 's3', 's4', 's5'] as const).map((id) => (
                   <svg
-                    key={i}
+                    aria-hidden="true"
+                    focusable="false"
+                    key={id}
                     className="w-5 h-5 text-emerald-500"
                     fill="currentColor"
                     viewBox="0 0 20 20"

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useAuth } from '@/context/AuthContext'
 import { useSupabase } from '@/context/SupabaseContext'
@@ -9,6 +9,7 @@ export default function AuthPage() {
   const router = useRouter()
   const { signIn, signUp } = useAuth()
   const supabaseContext = useSupabase()
+  const fId = useId()
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -158,12 +159,15 @@ export default function AuthPage() {
               </h2>
 
               <div>
-                <label htmlFor="reset-email" className="block text-base font-medium text-zinc-900">
+                <label
+                  htmlFor={`${fId}-reset-email`}
+                  className="block text-base font-medium text-zinc-900"
+                >
                   Email
                 </label>
                 <input
                   type="email"
-                  id="reset-email"
+                  id={`${fId}-reset-email`}
                   className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -208,6 +212,8 @@ export default function AuthPage() {
                 <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm">
                   <div className="flex items-center gap-2">
                     <svg
+                      aria-hidden="true"
+                      focusable="false"
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 flex-shrink-0"
                       viewBox="0 0 20 20"
@@ -225,12 +231,15 @@ export default function AuthPage() {
               )}
 
               <div>
-                <label htmlFor="email" className="block text-base font-medium text-zinc-900">
+                <label
+                  htmlFor={`${fId}-email`}
+                  className="block text-base font-medium text-zinc-900"
+                >
                   Email
                 </label>
                 <input
                   type="email"
-                  id="email"
+                  id={`${fId}-email`}
                   className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -239,12 +248,15 @@ export default function AuthPage() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-base font-medium text-zinc-900">
+                <label
+                  htmlFor={`${fId}-password`}
+                  className="block text-base font-medium text-zinc-900"
+                >
                   Password
                 </label>
                 <input
                   type="password"
-                  id="password"
+                  id={`${fId}-password`}
                   className="mt-1 p-2 w-full border border-gray-300 bg-white text-zinc-900 rounded"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

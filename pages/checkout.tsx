@@ -1,12 +1,12 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useId, useState } from 'react'
+import Toast from '@/components/ui/Toast'
 import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
-import Toast from '@/components/ui/Toast'
-import type { ShippingAddress, ShippingRate } from '@/types'
 import { formatMoney } from '@/lib/format/money'
+import type { ShippingAddress, ShippingRate } from '@/types'
 
 export default function CheckoutPage() {
   const { cart } = useCart()
@@ -21,6 +21,14 @@ export default function CheckoutPage() {
   const [selectedRate, setSelectedRate] = useState<ShippingRate | null>(null)
   const [isLoadingRates, setIsLoadingRates] = useState(false)
   const router = useRouter()
+  const nameId = useId()
+  const street1Id = useId()
+  const street2Id = useId()
+  const cityId = useId()
+  const zipId = useId()
+  const phoneId = useId()
+  const shippingEmailId = useId()
+  const guestEmailId = useId()
 
   // Shipping address form
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
@@ -230,8 +238,11 @@ export default function CheckoutPage() {
             <form onSubmit={handleAddressSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                  <label className="block text-base font-medium text-white mb-2">Full Name *</label>
+                  <label htmlFor={nameId} className="block text-base font-medium text-white mb-2">
+                    Full Name *
+                  </label>
                   <input
+                    id={nameId}
                     type="text"
                     className="w-full border border-gray-300 text-white rounded p-3"
                     value={shippingAddress.name}
@@ -242,10 +253,14 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-base font-medium text-white mb-2">
+                  <label
+                    htmlFor={street1Id}
+                    className="block text-base font-medium text-white mb-2"
+                  >
                     Address Line 1 *
                   </label>
                   <input
+                    id={street1Id}
                     type="text"
                     className="w-full border border-gray-300 text-white rounded p-3"
                     value={shippingAddress.street1}
@@ -256,10 +271,14 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-base font-medium text-white mb-2">
+                  <label
+                    htmlFor={street2Id}
+                    className="block text-base font-medium text-white mb-2"
+                  >
                     Address Line 2
                   </label>
                   <input
+                    id={street2Id}
                     type="text"
                     className="w-full border border-gray-300 text-white rounded p-3"
                     value={shippingAddress.street2}
@@ -269,8 +288,11 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-base font-medium text-white mb-2">City *</label>
+                  <label htmlFor={cityId} className="block text-base font-medium text-white mb-2">
+                    City *
+                  </label>
                   <input
+                    id={cityId}
                     type="text"
                     className="w-full border border-gray-300 text-white rounded p-3"
                     value={shippingAddress.city}
@@ -281,8 +303,11 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-base font-medium text-white mb-2">Postcode *</label>
+                  <label htmlFor={zipId} className="block text-base font-medium text-white mb-2">
+                    Postcode *
+                  </label>
                   <input
+                    id={zipId}
                     type="text"
                     className="w-full border border-gray-300 text-white rounded p-3"
                     value={shippingAddress.zip}
@@ -293,8 +318,11 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-base font-medium text-white mb-2">Phone</label>
+                  <label htmlFor={phoneId} className="block text-base font-medium text-white mb-2">
+                    Phone
+                  </label>
                   <input
+                    id={phoneId}
                     type="tel"
                     className="w-full border border-gray-300 text-white rounded p-3"
                     value={shippingAddress.phone}
@@ -304,8 +332,14 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-base font-medium text-white mb-2">Email</label>
+                  <label
+                    htmlFor={shippingEmailId}
+                    className="block text-base font-medium text-white mb-2"
+                  >
+                    Email
+                  </label>
                   <input
+                    id={shippingEmailId}
                     type="email"
                     className="w-full border border-gray-300 text-white rounded p-3"
                     value={shippingAddress.email}
@@ -344,9 +378,10 @@ export default function CheckoutPage() {
               {shippingRates.map((rate) => {
                 const isSelected = selectedRate && selectedRate.object_id === rate.object_id
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={rate.object_id}
-                    className={`border rounded-lg p-4 cursor-pointer transition ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
+                    className={`w-full text-left border rounded-lg p-4 cursor-pointer transition ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}
                     onClick={() => setSelectedRate(rate)}
                   >
                     <div className="flex justify-between items-center">
@@ -360,23 +395,23 @@ export default function CheckoutPage() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-gray-800">
-                          {formatMoney(rate.rate)}
-                        </p>
+                        <p className="font-semibold text-gray-800">{formatMoney(rate.rate)}</p>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 )
               })}
             </div>
             <div className="mt-6 flex flex-col sm:flex-row gap-4">
               <button
+                type="button"
                 onClick={() => setShippingStep('address')}
                 className="w-full bg-white border border-gray-300 text-zinc-900 py-3 px-4 rounded-lg hover:bg-gray-100 transition"
               >
                 Back to Address
               </button>
               <button
+                type="button"
                 onClick={() => selectedRate && setShippingStep('payment')}
                 disabled={!selectedRate}
                 className="w-full bg-zinc-900/50 text-zinc-950 text-white py-3 px-4 rounded-lg hover:bg-zinc-100 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
@@ -415,6 +450,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => setCheckoutMode('guest')}
                   className="w-full bg-white border border-gray-300 text-zinc-900 py-3 px-4 rounded-lg hover:bg-gray-100 transition"
                 >
@@ -431,8 +467,11 @@ export default function CheckoutPage() {
               </div>
 
               <form onSubmit={handleGuestCheckout}>
-                <label className="block text-sm font-medium text-white mb-2">Email Address</label>
+                <label htmlFor={guestEmailId} className="block text-sm font-medium text-white mb-2">
+                  Email Address
+                </label>
                 <input
+                  id={guestEmailId}
                   type="email"
                   className="w-full border border-gray-300 text-white rounded p-3 mb-2"
                   value={email}
@@ -471,7 +510,7 @@ export default function CheckoutPage() {
           <div className="space-y-6">
             {cart.map((item) => (
               <div
-                key={item.product_id + '-' + (item.variant_id || 'base')}
+                key={`${item.product_id}-${item.variant_id || 'base'}`}
                 className="flex items-center gap-4 border-b pb-6"
               >
                 <Image
@@ -519,12 +558,14 @@ export default function CheckoutPage() {
           {user && shippingStep === 'payment' && (
             <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col sm:flex-row gap-4 justify-center">
               <button
+                type="button"
                 onClick={() => setShippingStep('rates')}
                 className="w-full sm:w-64 bg-white border border-gray-300 text-zinc-900 py-3 px-6 rounded-lg hover:bg-gray-100 transition"
               >
                 Back to Shipping
               </button>
               <button
+                type="button"
                 onClick={handleLoggedInCheckout}
                 disabled={isLoading}
                 className="w-full sm:w-64 bg-zinc-900 text-white py-3 px-6 rounded-lg hover:bg-zinc-800 transition disabled:bg-blue-400 disabled:cursor-not-allowed"

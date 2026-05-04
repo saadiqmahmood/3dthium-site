@@ -1,9 +1,10 @@
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useSupabase } from '@/context/SupabaseContext'
 
 export default function PasswordResetPage() {
+  const fId = useId()
   const [newPassword, setNewPassword] = useState('')
   const [loading, setLoading] = useState(true)
   const [validSession, setValidSession] = useState(false)
@@ -72,6 +73,7 @@ export default function PasswordResetPage() {
           <h1 className="text-xl font-semibold text-red-600">Reset Link Invalid or Expired</h1>
           <p className="text-gray-700">Please go back and request a new password reset email.</p>
           <button
+            type="button"
             onClick={() => router.push('/auth')}
             className="mt-4 inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
           >
@@ -91,11 +93,14 @@ export default function PasswordResetPage() {
         <h1 className="text-2xl font-semibold text-center text-stone-800">Set New Password</h1>
 
         <div>
-          <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor={`${fId}-new-password`}
+            className="block text-sm font-medium text-gray-700"
+          >
             New Password
           </label>
           <input
-            id="new-password"
+            id={`${fId}-new-password`}
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}

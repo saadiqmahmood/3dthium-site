@@ -108,6 +108,7 @@ const PrivacyPage = () => (
       </p>
     </section>
 
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="toc">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">Table of Contents</h2>
       <ul className="list-disc pl-6 text-base text-blue-700">
@@ -185,10 +186,12 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 1 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="infocollect">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         1. What information do we collect?
       </h2>
+      {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
       <h3 className="text-lg font-semibold text-gray-800 mb-2" id="personalinfo">
         Personal information you disclose to us
       </h3>
@@ -317,6 +320,7 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 2 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="infouse">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         2. How do we process your information?
@@ -348,6 +352,7 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 3 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="legalbases">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         3. What legal bases do we rely on to process your personal information?
@@ -394,6 +399,7 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 4 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="whoshare">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         4. When and with whom do we share your personal information?
@@ -421,6 +427,7 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 5 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="cookies">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         5. Do we use cookies and other tracking technologies?
@@ -482,6 +489,7 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 6 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="ai">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         6. Do we offer artificial intelligence-based products?
@@ -524,6 +532,7 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 7 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="sociallogins">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         7. How do we handle your social logins?
@@ -551,6 +560,7 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 8 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="inforetain">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         8. How long do we keep your information?
@@ -577,6 +587,7 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 9 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="infosafe">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         9. How do we keep your information safe?
@@ -599,6 +610,7 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 10 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="privacyrights">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         10. What are your privacy rights?
@@ -662,6 +674,7 @@ const PrivacyPage = () => (
         </a>
         .
       </p>
+      {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
       <h3 className="text-lg font-semibold text-gray-800 mb-2" id="withdrawconsent">
         Withdrawing your consent
       </h3>
@@ -725,6 +738,7 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 11 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="DNT">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         11. Controls for do-not-track features
@@ -742,6 +756,7 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 12 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="policyupdates">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         12. Do we make updates to this notice?
@@ -760,6 +775,7 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 13 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="contact">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         13. How can you contact us about this notice?
@@ -781,6 +797,7 @@ const PrivacyPage = () => (
     </section>
 
     {/* --- Section 14 --- */}
+    {/* biome-ignore lint/correctness/useUniqueElementIds: Static page anchor */}
     <section className="mb-8" id="request">
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         14. How can you review, update, or delete the data we collect from you?
