@@ -1,4 +1,4 @@
-import type { Session, User } from '@supabase/supabase-js'
+import type { AuthError, Session, User } from '@supabase/supabase-js'
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react'
 import { useSupabase } from './SupabaseContext'
 
@@ -6,8 +6,8 @@ type AuthContextType = {
   user: User | null
   session: Session | null
   isAdmin: boolean
-  signIn: (email: string, password: string) => Promise<{ data: unknown; error: unknown }>
-  signUp: (email: string, password: string) => Promise<{ data: unknown; error: unknown }>
+  signIn: (email: string, password: string) => Promise<{ data: unknown; error: AuthError | null }>
+  signUp: (email: string, password: string) => Promise<{ data: unknown; error: AuthError | null }>
   signOut: () => Promise<void>
   loading: boolean
 }
@@ -23,7 +23,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   if (!supabaseContext) {
     // Return a fallback provider that doesn't require Supabase
-    const noOp = async () => ({ data: null, error: new Error('Supabase not available') })
+    const noOp = async () => ({
+      data: null,
+      error: new Error('Supabase not available') as unknown as AuthError,
+    })
     const noOpVoid = async () => {}
     return (
       <AuthContext.Provider

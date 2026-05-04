@@ -1,11 +1,12 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
 import { formatMoney } from '@/lib/format/money'
+import type { CartQuote } from '@/lib/pricing/quoteCart'
 import type { ShippingAddress, ShippingRate } from '@/types'
 
 export default function CheckoutPage() {
@@ -20,6 +21,7 @@ export default function CheckoutPage() {
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>([])
   const [selectedRate, setSelectedRate] = useState<ShippingRate | null>(null)
   const [isLoadingRates, setIsLoadingRates] = useState(false)
+  const [quote, setQuote] = useState<CartQuote | null>(null)
   const router = useRouter()
   const nameId = useId()
   const street1Id = useId()
@@ -43,9 +45,43 @@ export default function CheckoutPage() {
     email: '',
   })
 
-  const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0)
-  const shippingCost = selectedRate ? parseFloat(selectedRate.rate) : 0
-  const total = subtotal + shippingCost
+  // Fetch server-authoritative prices; re-fetch with shipping_rate_id once a rate is chosen
+  useEffect(() => {
+    if (cart.length === 0) return
+    let cancelled = false
+    fetch('/api/cart/quote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cart: cart.map((i) => ({
+          product_id: i.product_id,
+          variant_id: i.variant_id ?? null,
+          quantity: i.quantity,
+          name: i.name,
+          image_url: i.image_url,
+        })),
+        ...(selectedRate ? { shipping_rate_id: selectedRate.object_id } : {}),
+      }),
+    })
+      .then((r) => r.json())
+      .then((q) => {
+        if (!cancelled && q.subtotal !== undefined) setQuote(q)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [cart, selectedRate])
+
+  // Prefer server-resolved values; fall back to client-side calculation while quote is loading
+  const subtotal =
+    quote?.subtotal ?? cart.reduce((acc, item) => acc + item.price * item.quantity, 0)
+  const shippingCost = selectedRate
+    ? quote?.shipping != null && quote.shipping > 0
+      ? quote.shipping
+      : parseFloat(selectedRate.rate)
+    : 0
+  const total = selectedRate && quote?.total != null ? quote.total : subtotal + shippingCost
 
   // Calculate shipping rates when address is provided
   const calculateShippingRates = async () => {
@@ -530,27 +566,43 @@ export default function CheckoutPage() {
                 </div>
                 <div className="ml-auto text-right">
                   <p className="text-white font-medium">
-                    {formatMoney(item.price * item.quantity)}
+                    {formatMoney(
+                      quote?.items.find(
+                        (qi) =>
+                          qi.product_id === item.product_id &&
+                          qi.variant_id === (item.variant_id ?? null)
+                      )?.line_total ?? item.price * item.quantity
+                    )}
                   </p>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Shipping Information */}
-          {selectedRate && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="flex justify-between items-center mb-2">
+          {/* Price breakdown */}
+          <div className="mt-6 pt-6 border-t border-gray-200 space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-zinc-400">Subtotal</span>
+              <span className="text-white">{formatMoney(subtotal)}</span>
+            </div>
+            {selectedRate && (
+              <div className="flex justify-between items-center text-sm">
                 <span className="text-zinc-400">Shipping ({selectedRate.servicelevel.name})</span>
                 <span className="text-white">{formatMoney(shippingCost)}</span>
               </div>
-            </div>
-          )}
+            )}
+            {quote?.discount != null && quote.discount > 0 && (
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-emerald-400">
+                  Discount{quote.promo_code ? ` (${quote.promo_code})` : ''}
+                </span>
+                <span className="text-emerald-400">−{formatMoney(quote.discount)}</span>
+              </div>
+            )}
+          </div>
 
-          <div className="mt-6 pt-6 border-t border-gray-200 flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
-            <div>
-              <p className="text-lg font-semibold text-gray-900">Total:</p>
-            </div>
+          <div className="mt-4 pt-4 border-t border-gray-200 flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
+            <p className="text-lg font-semibold text-gray-900">Total:</p>
             <p className="text-xl font-bold text-blue-600">{formatMoney(total)}</p>
           </div>
 
