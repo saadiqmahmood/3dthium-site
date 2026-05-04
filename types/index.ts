@@ -12,7 +12,7 @@ export type Product = {
   gallery_images?: string[] // New schema
   is_active?: boolean // New schema
   customizable?: boolean // New schema
-  attributes?: Record<string, any> // New schema
+  attributes?: Record<string, unknown> // New schema
 }
 
 // Legacy variant type (for old products table)

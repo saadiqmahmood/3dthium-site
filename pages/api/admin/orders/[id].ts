@@ -95,7 +95,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 : {}),
               ...(product ? { product_new: { id: product.id, name: product.name } } : {}),
             }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // biome-ignore lint/suspicious/noExplicitAny: heterogeneous order-items union shape
           }) as any[]
         }
 

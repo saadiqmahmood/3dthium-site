@@ -4,7 +4,7 @@ import { err, ok } from '@/lib/api/respond'
 import { log } from '@/lib/log'
 import { getSupabaseAdmin } from '@/lib/supabaseClient'
 
-const SUPABASE_STORAGE_HOST = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).hostname
+const SUPABASE_STORAGE_HOST = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL as string).hostname
 
 const schema = z.object({
   name: z.string().min(1).max(120),

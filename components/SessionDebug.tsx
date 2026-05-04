@@ -60,7 +60,10 @@ export default function SessionDebug() {
           </>
         )}
         {session && (
-          <div>Session Expires: {new Date(session.expires_at! * 1000).toLocaleString()}</div>
+          <div>
+            Session Expires:{' '}
+            {session.expires_at ? new Date(session.expires_at * 1000).toLocaleString() : 'N/A'}
+          </div>
         )}
       </div>
 

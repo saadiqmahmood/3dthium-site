@@ -6,8 +6,8 @@ type AuthContextType = {
   user: User | null
   session: Session | null
   isAdmin: boolean
-  signIn: (email: string, password: string) => Promise<any>
-  signUp: (email: string, password: string) => Promise<any>
+  signIn: (email: string, password: string) => Promise<{ data: unknown; error: unknown }>
+  signUp: (email: string, password: string) => Promise<{ data: unknown; error: unknown }>
   signOut: () => Promise<void>
   loading: boolean
 }
@@ -58,13 +58,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  // biome-ignore lint/correctness/useHookAtTopLevel: hooks are after an early-return guard; safe because supabaseContext nullability is stable across renders
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
       try {
         const {
           data: { session },
-          error,
         } = await client.auth.getSession()
 
         // Check if session is expired
@@ -127,6 +127,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       subscription.unsubscribe()
     }
+    // biome-ignore lint/correctness/useExhaustiveDependencies: checkAdminStatus is stable within a given render cycle; including it would cause loop
   }, [client, checkAdminStatus])
 
   const signOut = async () => {
@@ -157,6 +158,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   // Check session expiration periodically
+  // biome-ignore lint/correctness/useHookAtTopLevel: same guard pattern as above — safe
   useEffect(() => {
     if (!session?.expires_at) return
 

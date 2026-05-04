@@ -17,6 +17,7 @@ export async function applyPromoCode(promoId: string): Promise<boolean> {
       .where(
         and(
           eq(promoCodes.id, promoId),
+          // biome-ignore lint/style/noNonNullAssertion: maxUses is guarded by isNull() in the enclosing or()
           or(isNull(promoCodes.maxUses), lt(promoCodes.uses, promoCodes.maxUses!))
         )
       )

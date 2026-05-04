@@ -12,7 +12,7 @@ interface VariantManagerProps {
 export default function VariantManager({
   productId,
   basePrice,
-  refreshTrigger,
+  refreshTrigger: _refreshTrigger,
 }: VariantManagerProps) {
   const [variants, setVariants] = useState<ProductVariantNew[]>([])
   const [loading, setLoading] = useState(true)
