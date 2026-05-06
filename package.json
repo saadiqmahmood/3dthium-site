@@ -20,7 +20,13 @@
     "db:reset": "npm run db:push && npm run db:seed",
     "typecheck": "tsc --noEmit",
     "db:check": "drizzle-kit status",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -61,20 +67,28 @@
   "devDependencies": {
     "@biomejs/biome": "2.2.6",
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.59.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
+    "@vitest/ui": "^4.1.5",
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
+    "happy-dom": "^20.9.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
+    "msw": "^2.14.3",
+    "next-test-api-route-handler": "^5.0.5",
     "postcss": "^8.5.5",
     "tailwindcss": "^4.1.10",
     "tsx": "^4.20.6",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.5"
   },
   "lint-staged": {
     "{lib,pages/api}/**/*.{ts,js}": [
