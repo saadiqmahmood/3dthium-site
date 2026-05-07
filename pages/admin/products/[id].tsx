@@ -25,6 +25,7 @@ interface Category {
   name: string
   slug: string
   is_active: boolean
+  parent_id: string | null
 }
 
 interface FormData {
@@ -324,14 +325,26 @@ export default function EditProductPage() {
                   className={fieldClass('category_id')}
                 >
                   <option value="">Select a category</option>
-                  {categories
-                    .slice()
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
+                  {(() => {
+                      const parentMap = Object.fromEntries(
+                        categories.map((c) => [c.id, c.name])
+                      )
+                      return categories
+                        .slice()
+                        .sort((a, b) => {
+                          const aLabel = a.parent_id ? `${parentMap[a.parent_id]} > ${a.name}` : a.name
+                          const bLabel = b.parent_id ? `${parentMap[b.parent_id]} > ${b.name}` : b.name
+                          return aLabel.localeCompare(bLabel)
+                        })
+                        .map((c) => {
+                          const label = c.parent_id ? `${parentMap[c.parent_id]} > ${c.name}` : c.name
+                          return (
+                            <option key={c.id} value={c.id}>
+                              {label}
+                            </option>
+                          )
+                        })
+                    })()}
                 </select>
                 {errors.category_id && (
                   <p className="text-red-500 text-xs mt-1">{errors.category_id}</p>

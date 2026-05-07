@@ -1,0 +1,10 @@
+DATABASE_URL=postgresql://placeholder:placeholder@localhost:5432/placeholder \
+SUPABASE_SERVICE_ROLE_KEY=placeholder_service_role_key \
+STRIPE_SECRET_KEY=sk_test_placeholder \
+STRIPE_WEBHOOK_SECRET=whsec_placeholder \
+SHIPPO_API_KEY=shippo_test_placeholder \
+NEXT_PUBLIC_BASE_URL=http://localhost:3000 \
+NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co \
+NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder_anon_key \
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_placeholder \
+npm run build
