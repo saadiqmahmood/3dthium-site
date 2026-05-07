@@ -63,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === 'POST') {
       const parsed = CreateVariantSchema.safeParse(req.body)
       if (!parsed.success) {
-        return err(res, parsed.error.errors[0]?.message ?? 'Validation failed', 400)
+        return err(res, parsed.error.issues[0]?.message ?? 'Validation failed', 400)
       }
 
       const body = parsed.data

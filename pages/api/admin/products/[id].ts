@@ -21,7 +21,7 @@ const UpdateProductSchema = z
     gallery_images: z.array(z.string()).optional(),
     is_active: z.boolean().optional(),
     customizable: z.boolean().optional(),
-    attributes: z.record(z.unknown()).optional(),
+    attributes: z.record(z.string(), z.unknown()).optional(),
   })
   .strict()
 
