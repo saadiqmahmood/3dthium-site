@@ -131,7 +131,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       subscription.unsubscribe()
     }
     // biome-ignore lint/correctness/useExhaustiveDependencies: checkAdminStatus is stable within a given render cycle; including it would cause loop
-  }, [client, checkAdminStatus])
+  }, [client])
 
   const signOut = async () => {
     try {
