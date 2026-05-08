@@ -382,9 +382,6 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               <span className="text-4xl font-semibold text-zinc-900">
                 {formatMoney(displayPrice)}
               </span>
-              {variants.length > 0 && !hasCompleteVariantMatch && (
-                <span className="text-sm text-zinc-400 font-light">from</span>
-              )}
             </div>
 
             {/* Divider */}
