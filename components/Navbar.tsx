@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
 
-const CartIcon = () => (
+const CartIcon = ({ className = 'w-6 h-6 fill-zinc-900' }: { className?: string }) => (
   <svg
     aria-hidden="true"
     focusable="false"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 32 32"
-    className="w-6 h-6 fill-zinc-900"
+    className={className}
   >
     <title>Cart</title>
     <path d="M29.74 8.32A1 1 0 0 0 29 8H13a1 1 0 0 0 0 2h14.91l-.81 9.48a1.87 1.87 0 0 1-2 1.52H12.88a1.87 1.87 0 0 1-2-1.52L10 8.92v-.16L9.33 6.2A3.89 3.89 0 0 0 7 3.52L3.37 2.07a1 1 0 0 0-.74 1.86l3.62 1.45a1.89 1.89 0 0 1 1.14 1.3L8 9.16l.9 10.49a3.87 3.87 0 0 0 4 3.35h.1v2.18a3 3 0 1 0 2 0V23h8v2.18a3 3 0 1 0 2 0V23h.12a3.87 3.87 0 0 0 4-3.35L30 9.08a1 1 0 0 0-.26-.76zM14 29a1 1 0 1 1 1-1 1 1 0 0 1-1 1zm10 0a1 1 0 1 1 1-1 1 1 0 0 1-1 1z" />
@@ -18,7 +18,7 @@ const CartIcon = () => (
   </svg>
 )
 
-const UserIcon = () => (
+const UserIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
   <svg
     aria-hidden="true"
     focusable="false"
@@ -29,7 +29,7 @@ const UserIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className="w-6 h-6 text-zinc-900"
+    className={className}
   >
     <title>Account</title>
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -39,25 +39,24 @@ const UserIcon = () => (
 
 export default function Navbar() {
   const { cart } = useCart()
-  const isCartEmpty = cart.length === 0
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
   const [isOpen, setIsOpen] = useState(false)
   const [animate, setAnimate] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const router = useRouter()
   const { user, isAdmin } = useAuth()
 
+  const isActive = (href: string) => {
+    if (href === '/') return router.pathname === '/'
+    return router.pathname === href || router.pathname.startsWith(`${href}/`)
+  }
+
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsOpen(false)
-      }
+      if (window.innerWidth >= 768) setIsOpen(false)
     }
-
     window.addEventListener('resize', handleResize)
-
-    return () => {
-      window.removeEventListener('resize', handleResize)
-    }
+    return () => window.removeEventListener('resize', handleResize)
   }, [])
 
   useEffect(() => {
@@ -67,49 +66,50 @@ export default function Navbar() {
     return () => clearTimeout(timeout)
   }, [totalItems])
 
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const desktopLinkClass = (href: string) =>
+    `text-base font-light transition-colors whitespace-nowrap ${
+      isActive(href)
+        ? 'text-emerald-600 border-b-2 border-emerald-500 pb-0.5'
+        : 'text-zinc-700 hover:text-emerald-600'
+    }`
+
+  const badgeClass = `absolute -top-2 -right-2 bg-emerald-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'}`
+
   return (
     <>
-      <nav className="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-lg px-6 py-4 flex flex-col md:flex-row md:justify-between md:items-center transition-all duration-300 border-b border-gray-200">
+      <nav
+        className={`fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-lg px-6 flex flex-col md:flex-row md:justify-between md:items-center border-b border-gray-200 transition-all duration-300 ${
+          scrolled ? 'py-2' : 'py-4'
+        }`}
+      >
         <div className="flex justify-between items-center w-full relative z-10">
-          <Link href="/" className="text-5xl pl-5 font-light text-zinc-900">
+          <Link href="/" className="text-2xl font-light text-zinc-900 tracking-tight">
             3Dthium
           </Link>
 
           <div className="flex items-center gap-4">
-            {!isCartEmpty ? (
-              <Link
-                href={{ pathname: '/cart', query: { from: router.asPath } }}
-                className="hover:text-blue-600 md:hidden"
-              >
-                <div className="relative w-6 h-6">
-                  <CartIcon />
-                  {totalItems > 0 && (
-                    <span
-                      className={`absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'}`}
-                    >
-                      {totalItems}
-                    </span>
-                  )}
-                </div>
-              </Link>
-            ) : (
-              <div
-                className="relative w-6 h-6 cursor-not-allowed opacity-50 md:hidden"
-                title="Cart is empty"
-              >
-                <CartIcon />
-              </div>
-            )}
+            {/* Mobile cart — always clickable */}
+            <Link
+              href={{ pathname: '/cart', query: { from: router.asPath } }}
+              className="relative md:hidden hover:opacity-75 transition-opacity"
+              aria-label={`Cart${totalItems > 0 ? `, ${totalItems} items` : ''}`}
+            >
+              <CartIcon />
+              {totalItems > 0 && <span className={badgeClass}>{totalItems}</span>}
+            </Link>
 
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
-              className={`md:hidden p-2 rounded transition ${
-                isOpen
-                  ? 'bg-emerald-500 text-white'
-                  : 'text-zinc-900 hover:text-emerald-600 hover:bg-gray-100'
-              }`}
+              className="md:hidden p-2 rounded text-zinc-900 hover:text-emerald-600 hover:bg-gray-100 transition"
               aria-label="Toggle Menu"
+              aria-expanded={isOpen}
             >
               <svg
                 aria-hidden="true"
@@ -119,7 +119,6 @@ export default function Navbar() {
                 stroke="currentColor"
                 strokeWidth={2}
                 viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
               >
                 <title>Menu</title>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -127,119 +126,98 @@ export default function Navbar() {
             </button>
           </div>
         </div>
-        <div className="hidden md:flex md:flex-row md:space-x-7 pr-20 text-base font-medium items-center text-zinc-900">
-          <Link
-            href="/"
-            className="text-base text-zinc-900 hover:text-emerald-600 transition-colors font-light"
-          >
+
+        {/* Desktop nav */}
+        <div className="hidden md:flex md:flex-row md:space-x-7 text-base items-center">
+          <Link href="/" className={desktopLinkClass('/')}>
             Home
           </Link>
-          <Link
-            href="/products"
-            className="text-base text-zinc-900 hover:text-emerald-600 transition-colors font-light"
-          >
+          <Link href="/products" className={desktopLinkClass('/products')}>
             Shop
           </Link>
           <Link
             href="/custom-order"
-            className="text-base whitespace-nowrap text-zinc-900 hover:text-emerald-600 transition-colors font-light"
+            className={`text-base font-light whitespace-nowrap transition-colors px-3 py-1 rounded-full border ${
+              isActive('/custom-order')
+                ? 'border-emerald-500 text-emerald-600 bg-emerald-50'
+                : 'border-emerald-400 text-emerald-600 hover:bg-emerald-50'
+            }`}
           >
             Custom Order
           </Link>
-          <Link
-            href="/about"
-            className="text-base text-zinc-900 hover:text-emerald-600 transition-colors font-light"
-          >
+          <Link href="/about" className={desktopLinkClass('/about')}>
             About
           </Link>
-          <Link
-            href="/contact"
-            className="text-base text-zinc-900 hover:text-emerald-600 transition-colors font-light"
-          >
+          <Link href="/contact" className={desktopLinkClass('/contact')}>
             Contact
           </Link>
-          {!isCartEmpty ? (
-            <Link
-              href={{ pathname: '/cart', query: { from: router.asPath } }}
-              className="hidden md:block hover:text-emerald-600 transition-colors"
-            >
-              <div className="relative w-6 h-6">
-                <CartIcon />
-                {totalItems > 0 && (
-                  <span
-                    className={`absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full font-medium leading-none transition-transform duration-300 ease-out ${animate ? 'scale-110' : 'scale-100'}`}
-                  >
-                    {totalItems}
-                  </span>
-                )}
-              </div>
-            </Link>
-          ) : (
-            <div
-              className="relative w-6 h-6 cursor-not-allowed opacity-50 hidden md:block"
-              title="Cart is empty"
-            >
-              <CartIcon />
-            </div>
-          )}
+
+          {/* Desktop cart — always clickable */}
+          <Link
+            href={{ pathname: '/cart', query: { from: router.asPath } }}
+            className="relative hover:opacity-75 transition-opacity"
+            aria-label={`Cart${totalItems > 0 ? `, ${totalItems} items` : ''}`}
+          >
+            <CartIcon />
+            {totalItems > 0 && <span className={badgeClass}>{totalItems}</span>}
+          </Link>
+
+          {/* Auth */}
           {!user ? (
             <Link
               href="/auth"
-              className="text-base font-medium text-zinc-900 hover:text-emerald-600 transition-colors"
+              className="flex items-center gap-1.5 text-base font-medium text-zinc-700 hover:text-emerald-600 transition-colors"
             >
-              Login
+              <UserIcon />
+              <span>Login</span>
             </Link>
           ) : (
             <>
-              <Link href="/account" className="hover:text-emerald-400 transition-colors">
+              <Link
+                href="/account"
+                className={`flex items-center gap-1.5 text-base font-light transition-colors ${
+                  isActive('/account') ? 'text-emerald-600' : 'text-zinc-700 hover:text-emerald-600'
+                }`}
+              >
                 <UserIcon />
+                <span>Account</span>
               </Link>
               {isAdmin && (
                 <Link
                   href="/admin"
-                  className="text-base font-medium text-zinc-900 hover:text-emerald-600 transition-colors"
+                  className="text-base font-medium text-zinc-700 hover:text-emerald-600 transition-colors"
                 >
                   Admin
                 </Link>
               )}
             </>
           )}
-          {/** Privacy Policy link (desktop) */}
-          {/* Privacy Policy link removed from desktop */}
         </div>
       </nav>
 
-      {/* Mobile Menu - Outside nav element */}
+      {/* Mobile Menu */}
       {isOpen && (
         <>
-          {/* Backdrop */}
           {/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop overlay for mobile menu */}
           <div
-            className="md:hidden fixed inset-0 z-[60] bg-white/90 backdrop-blur-sm animate-fadeIn"
+            className="md:hidden fixed inset-0 z-[60] bg-white/90 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
             onKeyDown={(e) => {
-              if (e.key === 'Escape') {
-                setIsOpen(false)
-              }
+              if (e.key === 'Escape') setIsOpen(false)
             }}
-            style={{
-              animation: 'fadeIn 0.3s ease-out',
-            }}
+            style={{ animation: 'fadeIn 0.3s ease-out' }}
           />
 
-          {/* Menu Panel */}
           {/* biome-ignore lint/a11y/noStaticElementInteractions: stops click propagation */}
           <div
             className="md:hidden fixed top-0 left-0 z-[70] bg-white w-full sm:w-96 h-full flex flex-col shadow-2xl border-r border-gray-200"
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
-            style={{
-              animation: 'slideInLeft 0.4s ease-out',
-            }}
+            style={{ animation: 'slideInLeft 0.4s ease-out' }}
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <span className="text-3xl font-light text-zinc-900">3Dthium</span>
+              <span className="text-2xl font-light text-zinc-900">3Dthium</span>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
@@ -260,32 +238,37 @@ export default function Navbar() {
               </button>
             </div>
 
-            {/* Cart Section */}
-            {!isCartEmpty && (
-              <div className="px-6 py-4 bg-gray-50">
-                <Link
-                  href={{ pathname: '/cart', query: { from: router.asPath } }}
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-between p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-200"
-                >
-                  <div className="flex items-center gap-3">
-                    <svg
-                      aria-hidden="true"
-                      focusable="false"
-                      className="w-5 h-5 text-emerald-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-                    </svg>
-                    <span className="text-zinc-900 text-lg font-light">
-                      {totalItems} item{totalItems !== 1 ? 's' : ''}
-                    </span>
-                  </div>
+            {/* Mobile cart */}
+            <div className="px-6 py-4 border-b border-gray-100">
+              <Link
+                href={{ pathname: '/cart', query: { from: router.asPath } }}
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-between p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-200"
+              >
+                <div className="flex items-center gap-3">
                   <svg
                     aria-hidden="true"
                     focusable="false"
-                    className="w-5 h-5 text-zinc-600"
+                    className="w-5 h-5 text-emerald-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <title>Cart</title>
+                    <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                  </svg>
+                  <span className="text-zinc-900 text-base font-light">
+                    {totalItems > 0 ? `${totalItems} item${totalItems !== 1 ? 's' : ''}` : 'Cart'}
+                  </span>
+                </div>
+                {totalItems > 0 ? (
+                  <span className="bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                    {totalItems}
+                  </span>
+                ) : (
+                  <svg
+                    aria-hidden="true"
+                    focusable="false"
+                    className="w-4 h-4 text-zinc-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -297,104 +280,81 @@ export default function Navbar() {
                       d="M9 5l7 7-7 7"
                     />
                   </svg>
-                </Link>
-              </div>
-            )}
+                )}
+              </Link>
+            </div>
 
             {/* Navigation */}
             <div className="flex-1 overflow-y-auto px-6 py-4">
               <div className="space-y-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsOpen(false)
-                    router.push('/')
-                  }}
-                  className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light"
-                >
-                  Home
-                </button>
+                {(
+                  [
+                    { href: '/', label: 'Home' },
+                    { href: '/products', label: 'Shop' },
+                    { href: '/about', label: 'About' },
+                    { href: '/contact', label: 'Contact' },
+                  ] as { href: string; label: string }[]
+                ).map(({ href, label }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setIsOpen(false)}
+                    className={`block w-full py-3 px-4 text-lg rounded-lg transition-all font-light ${
+                      isActive(href)
+                        ? 'text-emerald-600 bg-emerald-50'
+                        : 'text-zinc-700 hover:text-zinc-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                ))}
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsOpen(false)
-                    router.push('/products')
-                  }}
-                  className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light"
-                >
-                  Shop
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsOpen(false)
-                    router.push('/custom-order')
-                  }}
-                  className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light"
+                {/* Custom Order — visually differentiated */}
+                <Link
+                  href="/custom-order"
+                  onClick={() => setIsOpen(false)}
+                  className={`block w-full py-3 px-4 text-lg rounded-lg transition-all font-medium border ${
+                    isActive('/custom-order')
+                      ? 'text-emerald-700 bg-emerald-100 border-emerald-300'
+                      : 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+                  }`}
                 >
                   Custom Order
-                </button>
+                </Link>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsOpen(false)
-                    router.push('/about')
-                  }}
-                  className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light"
-                >
-                  About
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsOpen(false)
-                    router.push('/contact')
-                  }}
-                  className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light"
-                >
-                  Contact
-                </button>
-
-                {/* Auth Section */}
-                <div className="pt-4 mt-4 border-t border-gray-200">
+                {/* Auth */}
+                <div className="pt-4 mt-4 border-t border-gray-200 space-y-1">
                   {!user ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsOpen(false)
-                        router.push('/auth')
-                      }}
-                      className="w-full text-left py-3 px-4 text-lg text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition-all font-medium"
+                    <Link
+                      href="/auth"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 w-full py-3 px-4 text-lg text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-all font-medium"
                     >
+                      <UserIcon className="w-5 h-5" />
                       Login
-                    </button>
+                    </Link>
                   ) : (
                     <>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsOpen(false)
-                          router.push('/account')
-                        }}
-                        className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light mb-2"
+                      <Link
+                        href="/account"
+                        onClick={() => setIsOpen(false)}
+                        className={`flex items-center gap-3 w-full py-3 px-4 text-lg rounded-lg transition-all font-light ${
+                          isActive('/account')
+                            ? 'text-emerald-600 bg-emerald-50'
+                            : 'text-zinc-700 hover:text-zinc-900 hover:bg-gray-100'
+                        }`}
                       >
+                        <UserIcon className="w-5 h-5" />
                         My Account
-                      </button>
+                      </Link>
                       {isAdmin && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsOpen(false)
-                            router.push('/admin')
-                          }}
-                          className="w-full text-left py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light"
+                        <Link
+                          href="/admin"
+                          onClick={() => setIsOpen(false)}
+                          className="block w-full py-3 px-4 text-lg text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 rounded-lg transition-all font-light"
                         >
                           Admin
-                        </button>
+                        </Link>
                       )}
                     </>
                   )}
