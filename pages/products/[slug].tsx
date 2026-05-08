@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useCart } from '@/context/CartContext'
 import { formatMoney } from '@/lib/format/money'
@@ -82,6 +82,17 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   const [quantity, setQuantity] = useState(1)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
   const [mainImage, setMainImage] = useState<string | null>(null)
+
+  // Preload all variant images on mount so color switching is instant
+  useEffect(() => {
+    const urls = Array.from(
+      new Set(variants.map((v) => v.image_url).filter((url): url is string => Boolean(url)))
+    )
+    for (const url of urls) {
+      const img = new window.Image()
+      img.src = url
+    }
+  }, [variants])
 
   // Calculate selected variant synchronously during render to prevent flicker
   // This ensures the variant is always in sync with selections without state updates
