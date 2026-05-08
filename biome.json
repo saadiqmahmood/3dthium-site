@@ -6,8 +6,15 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": false,
-    "includes": ["**", "!scripts", "!eslint.config.mjs"]
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!scripts",
+      "!eslint.config.mjs",
+      "!.next/**",
+      "!node_modules/**",
+      "!public/**"
+    ]
   },
   "formatter": {
     "enabled": true,
