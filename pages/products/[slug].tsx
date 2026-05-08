@@ -70,7 +70,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   product,
   variants,
   variantOptions,
-  priceRange,
+  priceRange: _priceRange,
 }) => {
   const { addToCart } = useCart()
   const router = useRouter()
@@ -283,116 +283,160 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto py-24 px-6">
+      <div className="max-w-7xl mx-auto pt-24 pb-20 px-6">
         {/* Back button */}
         <button
           type="button"
           onClick={() => router.back()}
-          className="ml-2 mb-6 text-emerald-600 hover:text-emerald-700 text-base flex items-center"
+          className="mb-8 text-sm text-zinc-500 hover:text-zinc-800 flex items-center gap-1.5 transition-colors group"
         >
-          ← Back
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="w-4 h-4 transition-transform group-hover:-translate-x-0.5"
+          >
+            <path
+              fillRule="evenodd"
+              d="M17 10a.75.75 0 0 1-.75.75H5.612l4.158 3.96a.75.75 0 1 1-1.04 1.08l-5.5-5.25a.75.75 0 0 1 0-1.08l5.5-5.25a.75.75 0 1 1 1.04 1.08L5.612 9.25H16.25A.75.75 0 0 1 17 10Z"
+              clipRule="evenodd"
+            />
+          </svg>
+          Back
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Product Image */}
-          <div>
-            <div className="sticky top-24">
-              <div className="relative bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 p-4">
-                <div className="relative aspect-square w-full bg-gray-50 rounded-lg overflow-hidden">
-                  <Image
-                    src={displayImage}
-                    alt={product.name}
-                    className="w-full h-full object-contain transition-opacity duration-300"
-                    width={1000}
-                    height={1000}
-                  />
-                </div>
-                {/* Gallery images */}
-                {product.gallery_images && product.gallery_images.length > 0 && (
-                  <div className="mt-4 grid grid-cols-4 gap-2">
-                    {/* Main image as first thumbnail */}
-                    <button
-                      type="button"
-                      onClick={() => setMainImage(null)}
-                      className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                        mainImage === null
-                          ? 'border-emerald-500 ring-2 ring-emerald-200'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <Image
-                        src={displayImage}
-                        alt={`${product.name} main`}
-                        className="w-full h-full object-cover"
-                        width={100}
-                        height={100}
-                      />
-                    </button>
-                    {/* Gallery images */}
-                    {product.gallery_images.slice(0, 3).map((image, index) => (
-                      <button
-                        key={image}
-                        type="button"
-                        onClick={() => setMainImage(image)}
-                        className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                          mainImage === image
-                            ? 'border-emerald-500 ring-2 ring-emerald-200'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <Image
-                          src={image}
-                          alt={`${product.name} gallery ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          width={100}
-                          height={100}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+          {/* ── Left: Image panel ── */}
+          <div className="sticky top-24 space-y-3">
+            {/* Main image */}
+            <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-zinc-50 border border-zinc-100 shadow-sm group">
+              <Image
+                src={displayImage}
+                alt={product.name}
+                className="w-full h-full object-contain transition-all duration-500 ease-in-out group-hover:scale-[1.03]"
+                width={1000}
+                height={1000}
+                priority
+              />
             </div>
+
+            {/* Thumbnails */}
+            {product.gallery_images && product.gallery_images.length > 0 && (
+              <div className="grid grid-cols-4 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMainImage(null)}
+                  className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 ${
+                    mainImage === null
+                      ? 'border-emerald-500 shadow-md shadow-emerald-100'
+                      : 'border-transparent hover:border-zinc-300'
+                  }`}
+                >
+                  <Image
+                    src={getDisplayImage()}
+                    alt={`${product.name} main`}
+                    className="w-full h-full object-cover"
+                    width={160}
+                    height={160}
+                  />
+                </button>
+                {product.gallery_images.slice(0, 3).map((image, index) => (
+                  <button
+                    key={image}
+                    type="button"
+                    onClick={() => setMainImage(image)}
+                    className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 ${
+                      mainImage === image
+                        ? 'border-emerald-500 shadow-md shadow-emerald-100'
+                        : 'border-transparent hover:border-zinc-300'
+                    }`}
+                  >
+                    <Image
+                      src={image}
+                      alt={`${product.name} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      width={160}
+                      height={160}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Product Details */}
+          {/* ── Right: Details panel ── */}
           <div className="space-y-8">
+            {/* Category + title */}
             <div>
-              <h1 className="text-5xl font-light text-zinc-900 mb-3">{product.name}</h1>
-              <div className="text-base text-zinc-600 font-light mb-4">{product.category.name}</div>
+              <p className="text-xs font-medium uppercase tracking-widest text-emerald-600 mb-2">
+                {product.category.name}
+              </p>
+              <h1 className="text-4xl md:text-5xl font-light text-zinc-900 leading-tight">
+                {product.name}
+              </h1>
             </div>
+
+            {/* Price — hero, not in a card */}
+            <div className="flex items-baseline gap-3">
+              <span className="text-4xl font-semibold text-zinc-900">
+                {formatMoney(displayPrice)}
+              </span>
+              {variants.length > 0 && !hasCompleteVariantMatch && (
+                <span className="text-sm text-zinc-400 font-light">from</span>
+              )}
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-zinc-100" />
 
             {/* Description */}
             {product.description && (
-              <div className="text-zinc-700 text-lg leading-relaxed font-light">
+              <p className="text-zinc-600 text-base leading-relaxed font-light">
                 {product.description}
-              </div>
+              </p>
             )}
 
             {/* Variant Selectors */}
             {variants.length > 0 && (
-              <div className="space-y-4">
-                {/* Size Selector */}
+              <div className="space-y-6">
+                {/* Size */}
                 {variantOptions.sizes.length > 0 && (
                   <div>
-                    <p className="block font-semibold mb-2 text-zinc-900 text-lg">Size</p>
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm font-semibold text-zinc-900 uppercase tracking-wider">
+                        Size
+                      </p>
+                      {selectedSize && (
+                        <span className="text-sm text-zinc-500 font-light">
+                          {formatSizeDisplay(getDisplayName(selectedSize))}
+                        </span>
+                      )}
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       {variantOptions.sizes.map((sizeOption) => {
                         const isDisabled = !isSizeAvailable(sizeOption.value)
+                        const isSelected = selectedSize === sizeOption.value
                         return (
                           <button
                             type="button"
                             key={sizeOption.value}
                             onClick={() => !isDisabled && handleSizeSelect(sizeOption.value)}
                             disabled={isDisabled}
-                            className={`px-4 py-2 rounded-lg border text-base font-light transition ${
-                              selectedSize === sizeOption.value
-                                ? 'bg-emerald-500 text-white border-emerald-500'
+                            className={`relative min-w-[3.5rem] px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-all duration-150 ${
+                              isSelected
+                                ? 'border-zinc-900 bg-zinc-900 text-white shadow-sm'
                                 : isDisabled
-                                  ? 'bg-gray-50 text-zinc-400 border-gray-200 cursor-not-allowed opacity-50'
-                                  : 'bg-gray-100 text-zinc-700 border-gray-300 hover:border-gray-400 hover:text-zinc-900'
+                                  ? 'border-zinc-100 bg-zinc-50 text-zinc-300 cursor-not-allowed'
+                                  : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400 hover:text-zinc-900'
                             }`}
                           >
+                            {isDisabled && (
+                              <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <span className="w-full h-px bg-zinc-300 rotate-[-20deg] absolute" />
+                              </span>
+                            )}
                             {formatSizeDisplay(sizeOption.displayName)}
                           </button>
                         )
@@ -401,45 +445,66 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                   </div>
                 )}
 
-                {/* Color Selector */}
+                {/* Colour */}
                 {variantOptions.colors.length > 0 && (
                   <div>
-                    <p className="block font-semibold mb-2 text-zinc-900 text-lg">Color</p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm font-semibold text-zinc-900 uppercase tracking-wider">
+                        Colour
+                      </p>
+                      {selectedColor && (
+                        <span className="text-sm text-zinc-500 font-light">
+                          {getDisplayName(selectedColor)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-3">
                       {variantOptions.colors.map((colorOption) => {
                         const isDisabled = !isColorAvailable(colorOption.value)
-                        const hasColorSwatch =
-                          colorOption.hexColor && colorOption.hexColor.trim() !== ''
+                        const isSelected = selectedColor === colorOption.value
+                        const hasSwatch = colorOption.hexColor && colorOption.hexColor.trim() !== ''
+
+                        if (hasSwatch) {
+                          return (
+                            <button
+                              type="button"
+                              key={colorOption.value}
+                              onClick={() => !isDisabled && setSelectedColor(colorOption.value)}
+                              disabled={isDisabled}
+                              title={colorOption.displayName}
+                              className={`relative w-9 h-9 rounded-full transition-all duration-150 ${
+                                isDisabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'
+                              } ${
+                                isSelected
+                                  ? 'ring-2 ring-offset-2 ring-zinc-900 scale-110'
+                                  : 'ring-1 ring-zinc-200 hover:ring-zinc-400 hover:scale-105'
+                              }`}
+                              style={{ backgroundColor: colorOption.hexColor || '#ccc' }}
+                            >
+                              {isDisabled && (
+                                <span className="absolute inset-0 flex items-center justify-center">
+                                  <span className="w-full h-px bg-white/60 rotate-45 absolute" />
+                                </span>
+                              )}
+                            </button>
+                          )
+                        }
+
                         return (
                           <button
                             type="button"
                             key={colorOption.value}
                             onClick={() => !isDisabled && setSelectedColor(colorOption.value)}
                             disabled={isDisabled}
-                            className={`relative px-4 py-2 rounded-lg border text-base font-light transition flex items-center gap-2 ${
-                              selectedColor === colorOption.value
-                                ? 'bg-emerald-500 text-white border-emerald-500 ring-2 ring-emerald-200'
+                            className={`px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-all duration-150 ${
+                              isSelected
+                                ? 'border-zinc-900 bg-zinc-900 text-white'
                                 : isDisabled
-                                  ? 'bg-gray-50 text-zinc-400 border-gray-200 cursor-not-allowed opacity-50'
-                                  : 'bg-gray-100 text-zinc-700 border-gray-300 hover:border-gray-400 hover:text-zinc-900'
+                                  ? 'border-zinc-100 bg-zinc-50 text-zinc-300 cursor-not-allowed'
+                                  : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400'
                             }`}
-                            title={
-                              isDisabled
-                                ? 'Not available for selected size'
-                                : colorOption.displayName
-                            }
                           >
-                            {hasColorSwatch && (
-                              <span
-                                className={`w-5 h-5 rounded-full border-2 ${
-                                  selectedColor === colorOption.value
-                                    ? 'border-white'
-                                    : 'border-gray-300'
-                                }`}
-                                style={{ backgroundColor: colorOption.hexColor || '#ccc' }}
-                              />
-                            )}
-                            <span>{colorOption.displayName}</span>
+                            {colorOption.displayName}
                           </button>
                         )
                       })}
@@ -447,93 +512,155 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                   </div>
                 )}
 
-                {/* Material Selector */}
+                {/* Material */}
                 {variantOptions.materials.length > 0 && (
                   <div>
-                    <p className="block font-semibold mb-2 text-zinc-900 text-lg">Material</p>
+                    <p className="text-sm font-semibold text-zinc-900 uppercase tracking-wider mb-3">
+                      Material
+                    </p>
                     <div className="flex flex-wrap gap-2">
-                      {variantOptions.materials.map((materialOption) => (
-                        <button
-                          type="button"
-                          key={materialOption.value}
-                          onClick={() => setSelectedMaterial(materialOption.value)}
-                          className={`px-4 py-2 rounded-lg border text-base font-light transition ${
-                            selectedMaterial === materialOption.value
-                              ? 'bg-emerald-500 text-white border-emerald-500'
-                              : 'bg-gray-100 text-zinc-700 border-gray-300 hover:border-gray-400 hover:text-zinc-900'
-                          }`}
-                        >
-                          {materialOption.displayName}
-                        </button>
-                      ))}
+                      {variantOptions.materials.map((materialOption) => {
+                        const isSelected = selectedMaterial === materialOption.value
+                        return (
+                          <button
+                            type="button"
+                            key={materialOption.value}
+                            onClick={() => setSelectedMaterial(materialOption.value)}
+                            className={`px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-all duration-150 ${
+                              isSelected
+                                ? 'border-zinc-900 bg-zinc-900 text-white'
+                                : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400'
+                            }`}
+                          >
+                            {materialOption.displayName}
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Price */}
-            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
-              <div className="text-base text-zinc-600 font-light mb-2">Price</div>
-              <div className="text-4xl font-semibold text-zinc-900">
-                {formatMoney(displayPrice)}
-                {variants.length > 0 && !hasCompleteVariantMatch && (
-                  <span className="text-xl text-zinc-600 ml-2 font-light">(preview)</span>
-                )}
-                {variants.length === 0 && priceRange.has_variants && (
-                  <span className="text-xl text-zinc-600 ml-2 font-light">
-                    {'(from '}
-                    {formatMoney(priceRange.min)}
-                    {')'}
-                  </span>
-                )}
-              </div>
-            </div>
+            {/* Divider */}
+            <div className="border-t border-zinc-100" />
 
-            {/* Quantity & Add to Cart */}
-            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-4">
-              <div>
-                <p className="block font-medium mb-3 text-zinc-900 text-base">Quantity</p>
-                <div className="flex items-center space-x-3">
+            {/* Quantity + CTA */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <p className="text-sm font-semibold text-zinc-900 uppercase tracking-wider w-20">
+                  Qty
+                </p>
+                <div className="flex items-center border-2 border-zinc-200 rounded-xl overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 rounded-lg border border-gray-300 bg-white flex items-center justify-center hover:bg-gray-100 text-zinc-900 transition"
+                    className="w-10 h-10 flex items-center justify-center text-zinc-600 hover:bg-zinc-50 transition-colors text-lg font-light"
                   >
-                    -
+                    −
                   </button>
-                  <span className="text-lg font-medium text-zinc-900 min-w-[3rem] text-center">
+                  <span className="w-10 text-center text-sm font-medium text-zinc-900">
                     {quantity}
                   </span>
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.min(99, quantity + 1))}
                     disabled={quantity >= 99}
-                    className="w-10 h-10 rounded-lg border border-gray-300 bg-white flex items-center justify-center hover:bg-gray-100 text-zinc-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-10 h-10 flex items-center justify-center text-zinc-600 hover:bg-zinc-50 transition-colors text-lg font-light disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     +
                   </button>
                 </div>
               </div>
 
-              {/* Add to Cart Button */}
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="w-full bg-zinc-900 text-white py-4 px-6 rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={variants.length > 0 && !hasCompleteVariantMatch}
+                className={`w-full py-4 px-6 rounded-2xl text-base font-medium transition-all duration-200 ${
+                  variants.length > 0 && !hasCompleteVariantMatch
+                    ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
+                    : 'bg-zinc-900 text-white hover:bg-zinc-800 active:scale-[0.99] shadow-sm hover:shadow-md'
+                }`}
               >
-                {variants.length > 0 && !hasCompleteVariantMatch ? 'Select Options' : 'Add to Cart'}
+                {variants.length > 0 && !hasCompleteVariantMatch
+                  ? 'Select options above'
+                  : 'Add to Cart'}
               </button>
+
+              {/* Trust strip */}
+              <div className="flex items-center justify-center gap-6 text-xs text-zinc-400 font-light pt-1">
+                <span className="flex items-center gap-1.5">
+                  <svg
+                    aria-hidden="true"
+                    focusable="false"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="w-3.5 h-3.5"
+                  >
+                    <path d="M6.5 3c-1.051 0-2.093.04-3.125.117A1.49 1.49 0 0 0 2 4.607V10.5h9.5V4.606c0-.74-.55-1.375-1.375-1.489A41.35 41.35 0 0 0 6.5 3ZM2 12v2.5A1.5 1.5 0 0 0 3.5 16h.041a3 3 0 0 1 5.918 0h.791a.75.75 0 0 0 .75-.75V12H2Z" />
+                    <path d="M6.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM13.25 5a.75.75 0 0 0-.75.75v8.514a3.001 3.001 0 0 1 4.893 1.44c.37-.275.607-.714.607-1.204V7.803a1.5 1.5 0 0 0-.82-1.337l-3.25-1.625A.75.75 0 0 0 13.25 5ZM14.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+                  </svg>
+                  Made to order
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <svg
+                    aria-hidden="true"
+                    focusable="false"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="w-3.5 h-3.5"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Secure checkout
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <svg
+                    aria-hidden="true"
+                    focusable="false"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="w-3.5 h-3.5"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  UK made
+                </span>
+              </div>
             </div>
 
-            {/* Customizable Badge */}
+            {/* Customisable badge */}
             {product.customizable && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-blue-800 text-sm">
-                  <span className="font-semibold">Customizable:</span> This product can be
-                  personalized with your own text or design.
-                </p>
+              <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
+                <svg
+                  aria-hidden="true"
+                  focusable="false"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"
+                >
+                  <path d="m5.433 13.917 1.262-3.155A4 4 0 0 1 7.58 9.42l6.92-6.918a2.121 2.121 0 0 1 3 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 0 1-.65-.65Z" />
+                  <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z" />
+                </svg>
+                <div>
+                  <p className="text-sm font-medium text-emerald-800">Customisable product</p>
+                  <p className="text-xs text-emerald-600 font-light mt-0.5">
+                    This product can be personalised with your own text or design.
+                  </p>
+                </div>
               </div>
             )}
           </div>
