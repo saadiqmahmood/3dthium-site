@@ -70,7 +70,6 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   product,
   variants,
   variantOptions,
-  priceRange: _priceRange,
 }) => {
   const { addToCart } = useCart()
   const router = useRouter()
