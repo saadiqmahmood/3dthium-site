@@ -48,18 +48,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // biome-ignore lint/correctness/useHookAtTopLevel: hooks are after an early-return guard; safe because supabaseContext nullability is stable across renders
   useEffect(() => {
-    const checkAdminStatus = async () => {
+    const checkAdminStatus = async (token: string) => {
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), 5000)
       try {
-        const {
-          data: { session: currentSession },
-        } = await client.auth.getSession()
-        const token = currentSession?.access_token
-        if (!token) {
-          setIsAdmin(false)
-          return
-        }
         const response = await fetch('/api/auth/me', {
           headers: { Authorization: `Bearer ${token}` },
           signal: controller.signal,
@@ -85,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session)
         setUser(session?.user || null)
         if (session?.user) {
-          await checkAdminStatus()
+          await checkAdminStatus(session.access_token)
         } else {
           setIsAdmin(false)
         }
@@ -104,7 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(session)
       setUser(session?.user || null)
       if (session?.user) {
-        await checkAdminStatus()
+        await checkAdminStatus(session.access_token)
       } else {
         setIsAdmin(false)
       }
