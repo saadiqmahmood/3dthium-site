@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import Spinner from '@/components/ui/Spinner'
 import Toast from '@/components/ui/Toast'
+import { authFetch } from '@/lib/api/authFetch'
 
 interface Category {
   id: string
@@ -46,7 +47,7 @@ export default function AdminCategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/admin/categories')
+      const response = await authFetch('/api/admin/categories')
       if (response.ok) {
         const data = await response.json()
         setCategories(data)
@@ -134,7 +135,7 @@ export default function AdminCategoriesPage() {
     }
 
     try {
-      const response = await fetch(`/api/admin/categories/${categoryId}`, {
+      const response = await authFetch(`/api/admin/categories/${categoryId}`, {
         method: 'DELETE',
       })
 

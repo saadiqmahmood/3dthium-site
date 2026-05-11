@@ -6,6 +6,7 @@ import ImageManager from '@/components/admin/ImageManager'
 import VariantManager from '@/components/admin/VariantManager'
 import VariationGenerator from '@/components/admin/VariationGenerator'
 import Toast from '@/components/ui/Toast'
+import { authFetch } from '@/lib/api/authFetch'
 
 type ProductAttribute = {
   id?: string
@@ -73,7 +74,7 @@ export default function EditProductPage() {
   const fId = useId()
 
   useEffect(() => {
-    fetch('/api/admin/categories')
+    authFetch('/api/admin/categories')
       .then((r) => r.json())
       .then((data) => {
         const list = Array.isArray(data) ? data : (data.data ?? [])
@@ -84,7 +85,7 @@ export default function EditProductPage() {
 
   useEffect(() => {
     if (!id) return
-    fetch(`/api/admin/products/${id}`)
+    authFetch(`/api/admin/products/${id}`)
       .then((r) => r.json())
       .then((data) => {
         const p = data.data ?? data
@@ -107,7 +108,7 @@ export default function EditProductPage() {
 
   useEffect(() => {
     if (!id) return
-    fetch(`/api/admin/products/${id}/attributes`)
+    authFetch(`/api/admin/products/${id}/attributes`)
       .then((r) => r.json())
       .then((data) => {
         const raw = data.attributes ?? data.data?.attributes ?? []
@@ -173,7 +174,7 @@ export default function EditProductPage() {
 
     setSaving(true)
     try {
-      const response = await fetch(`/api/admin/products/${id}`, {
+      const response = await authFetch(`/api/admin/products/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -207,7 +208,7 @@ export default function EditProductPage() {
 
   const handleDelete = async () => {
     if (!id || !confirm('Delete this product? This cannot be undone.')) return
-    await fetch(`/api/admin/products/${id}`, { method: 'DELETE' })
+    await authFetch(`/api/admin/products/${id}`, { method: 'DELETE' })
     router.push('/admin/products')
   }
 

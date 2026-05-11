@@ -50,7 +50,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       try {
-        const response = await fetch('/api/auth/me')
+        const {
+          data: { session: currentSession },
+        } = await client.auth.getSession()
+        const token = currentSession?.access_token
+        if (!token) {
+          setIsAdmin(false)
+          return
+        }
+        const response = await fetch('/api/auth/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         if (!response.ok) {
           setIsAdmin(false)
           return

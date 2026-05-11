@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { formatMoney } from '@/lib/format/money'
 import type { ProductVariantNew } from '@/types'
+import { authFetch } from '@/lib/api/authFetch'
 
 interface VariantManagerProps {
   productId: string
@@ -45,7 +46,7 @@ export default function VariantManager({
 
   const fetchAttributeOptions = async () => {
     try {
-      const response = await fetch(`/api/admin/products/${productId}/attributes`)
+      const response = await authFetch(`/api/admin/products/${productId}/attributes`)
       if (response.ok) {
         const data = await response.json()
         const attributes = data.attributes || []
@@ -69,7 +70,7 @@ export default function VariantManager({
   const fetchVariants = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/admin/product-variants/${productId}`)
+      const response = await authFetch(`/api/admin/product-variants/${productId}`)
       if (response.ok) {
         const json = await response.json()
         setVariants(Array.isArray(json) ? json : (json.data ?? []))
@@ -134,7 +135,7 @@ export default function VariantManager({
     console.log('🚀 [VARIANT MANAGER] Creating variant:', payload)
 
     try {
-      const response = await fetch(`/api/admin/product-variants/${productId}`, {
+      const response = await authFetch(`/api/admin/product-variants/${productId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -198,7 +199,7 @@ export default function VariantManager({
 
     setSaving(true)
     try {
-      const response = await fetch(`/api/admin/product-variants/${productId}/${variantId}`, {
+      const response = await authFetch(`/api/admin/product-variants/${productId}/${variantId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editFormData),
@@ -232,7 +233,7 @@ export default function VariantManager({
 
     setSaving(true)
     try {
-      const response = await fetch(`/api/admin/product-variants/${productId}/${variantId}`, {
+      const response = await authFetch(`/api/admin/product-variants/${productId}/${variantId}`, {
         method: 'DELETE',
       })
 

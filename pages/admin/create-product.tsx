@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useId, useState } from 'react'
 import ImageManager from '@/components/admin/ImageManager'
 import Toast from '@/components/ui/Toast'
+import { authFetch } from '@/lib/api/authFetch'
 
 interface Category {
   id: string
@@ -49,7 +50,7 @@ export default function CreateProductPage() {
   const fId = useId()
 
   useEffect(() => {
-    fetch('/api/admin/categories')
+    authFetch('/api/admin/categories')
       .then((r) => r.json())
       .then((data) => {
         // Handle both old flat response and new { data } envelope
@@ -90,7 +91,7 @@ export default function CreateProductPage() {
 
     setSubmitting(true)
     try {
-      const response = await fetch('/api/admin/products', {
+      const response = await authFetch('/api/admin/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,5 +1,6 @@
 import { useEffect, useId, useState } from 'react'
 import ImageUpload from './ImageUpload'
+import { authFetch } from '@/lib/api/authFetch'
 
 type AttributeOption = {
   value: string
@@ -243,7 +244,7 @@ export default function AttributeBuilder({
 
     setSaving(true)
     try {
-      const response = await fetch(`/api/admin/products/${productId}/attributes`, {
+      const response = await authFetch(`/api/admin/products/${productId}/attributes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ attributes }),

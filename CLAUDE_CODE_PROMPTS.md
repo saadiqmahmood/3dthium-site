@@ -133,6 +133,7 @@ Scope (in priority order, commit per item):
 2) Environment management.
    - Replace `env.example` so it has placeholder values only (the security engineer is doing the value scrubbing — coordinate; if they haven't yet, do it). Add a comment block explaining each variable, which scope it has (public/secret), and the dashboard each one comes from.
    - Add a startup env validator: `lib/env.ts` using `zod` (add as dep) that parses `process.env` into a typed object at module load. Required server vars: `DATABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SHIPPO_API_KEY`, `NEXT_PUBLIC_BASE_URL`. Required public vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_BASE_URL`. Export `env` from this module and refactor `lib/db.ts`, `lib/supabaseClient.ts`, `lib/shippoClient.ts`, all `pages/api/**` to import `env` instead of touching `process.env` directly. Fail loudly at boot if anything is missing.
+   - Add `DATABASE_URL_DEV` as a required-in-development env var pointing at the Supabase agent branch (the DBA role is provisioning it). Refuse to start `next dev` if `NODE_ENV !== 'production'` and `DATABASE_URL_DEV` is unset — this prevents an agent from accidentally running against the prod DB.
 
 3) Logging strategy.
    - There are 99 `console.log` calls across `pages/api/**`, many with emojis. Add `lib/log.ts` exporting `log.debug`, `log.info`, `log.warn`, `log.error`. In production (`NODE_ENV === 'production'`), `debug` is a no-op and others go to `console` as JSON lines. Do a project-wide replace: `console.log` → `log.debug`, `console.error` → `log.error`. Strip the emoji prefixes during the swap.
@@ -211,6 +212,12 @@ Scope (in priority order, commit per item):
 8) Document.
    - `docs/db/SCHEMA.md` — current canonical schema as a list of tables, columns, FKs, indexes.
    - `docs/db/RLS.md` — final policy intent for every public-facing table.
+
+9) Set up a non-prod database branch for agent work.
+- Use Supabase database branching (Supabase Dashboard → Branches, or `supabase db branch create agent-dev`) to create an isolated copy of the production schema + a small seeded dataset.
+- Add `DATABASE_URL_DEV` to `env.example` and `lib/env.ts` (coordinate with DevOps). Document that any Claude Code session doing schema or data work MUST point at `DATABASE_URL_DEV`, never `DATABASE_URL`.
+- Add an npm script `db:branch:reset` that drops the agent branch and recreates it from the latest migration set + seed.
+- Document the workflow in `docs/db/AGENT_SAFETY.md`: agents work on the branch; migrations are reviewed in PR; only a human merges to the production branch.
 
 Constraints:
 - Do not refactor application code. That's the backend engineer's job.
