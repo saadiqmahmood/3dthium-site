@@ -1,14 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { createServerSupabase } from './utils/supabase/server'
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
-  const supabase = createServerSupabase(req)
-
-  // Refresh session if expired - required for Server Components
-  await supabase.auth.getSession()
-
-  return res
+export async function middleware(_req: NextRequest) {
+  return NextResponse.next()
 }
 
 export const config = {

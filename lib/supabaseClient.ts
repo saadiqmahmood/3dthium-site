@@ -1,8 +1,8 @@
-import { createBrowserClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 
 // Single Supabase client instance for the entire app (browser/client-side)
-export const supabase = createBrowserClient(
+// Uses localStorage — reliable for CSR Pages Router apps across all environments
+export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL as string,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
 )

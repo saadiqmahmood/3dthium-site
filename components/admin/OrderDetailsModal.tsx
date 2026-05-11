@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { formatMoney } from '@/lib/format/money'
 import type { ProductVariant } from '@/types'
+import { authFetch } from '@/lib/api/authFetch'
 
 export const ORDER_STATUSES = [
   'pending',
@@ -131,7 +132,7 @@ export function OrderDetailsModal({
   useEffect(() => {
     setOrderDetailsLoading(true)
     const load = async () => {
-      const res = await fetch(`/api/admin/orders/${order.id}`)
+      const res = await authFetch(`/api/admin/orders/${order.id}`)
       if (res.ok) {
         const data = await res.json()
         const mapped = {
@@ -161,7 +162,7 @@ export function OrderDetailsModal({
       )
       const variantsMap: Record<string, ProductVariant[]> = {}
       for (const productId of productIds) {
-        const res = await fetch(`/api/admin/product-variants/${productId}`)
+        const res = await authFetch(`/api/admin/product-variants/${productId}`)
         if (res.ok) {
           const variants = await res.json()
           variantsMap[productId] = variants || []
@@ -199,7 +200,7 @@ export function OrderDetailsModal({
       )
       const price = variant ? Number(variant.price) : Number(item.price_at_purchase)
       newTotal += price * item.quantity
-      await fetch(`/api/admin/order-items/${item.id}`, {
+      await authFetch(`/api/admin/order-items/${item.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -210,7 +211,7 @@ export function OrderDetailsModal({
         }),
       })
     }
-    await fetch(`/api/admin/orders/${order.id}`, {
+    await authFetch(`/api/admin/orders/${order.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ total_price: newTotal }),
@@ -222,7 +223,7 @@ export function OrderDetailsModal({
 
   const handleUpdateOrderStatus = async () => {
     if (!orderDetails) return
-    const res = await fetch(`/api/admin/orders/${orderDetails.id}`, {
+    const res = await authFetch(`/api/admin/orders/${orderDetails.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: orderStatusInput }),
@@ -236,7 +237,7 @@ export function OrderDetailsModal({
 
   const handleDeleteOrder = async () => {
     if (!orderDetails) return
-    const res = await fetch(`/api/admin/orders/${orderDetails.id}`, { method: 'DELETE' })
+    const res = await authFetch(`/api/admin/orders/${orderDetails.id}`, { method: 'DELETE' })
     if (res.ok) {
       onDeleted(orderDetails.id)
       onClose()

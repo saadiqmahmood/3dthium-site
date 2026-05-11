@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Spinner from '@/components/ui/Spinner'
 import Toast from '@/components/ui/Toast'
 import { formatMoney } from '@/lib/format/money'
+import { authFetch } from '@/lib/api/authFetch'
 
 type Order = {
   id: string
@@ -41,7 +42,7 @@ export default function AdminDashboard() {
       setLoading(true)
       try {
         console.log('🔍 [AdminDashboard] Fetching metrics from API...')
-        const response = await fetch('/api/admin/metrics')
+        const response = await authFetch('/api/admin/metrics')
 
         if (!response.ok) {
           console.error('❌ [AdminDashboard] Error fetching metrics:', response.status)
@@ -64,7 +65,7 @@ export default function AdminDashboard() {
   // Export helpers
   const exportTable = async (table: string) => {
     try {
-      const response = await fetch(`/api/admin/${table}`)
+      const response = await authFetch(`/api/admin/${table}`)
       if (!response.ok) throw new Error('Export failed')
 
       const data = await response.json()
@@ -109,7 +110,7 @@ export default function AdminDashboard() {
       })
 
       // Use API route for import
-      const response = await fetch(`/api/admin/${table}/import`, {
+      const response = await authFetch(`/api/admin/${table}/import`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

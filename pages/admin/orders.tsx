@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { ORDER_STATUSES, type Order, OrderDetailsModal } from '@/components/admin/OrderDetailsModal'
 import Toast from '@/components/ui/Toast'
 import { formatMoney } from '@/lib/format/money'
+import { authFetch } from '@/lib/api/authFetch'
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
@@ -22,7 +23,7 @@ export default function AdminOrdersPage() {
   const fetchOrders = useCallback(async () => {
     setOrdersLoading(true)
     try {
-      const response = await fetch('/api/admin/orders')
+      const response = await authFetch('/api/admin/orders')
       if (!response.ok) throw new Error('Failed to fetch orders')
       const data = await response.json()
 
@@ -30,7 +31,7 @@ export default function AdminOrdersPage() {
       if (data?.length > 0) {
         const userIds = Array.from(new Set(data.map((o: Order) => o.user_id).filter(Boolean)))
         if (userIds.length > 0) {
-          const usersResponse = await fetch('/api/admin/users')
+          const usersResponse = await authFetch('/api/admin/users')
           if (usersResponse.ok) {
             const usersData = await usersResponse.json()
             usersMap = Object.fromEntries(
@@ -103,7 +104,7 @@ export default function AdminOrdersPage() {
   }
   const handleBulkDelete = async () => {
     for (const id of selectedOrders) {
-      await fetch(`/api/admin/orders/${id}`, { method: 'DELETE' })
+      await authFetch(`/api/admin/orders/${id}`, { method: 'DELETE' })
     }
     setOrders((prev) => prev.filter((o) => !selectedOrders.includes(o.id)))
     setSelectedOrders([])

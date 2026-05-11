@@ -1,51 +1,27 @@
-import { createServerClient } from '@supabase/ssr'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { getSupabaseAdmin } from '@/lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
-    {
-      cookies: {
-        getAll() {
-          return Object.entries(req.cookies).map(([name, value]) => ({
-            name,
-            value: value ?? '',
-          }))
-        },
-        setAll(cookiesToSet) {
-          for (const { name, value, options } of cookiesToSet) {
-            res.setHeader(
-              'Set-Cookie',
-              `${name}=${value}; Path=${options?.path ?? '/'}; HttpOnly; SameSite=Lax${options?.secure ? '; Secure' : ''}`
-            )
-          }
-        },
-      },
-    }
-  )
+  const authHeader = req.headers.authorization
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const adminSupabase = getSupabaseAdmin()
 
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser()
+  } = await adminSupabase.auth.getUser(token)
 
   if (error || !user) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
-
-  const adminSupabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.SUPABASE_SERVICE_ROLE_KEY as string,
-    {
-      cookies: { getAll: () => [], setAll: () => {} },
-      auth: { persistSession: false },
-    }
-  )
 
   const { data: userRow } = await adminSupabase
     .from('users')

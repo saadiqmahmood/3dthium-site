@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
+import { authFetch } from '@/lib/api/authFetch'
 
 type CustomOrder = {
   id: number
@@ -37,7 +38,7 @@ export default function AdminCustomOrdersPage() {
       setError(null)
       try {
         console.log('🔍 [AdminCustomOrders] Fetching custom orders from API...')
-        const response = await fetch('/api/admin/custom-orders')
+        const response = await authFetch('/api/admin/custom-orders')
 
         if (!response.ok) {
           console.error('❌ [AdminCustomOrders] Error fetching custom orders:', response.status)
@@ -87,7 +88,7 @@ export default function AdminCustomOrdersPage() {
   const handleBulkDelete = async () => {
     try {
       for (const id of selectedOrders) {
-        const response = await fetch(`/api/admin/custom-orders/${id}`, { method: 'DELETE' })
+        const response = await authFetch(`/api/admin/custom-orders/${id}`, { method: 'DELETE' })
         if (!response.ok) {
           throw new Error(`Failed to delete order ${id}`)
         }

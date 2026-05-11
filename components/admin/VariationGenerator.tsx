@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import { authFetch } from '@/lib/api/authFetch'
 
 type Attribute = {
   id: string
@@ -74,7 +75,7 @@ export default function VariationGenerator({
     setMessage(null)
 
     try {
-      const response = await fetch(`/api/admin/products/${productId}/variations/generate`, {
+      const response = await authFetch(`/api/admin/products/${productId}/variations/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

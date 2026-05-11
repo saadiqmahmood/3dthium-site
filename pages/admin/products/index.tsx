@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { formatMoney } from '@/lib/format/money'
+import { authFetch } from '@/lib/api/authFetch'
 
 interface Category {
   id: string
@@ -47,7 +48,7 @@ export default function AdminProductsPage() {
   const fetchProducts = useCallback(async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/admin/products')
+      const response = await authFetch('/api/admin/products')
       if (response.ok) {
         const json = await response.json()
         setProducts(Array.isArray(json) ? json : (json.data ?? []))
@@ -65,7 +66,7 @@ export default function AdminProductsPage() {
   // Fetch categories
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/categories')
+      const response = await authFetch('/api/admin/categories')
       if (response.ok) {
         const data = await response.json()
         setCategories(data || [])
@@ -109,7 +110,7 @@ export default function AdminProductsPage() {
   // Toggle product status
   const toggleProductStatus = async (productId: string, currentStatus: boolean) => {
     try {
-      const response = await fetch(`/api/admin/products/${productId}`, {
+      const response = await authFetch(`/api/admin/products/${productId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_active: !currentStatus }),
@@ -137,7 +138,7 @@ export default function AdminProductsPage() {
     }
 
     try {
-      const response = await fetch(`/api/admin/products/${productId}`, {
+      const response = await authFetch(`/api/admin/products/${productId}`, {
         method: 'DELETE',
       })
 
@@ -179,7 +180,7 @@ export default function AdminProductsPage() {
 
     for (const productId of selectedProducts) {
       try {
-        await fetch(`/api/admin/products/${productId}`, { method: 'DELETE' })
+        await authFetch(`/api/admin/products/${productId}`, { method: 'DELETE' })
       } catch (error) {
         console.error('Error deleting product:', productId, error)
       }
@@ -193,7 +194,7 @@ export default function AdminProductsPage() {
   const handleBulkStatusChange = async (newStatus: boolean) => {
     for (const productId of selectedProducts) {
       try {
-        await fetch(`/api/admin/products/${productId}`, {
+        await authFetch(`/api/admin/products/${productId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ is_active: newStatus }),

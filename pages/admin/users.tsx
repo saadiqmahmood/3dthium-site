@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
+import { authFetch } from '@/lib/api/authFetch'
 
 type User = {
   id: string
@@ -33,7 +34,7 @@ export default function AdminUsersPage() {
       setUsersLoading(true)
       try {
         console.log('🔍 [AdminUsers] Fetching users from API...')
-        const response = await fetch('/api/admin/users')
+        const response = await authFetch('/api/admin/users')
 
         if (!response.ok) {
           console.error('❌ [AdminUsers] Error fetching users:', response.status)
@@ -70,7 +71,7 @@ export default function AdminUsersPage() {
   const handleBulkDeleteUsers = async () => {
     try {
       for (const id of selectedUsers) {
-        await fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
+        await authFetch(`/api/admin/users/${id}`, { method: 'DELETE' })
       }
       setUsers((users) => users.filter((u) => !selectedUsers.includes(u.id)))
       setSelectedUsers([])
@@ -82,7 +83,7 @@ export default function AdminUsersPage() {
   const handleAction = async (user: User, type: 'toggle') => {
     try {
       if (type === 'toggle') {
-        const response = await fetch(`/api/admin/users/${user.id}`, {
+        const response = await authFetch(`/api/admin/users/${user.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ is_admin: !user.is_admin }),
