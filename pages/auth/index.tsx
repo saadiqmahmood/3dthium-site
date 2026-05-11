@@ -137,7 +137,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white px-4 sm:px-8 py-6 relative overflow-hidden">
+    <div className="min-h-screen bg-white px-4 sm:px-8 pt-24 pb-6 relative overflow-hidden">
       {/* Background glow effects */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/3 right-1/3 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>

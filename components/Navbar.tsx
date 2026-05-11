@@ -73,7 +73,7 @@ export default function Navbar() {
   }, [])
 
   const linkClass = (href: string) =>
-    `text-sm font-light transition-colors ${
+    `text-base font-light transition-colors ${
       isActive(href)
         ? 'text-emerald-600 border-b border-emerald-500 pb-px'
         : 'text-zinc-600 hover:text-zinc-900'
@@ -145,7 +145,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/custom-order"
-                className={`text-sm font-light transition-colors px-3.5 py-1 rounded-full border ${
+                className={`text-base font-light transition-colors px-3.5 py-1 rounded-full border ${
                   isActive('/custom-order')
                     ? 'border-emerald-500 text-emerald-600 bg-emerald-50'
                     : 'border-zinc-300 text-zinc-700 hover:border-emerald-400 hover:text-emerald-600'
@@ -166,7 +166,7 @@ export default function Navbar() {
               {isAdmin && (
                 <Link
                   href="/admin"
-                  className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+                  className="text-base font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
                 >
                   Admin
                 </Link>
