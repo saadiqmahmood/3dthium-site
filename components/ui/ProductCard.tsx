@@ -31,12 +31,20 @@ type Props = {
 }
 
 export default function ProductCard({ product }: Props) {
-  // Calculate display price
   const displayPrice = product.price_range.has_variants
     ? product.price_range.min === product.price_range.max
       ? formatMoney(product.price_range.min)
-      : `${formatMoney(product.price_range.min)} - ${formatMoney(product.price_range.max)}`
+      : `${formatMoney(product.price_range.min)} – ${formatMoney(product.price_range.max)}`
     : formatMoney(product.base_price)
+
+  const uniqueSizes = Array.from(new Set(product.variants.map((v) => v.size).filter(Boolean)))
+  const uniqueColors = Array.from(new Set(product.variants.map((v) => v.color).filter(Boolean)))
+  const uniqueMaterials = Array.from(new Set(product.variants.map((v) => v.material).filter(Boolean)))
+
+  const variantParts: string[] = []
+  if (uniqueSizes.length > 0) variantParts.push(`${uniqueSizes.length} size${uniqueSizes.length > 1 ? 's' : ''}`)
+  if (uniqueColors.length > 0) variantParts.push(`${uniqueColors.length} colour${uniqueColors.length > 1 ? 's' : ''}`)
+  if (uniqueMaterials.length > 0) variantParts.push(`${uniqueMaterials.length} material${uniqueMaterials.length > 1 ? 's' : ''}`)
 
   return (
     <Link href={`/products/${product.slug}`} className="block w-full">
@@ -54,11 +62,11 @@ export default function ProductCard({ product }: Props) {
 
         {/* Product Info */}
         <div className="p-4">
-          {/* Product Name */}
           <h3 className="text-sm font-normal text-zinc-900 mb-2 line-clamp-2">{product.name}</h3>
-
-          {/* Price */}
           <p className="text-base font-semibold text-zinc-900">{displayPrice}</p>
+          {variantParts.length > 0 && (
+            <p className="text-xs text-zinc-400 mt-1">{variantParts.join(' · ')}</p>
+          )}
         </div>
       </div>
     </Link>

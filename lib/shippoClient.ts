@@ -57,7 +57,7 @@ export async function getShippingRates(shipmentData: ShipmentRequest): Promise<S
       Authorization: `ShippoToken ${SHIPPO_API_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(shipmentData),
+    body: JSON.stringify({ ...shipmentData, async: false }),
   })
   if (!response.ok) {
     const errorText = await response.text()

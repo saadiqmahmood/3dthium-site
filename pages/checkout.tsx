@@ -107,6 +107,10 @@ export default function CheckoutPage() {
       }
 
       const data = await response.json()
+      if (!data.rates || data.rates.length === 0) {
+        setToast({ message: 'No shipping options available for this address. Please check your address and try again.', type: 'error' })
+        return
+      }
       setShippingRates(data.rates)
       setShippingStep('rates')
     } catch (error) {
@@ -270,17 +274,17 @@ export default function CheckoutPage() {
         {/* Shipping Address Form */}
         {shippingStep === 'address' && (
           <div className="bg-gray-50 border border-gray-200 rounded-xl shadow p-8 max-w-2xl mx-auto mb-8">
-            <h2 className="text-xl font-semibold mb-6 text-white">Shipping Address</h2>
+            <h2 className="text-xl font-semibold mb-6 text-zinc-900">Shipping Address</h2>
             <form onSubmit={handleAddressSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                  <label htmlFor={nameId} className="block text-base font-medium text-white mb-2">
+                  <label htmlFor={nameId} className="block text-base font-medium text-zinc-900 mb-2">
                     Full Name *
                   </label>
                   <input
                     id={nameId}
                     type="text"
-                    className="w-full border border-gray-300 text-white rounded p-3"
+                    className="w-full border border-gray-300 text-zinc-900 rounded p-3"
                     value={shippingAddress.name}
                     onChange={(e) =>
                       setShippingAddress({ ...shippingAddress, name: e.target.value })
@@ -291,14 +295,14 @@ export default function CheckoutPage() {
                 <div className="md:col-span-2">
                   <label
                     htmlFor={street1Id}
-                    className="block text-base font-medium text-white mb-2"
+                    className="block text-base font-medium text-zinc-900 mb-2"
                   >
                     Address Line 1 *
                   </label>
                   <input
                     id={street1Id}
                     type="text"
-                    className="w-full border border-gray-300 text-white rounded p-3"
+                    className="w-full border border-gray-300 text-zinc-900 rounded p-3"
                     value={shippingAddress.street1}
                     onChange={(e) =>
                       setShippingAddress({ ...shippingAddress, street1: e.target.value })
@@ -309,14 +313,14 @@ export default function CheckoutPage() {
                 <div className="md:col-span-2">
                   <label
                     htmlFor={street2Id}
-                    className="block text-base font-medium text-white mb-2"
+                    className="block text-base font-medium text-zinc-900 mb-2"
                   >
                     Address Line 2
                   </label>
                   <input
                     id={street2Id}
                     type="text"
-                    className="w-full border border-gray-300 text-white rounded p-3"
+                    className="w-full border border-gray-300 text-zinc-900 rounded p-3"
                     value={shippingAddress.street2}
                     onChange={(e) =>
                       setShippingAddress({ ...shippingAddress, street2: e.target.value })
@@ -324,13 +328,13 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor={cityId} className="block text-base font-medium text-white mb-2">
+                  <label htmlFor={cityId} className="block text-base font-medium text-zinc-900 mb-2">
                     City *
                   </label>
                   <input
                     id={cityId}
                     type="text"
-                    className="w-full border border-gray-300 text-white rounded p-3"
+                    className="w-full border border-gray-300 text-zinc-900 rounded p-3"
                     value={shippingAddress.city}
                     onChange={(e) =>
                       setShippingAddress({ ...shippingAddress, city: e.target.value })
@@ -339,13 +343,13 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor={zipId} className="block text-base font-medium text-white mb-2">
+                  <label htmlFor={zipId} className="block text-base font-medium text-zinc-900 mb-2">
                     Postcode *
                   </label>
                   <input
                     id={zipId}
                     type="text"
-                    className="w-full border border-gray-300 text-white rounded p-3"
+                    className="w-full border border-gray-300 text-zinc-900 rounded p-3"
                     value={shippingAddress.zip}
                     onChange={(e) =>
                       setShippingAddress({ ...shippingAddress, zip: e.target.value })
@@ -354,13 +358,13 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor={phoneId} className="block text-base font-medium text-white mb-2">
+                  <label htmlFor={phoneId} className="block text-base font-medium text-zinc-900 mb-2">
                     Phone
                   </label>
                   <input
                     id={phoneId}
                     type="tel"
-                    className="w-full border border-gray-300 text-white rounded p-3"
+                    className="w-full border border-gray-300 text-zinc-900 rounded p-3"
                     value={shippingAddress.phone}
                     onChange={(e) =>
                       setShippingAddress({ ...shippingAddress, phone: e.target.value })
@@ -370,14 +374,14 @@ export default function CheckoutPage() {
                 <div>
                   <label
                     htmlFor={shippingEmailId}
-                    className="block text-base font-medium text-white mb-2"
+                    className="block text-base font-medium text-zinc-900 mb-2"
                   >
                     Email
                   </label>
                   <input
                     id={shippingEmailId}
                     type="email"
-                    className="w-full border border-gray-300 text-white rounded p-3"
+                    className="w-full border border-gray-300 text-zinc-900 rounded p-3"
                     value={shippingAddress.email}
                     onChange={(e) =>
                       setShippingAddress({ ...shippingAddress, email: e.target.value })
@@ -409,7 +413,7 @@ export default function CheckoutPage() {
         {/* Shipping Rates Selection */}
         {shippingStep === 'rates' && (
           <div className="bg-gray-50 border border-gray-200 rounded-xl shadow p-8 max-w-2xl mx-auto mb-8">
-            <h2 className="text-xl font-semibold mb-6 text-white">Select Shipping Method</h2>
+            <h2 className="text-xl font-semibold mb-6 text-zinc-900">Select Shipping Method</h2>
             <div className="space-y-4">
               {shippingRates.map((rate) => {
                 const isSelected = selectedRate && selectedRate.object_id === rate.object_id
@@ -450,7 +454,7 @@ export default function CheckoutPage() {
                 type="button"
                 onClick={() => selectedRate && setShippingStep('payment')}
                 disabled={!selectedRate}
-                className="w-full bg-zinc-900/50 text-zinc-950 text-white py-3 px-4 rounded-lg hover:bg-zinc-100 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
+                className="w-full bg-zinc-900/50 text-white py-3 px-4 rounded-lg hover:bg-zinc-100 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
               >
                 Continue to Payment
               </button>
@@ -503,13 +507,13 @@ export default function CheckoutPage() {
               </div>
 
               <form onSubmit={handleGuestCheckout}>
-                <label htmlFor={guestEmailId} className="block text-sm font-medium text-white mb-2">
+                <label htmlFor={guestEmailId} className="block text-sm font-medium text-zinc-900 mb-2">
                   Email Address
                 </label>
                 <input
                   id={guestEmailId}
                   type="email"
-                  className="w-full border border-gray-300 text-white rounded p-3 mb-2"
+                  className="w-full border border-gray-300 text-zinc-900 rounded p-3 mb-2"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -542,7 +546,7 @@ export default function CheckoutPage() {
 
         {/* Order Summary - Always show */}
         <div className="bg-gray-50 rounded-xl p-8 mb-8">
-          <h2 className="text-xl font-semibold mb-6 text-white">Order Summary</h2>
+          <h2 className="text-xl font-semibold mb-6 text-zinc-900">Order Summary</h2>
           <div className="space-y-6">
             {cart.map((item) => (
               <div
@@ -565,7 +569,7 @@ export default function CheckoutPage() {
                   <p className="text-sm text-zinc-400">Quantity: {item.quantity}</p>
                 </div>
                 <div className="ml-auto text-right">
-                  <p className="text-white font-medium">
+                  <p className="text-zinc-900 font-medium">
                     {formatMoney(
                       quote?.items.find(
                         (qi) =>
@@ -583,12 +587,12 @@ export default function CheckoutPage() {
           <div className="mt-6 pt-6 border-t border-gray-200 space-y-2">
             <div className="flex justify-between items-center text-sm">
               <span className="text-zinc-400">Subtotal</span>
-              <span className="text-white">{formatMoney(subtotal)}</span>
+              <span className="text-zinc-900">{formatMoney(subtotal)}</span>
             </div>
             {selectedRate && (
               <div className="flex justify-between items-center text-sm">
                 <span className="text-zinc-400">Shipping ({selectedRate.servicelevel.name})</span>
-                <span className="text-white">{formatMoney(shippingCost)}</span>
+                <span className="text-zinc-900">{formatMoney(shippingCost)}</span>
               </div>
             )}
             {quote?.discount != null && quote.discount > 0 && (
