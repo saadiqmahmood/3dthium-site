@@ -178,39 +178,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const inheritedImages = collectImages(combo.options, attributes)
       const imageUrl = inheritedImages.all.length > 0 ? inheritedImages.all[0] : null
 
-      // Map attribute values to database columns
-      // The combo.values keys are lowercase with underscores (e.g., "height", "color", "colour")
-      // We need to find which attribute is color/colour, size/height, and material
+      // Map attribute values to database columns using display_name so the stored
+      // value is always human-readable (e.g. "100mm", "Yellow") — no lookup needed later.
       let size: string | null = null
       let color: string | null = null
       let material: string | null = null
 
-      // Find attributes by type and name
       for (const attr of attributes) {
         const attrKey = attr.name.toLowerCase().replace(/\s+/g, '_')
         const attrType = attr.type?.toLowerCase() || ''
         const attrNameLower = attr.name.toLowerCase()
-        const value = combo.values[attrKey]
+        const option = combo.options[attrKey]
+        // Prefer display_name over internal code value
+        const displayValue = option?.display_name?.trim() || option?.value || combo.values[attrKey]
 
-        // Check for size/height
         if (
           attrType === 'size' ||
           attrNameLower.includes('size') ||
           attrNameLower.includes('height')
         ) {
-          size = value || null
-        }
-        // Check for color/colour
-        else if (
+          size = displayValue || null
+        } else if (
           attrType === 'color' ||
           attrNameLower.includes('color') ||
           attrNameLower.includes('colour')
         ) {
-          color = value || null
-        }
-        // Check for material
-        else if (attrType === 'material' || attrNameLower.includes('material')) {
-          material = value || null
+          color = displayValue || null
+        } else if (attrType === 'material' || attrNameLower.includes('material')) {
+          material = displayValue || null
         }
       }
 
