@@ -167,12 +167,10 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
 
   // Helper function to format size display name with unit
   const formatSizeDisplay = (displayName: string): string => {
-    // If it already contains a unit (mm, cm, in, ft, etc.), return as is
-    if (/mm|cm|in|ft|m\b/i.test(displayName)) {
-      return displayName
-    }
-    // Otherwise, add "mm" as default unit
-    return `${displayName}mm`
+    if (/mm|cm|in|ft|m\b/i.test(displayName)) return displayName
+    // Only append mm to bare numbers (e.g. "100" → "100mm"); leave words like "Small" alone
+    if (/^\d+(\.\d+)?$/.test(displayName.trim())) return `${displayName.trim()}mm`
+    return displayName
   }
 
   // Handler for size selection - auto-select first available color
@@ -256,6 +254,9 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
       size: selectedSize,
       color: selectedColor,
       material: selectedMaterial,
+      size_display: selectedSize ? formatSizeDisplay(getDisplayName(selectedSize)) : null,
+      color_display: selectedColor ? getDisplayName(selectedColor) : null,
+      material_display: selectedMaterial ? getDisplayName(selectedMaterial) : null,
       price: displayPrice,
       name: product.name,
       image_url: displayImage,

@@ -9,6 +9,13 @@ import { formatMoney } from '@/lib/format/money'
 import type { CartQuote } from '@/lib/pricing/quoteCart'
 import type { ShippingAddress, ShippingRate } from '@/types'
 
+function humanizeCode(val: string | null | undefined): string | null {
+  if (!val) return null
+  const stripped = val.replace(/^(height|size|colour|color|material|design|weight|width|length|depth)-/i, '')
+  const readable = stripped.replace(/-/g, ' ').trim()
+  return readable.charAt(0).toUpperCase() + readable.slice(1)
+}
+
 export default function CheckoutPage() {
   const { cart } = useCart()
   const { user, loading: authLoading } = useAuth()
@@ -563,8 +570,11 @@ export default function CheckoutPage() {
                 <div>
                   <h3 className="font-semibold text-gray-800">{item.name}</h3>
                   <p className="text-sm text-zinc-400">
-                    {[item.size, item.color, item.material].filter(Boolean).join(' • ') ||
-                      'Base product'}
+                    {[
+                      item.size_display || humanizeCode(item.size),
+                      item.color_display || humanizeCode(item.color),
+                      item.material_display || humanizeCode(item.material),
+                    ].filter(Boolean).join(' • ') || 'Base product'}
                   </p>
                   <p className="text-sm text-zinc-400">Quantity: {item.quantity}</p>
                 </div>

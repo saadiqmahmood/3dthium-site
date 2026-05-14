@@ -7,6 +7,9 @@ export type CartItem = {
   size?: string | null
   color?: string | null
   material?: string | null
+  size_display?: string | null
+  color_display?: string | null
+  material_display?: string | null
   price: number
   name: string
   image_url: string
