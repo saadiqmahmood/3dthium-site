@@ -145,11 +145,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             )
             resolvedShippingCost = Math.round(Number(client_shipping_cost) * 100)
           } else {
-            return res
-              .status(400)
-              .json({
-                message: 'Shipping rate has expired. Please go back and recalculate shipping.',
-              })
+            return res.status(400).json({
+              message: 'Shipping rate has expired. Please go back and recalculate shipping.',
+            })
           }
         }
       } catch (err) {
