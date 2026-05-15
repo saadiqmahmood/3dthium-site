@@ -261,7 +261,7 @@ export default function VariantManager({
       size: variant.size || '',
       color: variant.color || '',
       material: variant.material || '',
-      price_adjustment: variant.price_adjustment,
+      price_adjustment: Number(variant.price_adjustment),
       sku: variant.sku || '',
       is_available: variant.is_available,
     })
@@ -272,8 +272,8 @@ export default function VariantManager({
     setEditFormData({})
   }
 
-  const calculateFinalPrice = (priceAdjustment: number) => {
-    return basePrice + priceAdjustment
+  const calculateFinalPrice = (priceAdjustment: number | string) => {
+    return Number(basePrice) + Number(priceAdjustment)
   }
 
   // Helper function to get display name for a value

@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import ImageUpload from './ImageUpload'
 import { authFetch } from '@/lib/api/authFetch'
 
@@ -34,8 +34,8 @@ export default function AttributeBuilder({
   onAttributesChange,
 }: AttributeBuilderProps) {
   const [attributes, setAttributes] = useState<Attribute[]>(initialAttributes)
-  const isEditingRef = { current: false }
-  const lastSyncedLengthRef = { current: initialAttributes.length }
+  const isEditingRef = useRef(false)
+  const lastSyncedLengthRef = useRef(initialAttributes.length)
 
   // Only sync from props when not actively editing
   // This prevents the disappearing issue when adding new attributes
@@ -532,7 +532,7 @@ export default function AttributeBuilder({
 
                   {attr.options.map((option, optIdx) => (
                     <div
-                      key={option.value || option.displayName}
+                      key={`attr-${attrIdx}-opt-${optIdx}`}
                       className="grid grid-cols-12 gap-3 items-start p-4 bg-gray-50 rounded-lg border border-gray-200"
                     >
                       {/* Value - Hidden, auto-generated from display name */}

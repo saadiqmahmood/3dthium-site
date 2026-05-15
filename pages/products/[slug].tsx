@@ -81,6 +81,8 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   const [quantity, setQuantity] = useState(1)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
   const [mainImage, setMainImage] = useState<string | null>(null)
+  const [showBulkOrder, setShowBulkOrder] = useState(false)
+  const [bulkQuantities, setBulkQuantities] = useState<Record<string, number>>({})
 
   // Preload all variant images on mount so color switching is instant
   useEffect(() => {
@@ -215,6 +217,34 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   // Get display image (only changes when color is selected)
   // Use manually selected main image if set, otherwise use calculated image
   const displayImage = mainImage || getDisplayImage()
+
+  const handleBulkAddToCart = () => {
+    const itemsToAdd = variants.filter((v) => (bulkQuantities[v.id] || 0) > 0)
+    if (!itemsToAdd.length) return
+
+    for (const variant of itemsToAdd) {
+      const qty = bulkQuantities[variant.id] || 0
+      addToCart({
+        product_id: product.id,
+        variant_id: variant.id,
+        quantity: qty,
+        size: variant.size || null,
+        color: variant.color || null,
+        material: variant.material || null,
+        size_display: variant.size || null,
+        color_display: variant.color || null,
+        material_display: variant.material || null,
+        price: product.base_price + variant.price_adjustment,
+        name: product.name,
+        image_url: variant.image_url || product.thumbnail_url || '',
+      })
+    }
+
+    const count = itemsToAdd.length
+    setToast({ message: `Added ${count} variant${count > 1 ? 's' : ''} to cart`, type: 'success' })
+    setBulkQuantities({})
+    setShowBulkOrder(false)
+  }
 
   const handleAddToCart = () => {
     // Require all attributes that have variants to be selected
@@ -638,6 +668,118 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               </div>
             </div>
 
+            {/* Multi-variant bulk order */}
+            {variants.length > 1 && (
+              <div className="border-t border-zinc-100 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowBulkOrder(!showBulkOrder)}
+                  className="flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+                >
+                  <svg
+                    aria-hidden="true"
+                    focusable="false"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className={`w-4 h-4 transition-transform ${showBulkOrder ? 'rotate-90' : ''}`}
+                  >
+                    <path fillRule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+                  </svg>
+                  Order multiple variants
+                </button>
+
+                {showBulkOrder && (
+                  <div className="mt-4 border border-zinc-100 rounded-xl overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-zinc-50 border-b border-zinc-100">
+                          <tr>
+                            {variantOptions.sizes.length > 0 && (
+                              <th className="px-4 py-2.5 text-left font-medium text-zinc-600">Size</th>
+                            )}
+                            {variantOptions.colors.length > 0 && (
+                              <th className="px-4 py-2.5 text-left font-medium text-zinc-600">Colour</th>
+                            )}
+                            {variantOptions.materials.length > 0 && (
+                              <th className="px-4 py-2.5 text-left font-medium text-zinc-600">Material</th>
+                            )}
+                            <th className="px-4 py-2.5 text-left font-medium text-zinc-600">Price</th>
+                            <th className="px-4 py-2.5 text-left font-medium text-zinc-600 w-28">Qty</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-50">
+                          {variants.map((variant) => {
+                            const variantPrice = product.base_price + variant.price_adjustment
+                            const qty = bulkQuantities[variant.id] || 0
+                            return (
+                              <tr key={variant.id} className={qty > 0 ? 'bg-emerald-50/50' : 'hover:bg-zinc-50/50'}>
+                                {variantOptions.sizes.length > 0 && (
+                                  <td className="px-4 py-2.5 text-zinc-700">{variant.size || '—'}</td>
+                                )}
+                                {variantOptions.colors.length > 0 && (
+                                  <td className="px-4 py-2.5 text-zinc-700">{variant.color || '—'}</td>
+                                )}
+                                {variantOptions.materials.length > 0 && (
+                                  <td className="px-4 py-2.5 text-zinc-700">{variant.material || '—'}</td>
+                                )}
+                                <td className="px-4 py-2.5 text-zinc-700">{formatMoney(variantPrice)}</td>
+                                <td className="px-4 py-2.5">
+                                  <div className="flex items-center border border-zinc-200 rounded-lg overflow-hidden w-24">
+                                    <button
+                                      type="button"
+                                      onClick={() => setBulkQuantities((prev) => ({ ...prev, [variant.id]: Math.max(0, (prev[variant.id] || 0) - 1) }))}
+                                      className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:bg-zinc-100 transition-colors text-base"
+                                    >
+                                      −
+                                    </button>
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      max={99}
+                                      value={qty === 0 ? '' : qty}
+                                      placeholder="0"
+                                      onChange={(e) => {
+                                        const val = Math.min(99, Math.max(0, parseInt(e.target.value) || 0))
+                                        setBulkQuantities((prev) => ({ ...prev, [variant.id]: val }))
+                                      }}
+                                      className="w-10 text-center text-xs font-medium text-zinc-900 bg-transparent focus:outline-none"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setBulkQuantities((prev) => ({ ...prev, [variant.id]: Math.min(99, (prev[variant.id] || 0) + 1) }))}
+                                      className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:bg-zinc-100 transition-colors text-base"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                    {Object.values(bulkQuantities).some((q) => q > 0) && (
+                      <div className="px-4 py-3 border-t border-zinc-100 bg-white flex items-center justify-between">
+                        <p className="text-sm text-zinc-500 font-light">
+                          {Object.values(bulkQuantities).filter((q) => q > 0).length} variant
+                          {Object.values(bulkQuantities).filter((q) => q > 0).length !== 1 ? 's' : ''} selected
+                        </p>
+                        <button
+                          type="button"
+                          onClick={handleBulkAddToCart}
+                          className="bg-zinc-900 text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-zinc-800 active:scale-[0.99] transition-all"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Customisable badge */}
             {product.customizable && (
               <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
@@ -693,31 +835,7 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
   }
 
   try {
-    console.log(`[getStaticProps] Starting for slug: ${slug}`)
-    console.log(`[getStaticProps] Supabase URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL}`)
-    console.log(`[getStaticProps] Anon key exists: ${!!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`)
-
-    // Test basic connection first
-    const { data: testData, error: testError } = await supabaseServer
-      .from('products')
-      .select('id, name, slug')
-      .eq('slug', slug)
-      .eq('is_active', true)
-      .single()
-
-    if (testError) {
-      console.error(`[getStaticProps] Basic query error:`, testError)
-      return { notFound: true }
-    }
-
-    if (!testData) {
-      console.log(`[getStaticProps] Product not found for slug: ${slug}`)
-      return { notFound: true }
-    }
-
-    console.log(`[getStaticProps] Basic query successful for: ${testData.name}`)
-
-    // Now try the full query
+    // Fetch product
     const { data: product, error: productError } = await supabaseServer
       .from('products')
       .select(`
@@ -744,69 +862,54 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
       .eq('is_active', true)
       .single()
 
-    if (productError) {
-      console.error(`[getStaticProps] Full query error:`, productError)
+    if (productError || !product) {
       return { notFound: true }
     }
 
-    console.log(`[getStaticProps] Full query successful for: ${product.name}`)
+    // Fetch variants and attributes (with their options) in parallel
+    const [variantsResult, attributesResult] = await Promise.all([
+      supabaseServer
+        .from('product_variants')
+        .select('*')
+        .eq('product_id', product.id)
+        .eq('is_available', true)
+        .order('created_at', { ascending: true }),
+      supabaseServer
+        .from('product_attributes')
+        .select('*, options:product_attribute_options(*)')
+        .eq('product_id', product.id)
+        .order('display_order', { ascending: true }),
+    ])
 
-    // Fetch variants
-    const { data: variants, error: variantsError } = await supabaseServer
-      .from('product_variants')
-      .select('*')
-      .eq('product_id', product.id)
-      .eq('is_available', true)
-      .order('created_at', { ascending: true })
-
-    if (variantsError) {
-      console.error(`[getStaticProps] Variants error:`, variantsError)
-      // Don't return notFound for variants error, just use empty array
-    }
-
-    console.log(
-      `[getStaticProps] Variants query completed, found: ${variants?.length || 0} variants`
-    )
-
-    // Fetch product attributes and options to get display names
-    const { data: attributes, error: attrError } = await supabaseServer
-      .from('product_attributes')
-      .select('*')
-      .eq('product_id', product.id)
-      .order('display_order', { ascending: true })
+    const variants = variantsResult.data || []
+    const attributes = attributesResult.data || []
 
     const valueToDisplayNameMap: Record<string, string> = {}
-    let attributeOptions: Array<{
+    const attributeOptions: Array<{
       value: string
       display_name: string
       hex_color?: string | null
       attribute_id: string
     }> = []
 
-    if (!attrError && attributes && attributes.length > 0) {
-      const attributeIds = attributes.map((attr) => attr.id)
-      const { data: options, error: optError } = await supabaseServer
-        .from('product_attribute_options')
-        .select('*')
-        .in('attribute_id', attributeIds)
-
-      if (!optError && options) {
-        attributeOptions = options
-        // Create mapping from value to display_name and hex_color
-        options.forEach(
-          (opt: { value: string; display_name: string; hex_color?: string | null }) => {
-            valueToDisplayNameMap[opt.value] = opt.display_name
-          }
-        )
+    for (const attr of attributes) {
+      for (const opt of (attr.options || []) as Array<{
+        value: string
+        display_name: string
+        hex_color?: string | null
+        attribute_id: string
+      }>) {
+        valueToDisplayNameMap[opt.value] = opt.display_name
+        attributeOptions.push({ ...opt, attribute_id: attr.id })
       }
     }
 
     // Calculate price range
     let minPrice = product.base_price
     let maxPrice = product.base_price
-    const hasVariants = Boolean(variants && variants.length > 0)
+    const hasVariants = variants.length > 0
 
-    if (hasVariants && variants) {
+    if (hasVariants) {
       const variantPrices = variants.map(
         (v: { price_adjustment: number }) => product.base_price + v.price_adjustment
       )
@@ -816,13 +919,13 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
 
     // Extract unique options for display (using display names, but store values for matching)
     const uniqueSizeValues = Array.from(
-      new Set(variants?.map((v: { size?: string }) => v.size).filter(Boolean) || [])
+      new Set(variants.map((v: { size?: string }) => v.size).filter(Boolean))
     ) as string[]
     const uniqueColorValues = Array.from(
-      new Set(variants?.map((v: { color?: string }) => v.color).filter(Boolean) || [])
+      new Set(variants.map((v: { color?: string }) => v.color).filter(Boolean))
     ) as string[]
     const uniqueMaterialValues = Array.from(
-      new Set(variants?.map((v: { material?: string }) => v.material).filter(Boolean) || [])
+      new Set(variants.map((v: { material?: string }) => v.material).filter(Boolean))
     ) as string[]
 
     // Map values to display names and hex colors
@@ -854,9 +957,6 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
       displayName: valueToDisplayNameMap[value] || value,
     }))
 
-    console.log(`[getStaticProps] Returning data for: ${product.name}`)
-    console.log(`[getStaticProps] Product categories:`, product.categories)
-
     // Handle category data safely
     const categoryData =
       product.categories && Array.isArray(product.categories) && product.categories.length > 0
@@ -865,8 +965,8 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
 
     return {
       props: {
-        product: { ...product, category: categoryData }, // Flatten category
-        variants: variants || [],
+        product: { ...product, category: categoryData },
+        variants,
         variantOptions: {
           sizes: sizeOptions,
           colors: colorOptions,
