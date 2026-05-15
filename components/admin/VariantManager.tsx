@@ -38,7 +38,6 @@ export default function VariantManager({
 
   // Bulk selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [bulkPrice, setBulkPrice] = useState('')
   const [bulkApplying, setBulkApplying] = useState(false)
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: fetchVariants and fetchAttributeOptions are stable async fetchers
@@ -294,55 +293,6 @@ export default function VariantManager({
     }
   }
 
-  const handleBulkSetAvailability = async (available: boolean) => {
-    if (!selectedIds.size) return
-    setBulkApplying(true)
-    try {
-      await Promise.all(
-        Array.from(selectedIds).map((id) =>
-          authFetch(`/api/admin/product-variants/${productId}/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ is_available: available }),
-          })
-        )
-      )
-      setToast({ message: `${selectedIds.size} variant${selectedIds.size > 1 ? 's' : ''} updated`, type: 'success' })
-      setSelectedIds(new Set())
-      fetchVariants()
-    } catch {
-      setToast({ message: 'Failed to update some variants', type: 'error' })
-    } finally {
-      setBulkApplying(false)
-    }
-  }
-
-  const handleBulkSetPrice = async () => {
-    if (!selectedIds.size || bulkPrice === '') return
-    const adj = Number.parseFloat(bulkPrice)
-    if (Number.isNaN(adj)) return
-    setBulkApplying(true)
-    try {
-      await Promise.all(
-        Array.from(selectedIds).map((id) =>
-          authFetch(`/api/admin/product-variants/${productId}/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ price_adjustment: adj }),
-          })
-        )
-      )
-      setToast({ message: `Price updated on ${selectedIds.size} variant${selectedIds.size > 1 ? 's' : ''}`, type: 'success' })
-      setSelectedIds(new Set())
-      setBulkPrice('')
-      fetchVariants()
-    } catch {
-      setToast({ message: 'Failed to update prices', type: 'error' })
-    } finally {
-      setBulkApplying(false)
-    }
-  }
-
   const handleBulkDelete = async () => {
     if (!selectedIds.size) return
     if (!confirm(`Delete ${selectedIds.size} variant${selectedIds.size > 1 ? 's' : ''}? This cannot be undone.`)) return
@@ -535,55 +485,18 @@ export default function VariantManager({
           <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
             {/* Bulk action bar */}
             {selectedIds.size > 0 && (
-              <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-emerald-50 border-b border-emerald-100">
-                <span className="text-sm font-medium text-emerald-800">
-                  {selectedIds.size} selected
+              <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border-b border-red-100">
+                <span className="text-sm font-light text-red-800">
+                  {selectedIds.size} variant{selectedIds.size > 1 ? 's' : ''} selected
                 </span>
-                <div className="flex items-center gap-2 ml-auto flex-wrap">
-                  {/* Bulk price */}
-                  <div className="flex items-center gap-1.5">
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="Price adj."
-                      value={bulkPrice}
-                      onChange={(e) => setBulkPrice(e.target.value)}
-                      className="w-28 border border-gray-200 rounded-lg px-2 py-1.5 text-sm font-light text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-                    />
-                    <button
-                      type="button"
-                      disabled={bulkApplying || bulkPrice === ''}
-                      onClick={handleBulkSetPrice}
-                      className="px-3 py-1.5 bg-white border border-gray-200 text-zinc-700 text-sm font-light rounded-lg hover:bg-gray-50 disabled:opacity-40 transition-colors"
-                    >
-                      Set Price
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={bulkApplying}
-                    onClick={() => handleBulkSetAvailability(true)}
-                    className="px-3 py-1.5 bg-white border border-gray-200 text-emerald-700 text-sm font-light rounded-lg hover:bg-emerald-50 disabled:opacity-40 transition-colors"
-                  >
-                    Enable
-                  </button>
-                  <button
-                    type="button"
-                    disabled={bulkApplying}
-                    onClick={() => handleBulkSetAvailability(false)}
-                    className="px-3 py-1.5 bg-white border border-gray-200 text-zinc-600 text-sm font-light rounded-lg hover:bg-gray-50 disabled:opacity-40 transition-colors"
-                  >
-                    Disable
-                  </button>
-                  <button
-                    type="button"
-                    disabled={bulkApplying}
-                    onClick={handleBulkDelete}
-                    className="px-3 py-1.5 bg-white border border-red-200 text-red-600 text-sm font-light rounded-lg hover:bg-red-50 disabled:opacity-40 transition-colors"
-                  >
-                    Delete
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  disabled={bulkApplying}
+                  onClick={handleBulkDelete}
+                  className="ml-auto px-4 py-1.5 bg-red-600 text-white text-sm font-light rounded-lg hover:bg-red-700 disabled:opacity-40 transition-colors"
+                >
+                  {bulkApplying ? 'Deleting…' : 'Delete Selected'}
+                </button>
               </div>
             )}
             <table className="w-full">
