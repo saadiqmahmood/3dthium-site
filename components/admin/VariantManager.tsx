@@ -36,6 +36,11 @@ export default function VariantManager({
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editFormData, setEditFormData] = useState<Record<string, unknown>>({})
 
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkPrice, setBulkPrice] = useState('')
+  const [bulkApplying, setBulkApplying] = useState(false)
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: fetchVariants and fetchAttributeOptions are stable async fetchers
   useEffect(() => {
     if (productId) {
@@ -272,6 +277,92 @@ export default function VariantManager({
     setEditFormData({})
   }
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === variants.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(variants.map((v) => v.id)))
+    }
+  }
+
+  const handleBulkSetAvailability = async (available: boolean) => {
+    if (!selectedIds.size) return
+    setBulkApplying(true)
+    try {
+      await Promise.all(
+        Array.from(selectedIds).map((id) =>
+          authFetch(`/api/admin/product-variants/${productId}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_available: available }),
+          })
+        )
+      )
+      setToast({ message: `${selectedIds.size} variant${selectedIds.size > 1 ? 's' : ''} updated`, type: 'success' })
+      setSelectedIds(new Set())
+      fetchVariants()
+    } catch {
+      setToast({ message: 'Failed to update some variants', type: 'error' })
+    } finally {
+      setBulkApplying(false)
+    }
+  }
+
+  const handleBulkSetPrice = async () => {
+    if (!selectedIds.size || bulkPrice === '') return
+    const adj = Number.parseFloat(bulkPrice)
+    if (Number.isNaN(adj)) return
+    setBulkApplying(true)
+    try {
+      await Promise.all(
+        Array.from(selectedIds).map((id) =>
+          authFetch(`/api/admin/product-variants/${productId}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ price_adjustment: adj }),
+          })
+        )
+      )
+      setToast({ message: `Price updated on ${selectedIds.size} variant${selectedIds.size > 1 ? 's' : ''}`, type: 'success' })
+      setSelectedIds(new Set())
+      setBulkPrice('')
+      fetchVariants()
+    } catch {
+      setToast({ message: 'Failed to update prices', type: 'error' })
+    } finally {
+      setBulkApplying(false)
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (!selectedIds.size) return
+    if (!confirm(`Delete ${selectedIds.size} variant${selectedIds.size > 1 ? 's' : ''}? This cannot be undone.`)) return
+    setBulkApplying(true)
+    try {
+      await Promise.all(
+        Array.from(selectedIds).map((id) =>
+          authFetch(`/api/admin/product-variants/${productId}/${id}`, { method: 'DELETE' })
+        )
+      )
+      setToast({ message: `${selectedIds.size} variant${selectedIds.size > 1 ? 's' : ''} deleted`, type: 'success' })
+      setSelectedIds(new Set())
+      fetchVariants()
+    } catch {
+      setToast({ message: 'Failed to delete some variants', type: 'error' })
+    } finally {
+      setBulkApplying(false)
+    }
+  }
+
   const calculateFinalPrice = (priceAdjustment: number | string) => {
     return Number(basePrice) + Number(priceAdjustment)
   }
@@ -442,9 +533,70 @@ export default function VariantManager({
           </div>
         ) : (
           <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+            {/* Bulk action bar */}
+            {selectedIds.size > 0 && (
+              <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-emerald-50 border-b border-emerald-100">
+                <span className="text-sm font-medium text-emerald-800">
+                  {selectedIds.size} selected
+                </span>
+                <div className="flex items-center gap-2 ml-auto flex-wrap">
+                  {/* Bulk price */}
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="Price adj."
+                      value={bulkPrice}
+                      onChange={(e) => setBulkPrice(e.target.value)}
+                      className="w-28 border border-gray-200 rounded-lg px-2 py-1.5 text-sm font-light text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                    />
+                    <button
+                      type="button"
+                      disabled={bulkApplying || bulkPrice === ''}
+                      onClick={handleBulkSetPrice}
+                      className="px-3 py-1.5 bg-white border border-gray-200 text-zinc-700 text-sm font-light rounded-lg hover:bg-gray-50 disabled:opacity-40 transition-colors"
+                    >
+                      Set Price
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={bulkApplying}
+                    onClick={() => handleBulkSetAvailability(true)}
+                    className="px-3 py-1.5 bg-white border border-gray-200 text-emerald-700 text-sm font-light rounded-lg hover:bg-emerald-50 disabled:opacity-40 transition-colors"
+                  >
+                    Enable
+                  </button>
+                  <button
+                    type="button"
+                    disabled={bulkApplying}
+                    onClick={() => handleBulkSetAvailability(false)}
+                    className="px-3 py-1.5 bg-white border border-gray-200 text-zinc-600 text-sm font-light rounded-lg hover:bg-gray-50 disabled:opacity-40 transition-colors"
+                  >
+                    Disable
+                  </button>
+                  <button
+                    type="button"
+                    disabled={bulkApplying}
+                    onClick={handleBulkDelete}
+                    className="px-3 py-1.5 bg-white border border-red-200 text-red-600 text-sm font-light rounded-lg hover:bg-red-50 disabled:opacity-40 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )}
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
+                  <th className="px-4 py-3 w-8">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.size === variants.length && variants.length > 0}
+                      onChange={toggleSelectAll}
+                      className="rounded w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                    />
+                  </th>
                   <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">Size</th>
                   <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">Color</th>
                   <th className="px-4 py-3 text-left text-sm font-light text-zinc-700">Material</th>
@@ -461,10 +613,18 @@ export default function VariantManager({
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {variants.map((variant) => (
-                  <tr key={variant.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={variant.id} className={`transition-colors ${selectedIds.has(variant.id) ? 'bg-emerald-50/60' : 'hover:bg-gray-50'}`}>
                     {editingId === variant.id ? (
                       // Edit mode
                       <>
+                        <td className="px-4 py-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(variant.id)}
+                            onChange={() => toggleSelect(variant.id)}
+                            className="rounded w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                          />
+                        </td>
                         <td className="px-4 py-3">
                           <input
                             type="text"
@@ -559,6 +719,14 @@ export default function VariantManager({
                     ) : (
                       // View mode
                       <>
+                        <td className="px-4 py-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(variant.id)}
+                            onChange={() => toggleSelect(variant.id)}
+                            className="rounded w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                          />
+                        </td>
                         <td className="px-4 py-3 text-sm text-zinc-900 font-light">
                           {getDisplayName(variant.size)}
                         </td>
