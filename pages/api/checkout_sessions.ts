@@ -40,6 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       promo_code,
       shipping_address,
       shipping_rate_id,
+      shipping_cost: client_shipping_cost,
       shipping_provider,
       shipping_service,
     } = req.body as {
@@ -60,6 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         email?: string
       }
       shipping_rate_id?: string
+      shipping_cost?: number
       shipping_provider?: string
       shipping_service?: string
     }
@@ -131,14 +133,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const shippoRes = await fetch(`${SHIPPO_API_URL}/rates/${shipping_rate_id}`, {
           headers: { Authorization: `ShippoToken ${process.env.SHIPPO_API_KEY}` },
         })
-        if (!shippoRes.ok) {
-          return res.status(400).json({ message: 'Invalid shipping rate' })
+        if (shippoRes.ok) {
+          const rate = await shippoRes.json()
+          resolvedShippingCost = Math.round(Number(rate.amount) * 100)
+        } else {
+          // Rate may have expired — fall back to client-provided cost if available
+          if (client_shipping_cost != null && client_shipping_cost > 0) {
+            log.warn(
+              'Shippo rate verification failed, falling back to client cost:',
+              shipping_rate_id
+            )
+            resolvedShippingCost = Math.round(Number(client_shipping_cost) * 100)
+          } else {
+            return res
+              .status(400)
+              .json({
+                message: 'Shipping rate has expired. Please go back and recalculate shipping.',
+              })
+          }
         }
-        const rate = await shippoRes.json()
-        resolvedShippingCost = Math.round(Number(rate.amount) * 100)
       } catch (err) {
         log.error('Failed to fetch Shippo rate:', err)
-        return res.status(400).json({ message: 'Could not verify shipping rate' })
+        // Network error — fall back to client-provided cost if available
+        if (client_shipping_cost != null && client_shipping_cost > 0) {
+          resolvedShippingCost = Math.round(Number(client_shipping_cost) * 100)
+        } else {
+          return res
+            .status(400)
+            .json({ message: 'Could not verify shipping rate. Please try again.' })
+        }
       }
     }
 
