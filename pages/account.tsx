@@ -9,7 +9,7 @@ import { formatMoney } from '@/lib/format/money'
 
 // Define types for order and order item
 interface Product {
-  title: string
+  name: string
 }
 interface ProductVariant {
   color: string
@@ -122,7 +122,7 @@ export default function AccountPage() {
             size,
             price_at_purchase,
             products (
-              title
+              name
             ),
             product_variants (
               color,
@@ -147,7 +147,7 @@ export default function AccountPage() {
         quantity: number
         size: string
         price_at_purchase: number
-        products?: { title?: string } | { title?: string }[]
+        products?: { name?: string } | { name?: string }[]
         product_variants?:
           | { color?: string; image_url?: string }
           | { color?: string; image_url?: string }[]
@@ -168,16 +168,16 @@ export default function AccountPage() {
           order_items: Array.isArray(order.order_items)
             ? order.order_items.map((item: SupabaseOrderItem) => {
                 // Handle both array and object for products
-                let productObj: { title: string } = { title: '' }
+                let productObj: { name: string } = { name: '' }
                 if (item.products) {
                   if (Array.isArray(item.products)) {
                     productObj = {
-                      title:
-                        typeof item.products[0]?.title === 'string' ? item.products[0].title : '',
+                      name:
+                        typeof item.products[0]?.name === 'string' ? item.products[0].name : '',
                     }
                   } else {
                     productObj = {
-                      title: typeof item.products.title === 'string' ? item.products.title : '',
+                      name: typeof item.products.name === 'string' ? item.products.name : '',
                     }
                   }
                 }
@@ -232,7 +232,7 @@ export default function AccountPage() {
     setReorderLoading(true)
     try {
       const cart = order.order_items.map((item: OrderItem) => ({
-        product: { title: item.products?.title },
+        product: { name: item.products?.name },
         variant: {
           color: item.product_variants?.color,
           image_url: item.product_variants?.image_url,
@@ -514,12 +514,12 @@ export default function AccountPage() {
                             width={80}
                             height={80}
                             src={item.product_variants?.image_url || ''}
-                            alt={item.products?.title || ''}
+                            alt={item.products?.name || ''}
                             className="w-full h-full object-cover"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-zinc-900 mb-2">{item.products?.title}</h4>
+                          <h4 className="font-medium text-zinc-900 mb-2">{item.products?.name}</h4>
                           <div className="flex flex-wrap gap-3 text-base text-zinc-600 font-light">
                             <span>Color: {item.product_variants?.color}</span>
                             <span>•</span>
