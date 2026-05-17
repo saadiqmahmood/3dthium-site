@@ -93,12 +93,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const processedVariants =
       variants?.map((variant) => ({
         ...variant,
-        final_price: product.base_price + variant.price_adjustment,
+        final_price: Number(product.base_price) + Number(variant.price_adjustment),
       })) || []
 
     // Calculate price range
-    let minPrice = product.base_price
-    let maxPrice = product.base_price
+    let minPrice = Number(product.base_price)
+    let maxPrice = Number(product.base_price)
 
     if (processedVariants.length > 0) {
       const prices = processedVariants.map((v) => v.final_price)

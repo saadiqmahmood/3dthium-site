@@ -28,7 +28,8 @@ export function computeDiscount(
   promo: Pick<PromoCode, 'type' | 'value'>,
   orderTotal: number
 ): number {
-  const raw = promo.type === 'percentage' ? (orderTotal * promo.value) / 100 : promo.value
+  const val = Number(promo.value)
+  const raw = promo.type === 'percentage' ? (orderTotal * val) / 100 : val
   return Math.min(Math.max(raw, 0), orderTotal)
 }
 
@@ -42,11 +43,11 @@ export function validatePromo(
     return { valid: false, message: 'Promo code has expired' }
   }
 
-  if (promo.max_uses !== null && promo.uses >= promo.max_uses) {
+  if (promo.max_uses !== null && Number(promo.uses) >= Number(promo.max_uses)) {
     return { valid: false, message: 'Promo code usage limit reached' }
   }
 
-  if (promo.min_order_value !== null && orderTotal < promo.min_order_value) {
+  if (promo.min_order_value !== null && orderTotal < Number(promo.min_order_value)) {
     return {
       valid: false,
       message: `Minimum order value for this code is £${promo.min_order_value}`,
