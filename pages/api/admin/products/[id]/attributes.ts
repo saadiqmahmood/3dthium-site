@@ -380,7 +380,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               // Note: We need to match by the option values (not display names)
               // Variants store option values, which are normalized
               const { data: orphanedVariants } = await supabase
-                .from('product_variants_new')
+                .from('product_variants')
                 .select('id, size, color, material, sku')
                 .eq('product_id', productId)
 
@@ -397,7 +397,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 // Delete orphaned variants
                 const variantIds = variantsToDelete.map((v) => v.id)
                 const { error: deleteVariantError } = await supabase
-                  .from('product_variants_new')
+                  .from('product_variants')
                   .delete()
                   .in('id', variantIds)
 
@@ -440,7 +440,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       // First, delete all auto-generated variants
       await supabase
-        .from('product_variants_new')
+        .from('product_variants')
         .delete()
         .eq('product_id', productId)
         .eq('auto_generated', true)

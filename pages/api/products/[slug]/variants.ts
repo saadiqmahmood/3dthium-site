@@ -72,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const processedVariants =
       variants?.map((variant) => ({
         ...variant,
-        final_price: product.base_price + variant.price_adjustment,
+        final_price: Number(product.base_price) + Number(variant.price_adjustment),
       })) || []
 
     // Get unique attribute values for variant selectors

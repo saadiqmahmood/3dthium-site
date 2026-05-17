@@ -144,8 +144,8 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
 
   // Calculate display price - dynamic based on selections
   const displayPrice = selectedVariant
-    ? product.base_price + selectedVariant.price_adjustment
-    : product.base_price
+    ? Number(product.base_price) + Number(selectedVariant.price_adjustment)
+    : Number(product.base_price)
 
   // Check if we have an exact variant match (all selected attributes match the variant exactly)
   const hasCompleteVariantMatch =
@@ -234,7 +234,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
         size_display: variant.size || null,
         color_display: variant.color || null,
         material_display: variant.material || null,
-        price: product.base_price + variant.price_adjustment,
+        price: Number(product.base_price) + Number(variant.price_adjustment),
         name: product.name,
         image_url: variant.image_url || product.thumbnail_url || '',
       })
@@ -710,7 +710,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                         </thead>
                         <tbody className="divide-y divide-zinc-50">
                           {variants.map((variant) => {
-                            const variantPrice = product.base_price + variant.price_adjustment
+                            const variantPrice = Number(product.base_price) + Number(variant.price_adjustment)
                             const qty = bulkQuantities[variant.id] || 0
                             return (
                               <tr key={variant.id} className={qty > 0 ? 'bg-emerald-50/50' : 'hover:bg-zinc-50/50'}>
@@ -905,13 +905,13 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
     }
 
     // Calculate price range
-    let minPrice = product.base_price
-    let maxPrice = product.base_price
+    let minPrice = Number(product.base_price)
+    let maxPrice = Number(product.base_price)
     const hasVariants = variants.length > 0
 
     if (hasVariants) {
       const variantPrices = variants.map(
-        (v: { price_adjustment: number }) => product.base_price + v.price_adjustment
+        (v: { price_adjustment: number }) => Number(product.base_price) + Number(v.price_adjustment)
       )
       minPrice = Math.min(...variantPrices)
       maxPrice = Math.max(...variantPrices)

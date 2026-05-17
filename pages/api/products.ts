@@ -81,11 +81,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const productVariants = variantsByProduct[product.id] || []
 
       // Calculate price range
-      let minPrice = product.base_price
-      let maxPrice = product.base_price
+      let minPrice = Number(product.base_price)
+      let maxPrice = Number(product.base_price)
 
       if (productVariants.length > 0) {
-        const prices = productVariants.map((v) => product.base_price + v.price_adjustment)
+        const prices = productVariants.map(
+          (v) => Number(product.base_price) + Number(v.price_adjustment)
+        )
         minPrice = Math.min(...prices)
         maxPrice = Math.max(...prices)
       }
