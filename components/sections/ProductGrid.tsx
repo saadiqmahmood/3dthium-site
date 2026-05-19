@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+import { useCallback, useEffect, useState } from 'react'
 import ProductCard from '@/components/ui/ProductCard'
 import type { ProductVariantNew } from '@/types'
 
-// New product type from products_new API
 type ProductNew = {
   id: string
   name: string
@@ -11,187 +11,275 @@ type ProductNew = {
   base_price: number
   thumbnail_url: string
   customizable: boolean
-  category: {
-    name: string
-    slug: string
-  }
+  category: { id: string; name: string; slug: string }
   variants: ProductVariantNew[]
-  price_range: {
-    min: number
-    max: number
-    has_variants: boolean
-  }
+  price_range: { min: number; max: number; has_variants: boolean }
   created_at: string
 }
 
+type Category = {
+  id: string
+  name: string
+  slug: string
+  parent_id: string | null
+}
+
 export default function ProductGrid() {
-  const [selectedCategory, setSelectedCategory] = useState('All')
+  const router = useRouter()
   const [products, setProducts] = useState<ProductNew[]>([])
-  const [categories, setCategories] = useState<string[]>(['All'])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
-    console.log('🔄 [ProductGrid] Component mounted, fetching products...')
-    const fetchProducts = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        console.log('🔄 [ProductGrid] Making API call to /api/products...')
-        const res = await fetch('/api/products')
+    const cat = router.query.cat
+    setSelectedSlug(typeof cat === 'string' ? cat : null)
+  }, [router.query.cat])
 
-        if (!res.ok) {
-          console.error('❌ [ProductGrid] API response not ok:', res.status, res.statusText)
-          setError('Failed to fetch products')
-          return
-        }
-
-        const data = await res.json()
-        console.log('✅ [ProductGrid] Products fetched successfully:', data.products.length)
-        setProducts(data.products)
-
-        // Extract unique categories from products
-        const uniqueCategories = [
-          'All',
-          ...new Set(data.products.map((p: ProductNew) => p.category.name)),
-        ] as string[]
-        setCategories(uniqueCategories)
-      } catch (error) {
-        console.error('❌ [ProductGrid] Error fetching products:', error)
-        setError('Failed to fetch products')
-      } finally {
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/products').then((r) => r.json()),
+      fetch('/api/categories').then((r) => r.json()),
+    ])
+      .then(([prodData, catData]) => {
+        setProducts(prodData.products || [])
+        setCategories(catData.categories || [])
         setLoading(false)
-      }
-    }
-
-    fetchProducts()
+      })
+      .catch(() => setLoading(false))
   }, [])
 
-  const filteredProducts =
-    selectedCategory === 'All'
-      ? products
-      : products.filter((product) => product.category.name === selectedCategory)
+  const selectCategory = useCallback(
+    (slug: string | null) => {
+      setSelectedSlug(slug)
+      setSidebarOpen(false)
+      router.replace({ pathname: '/products', query: slug ? { cat: slug } : {} }, undefined, {
+        shallow: true,
+      })
+    },
+    [router]
+  )
+
+  const topLevel = categories.filter((c) => !c.parent_id)
+  const childrenOf = (parentId: string) => categories.filter((c) => c.parent_id === parentId)
+
+  const countFor = (slug: string, parentId?: string) => {
+    const childSlugs = parentId ? childrenOf(parentId).map((c) => c.slug) : []
+    return products.filter((p) => p.category.slug === slug || childSlugs.includes(p.category.slug))
+      .length
+  }
+
+  const isParentActive = (catId: string) => childrenOf(catId).some((s) => s.slug === selectedSlug)
+
+  const filteredProducts = selectedSlug
+    ? (() => {
+        const cat = categories.find((c) => c.slug === selectedSlug)
+        const childSlugs = cat && !cat.parent_id ? childrenOf(cat.id).map((c) => c.slug) : []
+        return products.filter(
+          (p) => p.category.slug === selectedSlug || childSlugs.includes(p.category.slug)
+        )
+      })()
+    : products
+
+  const sidebarTree = (
+    <div className="space-y-0.5">
+      <button
+        type="button"
+        onClick={() => selectCategory(null)}
+        className={`w-full text-left py-2.5 pr-4 text-base transition-all flex items-center justify-between border-l-2 pl-[14px] ${
+          !selectedSlug
+            ? 'border-emerald-500 text-emerald-600 font-medium bg-emerald-50/50'
+            : 'border-transparent text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
+        }`}
+      >
+        <span>All products</span>
+        {products.length > 0 && (
+          <span className="text-sm text-zinc-400 tabular-nums">{products.length}</span>
+        )}
+      </button>
+
+      {topLevel.map((cat) => {
+        const subs = childrenOf(cat.id)
+        const isActive = selectedSlug === cat.slug
+        const expanded = isActive || isParentActive(cat.id)
+        return (
+          <div key={cat.id}>
+            <button
+              type="button"
+              onClick={() => selectCategory(cat.slug)}
+              className={`w-full text-left py-2.5 pr-4 text-base transition-all flex items-center justify-between border-l-2 pl-[14px] ${
+                isActive
+                  ? 'border-emerald-500 text-emerald-600 font-medium bg-emerald-50/50'
+                  : expanded
+                    ? 'border-zinc-200 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-50'
+                    : 'border-transparent text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
+              }`}
+            >
+              <span>{cat.name}</span>
+              {countFor(cat.slug, cat.id) > 0 && (
+                <span className="text-sm text-zinc-400 tabular-nums">
+                  {countFor(cat.slug, cat.id)}
+                </span>
+              )}
+            </button>
+            {subs.length > 0 && expanded && (
+              <div className="ml-[14px] border-l-2 border-emerald-100 pl-3 pb-1 space-y-0.5">
+                {subs.map((sub) => (
+                  <button
+                    key={sub.id}
+                    type="button"
+                    onClick={() => selectCategory(sub.slug)}
+                    className={`w-full text-left px-3 py-2 text-sm transition-all flex items-center justify-between ${
+                      selectedSlug === sub.slug
+                        ? 'text-emerald-600 font-medium'
+                        : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                    }`}
+                  >
+                    <span>{sub.name}</span>
+                    {countFor(sub.slug) > 0 && (
+                      <span className="text-xs text-zinc-400 tabular-nums">
+                        {countFor(sub.slug)}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
 
   return (
-    <section className="py-12">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Category Filters */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-light text-zinc-900 mb-6 text-center">Shop by Category</h2>
-          <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((category) => (
-              <button
-                type="button"
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-3 rounded-lg text-base font-light transition-all duration-200 ${
-                  selectedCategory === category
-                    ? 'bg-emerald-500 text-white border border-emerald-500'
-                    : 'bg-gray-100 text-zinc-700 border border-gray-200 hover:bg-gray-200 hover:text-zinc-900'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
+    <div className="max-w-7xl mx-auto px-6 pb-20">
+      {/* Mobile filter bar */}
+      <div className="flex items-center justify-between py-5 border-b border-zinc-100 lg:hidden">
+        <p className="text-base text-zinc-600">
+          {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+        </p>
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="flex items-center gap-2 text-base font-medium text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
+        >
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="w-4 h-4"
+          >
+            <path
+              fillRule="evenodd"
+              d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.845 1.757l-1.075.859A.75.75 0 0 1 9 17.598V13.49a2.25 2.25 0 0 0-.659-1.59L3.659 7.218A2.25 2.25 0 0 1 3 5.629V3.34a.75.75 0 0 1 .628-.74Z"
+              clipRule="evenodd"
+            />
+          </svg>
+          Filter{selectedSlug ? ' (1)' : ''}
+        </button>
+      </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mx-auto"></div>
-            <p className="mt-4 text-zinc-600 font-light">Loading products...</p>
-          </div>
-        )}
+      <div className="flex gap-12 pt-8">
+        {/* Desktop sidebar */}
+        <aside className="hidden lg:block w-52 flex-shrink-0">
+          <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 px-4 pb-4">
+            Categories
+          </p>
+          {sidebarTree}
+        </aside>
 
-        {/* Error State */}
-        {error && (
-          <div className="text-center py-20">
-            <div className="max-w-md mx-auto">
-              <svg
-                aria-hidden="true"
-                focusable="false"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-16 h-16 text-red-500 mx-auto mb-4"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              <h3 className="text-lg font-medium text-zinc-900 mb-2">Unable to Load Products</h3>
-              <p className="text-zinc-600 mb-6 font-light">{error}</p>
-              <button
-                type="button"
-                onClick={() => window.location.reload()}
-                className="bg-zinc-900 text-white font-medium py-3 px-6 rounded-lg hover:bg-zinc-800 transition-colors"
-              >
-                Try Again
-              </button>
+        {/* Product grid */}
+        <div className="flex-1 min-w-0">
+          {loading ? (
+            <div className="flex items-center justify-center py-24">
+              <div className="w-6 h-6 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin" />
             </div>
-          </div>
-        )}
-
-        {/* Product Grid */}
-        {!loading && !error && (
-          <>
-            <div className="mb-8 text-center">
-              <p className="text-zinc-600 text-lg font-light">
-                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
-                {selectedCategory !== 'All' && ` in ${selectedCategory}`}
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} variants={product.variants} />
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* No Products State */}
-        {!loading && !error && filteredProducts.length === 0 && (
-          <div className="text-center py-20">
-            <div className="max-w-md mx-auto">
-              <svg
-                aria-hidden="true"
-                focusable="false"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-16 h-16 text-zinc-400 mx-auto mb-4"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-              <h3 className="text-lg font-medium text-zinc-900 mb-2">No Products Found</h3>
-              <p className="text-zinc-600 mb-6 font-light">
-                {selectedCategory === 'All'
-                  ? "We're working on adding more amazing products!"
-                  : `No products found in ${selectedCategory} category`}
-              </p>
-              {selectedCategory !== 'All' && (
+          ) : filteredProducts.length === 0 ? (
+            <div className="py-24 text-center">
+              <p className="text-base text-zinc-500">No products found</p>
+              {selectedSlug && (
                 <button
                   type="button"
-                  onClick={() => setSelectedCategory('All')}
-                  className="bg-zinc-900 text-white font-medium py-2 px-4 rounded-lg hover:bg-zinc-800 transition-colors"
+                  onClick={() => selectCategory(null)}
+                  className="mt-4 text-base text-zinc-700 underline underline-offset-2 hover:text-zinc-900"
                 >
-                  View All Products
+                  View all products
                 </button>
               )}
             </div>
-          </div>
-        )}
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-6 hidden lg:flex">
+                <p className="text-base text-zinc-600">
+                  {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+                  {selectedSlug && (
+                    <button
+                      type="button"
+                      onClick={() => selectCategory(null)}
+                      className="ml-3 text-zinc-400 hover:text-zinc-700 transition-colors"
+                    >
+                      Clear ×
+                    </button>
+                  )}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-px bg-zinc-100">
+                {filteredProducts.map((product) => (
+                  <div key={product.id} className="bg-white p-5">
+                    <ProductCard product={product} variants={product.variants} />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
-    </section>
+
+      {/* Mobile sidebar drawer */}
+      {sidebarOpen && (
+        <>
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop */}
+          <div
+            className="fixed inset-0 z-[60] bg-black/20 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setSidebarOpen(false)
+            }}
+          />
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: stops click propagation */}
+          <div
+            className="fixed top-0 left-0 z-[70] bg-white w-72 h-full shadow-xl lg:hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            style={{ animation: 'slideInLeft 0.2s ease-out' }}
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
+              <span className="text-sm font-semibold text-zinc-900">Filter</span>
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(false)}
+                className="p-1 text-zinc-400 hover:text-zinc-900 transition-colors"
+              >
+                <svg
+                  aria-hidden="true"
+                  focusable="false"
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">{sidebarTree}</div>
+          </div>
+        </>
+      )}
+    </div>
   )
 }

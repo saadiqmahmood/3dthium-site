@@ -200,8 +200,6 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         variant_id: item.variant_id || null,
         quantity: item.quantity,
         size: item.size || null,
-        color: item.color || null,
-        material: item.material || null,
         price_at_purchase: basePrice + adjustment,
       }
     })
