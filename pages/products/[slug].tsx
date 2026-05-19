@@ -133,6 +133,35 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
     return null
   }, [selectedSize, selectedColor, selectedMaterial, variants])
 
+  const getDisplayImage = () => {
+    if (selectedColor && selectedVariant?.image_url) {
+      return selectedVariant.image_url
+    }
+    return product?.thumbnail_url || ''
+  }
+  const displayImage = mainImage || getDisplayImage()
+  const lightboxImages = product
+    ? ([displayImage, ...(product.gallery_images || []).filter((img) => img !== displayImage)].filter(
+        Boolean
+      ) as string[])
+    : []
+
+  useEffect(() => {
+    if (lightboxIdx === null) return
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxIdx(null)
+      if (e.key === 'ArrowRight')
+        setLightboxIdx((i) => Math.min((i ?? 0) + 1, lightboxImages.length - 1))
+      if (e.key === 'ArrowLeft') setLightboxIdx((i) => Math.max((i ?? 0) - 1, 0))
+    }
+    document.addEventListener('keydown', handleKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', handleKey)
+      document.body.style.overflow = ''
+    }
+  }, [lightboxIdx, lightboxImages.length])
+
   if (!product) {
     return (
       <div className="text-center py-20">
@@ -203,40 +232,6 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
       }
     }
   }
-
-  // Only update image when color is selected, not when size changes
-  const getDisplayImage = () => {
-    // Only use variant image if color is selected
-    if (selectedColor && selectedVariant?.image_url) {
-      return selectedVariant.image_url
-    }
-    return product.thumbnail_url || ''
-  }
-
-  // Get display image (only changes when color is selected)
-  // Use manually selected main image if set, otherwise use calculated image
-  const displayImage = mainImage || getDisplayImage()
-
-  const lightboxImages = [
-    displayImage,
-    ...(product.gallery_images || []).filter((img) => img !== displayImage),
-  ].filter(Boolean) as string[]
-
-  useEffect(() => {
-    if (lightboxIdx === null) return
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setLightboxIdx(null)
-      if (e.key === 'ArrowRight')
-        setLightboxIdx((i) => Math.min((i ?? 0) + 1, lightboxImages.length - 1))
-      if (e.key === 'ArrowLeft') setLightboxIdx((i) => Math.max((i ?? 0) - 1, 0))
-    }
-    document.addEventListener('keydown', handleKey)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', handleKey)
-      document.body.style.overflow = ''
-    }
-  }, [lightboxIdx, lightboxImages.length])
 
   const handleAddToCart = () => {
     // Require all attributes that have variants to be selected
