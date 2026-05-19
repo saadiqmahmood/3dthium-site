@@ -81,6 +81,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
   const [mainImage, setMainImage] = useState<string | null>(null)
   const [openAccordion, setOpenAccordion] = useState<string | null>(null)
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null)
 
   // Preload all variant images on mount so color switching is instant
   useEffect(() => {
@@ -215,6 +216,27 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   // Get display image (only changes when color is selected)
   // Use manually selected main image if set, otherwise use calculated image
   const displayImage = mainImage || getDisplayImage()
+
+  const lightboxImages = [
+    displayImage,
+    ...(product.gallery_images || []).filter((img) => img !== displayImage),
+  ].filter(Boolean) as string[]
+
+  useEffect(() => {
+    if (lightboxIdx === null) return
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxIdx(null)
+      if (e.key === 'ArrowRight')
+        setLightboxIdx((i) => Math.min((i ?? 0) + 1, lightboxImages.length - 1))
+      if (e.key === 'ArrowLeft') setLightboxIdx((i) => Math.max((i ?? 0) - 1, 0))
+    }
+    document.addEventListener('keydown', handleKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', handleKey)
+      document.body.style.overflow = ''
+    }
+  }, [lightboxIdx, lightboxImages.length])
 
   const handleAddToCart = () => {
     // Require all attributes that have variants to be selected
@@ -353,7 +375,11 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
           {/* ── Left: Image panel ── */}
           <div className="sticky top-24 space-y-3">
             {/* Main image */}
-            <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-zinc-50 border border-zinc-100 shadow-sm group">
+            <button
+              type="button"
+              onClick={() => setLightboxIdx(0)}
+              className="relative aspect-square w-full rounded-2xl overflow-hidden bg-zinc-50 border border-zinc-100 shadow-sm group cursor-zoom-in block"
+            >
               <Image
                 src={displayImage}
                 alt={product.name}
@@ -362,14 +388,14 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                 height={1000}
                 priority
               />
-            </div>
+            </button>
 
             {/* Thumbnails */}
             {product.gallery_images && product.gallery_images.length > 0 && (
               <div className="grid grid-cols-4 gap-2">
                 <button
                   type="button"
-                  onClick={() => setMainImage(null)}
+                  onClick={() => { setMainImage(null); setLightboxIdx(0) }}
                   className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 ${
                     mainImage === null
                       ? 'border-emerald-500 shadow-md shadow-emerald-100'
@@ -388,7 +414,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                   <button
                     key={image}
                     type="button"
-                    onClick={() => setMainImage(image)}
+                    onClick={() => { setMainImage(image); setLightboxIdx(0) }}
                     className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 ${
                       mainImage === image
                         ? 'border-emerald-500 shadow-md shadow-emerald-100'
@@ -791,6 +817,122 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
             })}
           </div>
         </div>
+
+        {/* Lightbox */}
+        {lightboxIdx !== null && (
+          <>
+            {/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop */}
+            <div
+              className="fixed inset-0 z-[100] bg-black/92 flex items-center justify-center"
+              onClick={() => setLightboxIdx(null)}
+              onKeyDown={(e) => e.key === 'Escape' && setLightboxIdx(null)}
+            >
+              {/* Close button */}
+              <button
+                type="button"
+                onClick={() => setLightboxIdx(null)}
+                className="absolute top-5 right-5 z-10 p-2 text-white/50 hover:text-white transition-colors"
+                aria-label="Close"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="w-7 h-7"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Image */}
+              {/* biome-ignore lint/a11y/noStaticElementInteractions: stops propagation */}
+              <div
+                className="flex items-center justify-center w-full max-w-3xl mx-6"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+              >
+                <Image
+                  src={lightboxImages[lightboxIdx]}
+                  alt={product.name}
+                  width={1000}
+                  height={1000}
+                  className="object-contain max-h-[90vh] w-auto h-auto"
+                  priority
+                />
+              </div>
+
+              {/* Prev */}
+              {lightboxIdx > 0 && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setLightboxIdx(lightboxIdx - 1)
+                  }}
+                  className="absolute left-4 p-3 text-white/50 hover:text-white transition-colors"
+                  aria-label="Previous image"
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Next */}
+              {lightboxIdx < lightboxImages.length - 1 && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setLightboxIdx(lightboxIdx + 1)
+                  }}
+                  className="absolute right-4 p-3 text-white/50 hover:text-white transition-colors"
+                  aria-label="Next image"
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Dot indicators */}
+              {lightboxImages.length > 1 && (
+                <div className="absolute bottom-5 flex items-center gap-2">
+                  {lightboxImages.map((_, i) => (
+                    <button
+                      key={lightboxImages[i]}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLightboxIdx(i)
+                      }}
+                      aria-label={`Image ${i + 1}`}
+                      className={`rounded-full transition-all duration-200 ${
+                        i === lightboxIdx ? 'w-2.5 h-2.5 bg-white' : 'w-2 h-2 bg-white/40 hover:bg-white/70'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Toast Notification */}
         {toast && (
