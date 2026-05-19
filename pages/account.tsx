@@ -53,7 +53,7 @@ export default function AccountPage() {
       console.log('🚫 [AccountPage] No user, redirecting to auth')
       router.push('/auth')
     }
-  }, [user, loading, router])
+  }, [user?.id, loading, router])
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: fetchOrders is a stable async fetcher defined below
   useEffect(() => {
@@ -69,7 +69,7 @@ export default function AccountPage() {
       console.log('📄 [AccountPage] Fetching orders for user:', user.id)
       fetchOrders()
     }
-  }, [user, section, supabaseContext])
+  }, [user?.id, section, supabaseContext])
 
   const fetchOrders = async () => {
     if (!supabaseContext) {

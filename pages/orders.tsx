@@ -184,7 +184,7 @@ export default function OrdersPage() {
     } finally {
       setLoading(false)
     }
-  }, [user, supabaseContext])
+  }, [user?.id, supabaseContext])
 
   useEffect(() => {
     if (authLoading) return
@@ -196,7 +196,7 @@ export default function OrdersPage() {
     }
 
     fetchOrders()
-  }, [user, authLoading, router, fetchOrders, supabaseContext])
+  }, [user?.id, authLoading, router, fetchOrders, supabaseContext])
 
   if (!supabaseContext) {
     return <div className="p-8">Error: Supabase client not available</div>

@@ -3,6 +3,7 @@ import type { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
+import CartToast, { type CartToastItem } from '@/components/ui/CartToast'
 import Toast from '@/components/ui/Toast'
 import { useCart } from '@/context/CartContext'
 import { formatMoney } from '@/lib/format/money'
@@ -79,6 +80,8 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
+  const [cartToast, setCartToast] = useState<CartToastItem | null>(null)
+  const [cartToastKey, setCartToastKey] = useState(0)
   const [mainImage, setMainImage] = useState<string | null>(null)
   const [openAccordion, setOpenAccordion] = useState<string | null>(null)
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null)
@@ -280,7 +283,16 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
     }
 
     addToCart(cartItem)
-    setToast({ message: 'Added to cart!', type: 'success' })
+    setCartToastKey((k) => k + 1)
+    setCartToast({
+      name: product.name,
+      image_url: displayImage,
+      price: displayPrice,
+      quantity,
+      size_display: selectedSize ? formatSizeDisplay(getDisplayName(selectedSize)) : null,
+      color_display: selectedColor ? getDisplayName(selectedColor) : null,
+      material_display: selectedMaterial ? getDisplayName(selectedMaterial) : null,
+    })
 
     // Reset quantity after adding to cart
     setQuantity(1)
@@ -821,6 +833,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               className="fixed inset-0 z-[100] bg-black/92 flex items-center justify-center"
               onClick={() => setLightboxIdx(null)}
               onKeyDown={(e) => e.key === 'Escape' && setLightboxIdx(null)}
+              style={{ animation: 'fadeIn 0.2s ease-out' }}
             >
               {/* Close button */}
               <button
@@ -847,6 +860,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                 className="flex items-center justify-center w-full max-w-3xl mx-6"
                 onClick={(e) => e.stopPropagation()}
                 onKeyDown={(e) => e.stopPropagation()}
+                style={{ animation: 'lightboxIn 0.25s ease-out' }}
               >
                 <Image
                   src={lightboxImages[lightboxIdx]}
@@ -929,7 +943,9 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
           </>
         )}
 
-        {/* Toast Notification */}
+        {cartToast && (
+          <CartToast key={cartToastKey} item={cartToast} onClose={() => setCartToast(null)} />
+        )}
         {toast && (
           <Toast
             message={toast.message}
