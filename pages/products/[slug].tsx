@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import type { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Image from 'next/image'
-import { useRouter } from 'next/router'
+import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useCart } from '@/context/CartContext'
@@ -72,7 +72,6 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   variantOptions,
 }) => {
   const { addToCart } = useCart()
-  const router = useRouter()
 
   // Variant selection state
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
@@ -81,8 +80,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   const [quantity, setQuantity] = useState(1)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
   const [mainImage, setMainImage] = useState<string | null>(null)
-  const [showBulkOrder, setShowBulkOrder] = useState(false)
-  const [bulkQuantities, setBulkQuantities] = useState<Record<string, number>>({})
+  const [openAccordion, setOpenAccordion] = useState<string | null>(null)
 
   // Preload all variant images on mount so color switching is instant
   useEffect(() => {
@@ -218,34 +216,6 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   // Use manually selected main image if set, otherwise use calculated image
   const displayImage = mainImage || getDisplayImage()
 
-  const handleBulkAddToCart = () => {
-    const itemsToAdd = variants.filter((v) => (bulkQuantities[v.id] || 0) > 0)
-    if (!itemsToAdd.length) return
-
-    for (const variant of itemsToAdd) {
-      const qty = bulkQuantities[variant.id] || 0
-      addToCart({
-        product_id: product.id,
-        variant_id: variant.id,
-        quantity: qty,
-        size: variant.size || null,
-        color: variant.color || null,
-        material: variant.material || null,
-        size_display: variant.size || null,
-        color_display: variant.color || null,
-        material_display: variant.material || null,
-        price: Number(product.base_price) + Number(variant.price_adjustment),
-        name: product.name,
-        image_url: variant.image_url || product.thumbnail_url || '',
-      })
-    }
-
-    const count = itemsToAdd.length
-    setToast({ message: `Added ${count} variant${count > 1 ? 's' : ''} to cart`, type: 'success' })
-    setBulkQuantities({})
-    setShowBulkOrder(false)
-  }
-
   const handleAddToCart = () => {
     // Require all attributes that have variants to be selected
     const hasSizeOptions = variantOptions.sizes.length > 0
@@ -314,28 +284,70 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto pt-24 pb-20 px-6">
-        {/* Back button */}
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="mb-8 text-sm text-zinc-500 hover:text-zinc-800 flex items-center gap-1.5 transition-colors group"
-        >
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-lg mb-10 flex-wrap" aria-label="Breadcrumb">
+          <Link
+            href="/"
+            className="text-zinc-400 hover:text-zinc-900 hover:underline underline-offset-2 transition-colors"
+          >
+            Home
+          </Link>
           <svg
             aria-hidden="true"
-            focusable="false"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="w-4 h-4 transition-transform group-hover:-translate-x-0.5"
+            className="w-4 h-4 text-zinc-300 flex-shrink-0"
+            viewBox="0 0 12 12"
+            fill="none"
           >
             <path
-              fillRule="evenodd"
-              d="M17 10a.75.75 0 0 1-.75.75H5.612l4.158 3.96a.75.75 0 1 1-1.04 1.08l-5.5-5.25a.75.75 0 0 1 0-1.08l5.5-5.25a.75.75 0 1 1 1.04 1.08L5.612 9.25H16.25A.75.75 0 0 1 17 10Z"
-              clipRule="evenodd"
+              d="M4 2l4 4-4 4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
-          Back
-        </button>
+          <Link
+            href="/products"
+            className="text-zinc-400 hover:text-zinc-900 hover:underline underline-offset-2 transition-colors"
+          >
+            Shop
+          </Link>
+          <svg
+            aria-hidden="true"
+            className="w-4 h-4 text-zinc-300 flex-shrink-0"
+            viewBox="0 0 12 12"
+            fill="none"
+          >
+            <path
+              d="M4 2l4 4-4 4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <Link
+            href={`/products?cat=${product.category.slug}`}
+            className="text-zinc-400 hover:text-zinc-900 hover:underline underline-offset-2 transition-colors"
+          >
+            {product.category.name}
+          </Link>
+          <svg
+            aria-hidden="true"
+            className="w-4 h-4 text-zinc-300 flex-shrink-0"
+            viewBox="0 0 12 12"
+            fill="none"
+          >
+            <path
+              d="M4 2l4 4-4 4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span className="text-zinc-900 font-semibold truncate max-w-[200px]">{product.name}</span>
+        </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           {/* ── Left: Image panel ── */}
@@ -417,13 +429,6 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
 
             {/* Divider */}
             <div className="border-t border-zinc-100" />
-
-            {/* Description */}
-            {product.description && (
-              <p className="text-zinc-600 text-base leading-relaxed font-light">
-                {product.description}
-              </p>
-            )}
 
             {/* Variant Selectors */}
             {variants.length > 0 && (
@@ -668,118 +673,6 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
               </div>
             </div>
 
-            {/* Multi-variant bulk order */}
-            {variants.length > 1 && (
-              <div className="border-t border-zinc-100 pt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowBulkOrder(!showBulkOrder)}
-                  className="flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
-                >
-                  <svg
-                    aria-hidden="true"
-                    focusable="false"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className={`w-4 h-4 transition-transform ${showBulkOrder ? 'rotate-90' : ''}`}
-                  >
-                    <path fillRule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-                  </svg>
-                  Order multiple variants
-                </button>
-
-                {showBulkOrder && (
-                  <div className="mt-4 border border-zinc-100 rounded-xl overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead className="bg-zinc-50 border-b border-zinc-100">
-                          <tr>
-                            {variantOptions.sizes.length > 0 && (
-                              <th className="px-4 py-2.5 text-left font-medium text-zinc-600">Size</th>
-                            )}
-                            {variantOptions.colors.length > 0 && (
-                              <th className="px-4 py-2.5 text-left font-medium text-zinc-600">Colour</th>
-                            )}
-                            {variantOptions.materials.length > 0 && (
-                              <th className="px-4 py-2.5 text-left font-medium text-zinc-600">Material</th>
-                            )}
-                            <th className="px-4 py-2.5 text-left font-medium text-zinc-600">Price</th>
-                            <th className="px-4 py-2.5 text-left font-medium text-zinc-600 w-28">Qty</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-zinc-50">
-                          {variants.map((variant) => {
-                            const variantPrice = Number(product.base_price) + Number(variant.price_adjustment)
-                            const qty = bulkQuantities[variant.id] || 0
-                            return (
-                              <tr key={variant.id} className={qty > 0 ? 'bg-emerald-50/50' : 'hover:bg-zinc-50/50'}>
-                                {variantOptions.sizes.length > 0 && (
-                                  <td className="px-4 py-2.5 text-zinc-700">{variant.size || '—'}</td>
-                                )}
-                                {variantOptions.colors.length > 0 && (
-                                  <td className="px-4 py-2.5 text-zinc-700">{variant.color || '—'}</td>
-                                )}
-                                {variantOptions.materials.length > 0 && (
-                                  <td className="px-4 py-2.5 text-zinc-700">{variant.material || '—'}</td>
-                                )}
-                                <td className="px-4 py-2.5 text-zinc-700">{formatMoney(variantPrice)}</td>
-                                <td className="px-4 py-2.5">
-                                  <div className="flex items-center border border-zinc-200 rounded-lg overflow-hidden w-24">
-                                    <button
-                                      type="button"
-                                      onClick={() => setBulkQuantities((prev) => ({ ...prev, [variant.id]: Math.max(0, (prev[variant.id] || 0) - 1) }))}
-                                      className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:bg-zinc-100 transition-colors text-base"
-                                    >
-                                      −
-                                    </button>
-                                    <input
-                                      type="number"
-                                      min={0}
-                                      max={99}
-                                      value={qty === 0 ? '' : qty}
-                                      placeholder="0"
-                                      onChange={(e) => {
-                                        const val = Math.min(99, Math.max(0, parseInt(e.target.value) || 0))
-                                        setBulkQuantities((prev) => ({ ...prev, [variant.id]: val }))
-                                      }}
-                                      className="w-10 text-center text-xs font-medium text-zinc-900 bg-transparent focus:outline-none"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() => setBulkQuantities((prev) => ({ ...prev, [variant.id]: Math.min(99, (prev[variant.id] || 0) + 1) }))}
-                                      className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:bg-zinc-100 transition-colors text-base"
-                                    >
-                                      +
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            )
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                    {Object.values(bulkQuantities).some((q) => q > 0) && (
-                      <div className="px-4 py-3 border-t border-zinc-100 bg-white flex items-center justify-between">
-                        <p className="text-sm text-zinc-500 font-light">
-                          {Object.values(bulkQuantities).filter((q) => q > 0).length} variant
-                          {Object.values(bulkQuantities).filter((q) => q > 0).length !== 1 ? 's' : ''} selected
-                        </p>
-                        <button
-                          type="button"
-                          onClick={handleBulkAddToCart}
-                          className="bg-zinc-900 text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-zinc-800 active:scale-[0.99] transition-all"
-                        >
-                          Add to Cart
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* Customisable badge */}
             {product.customizable && (
               <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
@@ -802,6 +695,100 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Below-fold: About this product */}
+        <div className="mt-24 pt-16 border-t border-zinc-200">
+          <h2 className="text-4xl font-semibold text-zinc-900 mb-10 tracking-tight">
+            About this product
+          </h2>
+
+          {product.description && (
+            <p className="text-base text-zinc-600 leading-relaxed max-w-3xl mb-12">
+              {product.description}
+            </p>
+          )}
+
+          <div className="divide-y divide-zinc-100 border-t border-zinc-100">
+            {(
+              [
+                {
+                  key: 'details',
+                  title: 'Product details',
+                  content:
+                    'Each piece is 3D printed to order in the UK using precision FDM technology. Slight layer lines are a natural characteristic of the process. Dimensions vary by size option — refer to the size selector above for available options.',
+                },
+                {
+                  key: 'materials',
+                  title: 'Materials & printing',
+                  content:
+                    'We print in PLA+ and PETG — both durable, environmentally conscious materials. PLA+ is ideal for decorative and display pieces; PETG is stronger and heat-resistant, suited to functional items. Colours are produced in-house and may vary slightly from on-screen representations.',
+                },
+                {
+                  key: 'delivery',
+                  title: 'Delivery & returns',
+                  content:
+                    'Free UK standard delivery on orders over £30. Items are dispatched within 2–4 business days of ordering. We accept returns on non-personalised items within 14 days of receipt — please contact us to arrange.',
+                },
+                ...(product.customizable
+                  ? [
+                      {
+                        key: 'custom',
+                        title: 'Custom options',
+                        content:
+                          "This product is available with personalised text or a custom design. Leave a note at checkout with your requirements, or get in touch before ordering to discuss what's possible.",
+                      },
+                    ]
+                  : []),
+              ] as Array<{ key: string; title: string; content: string }>
+            ).map(({ key, title, content }) => {
+              const isOpen = openAccordion === key
+              return (
+                <div key={key}>
+                  <button
+                    type="button"
+                    onClick={() => setOpenAccordion(isOpen ? null : key)}
+                    className="w-full flex items-center justify-between py-5 text-left group"
+                  >
+                    <span
+                      className={`text-2xl font-semibold tracking-tight transition-colors ${
+                        isOpen ? 'text-zinc-900' : 'text-zinc-700 group-hover:text-zinc-900'
+                      }`}
+                    >
+                      {title}
+                    </span>
+                    <svg
+                      aria-hidden="true"
+                      focusable="false"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className={`w-5 h-5 text-zinc-400 flex-shrink-0 transition-transform duration-200 ${
+                        isOpen ? 'rotate-180 text-zinc-600' : ''
+                      }`}
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  <div
+                    className={`grid transition-all duration-200 ease-out ${
+                      isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="pb-6 text-base text-zinc-500 leading-relaxed max-w-3xl">
+                        {content}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
 
@@ -957,11 +944,13 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
       displayName: valueToDisplayNameMap[value] || value,
     }))
 
-    // Handle category data safely
-    const categoryData =
-      product.categories && Array.isArray(product.categories) && product.categories.length > 0
-        ? product.categories[0]
-        : { id: null, name: 'Uncategorized', slug: 'uncategorized' }
+    // PostgREST returns many-to-one joins as objects, not arrays — handle both shapes
+    const rawCat = product.categories
+    const categoryData = rawCat
+      ? Array.isArray(rawCat)
+        ? (rawCat[0] ?? { id: null, name: 'Uncategorized', slug: 'uncategorized' })
+        : rawCat
+      : { id: null, name: 'Uncategorized', slug: 'uncategorized' }
 
     return {
       props: {

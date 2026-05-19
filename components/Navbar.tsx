@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
 
@@ -43,6 +43,12 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [animate, setAnimate] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [shopOpen, setShopOpen] = useState(false)
+  const [mobileShopOpen, setMobileShopOpen] = useState(false)
+  const [navCategories, setNavCategories] = useState<
+    Array<{ id: string; name: string; slug: string; parent_id: string | null }>
+  >([])
+  const shopTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const router = useRouter()
   const { user, isAdmin } = useAuth()
 
@@ -71,6 +77,22 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    fetch('/api/categories')
+      .then((r) => r.json())
+      .then((data) => setNavCategories(data.categories || []))
+      .catch(() => {})
+  }, [])
+
+  const handleShopEnter = () => {
+    if (shopTimeout.current) clearTimeout(shopTimeout.current)
+    setShopOpen(true)
+  }
+
+  const handleShopLeave = () => {
+    shopTimeout.current = setTimeout(() => setShopOpen(false), 150)
+  }
 
   const linkClass = (href: string) =>
     `text-base font-light transition-colors ${
@@ -140,9 +162,59 @@ export default function Navbar() {
               <Link href="/" className={linkClass('/')}>
                 Home
               </Link>
-              <Link href="/products" className={linkClass('/products')}>
-                Shop
-              </Link>
+              {/* biome-ignore lint/a11y/noStaticElementInteractions: hover trigger for dropdown */}
+              <div
+                className="relative"
+                onMouseEnter={handleShopEnter}
+                onMouseLeave={handleShopLeave}
+              >
+                <Link
+                  href="/products"
+                  className={`flex items-center gap-1 ${linkClass('/products')}`}
+                >
+                  Shop
+                  <svg
+                    aria-hidden="true"
+                    focusable="false"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className={`w-3 h-3 opacity-50 transition-transform duration-150 ${shopOpen ? 'rotate-180' : ''}`}
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </Link>
+                {shopOpen && navCategories.length > 0 && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50">
+                    <div className="bg-white shadow-2xl min-w-[240px] border border-zinc-100 border-t-[3px] border-t-emerald-500">
+                      <Link
+                        href="/products"
+                        onClick={() => setShopOpen(false)}
+                        className="block px-6 py-3 text-base text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
+                      >
+                        All products
+                      </Link>
+                      <div className="mx-6 border-t border-zinc-100" />
+                      {navCategories
+                        .filter((c) => !c.parent_id)
+                        .map((cat) => (
+                          <Link
+                            key={cat.id}
+                            href={`/products?cat=${cat.slug}`}
+                            onClick={() => setShopOpen(false)}
+                            className="block px-6 py-3 text-base text-zinc-700 hover:text-emerald-600 hover:bg-emerald-50/40 transition-colors"
+                          >
+                            {cat.name}
+                          </Link>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
               <Link
                 href="/custom-order"
                 className={`text-base font-light transition-colors px-3.5 py-1 rounded-full border ${
@@ -244,7 +316,6 @@ export default function Navbar() {
               {(
                 [
                   { href: '/', label: 'Home' },
-                  { href: '/products', label: 'Shop' },
                   { href: '/about', label: 'About' },
                   { href: '/contact', label: 'Contact' },
                 ] as { href: string; label: string }[]
@@ -262,6 +333,58 @@ export default function Navbar() {
                   {label}
                 </Link>
               ))}
+
+              {/* Shop with expandable categories */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setMobileShopOpen(!mobileShopOpen)}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-base font-light transition-colors ${
+                    isActive('/products')
+                      ? 'text-emerald-600 bg-emerald-50'
+                      : 'text-zinc-700 hover:text-zinc-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <span>Shop</span>
+                  <svg
+                    aria-hidden="true"
+                    focusable="false"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className={`w-4 h-4 transition-transform ${mobileShopOpen ? 'rotate-180' : ''}`}
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                {mobileShopOpen && (
+                  <div className="pl-4 mt-0.5 space-y-0.5">
+                    <Link
+                      href="/products"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-4 py-2 text-sm text-zinc-400 hover:text-zinc-900 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      All products
+                    </Link>
+                    {navCategories
+                      .filter((c) => !c.parent_id)
+                      .map((cat) => (
+                        <Link
+                          key={cat.id}
+                          href={`/products?cat=${cat.slug}`}
+                          onClick={() => setIsOpen(false)}
+                          className="block px-4 py-2 text-sm text-zinc-600 hover:text-zinc-900 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          {cat.name}
+                        </Link>
+                      ))}
+                  </div>
+                )}
+              </div>
 
               <Link
                 href="/custom-order"
