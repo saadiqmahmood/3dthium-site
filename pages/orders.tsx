@@ -1,3 +1,16 @@
+import {
+  Check,
+  ChevronRight,
+  ClipboardCheck,
+  Package,
+  PackageCheck,
+  Printer,
+  Settings2,
+  ShoppingBag,
+  ShoppingCart,
+  Truck,
+  X,
+} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -49,13 +62,13 @@ interface Order {
 }
 
 const PROGRESS_STEPS = [
-  { key: 'pending', label: 'Order Placed' },
-  { key: 'processing', label: 'Processing' },
-  { key: 'printing', label: 'Printing' },
-  { key: 'quality_check', label: 'Quality Check' },
-  { key: 'packaging', label: 'Packaging' },
-  { key: 'shipped', label: 'Shipped' },
-  { key: 'delivered', label: 'Delivered' },
+  { key: 'pending', label: 'Order Placed', Icon: ShoppingCart },
+  { key: 'processing', label: 'Processing', Icon: Settings2 },
+  { key: 'printing', label: 'Printing', Icon: Printer },
+  { key: 'quality_check', label: 'Quality Check', Icon: ClipboardCheck },
+  { key: 'packaging', label: 'Packaging', Icon: Package },
+  { key: 'shipped', label: 'Shipped', Icon: Truck },
+  { key: 'delivered', label: 'Delivered', Icon: PackageCheck },
 ]
 
 const STATUS_BADGE: Record<string, string> = {
@@ -90,78 +103,97 @@ function ProgressBar({ status }: { status: string }) {
   if (isCancelled) {
     return (
       <div className="flex items-center gap-3 py-2">
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-100 border-2 border-red-300 flex-shrink-0">
-          <svg
-            aria-hidden="true"
-            className="w-4 h-4 text-red-500"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.5}
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+        <div className="flex items-center justify-center w-9 h-9 rounded-full bg-red-100 border-2 border-red-300 flex-shrink-0">
+          <X className="w-4 h-4 text-red-500" />
         </div>
         <span className="text-sm font-medium text-red-600 capitalize">{status}</span>
       </div>
     )
   }
 
+  const currentStep = PROGRESS_STEPS[currentIdx]
+  const prevStep = currentIdx > 0 ? PROGRESS_STEPS[currentIdx - 1] : null
+  const nextStep = currentIdx < PROGRESS_STEPS.length - 1 ? PROGRESS_STEPS[currentIdx + 1] : null
+  const pct = Math.round(((currentIdx + 1) / PROGRESS_STEPS.length) * 100)
+
   return (
-    <div className="w-full overflow-x-auto pb-1">
-      <div className="flex items-start min-w-max gap-0">
-        {PROGRESS_STEPS.map((step, idx) => {
-          const isDone = currentIdx > idx
-          const isCurrent = currentIdx === idx
-          return (
-            <div key={step.key} className="flex items-center">
-              <div className="flex flex-col items-center gap-2">
-                <div
-                  className={`relative flex items-center justify-center w-9 h-9 rounded-full border-2 transition-all duration-500 ${
-                    isDone
-                      ? 'bg-emerald-500 border-emerald-500'
-                      : isCurrent
-                        ? 'bg-white border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.15)]'
-                        : 'bg-white border-zinc-200'
-                  }`}
-                >
-                  {isDone ? (
-                    <svg
-                      aria-hidden="true"
-                      className="w-4 h-4 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
-                  ) : isCurrent ? (
-                    <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-                  ) : (
-                    <div className="w-2.5 h-2.5 rounded-full bg-zinc-200" />
-                  )}
-                </div>
-                <span
-                  className={`text-xs font-medium whitespace-nowrap ${
-                    isDone ? 'text-emerald-600' : isCurrent ? 'text-zinc-900' : 'text-zinc-400'
-                  }`}
-                >
-                  {step.label}
-                </span>
-              </div>
-              {idx < PROGRESS_STEPS.length - 1 && (
-                <div
-                  className={`w-10 h-0.5 mx-1 mb-5 flex-shrink-0 transition-colors duration-500 ${
-                    isDone ? 'bg-emerald-400' : 'bg-zinc-200'
-                  }`}
-                />
-              )}
-            </div>
-          )
-        })}
+    <>
+      {/* Mobile: compact single-step view */}
+      <div className="sm:hidden space-y-3">
+        <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.15)] flex-shrink-0">
+            {currentStep && <currentStep.Icon className="w-5 h-5 text-white" />}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-zinc-900">{currentStep?.label}</p>
+            <p className="text-xs text-zinc-400">Step {currentIdx + 1} of {PROGRESS_STEPS.length}</p>
+          </div>
+          <span className="text-sm font-semibold text-emerald-600">{pct}%</span>
+        </div>
+        <div className="relative h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+          <div
+            className="absolute inset-y-0 left-0 bg-emerald-500 rounded-full transition-all duration-700"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <div className="flex justify-between text-xs text-zinc-400">
+          {prevStep ? <span>← {prevStep.label}</span> : <span />}
+          {nextStep ? <span>{nextStep.label} →</span> : <span className="text-emerald-600 font-medium">Complete</span>}
+        </div>
       </div>
-    </div>
+
+      {/* Desktop: full chain */}
+      <div className="hidden sm:block w-full overflow-x-auto pb-1">
+        <div className="flex items-start min-w-max gap-0">
+          {PROGRESS_STEPS.map((step, idx) => {
+            const isDone = currentIdx > idx
+            const isCurrent = currentIdx === idx
+            const { Icon } = step
+            return (
+              <div key={step.key} className="flex items-center">
+                <div className="flex flex-col items-center gap-2">
+                  <div
+                    className={`relative flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-500 ${
+                      isDone
+                        ? 'bg-emerald-500 border-emerald-500'
+                        : isCurrent
+                          ? 'bg-white border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.15)]'
+                          : 'bg-white border-zinc-200'
+                    }`}
+                  >
+                    {isDone ? (
+                      <Check className="w-4 h-4 text-white" strokeWidth={2.5} />
+                    ) : (
+                      <Icon
+                        className={`w-4 h-4 ${isCurrent ? 'text-emerald-500' : 'text-zinc-300'}`}
+                        strokeWidth={isCurrent ? 2 : 1.5}
+                      />
+                    )}
+                    {isCurrent && (
+                      <span className="absolute inset-0 rounded-full animate-ping bg-emerald-400 opacity-20" />
+                    )}
+                  </div>
+                  <span
+                    className={`text-xs font-medium whitespace-nowrap ${
+                      isDone ? 'text-emerald-600' : isCurrent ? 'text-zinc-900' : 'text-zinc-400'
+                    }`}
+                  >
+                    {step.label}
+                  </span>
+                </div>
+                {idx < PROGRESS_STEPS.length - 1 && (
+                  <div
+                    className={`w-10 h-0.5 mx-1 mb-5 flex-shrink-0 transition-colors duration-500 ${
+                      isDone ? 'bg-emerald-400' : 'bg-zinc-200'
+                    }`}
+                  />
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -470,20 +502,7 @@ export default function OrdersPage() {
         ) : orders.length === 0 ? (
           <div className="text-center py-20 bg-zinc-50 rounded-2xl border border-zinc-100">
             <div className="w-16 h-16 bg-white rounded-full border border-zinc-100 flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <svg
-                aria-hidden="true"
-                className="w-7 h-7 text-zinc-300"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.5}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                />
-              </svg>
+              <ShoppingBag className="w-7 h-7 text-zinc-300" strokeWidth={1.5} />
             </div>
             <h3 className="text-base font-semibold text-zinc-900 mb-1.5">No orders yet</h3>
             <p className="text-sm text-zinc-400 mb-6 max-w-xs mx-auto">
@@ -527,20 +546,7 @@ export default function OrdersPage() {
                       <span className="text-base font-semibold text-zinc-900">
                         {formatMoney(order.total_price)}
                       </span>
-                      <svg
-                        aria-hidden="true"
-                        className="w-4 h-4 text-zinc-300 group-hover:text-zinc-500 transition-colors"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                        />
-                      </svg>
+                      <ChevronRight className="w-4 h-4 text-zinc-300 group-hover:text-zinc-500 transition-colors" />
                     </div>
                   </div>
 

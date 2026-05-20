@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { data, error } = await supabaseAdmin
           .from('orders')
           .select(
-            `id, user_id, guest_email, total_price, status, created_at, shipping_name, shipping_address, shipping_city, shipping_postcode, shipping_country, shipping_phone, shipping_method, shipping_rate_id, shipping_cost, tracking_number, tracking_url, shipped_at, shipping_label_url, order_items(id, quantity, size, price_at_purchase, variant_id, product_id, products_legacy(id, title), product_variants_legacy(id, color, image_url))`
+            `id, user_id, guest_email, total_price, status, created_at, shipping_name, shipping_address, shipping_city, shipping_postcode, shipping_country, shipping_phone, shipping_method, shipping_rate_id, shipping_cost, tracking_number, tracking_url, shipped_at, shipping_label_url, order_items(id, quantity, size, price_at_purchase, variant_id, product_id)`
           )
           .eq('id', id)
           .single()
@@ -43,8 +43,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             price_at_purchase: number
             variant_id?: string
             product_id?: string
-            products_legacy?: unknown
-            product_variants_legacy?: unknown
           }
           const items = data.order_items as RawItem[]
 

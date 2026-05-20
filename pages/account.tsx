@@ -4,24 +4,17 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useAuth } from '@/context/AuthContext'
-import { useSupabase } from '@/context/SupabaseContext'
+import { authFetch } from '@/lib/api/authFetch'
+
 import { formatMoney } from '@/lib/format/money'
 
-// Define types for order and order item
-interface Product {
-  name: string
-}
-interface ProductVariant {
-  color: string
-  image_url: string
-}
 interface OrderItem {
   id: string
   quantity: number
-  size: string
+  size: string | null
   price_at_purchase: number
-  products?: Product
-  product_variants?: ProductVariant
+  variant_new?: { color: string | null; image_url: string | null }
+  product_new?: { id: string; name: string }
 }
 interface Order {
   id: string
@@ -34,7 +27,6 @@ interface Order {
 export default function AccountPage() {
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
-  const supabaseContext = useSupabase()
   const [section, setSection] = useState<'profile' | 'orders'>('profile')
   const [orders, setOrders] = useState<Order[]>([])
   const [ordersLoading, setOrdersLoading] = useState(true)
@@ -55,172 +47,22 @@ export default function AccountPage() {
     }
   }, [user?.id, loading, router])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: fetchOrders is a stable async fetcher defined below
   useEffect(() => {
-    if (!supabaseContext) return
-
-    console.log('📄 [AccountPage] User or section changed:', {
-      hasUser: !!user,
-      section,
-      userId: user?.id,
-    })
-
     if (user && section === 'orders') {
-      console.log('📄 [AccountPage] Fetching orders for user:', user.id)
       fetchOrders()
     }
-  }, [user?.id, section, supabaseContext])
+  }, [user?.id, section])
 
   const fetchOrders = async () => {
-    if (!supabaseContext) {
-      setToast({ message: 'Unable to connect. Please refresh the page.', type: 'error' })
-      return
-    }
-    const { client: supabaseClient } = supabaseContext
-
-    console.log('🔄 [AccountPage] Starting fetchOrders...')
     setOrdersLoading(true)
     try {
-      if (!user) {
-        console.error('❌ [AccountPage] No authenticated user for fetchOrders')
-        return
-      }
-
-      console.log('🔍 [AccountPage] Looking up user record for:', user.id)
-      // Look up user record
-      const { data: userRecord, error: userError } = await supabaseClient
-        .from('users')
-        .select('id')
-        .eq('auth_user_id', user.id)
-        .single()
-
-      if (userError) {
-        console.error('❌ [AccountPage] Error looking up user record:', userError)
+      const res = await authFetch('/api/orders')
+      if (!res.ok) {
         setToast({ message: 'Failed to load your orders', type: 'error' })
         return
       }
-
-      if (!userRecord) {
-        setToast({ message: 'Account not found. Please contact support.', type: 'error' })
-        return
-      }
-
-      console.log('✅ [AccountPage] User record found:', userRecord.id)
-
-      // Fetch orders
-      console.log('🔄 [AccountPage] Fetching orders for user record:', userRecord.id)
-      const { data: ordersData, error: ordersError } = await supabaseClient
-        .from('orders')
-        .select(`
-          id,
-          total_price,
-          status,
-          created_at,
-          order_items (
-            id,
-            quantity,
-            size,
-            price_at_purchase,
-            products (
-              name
-            ),
-            product_variants (
-              color,
-              image_url
-            )
-          )
-        `)
-        .eq('user_id', userRecord.id)
-        .order('created_at', { ascending: false })
-
-      if (ordersError) {
-        console.error('❌ [AccountPage] Error fetching orders:', ordersError)
-        setToast({ message: 'Failed to load your orders', type: 'error' })
-        return
-      }
-
-      console.log('✅ [AccountPage] Orders fetched successfully:', ordersData?.length || 0)
-
-      // Transform ordersData to match Order type
-      type SupabaseOrderItem = {
-        id: string
-        quantity: number
-        size: string
-        price_at_purchase: number
-        products?: { name?: string } | { name?: string }[]
-        product_variants?:
-          | { color?: string; image_url?: string }
-          | { color?: string; image_url?: string }[]
-      }
-      type SupabaseOrder = {
-        id: string
-        total_price: number
-        status: string
-        created_at: string
-        order_items: SupabaseOrderItem[]
-      }
-      const transformed: Order[] = (ordersData || []).map((order: SupabaseOrder) => {
-        return {
-          id: String(order.id),
-          total_price: Number(order.total_price),
-          status: String(order.status),
-          created_at: String(order.created_at),
-          order_items: Array.isArray(order.order_items)
-            ? order.order_items.map((item: SupabaseOrderItem) => {
-                // Handle both array and object for products
-                let productObj: { name: string } = { name: '' }
-                if (item.products) {
-                  if (Array.isArray(item.products)) {
-                    productObj = {
-                      name:
-                        typeof item.products[0]?.name === 'string' ? item.products[0].name : '',
-                    }
-                  } else {
-                    productObj = {
-                      name: typeof item.products.name === 'string' ? item.products.name : '',
-                    }
-                  }
-                }
-                // Handle both array and object for product_variants
-                let variantObj: { color: string; image_url: string } = { color: '', image_url: '' }
-                if (item.product_variants) {
-                  if (Array.isArray(item.product_variants)) {
-                    variantObj = {
-                      color:
-                        typeof item.product_variants[0]?.color === 'string'
-                          ? item.product_variants[0].color
-                          : '',
-                      image_url:
-                        typeof item.product_variants[0]?.image_url === 'string'
-                          ? item.product_variants[0].image_url
-                          : '',
-                    }
-                  } else {
-                    variantObj = {
-                      color:
-                        typeof item.product_variants.color === 'string'
-                          ? item.product_variants.color
-                          : '',
-                      image_url:
-                        typeof item.product_variants.image_url === 'string'
-                          ? item.product_variants.image_url
-                          : '',
-                    }
-                  }
-                }
-                return {
-                  id: String(item.id),
-                  quantity: Number(item.quantity),
-                  size: String(item.size),
-                  price_at_purchase: Number(item.price_at_purchase),
-                  products: productObj,
-                  product_variants: variantObj,
-                }
-              })
-            : [],
-        }
-      })
-      setOrders(transformed)
+      const data = await res.json()
+      setOrders(data)
     } catch {
       setOrders([])
     } finally {
@@ -232,10 +74,10 @@ export default function AccountPage() {
     setReorderLoading(true)
     try {
       const cart = order.order_items.map((item: OrderItem) => ({
-        product: { name: item.products?.name },
+        product: { name: item.product_new?.name },
         variant: {
-          color: item.product_variants?.color,
-          image_url: item.product_variants?.image_url,
+          color: item.variant_new?.color,
+          image_url: item.variant_new?.image_url,
           price: item.price_at_purchase,
         },
         size: item.size,
@@ -294,10 +136,7 @@ export default function AccountPage() {
           </button>
           <button
             type="button"
-            onClick={() => {
-              setSection('orders')
-              setSelectedOrder(null)
-            }}
+            onClick={() => router.push('/orders')}
             className={`px-6 py-3 rounded-lg font-light transition-all ${
               section === 'orders'
                 ? 'bg-emerald-500 text-white'
@@ -513,15 +352,15 @@ export default function AccountPage() {
                           <Image
                             width={80}
                             height={80}
-                            src={item.product_variants?.image_url || ''}
-                            alt={item.products?.name || ''}
+                            src={item.variant_new?.image_url || ''}
+                            alt={item.product_new?.name || ''}
                             className="w-full h-full object-cover"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-zinc-900 mb-2">{item.products?.name}</h4>
+                          <h4 className="font-medium text-zinc-900 mb-2">{item.product_new?.name}</h4>
                           <div className="flex flex-wrap gap-3 text-base text-zinc-600 font-light">
-                            <span>Color: {item.product_variants?.color}</span>
+                            <span>Color: {item.variant_new?.color}</span>
                             <span>•</span>
                             <span>Size: {item.size}</span>
                             <span>•</span>

@@ -156,8 +156,8 @@ export function OrderDetailsModal({
       const productIds: string[] = Array.from(
         new Set(
           (orderDetails.order_items ?? [])
-            .map((item: OrderItem) => String(item.products?.id))
-            .filter(Boolean)
+            .map((item: OrderItem) => item.product_new?.id || item.products?.id)
+            .filter(Boolean) as string[]
         )
       )
       const variantsMap: Record<string, ProductVariant[]> = {}
@@ -174,7 +174,7 @@ export function OrderDetailsModal({
     setEditableOrderItems(
       (orderDetails.order_items ?? []).map((item: OrderItem) => ({
         ...item,
-        variant_id: item.product_variants?.id,
+        variant_id: item.variant_id,
         product_variants: item.product_variants,
         size: item.size,
         quantity: item.quantity,

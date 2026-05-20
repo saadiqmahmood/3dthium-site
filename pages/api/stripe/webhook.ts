@@ -144,33 +144,55 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   try {
     // Create order record - match the actual database schema
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert({
-        user_id: user_id,
-        total_price: session.amount_total ? session.amount_total / 100 : 0, // Convert from pence
-        guest_email: guest_email,
-        stripe_session_id: session.id,
-        stripe_payment_intent_id: (session.payment_intent as string) || null,
-        stripe_customer_id: (session.customer as string) || null,
-        // Shipping information
-        shipping_name: shippingAddress?.name || null,
-        shipping_address: shippingAddress?.street1 || null,
-        shipping_city: shippingAddress?.city || null,
-        shipping_postcode: shippingAddress?.zip || null,
-        shipping_country: shippingAddress?.country || 'GB',
-        shipping_phone: shippingAddress?.phone || null,
-        shipping_method:
-          shippingProvider && shippingService ? `${shippingProvider}: ${shippingService}` : null,
-        shipping_rate_id: shippingRateId || null,
-        shipping_cost: shippingCost,
-      })
-      .select()
-      .single()
+    let order: { id: string; shipping_rate_id: string | null; [key: string]: unknown }
+    {
+      const { data: inserted, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user_id,
+          total_price: session.amount_total ? session.amount_total / 100 : 0,
+          guest_email: guest_email,
+          stripe_session_id: session.id,
+          stripe_payment_intent_id: (session.payment_intent as string) || null,
+          stripe_customer_id: (session.customer as string) || null,
+          shipping_name: shippingAddress?.name || null,
+          shipping_address: shippingAddress?.street1 || null,
+          shipping_city: shippingAddress?.city || null,
+          shipping_postcode: shippingAddress?.zip || null,
+          shipping_country: shippingAddress?.country || 'GB',
+          shipping_phone: shippingAddress?.phone || null,
+          shipping_method:
+            shippingProvider && shippingService ? `${shippingProvider}: ${shippingService}` : null,
+          shipping_rate_id: shippingRateId || null,
+          shipping_cost: shippingCost,
+        })
+        .select()
+        .single()
 
-    if (orderError) {
-      log.error('Error creating order:', orderError)
-      return
+      if (orderError) {
+        if (orderError.code === '23505') {
+          // Order already exists — fetch it so we can still sync items
+          const { data: existing, error: fetchError } = await supabase
+            .from('orders')
+            .select()
+            .eq('stripe_session_id', session.id)
+            .single()
+          if (fetchError || !existing) {
+            log.error('Error fetching existing order on duplicate:', fetchError)
+            return
+          }
+          order = existing as {
+            id: string
+            shipping_rate_id: string | null
+            [key: string]: unknown
+          }
+        } else {
+          log.error('Error creating order:', orderError)
+          return
+        }
+      } else {
+        order = inserted as { id: string; shipping_rate_id: string | null; [key: string]: unknown }
+      }
     }
 
     // Re-fetch server-side prices to store authoritative price_at_purchase
@@ -179,12 +201,30 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       .map((i) => i.variant_id)
       .filter(Boolean) as string[]
 
+    log.debug('[webhook] cart items count:', (cartItems as CartItem[]).length)
+    log.debug('[webhook] productIds:', productIds)
+    log.debug('[webhook] variantIds:', variantIds)
+
     const [productsRes, variantsRes] = await Promise.all([
       supabase.from('products').select('id, base_price').in('id', productIds),
       variantIds.length > 0
         ? supabase.from('product_variants').select('id, price_adjustment').in('id', variantIds)
-        : Promise.resolve({ data: [] as Array<{ id: string; price_adjustment: string }> }),
+        : Promise.resolve({
+            data: [] as Array<{ id: string; price_adjustment: string }>,
+            error: null,
+          }),
     ])
+
+    if (productsRes.error) log.error('[webhook] products lookup error:', productsRes.error)
+    if (variantsRes.error) log.error('[webhook] variants lookup error:', variantsRes.error)
+    log.debug(
+      '[webhook] products found:',
+      (productsRes.data ?? []).map((p) => p.id)
+    )
+    log.debug(
+      '[webhook] variants found:',
+      (variantsRes.data ?? []).map((v) => v.id)
+    )
 
     const productMap = new Map((productsRes.data ?? []).map((p) => [p.id, Number(p.base_price)]))
     const variantMap = new Map(
@@ -204,11 +244,21 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       }
     })
 
-    const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
+    const { data: existingItems } = await supabase
+      .from('order_items')
+      .select('id')
+      .eq('order_id', order.id)
+      .limit(1)
 
-    if (itemsError) {
-      log.error('Error creating order items:', itemsError)
-      return
+    if (!existingItems || existingItems.length === 0) {
+      log.debug('[webhook] inserting order items:', JSON.stringify(orderItems))
+      const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
+      if (itemsError) {
+        log.error('[webhook] order_items insert FAILED:', JSON.stringify(itemsError))
+        return
+      }
+    } else {
+      log.debug('[webhook] order items already exist, skipping insert:', order.id)
     }
 
     log.debug('Order created successfully:', order.id)
