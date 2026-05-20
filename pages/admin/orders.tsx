@@ -18,6 +18,7 @@ export default function AdminOrdersPage() {
   const ORDERS_PER_PAGE = 10
   const [selectedOrders, setSelectedOrders] = useState<string[]>([])
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [bulkStatusValue, setBulkStatusValue] = useState('')
 
   // --- Fetch Orders ---
   const fetchOrders = useCallback(async () => {
@@ -110,6 +111,28 @@ export default function AdminOrdersPage() {
     setSelectedOrders([])
   }
 
+  const handleBulkStatusUpdate = async () => {
+    if (!bulkStatusValue) return
+    await Promise.all(
+      selectedOrders.map((id) =>
+        authFetch(`/api/admin/orders/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: bulkStatusValue }),
+        })
+      )
+    )
+    setOrders((prev) =>
+      prev.map((o) => (selectedOrders.includes(o.id) ? { ...o, status: bulkStatusValue } : o))
+    )
+    setToast({
+      message: `Updated ${selectedOrders.length} order${selectedOrders.length !== 1 ? 's' : ''} to "${bulkStatusValue}"`,
+      type: 'success',
+    })
+    setSelectedOrders([])
+    setBulkStatusValue('')
+  }
+
   // --- Modal callbacks ---
   const handleStatusUpdated = (orderId: string, newStatus: string) => {
     setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)))
@@ -191,10 +214,32 @@ export default function AdminOrdersPage() {
 
       {/* Bulk actions */}
       {selectedOrders.length > 0 && (
-        <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-center justify-between">
-          <span className="text-sm text-emerald-900 font-light">
+        <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex flex-wrap items-center gap-3">
+          <span className="text-sm text-emerald-900 font-light mr-auto">
             {selectedOrders.length} order{selectedOrders.length !== 1 ? 's' : ''} selected
           </span>
+          <div className="flex items-center gap-2">
+            <select
+              value={bulkStatusValue}
+              onChange={(e) => setBulkStatusValue(e.target.value)}
+              className="border border-emerald-300 bg-white rounded-lg px-3 py-1.5 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 text-sm font-light"
+            >
+              <option value="">Set status…</option>
+              {ORDER_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s.charAt(0).toUpperCase() + s.slice(1).replace('_', ' ')}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={handleBulkStatusUpdate}
+              disabled={!bulkStatusValue}
+              className="px-4 py-1.5 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700 transition-colors font-light disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Update Status
+            </button>
+          </div>
           <button
             type="button"
             onClick={handleBulkDelete}

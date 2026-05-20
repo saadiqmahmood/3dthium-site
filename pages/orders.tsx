@@ -1,26 +1,22 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useAuth } from '@/context/AuthContext'
-import { useSupabase } from '@/context/SupabaseContext'
+import { authFetch } from '@/lib/api/authFetch'
 import { formatMoney } from '@/lib/format/money'
 
-interface Product {
-  title?: string
-  name?: string
-}
-
-interface ProductVariant {
-  color?: string
-  image_url?: string
-}
-
-interface ProductVariantNew {
+interface OrderItemVariant {
   size?: string | null
   color?: string | null
   material?: string | null
   image_url?: string | null
+}
+
+interface OrderItemProduct {
+  id: string
+  name: string
 }
 
 interface OrderItem {
@@ -28,10 +24,9 @@ interface OrderItem {
   quantity: number
   size?: string | null
   price_at_purchase: number
-  products?: Product
-  product_variants?: ProductVariant
-  variant_new?: ProductVariantNew
-  product_new?: Product | null
+  variant_id?: string | null
+  variant_new?: OrderItemVariant
+  product_new?: OrderItemProduct | null
 }
 
 interface Order {
@@ -39,426 +34,541 @@ interface Order {
   total_price: number
   status: string
   created_at: string
+  shipping_name?: string
+  shipping_address?: string
+  shipping_city?: string
+  shipping_postcode?: string
+  shipping_country?: string
+  shipping_phone?: string
+  shipping_method?: string
+  shipping_cost?: number
+  tracking_number?: string
+  tracking_url?: string
+  shipped_at?: string
   order_items: OrderItem[]
 }
 
-export default function OrdersPage() {
-  const { user, loading: authLoading } = useAuth()
-  const router = useRouter()
-  const supabaseContext = useSupabase()
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+const PROGRESS_STEPS = [
+  { key: 'pending', label: 'Order Placed' },
+  { key: 'processing', label: 'Processing' },
+  { key: 'printing', label: 'Printing' },
+  { key: 'quality_check', label: 'Quality Check' },
+  { key: 'packaging', label: 'Packaging' },
+  { key: 'shipped', label: 'Shipped' },
+  { key: 'delivered', label: 'Delivered' },
+]
 
-  const fetchOrders = useCallback(async () => {
-    if (!supabaseContext) {
-      setToast({ message: 'Unable to connect. Please refresh the page.', type: 'error' })
-      return
-    }
-    const { client: supabase } = supabaseContext
+const STATUS_BADGE: Record<string, string> = {
+  pending: 'bg-amber-50 text-amber-700 border-amber-200',
+  processing: 'bg-blue-50 text-blue-700 border-blue-200',
+  printing: 'bg-violet-50 text-violet-700 border-violet-200',
+  quality_check: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+  packaging: 'bg-orange-50 text-orange-700 border-orange-200',
+  shipped: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  delivered: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+  cancelled: 'bg-red-50 text-red-700 border-red-200',
+  refunded: 'bg-red-50 text-red-700 border-red-200',
+}
 
-    try {
-      setLoading(true)
-      if (!user) {
-        return
-      }
-      // First, look up the user record in the users table
-      const { data: userRecord, error: userError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('auth_user_id', user.id)
-        .single()
+function StatusBadge({ status }: { status: string }) {
+  const cls = STATUS_BADGE[status] ?? 'bg-zinc-100 text-zinc-600 border-zinc-200'
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${cls}`}>
+      {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
+    </span>
+  )
+}
 
-      if (userError) {
-        console.error('Error looking up user record:', userError)
-        setToast({ message: 'Failed to load your orders', type: 'error' })
-        return
-      }
+function getStepIndex(status: string) {
+  return PROGRESS_STEPS.findIndex((s) => s.key === status)
+}
 
-      if (!userRecord) {
-        setToast({ message: 'Account not found. Please contact support.', type: 'error' })
-        return
-      }
+function ProgressBar({ status }: { status: string }) {
+  const isCancelled = status === 'cancelled' || status === 'refunded'
+  const currentIdx = getStepIndex(status)
 
-      // Now fetch orders using the correct user_id
-      const { data: ordersData, error: ordersError } = await supabase
-        .from('orders')
-        .select(`
-          id,
-          total_price,
-          status,
-          created_at,
-          order_items (
-            id,
-            quantity,
-            size,
-            price_at_purchase,
-            variant_id,
-            products (
-              title
-            ),
-            product_variants (
-              color,
-              image_url
-            )
-          )
-        `)
-        .eq('user_id', userRecord.id)
-        .order('created_at', { ascending: false })
-
-      if (ordersError) {
-        console.error('Error fetching orders:', ordersError)
-        setToast({ message: 'Failed to load your orders', type: 'error' })
-        return
-      }
-
-      // Enrich order items with product_variants data if available
-      const enrichedOrders = await Promise.all(
-        (ordersData || []).map(async (order: unknown) => {
-          const o = order as Record<string, unknown>
-          const items = (Array.isArray(o.order_items) ? o.order_items : []) as Array<{
-            variant_id?: string
-            [key: string]: unknown
-          }>
-
-          const enrichedItems = await Promise.all(
-            items.map(async (item) => {
-              if (!item.variant_id) return item
-
-              const { data: newVariant } = await supabase
-                .from('product_variants')
-                .select('id, size, color, material, image_url')
-                .eq('id', item.variant_id)
-                .single()
-
-              if (newVariant) {
-                return {
-                  ...item,
-                  variant_new: {
-                    size: newVariant.size,
-                    color: newVariant.color,
-                    material: newVariant.material,
-                    image_url: newVariant.image_url,
-                  },
-                }
-              }
-
-              return item
-            })
-          )
-
-          return {
-            id: o.id as string,
-            total_price: o.total_price as number,
-            status: o.status as string,
-            created_at: o.created_at as string,
-            order_items: enrichedItems.map((item: unknown) => {
-              const i = item as Record<string, unknown>
-              return {
-                id: i.id as string,
-                quantity: i.quantity as number,
-                size: i.size as string | null,
-                price_at_purchase: i.price_at_purchase as number,
-                products: i.products
-                  ? Array.isArray(i.products)
-                    ? (i.products[0] as Product)
-                    : (i.products as Product)
-                  : undefined,
-                product_variants: i.product_variants
-                  ? Array.isArray(i.product_variants)
-                    ? (i.product_variants[0] as ProductVariant)
-                    : (i.product_variants as ProductVariant)
-                  : undefined,
-                variant_new: i.variant_new as ProductVariantNew | undefined,
-              }
-            }),
-          }
-        })
-      )
-
-      setOrders(enrichedOrders)
-    } catch (error) {
-      console.error('Error fetching orders:', error)
-      setOrders([])
-      setToast({ message: 'Failed to load your orders', type: 'error' })
-    } finally {
-      setLoading(false)
-    }
-  }, [user?.id, supabaseContext])
-
-  useEffect(() => {
-    if (authLoading) return
-    if (!supabaseContext) return
-
-    if (!user) {
-      router.push('/auth')
-      return
-    }
-
-    fetchOrders()
-  }, [user?.id, authLoading, router, fetchOrders, supabaseContext])
-
-  if (!supabaseContext) {
-    return <div className="p-8">Error: Supabase client not available</div>
+  if (isCancelled) {
+    return (
+      <div className="flex items-center gap-3 py-2">
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-100 border-2 border-red-300 flex-shrink-0">
+          <svg
+            aria-hidden="true"
+            className="w-4 h-4 text-red-500"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+        <span className="text-sm font-medium text-red-600 capitalize">{status}</span>
+      </div>
+    )
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
+  return (
+    <div className="w-full overflow-x-auto pb-1">
+      <div className="flex items-start min-w-max gap-0">
+        {PROGRESS_STEPS.map((step, idx) => {
+          const isDone = currentIdx > idx
+          const isCurrent = currentIdx === idx
+          return (
+            <div key={step.key} className="flex items-center">
+              <div className="flex flex-col items-center gap-2">
+                <div
+                  className={`relative flex items-center justify-center w-9 h-9 rounded-full border-2 transition-all duration-500 ${
+                    isDone
+                      ? 'bg-emerald-500 border-emerald-500'
+                      : isCurrent
+                        ? 'bg-white border-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.15)]'
+                        : 'bg-white border-zinc-200'
+                  }`}
+                >
+                  {isDone ? (
+                    <svg
+                      aria-hidden="true"
+                      className="w-4 h-4 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  ) : isCurrent ? (
+                    <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                  ) : (
+                    <div className="w-2.5 h-2.5 rounded-full bg-zinc-200" />
+                  )}
+                </div>
+                <span
+                  className={`text-xs font-medium whitespace-nowrap ${
+                    isDone ? 'text-emerald-600' : isCurrent ? 'text-zinc-900' : 'text-zinc-400'
+                  }`}
+                >
+                  {step.label}
+                </span>
+              </div>
+              {idx < PROGRESS_STEPS.length - 1 && (
+                <div
+                  className={`w-10 h-0.5 mx-1 mb-5 flex-shrink-0 transition-colors duration-500 ${
+                    isDone ? 'bg-emerald-400' : 'bg-zinc-200'
+                  }`}
+                />
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function OrderModal({ order, onClose }: { order: Order; onClose: () => void }) {
+  const [visible, setVisible] = useState(false)
+
+  const handleClose = useCallback(() => {
+    setVisible(false)
+    setTimeout(onClose, 280)
+  }, [onClose])
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setVisible(true))
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose()
+    }
+    document.addEventListener('keydown', handleKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      cancelAnimationFrame(raf)
+      document.removeEventListener('keydown', handleKey)
+      document.body.style.overflow = ''
+    }
+  }, [handleClose])
+
+  const fmt = (d: string) =>
+    new Date(d).toLocaleDateString('en-GB', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
     })
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid':
-      case 'processing':
-      case 'shipped':
-        return 'bg-green-100 text-green-800 border-green-200'
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'cancelled':
-      case 'refunded':
-        return 'bg-red-100 text-red-800 border-red-200'
-      default:
-        return 'bg-gray-100 text-white border-gray-200'
-    }
-  }
-
-  const getStatusBadge = (status: string) => {
-    const colors = getStatusColor(status)
-    return (
-      <span
-        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${colors}`}
-      >
-        {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
-      </span>
-    )
-  }
-
-  if (authLoading) {
-    return (
-      <div className="max-w-6xl mx-auto py-20 px-6 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-zinc-400">Loading...</p>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return null // Will redirect to auth
-  }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
-      {/* Background glow effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
-      </div>
-
-      <div className="relative max-w-6xl mx-auto py-24 px-4 sm:px-6 lg:px-8">
-        <div className="mb-10">
-          <h1 className="text-4xl font-light text-zinc-900 mb-3">My Orders</h1>
-          <p className="text-lg text-zinc-600">View your order history and track your purchases</p>
+    // biome-ignore lint/a11y/noStaticElementInteractions: modal backdrop
+    <div
+      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center transition-colors duration-300 ${visible ? 'bg-black/40' : 'bg-transparent'}`}
+      onClick={handleClose}
+      onKeyDown={(e) => e.key === 'Escape' && handleClose()}
+    >
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: modal content */}
+      <div
+        className={`bg-white w-full sm:max-w-2xl rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[92vh] overflow-y-auto transition-all duration-300 ${
+          visible ? 'translate-y-0 opacity-100 sm:scale-100' : 'translate-y-8 opacity-0 sm:scale-95'
+        }`}
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        {/* Drag handle (mobile) */}
+        <div className="sm:hidden flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-zinc-200" />
         </div>
 
-        {loading ? (
-          <div className="text-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-zinc-600">Loading orders...</p>
+        {/* Header */}
+        <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-zinc-100 px-6 py-4 flex items-center justify-between z-10">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-0.5">
+              Order details
+            </p>
+            <h2 className="text-lg font-semibold text-zinc-900">
+              #{order.id.slice(-8).toUpperCase()}
+            </h2>
           </div>
-        ) : orders.length === 0 ? (
-          <div className="text-center py-16 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <button
+            type="button"
+            onClick={handleClose}
+            aria-label="Close"
+            className="p-2 text-zinc-400 hover:text-zinc-700 transition-colors rounded-xl hover:bg-zinc-100"
+          >
+            <svg
+              aria-hidden="true"
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="px-6 py-6 space-y-8">
+          {/* Status row */}
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="space-y-2">
+              <StatusBadge status={order.status} />
+              <p className="text-sm text-zinc-500">{fmt(order.created_at)}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-semibold text-zinc-900">{formatMoney(order.total_price)}</p>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                {order.order_items.length} item
+                {order.order_items.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+          </div>
+
+          {/* Progress */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-4">
+              Order Progress
+            </p>
+            <ProgressBar status={order.status} />
+          </div>
+
+          {/* Items */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-4">
+              Items
+            </p>
+            {order.order_items.length === 0 ? (
+              <p className="text-sm text-zinc-400 bg-zinc-50 rounded-xl p-4">No items found</p>
+            ) : (
+              <div className="space-y-3">
+                {order.order_items.map((item) => {
+                  const name = item.product_new?.name || 'Product'
+                  const imageUrl = item.variant_new?.image_url || '/placeholder.png'
+                  const { color, size, material } = item.variant_new || {}
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex gap-4 p-4 bg-zinc-50 rounded-xl border border-zinc-100"
+                    >
+                      <div className="relative w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden bg-white border border-zinc-100">
+                        <Image
+                          src={imageUrl}
+                          alt={name}
+                          fill
+                          className="object-contain"
+                          sizes="64px"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-zinc-900 mb-1.5 truncate">{name}</p>
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {color && (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                              {color}
+                            </span>
+                          )}
+                          {size && (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-100">
+                              {size}
+                            </span>
+                          )}
+                          {material && (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                              {material}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-zinc-400">Qty {item.quantity}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-sm font-semibold text-zinc-900">
+                          {formatMoney(item.price_at_purchase * item.quantity)}
+                        </p>
+                        {item.quantity > 1 && (
+                          <p className="text-xs text-zinc-400 mt-0.5">
+                            {formatMoney(item.price_at_purchase)} each
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Shipping */}
+          {order.shipping_name && (
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-3">
+                Delivery
+              </p>
+              <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-100 text-sm text-zinc-700 space-y-1">
+                <p className="font-medium">{order.shipping_name}</p>
+                {order.shipping_address && <p className="text-zinc-500">{order.shipping_address}</p>}
+                {(order.shipping_city || order.shipping_postcode) && (
+                  <p className="text-zinc-500">
+                    {[order.shipping_city, order.shipping_postcode].filter(Boolean).join(', ')}
+                  </p>
+                )}
+                {order.shipping_method && (
+                  <p className="text-zinc-400 text-xs mt-2">
+                    {order.shipping_method}
+                    {order.shipping_cost ? ` · ${formatMoney(order.shipping_cost)}` : ''}
+                  </p>
+                )}
+                {order.tracking_number && (
+                  <div className="mt-3 pt-3 border-t border-zinc-200">
+                    <p className="text-xs text-zinc-400 mb-0.5">Tracking</p>
+                    {order.tracking_url ? (
+                      <a
+                        href={order.tracking_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-emerald-600 hover:text-emerald-700 text-sm font-medium"
+                      >
+                        {order.tracking_number} →
+                      </a>
+                    ) : (
+                      <span className="text-sm font-mono text-zinc-700">{order.tracking_number}</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Contact CTA */}
+          <div className="pt-2 pb-2 border-t border-zinc-100">
+            <p className="text-xs text-zinc-400 mb-3">Need to change or cancel this order?</p>
+            <Link
+              href={`/contact?subject=${encodeURIComponent(`Order #${order.id.slice(-8).toUpperCase()} — change request`)}`}
+              onClick={handleClose}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-900 text-white text-sm font-medium rounded-xl hover:bg-zinc-800 transition-colors"
+            >
               <svg
                 aria-hidden="true"
-                focusable="false"
-                className="w-10 h-10 text-blue-600"
+                className="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
+                strokeWidth={2}
                 viewBox="0 0 24 24"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                  d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
+                />
+              </svg>
+              Contact us about this order
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function OrdersPage() {
+  const { user, loading: authLoading } = useAuth()
+  const router = useRouter()
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
+  const fetchOrders = useCallback(async () => {
+    try {
+      setLoading(true)
+      const res = await authFetch('/api/orders')
+      if (!res.ok) throw new Error('Failed')
+      const data = await res.json()
+      setOrders(data)
+    } catch {
+      setToast({ message: 'Failed to load your orders', type: 'error' })
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (authLoading) return
+    if (!user) {
+      router.push('/auth')
+      return
+    }
+    fetchOrders()
+  }, [user?.id, authLoading, router, fetchOrders])
+
+  if (authLoading) {
+    return (
+      <div className="max-w-3xl mx-auto py-20 px-6 text-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-zinc-200 mx-auto" />
+      </div>
+    )
+  }
+
+  if (!user) return null
+
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString('en-GB', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
+
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="max-w-3xl mx-auto py-24 px-4 sm:px-6">
+        <div className="mb-10">
+          <h1 className="text-4xl font-light text-zinc-900 mb-2">My Orders</h1>
+          <p className="text-zinc-500">View and track your purchases</p>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-zinc-200 mx-auto" />
+            <p className="mt-4 text-zinc-400 text-sm">Loading orders...</p>
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="text-center py-20 bg-zinc-50 rounded-2xl border border-zinc-100">
+            <div className="w-16 h-16 bg-white rounded-full border border-zinc-100 flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <svg
+                aria-hidden="true"
+                className="w-7 h-7 text-zinc-300"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                 />
               </svg>
             </div>
-            <h3 className="text-2xl font-semibold text-zinc-900 mb-2">No orders yet</h3>
-            <p className="text-zinc-600 mb-8 max-w-md mx-auto">
-              Start shopping to see your orders here. Browse our collection of 3D printed products!
+            <h3 className="text-base font-semibold text-zinc-900 mb-1.5">No orders yet</h3>
+            <p className="text-sm text-zinc-400 mb-6 max-w-xs mx-auto">
+              Your orders will appear here once you have made a purchase.
             </p>
             <button
               type="button"
               onClick={() => router.push('/products')}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="px-5 py-2.5 bg-zinc-900 text-white text-sm font-medium rounded-xl hover:bg-zinc-800 transition-colors"
             >
-              <svg
-                aria-hidden="true"
-                focusable="false"
-                className="w-5 h-5 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                />
-              </svg>
-              Browse Products
+              Browse products
             </button>
           </div>
         ) : (
-          <div className="space-y-6">
-            {orders.map((order) => (
-              <div
-                key={order.id}
-                className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow duration-300"
-              >
-                {/* Order Header */}
-                <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-5 border-b border-gray-100">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-gray-900">
-                          Order #{order.id.slice(-8)}
-                        </h3>
-                        {getStatusBadge(order.status)}
+          <div className="space-y-3">
+            {orders.map((order) => {
+              const stepIdx = getStepIndex(order.status)
+              const isCancelled = order.status === 'cancelled' || order.status === 'refunded'
+              return (
+                <button
+                  key={order.id}
+                  type="button"
+                  onClick={() => setSelectedOrder(order)}
+                  className="w-full text-left bg-white border border-zinc-200 rounded-2xl px-5 py-4 hover:border-zinc-300 hover:shadow-sm transition-all duration-200 group"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2.5 mb-1.5">
+                        <span className="text-sm font-semibold text-zinc-900 font-mono">
+                          #{order.id.slice(-8).toUpperCase()}
+                        </span>
+                        <StatusBadge status={order.status} />
                       </div>
-                      <p className="text-sm text-gray-500">
-                        <svg
-                          aria-hidden="true"
-                          focusable="false"
-                          className="w-4 h-4 inline mr-1"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                        {formatDate(order.created_at)}
+                      <p className="text-xs text-zinc-400">
+                        {formatDate(order.created_at)} ·{' '}
+                        {order.order_items.length} item
+                        {order.order_items.length !== 1 ? 's' : ''}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-blue-600">
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className="text-base font-semibold text-zinc-900">
                         {formatMoney(order.total_price)}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">Total Amount</p>
+                      </span>
+                      <svg
+                        aria-hidden="true"
+                        className="w-4 h-4 text-zinc-300 group-hover:text-zinc-500 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                        />
+                      </svg>
                     </div>
                   </div>
-                </div>
 
-                {/* Order Items */}
-                <div className="px-6 py-6">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
-                    Order Items ({order.order_items?.length || 0})
-                  </h4>
-                  <div className="space-y-4">
-                    {order.order_items?.map((item) => {
-                      const variantNew = item.variant_new
-                      const productVariants = item.product_variants
-                      const productName =
-                        item.product_new?.name ||
-                        item.products?.title ||
-                        item.products?.name ||
-                        'Product'
-                      const imageUrl =
-                        variantNew?.image_url || productVariants?.image_url || '/placeholder.png'
-                      const color = variantNew?.color || productVariants?.color
-                      const size = variantNew?.size || item.size
-                      const material = variantNew?.material
-
-                      return (
+                  {/* Mini progress bar */}
+                  {!isCancelled ? (
+                    <div className="mt-3 flex items-center gap-0.5">
+                      {PROGRESS_STEPS.map((step, idx) => (
                         <div
-                          key={item.id}
-                          className="flex flex-col sm:flex-row gap-4 p-5 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-blue-200 transition-all duration-200"
-                        >
-                          {/* Product Image */}
-                          <div className="relative flex-shrink-0 w-full sm:w-24 h-24 bg-gray-100 rounded-lg overflow-hidden">
-                            <Image
-                              src={imageUrl}
-                              alt={productName}
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 640px) 100vw, 96px"
-                            />
-                          </div>
-
-                          {/* Product Details */}
-                          <div className="flex-1 min-w-0">
-                            <h5 className="text-lg font-semibold text-gray-900 mb-2 truncate">
-                              {productName}
-                            </h5>
-                            <div className="flex flex-wrap gap-3 mb-3">
-                              {color && (
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm text-zinc-600 font-medium">Color:</span>
-                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                    {color}
-                                  </span>
-                                </div>
-                              )}
-                              {size && (
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm text-zinc-400 font-medium">Size:</span>
-                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-                                    {size}
-                                  </span>
-                                </div>
-                              )}
-                              {material && (
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm text-zinc-400 font-medium">
-                                    Material:
-                                  </span>
-                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-50 text-green-700 border border-green-200">
-                                    {material}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-zinc-600">
-                              <span className="font-medium">Quantity: {item.quantity}</span>
-                              <span>×</span>
-                              <span className="font-medium">
-                                {formatMoney(item.price_at_purchase)}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Price */}
-                          <div className="flex-shrink-0 text-right">
-                            <p className="text-xl font-bold text-gray-900">
-                              {formatMoney(item.price_at_purchase * item.quantity)}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {item.quantity} × {formatMoney(item.price_at_purchase)}
-                            </p>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
-            ))}
+                          key={step.key}
+                          className={`flex-1 h-1 rounded-full transition-colors duration-500 ${
+                            stepIdx >= idx ? 'bg-emerald-400' : 'bg-zinc-100'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mt-3 h-1 rounded-full bg-red-100" />
+                  )}
+                </button>
+              )
+            })}
           </div>
         )}
       </div>
+
+      {selectedOrder && (
+        <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+      )}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
