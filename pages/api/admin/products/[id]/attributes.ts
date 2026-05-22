@@ -438,12 +438,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // DELETE: Remove all attributes for a product (cascade deletes options and variants)
   if (req.method === 'DELETE') {
     try {
-      // First, delete all auto-generated variants
-      await supabase
-        .from('product_variants')
-        .delete()
-        .eq('product_id', productId)
-        .eq('auto_generated', true)
+      // Delete all variants for this product before removing attributes
+      await supabase.from('product_variants').delete().eq('product_id', productId)
 
       // Then delete attributes (options will cascade)
       const { error } = await supabase

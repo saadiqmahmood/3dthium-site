@@ -81,13 +81,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: 'Product not found' })
     }
 
-    // 2. Fetch all attributes and their options
-    const { data: attributes, error: attrError } = await supabase
+    // 2. Fetch all attributes and their options (two queries to avoid FK-dependency on nested select)
+    const { data: attrRows, error: attrError } = await supabase
       .from('product_attributes')
-      .select(`
-        *,
-        options:product_attribute_options(*)
-      `)
+      .select('*')
       .in('id', validAttributeIds)
       .eq('product_id', productId)
       .order('display_order', { ascending: true })
@@ -96,6 +93,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       log.error('[VARIATION GENERATOR] Error fetching attributes:', attrError)
       return res.status(500).json({ error: attrError.message })
     }
+
+    const { data: optionRows, error: optError } = await supabase
+      .from('product_attribute_options')
+      .select('*')
+      .in(
+        'attribute_id',
+        (attrRows ?? []).map((a) => a.id)
+      )
+      .order('display_order', { ascending: true })
+
+    if (optError) {
+      log.error('[VARIATION GENERATOR] Error fetching attribute options:', optError)
+      return res.status(500).json({ error: optError.message })
+    }
+
+    const optionsByAttr: Record<string, AttributeOption[]> = {}
+    for (const opt of optionRows ?? []) {
+      if (!optionsByAttr[opt.attribute_id]) optionsByAttr[opt.attribute_id] = []
+      optionsByAttr[opt.attribute_id].push(opt as AttributeOption)
+    }
+
+    const attributes = (attrRows ?? []).map((attr) => ({
+      ...attr,
+      options: optionsByAttr[attr.id] ?? [],
+    }))
 
     log.debug('� [VARIATION GENERATOR] Found attributes:', {
       requested: validAttributeIds.length,
