@@ -32,6 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       'id, total_price, status, created_at, shipping_name, shipping_address, shipping_city, shipping_postcode, shipping_country, shipping_phone, shipping_method, shipping_cost, tracking_number, tracking_url, shipped_at'
     )
     .eq('user_id', userRow.id)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
   if (ordersError) return res.status(500).json({ error: 'Failed to fetch orders' })

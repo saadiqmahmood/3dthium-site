@@ -19,12 +19,14 @@ export default function AdminOrdersPage() {
   const [selectedOrders, setSelectedOrders] = useState<string[]>([])
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [bulkStatusValue, setBulkStatusValue] = useState('')
+  const [showDeleted, setShowDeleted] = useState(false)
 
   // --- Fetch Orders ---
   const fetchOrders = useCallback(async () => {
     setOrdersLoading(true)
     try {
-      const response = await authFetch('/api/admin/orders')
+      const url = showDeleted ? '/api/admin/orders?deleted=true' : '/api/admin/orders'
+      const response = await authFetch(url)
       if (!response.ok) throw new Error('Failed to fetch orders')
       const data = await response.json()
 
@@ -57,7 +59,7 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     fetchOrders()
-  }, [fetchOrders])
+  }, [fetchOrders, showDeleted])
 
   // --- Filtered Orders & Pagination ---
   const filteredOrders = orders.filter((o) => {
@@ -109,6 +111,22 @@ export default function AdminOrdersPage() {
     }
     setOrders((prev) => prev.filter((o) => !selectedOrders.includes(o.id)))
     setSelectedOrders([])
+    setToast({ message: `${selectedOrders.length} order${selectedOrders.length !== 1 ? 's' : ''} deleted`, type: 'success' })
+  }
+
+  const handleBulkRestore = async () => {
+    for (const id of selectedOrders) {
+      await authFetch(`/api/admin/orders/${id}`, { method: 'PATCH' })
+    }
+    setOrders((prev) => prev.filter((o) => !selectedOrders.includes(o.id)))
+    setSelectedOrders([])
+    setToast({ message: `${selectedOrders.length} order${selectedOrders.length !== 1 ? 's' : ''} restored`, type: 'success' })
+  }
+
+  const handleRestore = async (orderId: string) => {
+    await authFetch(`/api/admin/orders/${orderId}`, { method: 'PATCH' })
+    setOrders((prev) => prev.filter((o) => o.id !== orderId))
+    setToast({ message: 'Order restored', type: 'success' })
   }
 
   const handleBulkStatusUpdate = async () => {
@@ -145,9 +163,27 @@ export default function AdminOrdersPage() {
   // --- Render ---
   return (
     <div className="w-full mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-light text-zinc-900 mb-2">Orders</h1>
-        <p className="text-sm text-zinc-600 font-light">Manage and track customer orders</p>
+      <div className="mb-6 flex items-end justify-between">
+        <div>
+          <h1 className="text-3xl font-light text-zinc-900 mb-2">Orders</h1>
+          <p className="text-sm text-zinc-600 font-light">Manage and track customer orders</p>
+        </div>
+        <div className="flex rounded-lg border border-gray-200 overflow-hidden text-sm font-light">
+          <button
+            type="button"
+            onClick={() => { setShowDeleted(false); setSelectedOrders([]) }}
+            className={`px-4 py-2 transition-colors ${!showDeleted ? 'bg-emerald-600 text-white' : 'bg-white text-zinc-700 hover:bg-gray-50'}`}
+          >
+            Active
+          </button>
+          <button
+            type="button"
+            onClick={() => { setShowDeleted(true); setSelectedOrders([]) }}
+            className={`px-4 py-2 transition-colors ${showDeleted ? 'bg-red-600 text-white' : 'bg-white text-zinc-700 hover:bg-gray-50'}`}
+          >
+            Deleted
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -240,13 +276,23 @@ export default function AdminOrdersPage() {
               Update Status
             </button>
           </div>
-          <button
-            type="button"
-            onClick={handleBulkDelete}
-            className="px-4 py-1.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors font-light"
-          >
-            Delete Selected
-          </button>
+          {showDeleted ? (
+            <button
+              type="button"
+              onClick={handleBulkRestore}
+              className="px-4 py-1.5 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700 transition-colors font-light"
+            >
+              Restore Selected
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleBulkDelete}
+              className="px-4 py-1.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors font-light"
+            >
+              Delete Selected
+            </button>
+          )}
         </div>
       )}
 
@@ -361,13 +407,23 @@ export default function AdminOrdersPage() {
                     {new Date(order.created_at).toLocaleString()}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedOrder(order)}
-                      className="text-emerald-600 hover:text-emerald-700 border border-emerald-300 px-3 py-1 rounded-lg hover:bg-emerald-50 transition-colors text-xs font-light"
-                    >
-                      View Details
-                    </button>
+                    {showDeleted ? (
+                      <button
+                        type="button"
+                        onClick={() => handleRestore(order.id)}
+                        className="text-emerald-600 hover:text-emerald-700 border border-emerald-300 px-3 py-1 rounded-lg hover:bg-emerald-50 transition-colors text-xs font-light"
+                      >
+                        Restore
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOrder(order)}
+                        className="text-emerald-600 hover:text-emerald-700 border border-emerald-300 px-3 py-1 rounded-lg hover:bg-emerald-50 transition-colors text-xs font-light"
+                      >
+                        View Details
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))

@@ -197,6 +197,7 @@ export const orders = pgTable(
     shippingLabelUrl: text('shipping_label_url'),
     shippedAt: timestamp('shipped_at'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
+    deletedAt: timestamp('deleted_at'),
   },
   (table) => [index('idx_orders_created_at').on(table.createdAt)]
 )

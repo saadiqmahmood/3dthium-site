@@ -121,15 +121,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       case 'DELETE': {
-        log.debug('[API/admin/orders/[id]] Deleting order:', id)
-        const { error: deleteError } = await supabaseAdmin.from('orders').delete().eq('id', id)
+        log.debug('[API/admin/orders/[id]] Soft-deleting order:', id)
+        const { error: deleteError } = await supabaseAdmin
+          .from('orders')
+          .update({ deleted_at: new Date().toISOString() })
+          .eq('id', id)
 
         if (deleteError) {
           log.error('[API/admin/orders/[id]] Error deleting order:', deleteError)
           return res.status(500).json({ error: 'Failed to delete order' })
         }
 
-        log.debug('[API/admin/orders/[id]] Order deleted successfully')
+        log.debug('[API/admin/orders/[id]] Order soft-deleted successfully')
+        res.status(200).json({ success: true })
+        break
+      }
+
+      case 'PATCH': {
+        log.debug('[API/admin/orders/[id]] Restoring order:', id)
+        const { error: restoreError } = await supabaseAdmin
+          .from('orders')
+          .update({ deleted_at: null })
+          .eq('id', id)
+
+        if (restoreError) {
+          log.error('[API/admin/orders/[id]] Error restoring order:', restoreError)
+          return res.status(500).json({ error: 'Failed to restore order' })
+        }
+
+        log.debug('[API/admin/orders/[id]] Order restored successfully')
         res.status(200).json({ success: true })
         break
       }

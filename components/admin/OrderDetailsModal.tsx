@@ -37,6 +37,7 @@ export type Order = {
   tracking_url?: string
   shipped_at?: string
   shipping_label_url?: string
+  deleted_at?: string | null
 }
 
 export type OrderItem = {

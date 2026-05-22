@@ -15,12 +15,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     log.debug('[API/admin/orders] Fetching orders...')
     const supabaseAdmin = getSupabaseAdmin()
 
-    const { data: orders, error } = await supabaseAdmin
+    const showDeleted = req.query.deleted === 'true'
+
+    const query = supabaseAdmin
       .from('orders')
       .select(
-        'id, user_id, guest_email, total_price, status, created_at, shipping_method, shipping_cost, tracking_number'
+        'id, user_id, guest_email, total_price, status, created_at, shipping_method, shipping_cost, tracking_number, deleted_at'
       )
       .order('created_at', { ascending: false })
+
+    const { data: orders, error } = showDeleted
+      ? await query.not('deleted_at', 'is', null)
+      : await query.is('deleted_at', null)
 
     if (error) {
       log.error('[API/admin/orders] Error fetching orders:', error)
