@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import Head from 'next/head'
+import Link from 'next/link'
 import { useId, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -47,278 +48,181 @@ export default function ContactPage() {
         <title>Contact Us | 3Dthium</title>
       </Head>
 
-      <div className="min-h-screen bg-white relative overflow-hidden">
-        {/* Background glow effects */}
-        <div className="fixed inset-0 pointer-events-none">
-          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
-        </div>
-        {/* Hero Section */}
-        <section className="relative bg-white pt-40 pb-8 overflow-hidden">
-          {/* Hexagon pattern */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
-          </div>
-          <div className="relative max-w-7xl mx-auto px-6 text-center">
-            <h1 className="text-5xl md:text-6xl font-light text-zinc-900 mb-6">Get In Touch</h1>
-            <p className="text-lg md:text-xl text-zinc-600 max-w-3xl mx-auto font-light">
-              Have a question or need assistance? We&apos;re here to help bring your ideas to life.
+      <div className="min-h-screen bg-white">
+        {/* Header */}
+        <section className="pt-40 pb-12 border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-6">
+            <h1 className="text-5xl md:text-6xl font-light text-zinc-900 mb-4">Get in touch</h1>
+            <p className="text-lg text-zinc-500 font-light max-w-xl">
+              Have a question about an order, a custom print, or anything else? We&apos;re happy to help.
             </p>
           </div>
         </section>
 
-        {/* Contact Info Cards */}
-        <section className="relative pt-8 pb-16 bg-white overflow-hidden">
-          {/* Hexagon pattern */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
-          </div>
-          <div className="relative max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-              {/* Email */}
-              <div className="bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl p-8 text-center transition-all">
-                <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    aria-hidden="true"
-                    focusable="false"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-8 h-8 text-emerald-400"
-                  >
-                    <rect width="20" height="16" x="2" y="4" rx="2" />
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                  </svg>
+        {/* Main content */}
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-16">
+
+              {/* Left — contact details */}
+              <div className="lg:col-span-2 space-y-10">
+                <div>
+                  <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-widest mb-6">Contact</h2>
+                  <div className="space-y-8">
+                    {/* Email */}
+                    <div className="flex gap-4 items-start">
+                      <div className="w-10 h-10 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-emerald-600">
+                          <rect width="20" height="16" x="2" y="4" rx="2" />
+                          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-zinc-900 mb-0.5">Email</p>
+                        <a href="mailto:hello@3dthium.com" className="text-sm text-emerald-600 hover:text-emerald-700 font-light transition-colors">
+                          hello@3dthium.com
+                        </a>
+                        <p className="text-xs text-zinc-400 mt-1 font-light">We reply within 24 hours</p>
+                      </div>
+                    </div>
+
+                    {/* Location */}
+                    <div className="flex gap-4 items-start">
+                      <div className="w-10 h-10 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-emerald-600">
+                          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                          <circle cx="12" cy="10" r="3" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-zinc-900 mb-0.5">Based in</p>
+                        <p className="text-sm text-zinc-600 font-light">United Kingdom</p>
+                        <p className="text-xs text-zinc-400 mt-1 font-light">Shipping across the UK & internationally</p>
+                      </div>
+                    </div>
+
+                    {/* Response time */}
+                    <div className="flex gap-4 items-start">
+                      <div className="w-10 h-10 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-emerald-600">
+                          <circle cx="12" cy="12" r="10" />
+                          <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-zinc-900 mb-0.5">Hours</p>
+                        <p className="text-sm text-zinc-600 font-light">Mon – Fri, 9am – 6pm GMT</p>
+                        <p className="text-xs text-zinc-400 mt-1 font-light">We do our best to respond same day</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-xl font-medium text-white mb-2">Email Us</h3>
-                <p className="text-zinc-400 mb-4 font-light">
-                  We typically respond within 24 hours
-                </p>
-                <a
-                  href="mailto:hello@3dthium.com"
-                  className="text-emerald-400 hover:text-emerald-300 font-light transition-colors"
-                >
-                  hello@3dthium.com
-                </a>
-              </div>
 
-              {/* Phone */}
-              <div className="bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl p-8 text-center transition-all">
-                <div className="w-16 h-16 bg-cyan-500/10 border border-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    aria-hidden="true"
-                    focusable="false"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-8 h-8 text-cyan-400"
+                {/* Custom order nudge */}
+                <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-6">
+                  <p className="text-sm font-medium text-zinc-900 mb-1">Have a custom project in mind?</p>
+                  <p className="text-sm text-zinc-500 font-light mb-4">
+                    Use our custom order form for detailed design requests — it helps us get back to you faster.
+                  </p>
+                  <Link
+                    href="/custom-order"
+                    className="inline-block text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
                   >
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
+                    Submit a custom order →
+                  </Link>
                 </div>
-                <h3 className="text-xl font-medium text-white mb-2">Call Us</h3>
-                <p className="text-zinc-400 mb-4 font-light">Mon-Fri, 9am-6pm GMT</p>
-                <a
-                  href="tel:+441234567890"
-                  className="text-cyan-400 hover:text-cyan-300 font-light transition-colors"
-                >
-                  +44 (0) 123 456 7890
-                </a>
               </div>
 
-              {/* Location */}
-              <div className="bg-gray-50 border border-gray-200 hover:border-gray-300 rounded-2xl p-8 text-center transition-all">
-                <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    aria-hidden="true"
-                    focusable="false"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-8 h-8 text-emerald-400"
-                  >
-                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-medium text-white mb-2">Visit Us</h3>
-                <p className="text-zinc-400 mb-4 font-light">Based in the UK</p>
-                <p className="text-white font-light">United Kingdom</p>
-              </div>
-            </div>
-          </div>
-        </section>
+              {/* Right — form */}
+              <div className="lg:col-span-3">
+                <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-widest mb-6">Send a message</h2>
 
-        {/* Contact Form */}
-        <section className="relative py-12 bg-white overflow-hidden">
-          {/* Hexagon pattern */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute inset-0 bg-[linear-gradient(30deg,transparent_40%,rgba(134,239,172,0.1)_40%,rgba(134,239,172,0.1)_60%,transparent_60%),linear-gradient(150deg,transparent_40%,rgba(34,211,238,0.1)_40%,rgba(34,211,238,0.1)_60%,transparent_60%)] bg-[size:80px_140px]" />
-          </div>
-
-          <div className="relative max-w-4xl mx-auto px-6">
-            <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-              {/* Form Header */}
-              <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border-b border-gray-200 px-8 py-8">
-                <h2 className="text-3xl md:text-4xl font-light text-zinc-900 mb-3">
-                  Send Us a Message
-                </h2>
-                <p className="text-zinc-600 text-lg font-light">
-                  Fill out the form and we&apos;ll get back to you as soon as possible
-                </p>
-              </div>
-
-              {/* Form Content */}
-              <div className="p-8">
-                <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
                   {apiStatus === 'success' && (
-                    <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-lg flex items-center gap-3">
-                      <svg
-                        aria-hidden="true"
-                        focusable="false"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="w-6 h-6 flex-shrink-0"
-                      >
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-5 py-4 rounded-xl flex items-start gap-3 text-sm font-light">
+                      <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 flex-shrink-0 mt-0.5">
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                         <polyline points="22 4 12 14.01 9 11.01" />
                       </svg>
-                      <span className="font-medium">
-                        Your message was sent successfully! We&apos;ll be in touch soon.
-                      </span>
+                      <span>Message sent — we&apos;ll be in touch within 24 hours.</span>
                     </div>
                   )}
                   {apiStatus === 'error' && (
-                    <div className="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-lg flex items-center gap-3">
-                      <svg
-                        aria-hidden="true"
-                        focusable="false"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="w-6 h-6 flex-shrink-0"
-                      >
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl flex items-start gap-3 text-sm font-light">
+                      <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 flex-shrink-0 mt-0.5">
                         <circle cx="12" cy="12" r="10" />
                         <line x1="12" y1="8" x2="12" y2="12" />
                         <line x1="12" y1="16" x2="12.01" y2="16" />
                       </svg>
-                      <span className="font-medium">Something went wrong. Please try again.</span>
+                      <span>Something went wrong. Please try again or email us directly.</span>
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Name */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                      <label
-                        htmlFor={`${fId}-name`}
-                        className="block text-base font-medium text-zinc-900 mb-2"
-                      >
-                        Full Name *
+                      <label htmlFor={`${fId}-name`} className="block text-sm font-medium text-zinc-700 mb-1.5">
+                        Full name
                       </label>
                       <input
                         type="text"
                         id={`${fId}-name`}
                         {...register('name')}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        placeholder="John Smith"
+                        placeholder="Jane Smith"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-zinc-900 placeholder:text-zinc-400 text-sm font-light focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 transition-all"
                       />
-                      {errors.name && (
-                        <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                      )}
+                      {errors.name && <p className="mt-1.5 text-xs text-red-600">{errors.name.message}</p>}
                     </div>
 
-                    {/* Email */}
                     <div>
-                      <label
-                        htmlFor={`${fId}-email`}
-                        className="block text-base font-medium text-zinc-900 mb-2"
-                      >
-                        Email Address *
+                      <label htmlFor={`${fId}-email`} className="block text-sm font-medium text-zinc-700 mb-1.5">
+                        Email address
                       </label>
                       <input
                         type="email"
                         id={`${fId}-email`}
                         {...register('email')}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        placeholder="john@example.com"
+                        placeholder="jane@example.com"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-zinc-900 placeholder:text-zinc-400 text-sm font-light focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 transition-all"
                       />
-                      {errors.email && (
-                        <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                      )}
+                      {errors.email && <p className="mt-1.5 text-xs text-red-600">{errors.email.message}</p>}
                     </div>
                   </div>
 
-                  {/* Subject */}
                   <div>
-                    <label
-                      htmlFor={`${fId}-subject`}
-                      className="block text-base font-medium text-zinc-900 mb-2"
-                    >
-                      Subject *
+                    <label htmlFor={`${fId}-subject`} className="block text-sm font-medium text-zinc-700 mb-1.5">
+                      Subject
                     </label>
                     <input
                       type="text"
                       id={`${fId}-subject`}
                       {...register('subject')}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      placeholder="How can we help you?"
+                      placeholder="What's your message about?"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 text-zinc-900 placeholder:text-zinc-400 text-sm font-light focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 transition-all"
                     />
-                    {errors.subject && (
-                      <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
-                    )}
+                    {errors.subject && <p className="mt-1.5 text-xs text-red-600">{errors.subject.message}</p>}
                   </div>
 
-                  {/* Message */}
                   <div>
-                    <label
-                      htmlFor={`${fId}-message`}
-                      className="block text-base font-medium text-zinc-900 mb-2"
-                    >
-                      Message *
+                    <label htmlFor={`${fId}-message`} className="block text-sm font-medium text-zinc-700 mb-1.5">
+                      Message
                     </label>
                     <textarea
                       id={`${fId}-message`}
                       {...register('message')}
-                      rows={6}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                      placeholder="Tell us more about your inquiry..."
+                      rows={7}
+                      placeholder="Tell us what you need..."
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 text-zinc-900 placeholder:text-zinc-400 text-sm font-light focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 transition-all resize-none"
                     />
-                    {errors.message && (
-                      <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
-                    )}
+                    {errors.message && <p className="mt-1.5 text-xs text-red-600">{errors.message.message}</p>}
                   </div>
 
-                  {/* Submit Button */}
-                  <div>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full md:w-auto bg-zinc-900 text-white px-8 py-4 rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isSubmitting ? 'Sending...' : 'Send Message'}
-                    </button>
-                  </div>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-8 py-3 bg-zinc-900 text-white text-sm font-medium rounded-xl hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'Sending...' : 'Send message'}
+                  </button>
                 </form>
               </div>
             </div>
