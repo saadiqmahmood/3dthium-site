@@ -3,7 +3,6 @@ import {
   ChevronRight,
   Package,
   PackageCheck,
-  Printer,
   ShoppingBag,
   ShoppingCart,
   Truck,
@@ -59,9 +58,50 @@ interface Order {
   order_items: OrderItem[]
 }
 
+function PrinterIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Motor housing */}
+      <rect x="9.5" y="1" width="5" height="2" rx="0.5" />
+      <circle cx="11.5" cy="2" r="0.4" fill="currentColor" stroke="none" />
+      <circle cx="13.5" cy="2" r="0.4" fill="currentColor" stroke="none" />
+      {/* Gantry rail */}
+      <rect x="1.5" y="3" width="21" height="1.5" rx="0.5" />
+      {/* Vertical rails */}
+      <line x1="2.5" y1="4.5" x2="2.5" y2="22" />
+      <line x1="21.5" y1="4.5" x2="21.5" y2="22" />
+      {/* Feet */}
+      <line x1="1" y1="22" x2="4" y2="22" />
+      <line x1="20" y1="22" x2="23" y2="22" />
+      {/* Print head */}
+      <path d="M9.5 4.5 L14.5 4.5 L13.5 8 L10.5 8 Z" />
+      {/* Nozzle */}
+      <path d="M10.5 8 L13.5 8 L12 9.5 Z" />
+      {/* Filament path */}
+      <path d="M12 9.5 C10.5 11 13.5 12 12 13" fill="none" />
+      {/* Cube — top face */}
+      <path d="M8 14.5 L12 13 L16 14.5 L12 16 Z" />
+      {/* Cube — left face */}
+      <path d="M8 14.5 L8 19 L12 20.5 L12 16 Z" />
+      {/* Cube — right face */}
+      <path d="M16 14.5 L16 19 L12 20.5 L12 16 Z" />
+    </svg>
+  )
+}
+
 const PROGRESS_STEPS = [
   { key: 'pending', label: 'Order Placed', Icon: ShoppingCart },
-  { key: 'printing', label: 'Printing', Icon: Printer },
+  { key: 'printing', label: 'Printing', Icon: PrinterIcon },
   { key: 'packaging', label: 'Packaging', Icon: Package },
   { key: 'shipped', label: 'Shipped', Icon: Truck },
   { key: 'delivered', label: 'Delivered', Icon: PackageCheck },
