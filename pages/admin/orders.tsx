@@ -347,13 +347,11 @@ export default function AdminOrdersPage() {
                   <td className="px-4 py-3">
                     <span
                       className={`inline-block px-2 py-1 rounded-full text-xs font-light ${
-                        order.status === 'processing'
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : order.status === 'pending'
-                            ? 'bg-yellow-50 text-yellow-700'
-                            : order.status === 'cancelled'
-                              ? 'bg-red-50 text-red-700'
-                              : 'bg-gray-100 text-zinc-700'
+                        order.status === 'pending'
+                          ? 'bg-yellow-50 text-yellow-700'
+                          : order.status === 'cancelled'
+                            ? 'bg-red-50 text-red-700'
+                            : 'bg-gray-100 text-zinc-700'
                       }`}
                     >
                       {order.status}

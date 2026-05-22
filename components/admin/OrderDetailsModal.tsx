@@ -6,9 +6,7 @@ import { authFetch } from '@/lib/api/authFetch'
 
 export const ORDER_STATUSES = [
   'pending',
-  'processing',
   'printing',
-  'quality_check',
   'packaging',
   'shipped',
   'delivered',
