@@ -21,6 +21,11 @@ const schema = z.object({
 })
 type CustomOrderFormValues = z.infer<typeof schema>
 
+const inputClass =
+  'w-full px-4 py-3 rounded-xl border border-gray-200 text-zinc-900 placeholder:text-zinc-400 text-sm font-light focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 transition-all bg-white'
+
+const labelClass = 'block text-sm font-medium text-zinc-700 mb-1.5'
+
 export default function CustomOrderForm() {
   const fId = useId()
   const [fileError, setFileError] = useState<string | null>(null)
@@ -39,10 +44,8 @@ export default function CustomOrderForm() {
 
   if (!supabase) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-        <p className="text-red-800">
-          Error: Supabase client is not available. Please refresh the page.
-        </p>
+      <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl text-sm font-light">
+        Supabase client unavailable — please refresh the page.
       </div>
     )
   }
@@ -61,11 +64,6 @@ export default function CustomOrderForm() {
       return
     }
 
-    if (!supabase) {
-      setFileError('Supabase client is not available. Please refresh the page.')
-      return
-    }
-
     let fileUrl = ''
     try {
       const filePath = `${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`
@@ -73,7 +71,6 @@ export default function CustomOrderForm() {
         .from('custom-orders')
         .upload(filePath, file)
       if (uploadError) {
-        console.error('Supabase upload error:', uploadError)
         setFileError(uploadError.message || 'File upload failed. Please try again.')
         return
       }
@@ -100,202 +97,186 @@ export default function CustomOrderForm() {
   }
 
   return (
-    <div>
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6 px-8 rounded-xl">
-        {apiStatus === 'success' && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            Your request has been submitted successfully!
-          </div>
-        )}
-        {apiStatus === 'error' && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            Something went wrong. Please try again.
-          </div>
-        )}
-        {fileError && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {fileError}
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Full Name */}
-          <div>
-            <label htmlFor={`${fId}-name`} className="block text-base font-medium text-zinc-900">
-              Full Name
-            </label>
-            <input
-              type="text"
-              id={`${fId}-name`}
-              {...register('name')}
-              className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
-            />
-            {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
-          </div>
-
-          {/* Email */}
-          <div>
-            <label htmlFor={`${fId}-email`} className="block text-base font-medium text-zinc-900">
-              Email Address
-            </label>
-            <input
-              type="email"
-              id={`${fId}-email`}
-              {...register('email')}
-              className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
-            />
-            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label htmlFor={`${fId}-phone`} className="block text-base font-medium text-zinc-900">
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              id={`${fId}-phone`}
-              {...register('phone')}
-              className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
-            />
-            {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
-          </div>
-
-          {/* Preferred Material */}
-          <div>
-            <label
-              htmlFor={`${fId}-material`}
-              className="block text-base font-medium text-zinc-900"
-            >
-              Preferred Material
-            </label>
-            <select
-              id={`${fId}-material`}
-              {...register('material')}
-              className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
-            >
-              <option value="">Select material</option>
-              <option value="PLA">PLA</option>
-              <option value="Resin">Resin</option>
-              <option value="Eco-Plastic">Eco-Plastic</option>
-            </select>
-            {errors.material && (
-              <p className="mt-1 text-sm text-red-600">{errors.material.message}</p>
-            )}
-          </div>
-
-          {/* Delivery Address */}
-          <div className="md:col-span-2">
-            <label htmlFor={`${fId}-address`} className="block text-base font-medium text-zinc-900">
-              Delivery Address
-            </label>
-            <input
-              type="text"
-              id={`${fId}-address`}
-              {...register('address')}
-              className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
-            />
-            {errors.address && (
-              <p className="mt-1 text-sm text-red-600">{errors.address.message}</p>
-            )}
-          </div>
-
-          {/* Dimensions */}
-          <div className="md:col-span-2">
-            <p className="block text-base font-medium text-zinc-900 mb-1">
-              Object Dimensions (in mm)
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <input
-                  type="number"
-                  {...register('width', { setValueAs: dimSetValueAs })}
-                  placeholder="Width"
-                  max={250}
-                  className="p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
-                />
-                {errors.width && (
-                  <p className="mt-1 text-sm text-red-600">{errors.width.message}</p>
-                )}
-              </div>
-              <div>
-                <input
-                  type="number"
-                  {...register('height', { setValueAs: dimSetValueAs })}
-                  placeholder="Height"
-                  max={250}
-                  className="p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
-                />
-                {errors.height && (
-                  <p className="mt-1 text-sm text-red-600">{errors.height.message}</p>
-                )}
-              </div>
-              <div>
-                <input
-                  type="number"
-                  {...register('depth', { setValueAs: dimSetValueAs })}
-                  placeholder="Depth"
-                  max={250}
-                  className="p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
-                />
-                {errors.depth && (
-                  <p className="mt-1 text-sm text-red-600">{errors.depth.message}</p>
-                )}
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mt-1">Maximum dimensions: 250 x 250 x 250 mm</p>
-          </div>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+      {apiStatus === 'success' && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-5 py-4 rounded-xl flex items-start gap-3 text-sm font-light">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 flex-shrink-0 mt-0.5">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <span>Request submitted — we&apos;ll be in touch with a quote within 24–48 hours.</span>
         </div>
+      )}
+      {apiStatus === 'error' && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl flex items-start gap-3 text-sm font-light">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 flex-shrink-0 mt-0.5">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span>Something went wrong. Please try again or email us directly.</span>
+        </div>
+      )}
+      {fileError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl flex items-start gap-3 text-sm font-light">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 flex-shrink-0 mt-0.5">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span>{fileError}</span>
+        </div>
+      )}
 
-        {/* Description */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <label htmlFor={`${fId}-desc`} className="block text-base font-medium text-zinc-900">
-            Project Description
-          </label>
-          <textarea
-            id={`${fId}-desc`}
-            {...register('description')}
-            rows={4}
-            className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-white font-normal text-zinc-900 placeholder:text-zinc-500 focus:ring-emerald-500 focus:border-emerald-500"
+          <label htmlFor={`${fId}-name`} className={labelClass}>Full name</label>
+          <input
+            type="text"
+            id={`${fId}-name`}
+            {...register('name')}
+            placeholder="Jane Smith"
+            className={inputClass}
           />
-          {errors.description && (
-            <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
-          )}
+          {errors.name && <p className="mt-1.5 text-xs text-red-600">{errors.name.message}</p>}
         </div>
 
-        {/* File Upload */}
         <div>
-          <label htmlFor={`${fId}-file`} className="block text-base font-medium text-zinc-900">
-            Upload Design File (STL, DWG, SLDPRT, 3MF)
+          <label htmlFor={`${fId}-email`} className={labelClass}>Email address</label>
+          <input
+            type="email"
+            id={`${fId}-email`}
+            {...register('email')}
+            placeholder="jane@example.com"
+            className={inputClass}
+          />
+          {errors.email && <p className="mt-1.5 text-xs text-red-600">{errors.email.message}</p>}
+        </div>
+
+        <div>
+          <label htmlFor={`${fId}-phone`} className={labelClass}>
+            Phone <span className="text-zinc-400 font-light">(optional)</span>
           </label>
           <input
-            type="file"
-            id={`${fId}-file`}
-            ref={fileInputRef}
-            accept=".stl,.dwg,.sldprt,.3mf"
-            className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
-            file:rounded-md file:border-0 file:text-sm file:font-semibold
-            file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            type="tel"
+            id={`${fId}-phone`}
+            {...register('phone')}
+            placeholder="+44 7700 900000"
+            className={inputClass}
           />
-          <p className="text-xs text-gray-500 mt-1">Max size: 20MB per file.</p>
+          {errors.phone && <p className="mt-1.5 text-xs text-red-600">{errors.phone.message}</p>}
         </div>
 
-        {/* Submit Button */}
         <div>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-zinc-900 text-white px-8 py-3 rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50"
+          <label htmlFor={`${fId}-material`} className={labelClass}>Preferred material</label>
+          <select
+            id={`${fId}-material`}
+            {...register('material')}
+            className={inputClass}
           >
-            {isSubmitting ? 'Submitting...' : 'Submit Request'}
-          </button>
+            <option value="">Select material</option>
+            <option value="PLA">PLA</option>
+            <option value="Resin">Resin</option>
+            <option value="Eco-Plastic">Eco-Plastic</option>
+          </select>
+          {errors.material && <p className="mt-1.5 text-xs text-red-600">{errors.material.message}</p>}
         </div>
-      </form>
-      <div className="mt-4 text-center">
-        <Link href="/privacy" className="text-sm text-emerald-600 hover:underline">
-          Read our Privacy Policy
+      </div>
+
+      <div>
+        <label htmlFor={`${fId}-address`} className={labelClass}>Delivery address</label>
+        <input
+          type="text"
+          id={`${fId}-address`}
+          {...register('address')}
+          placeholder="123 Example Street, London, E1 1AA"
+          className={inputClass}
+        />
+        {errors.address && <p className="mt-1.5 text-xs text-red-600">{errors.address.message}</p>}
+      </div>
+
+      <div>
+        <p className={labelClass}>Dimensions <span className="text-zinc-400 font-light">(mm, optional)</span></p>
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <input
+              type="number"
+              {...register('width', { setValueAs: dimSetValueAs })}
+              placeholder="Width"
+              max={250}
+              className={inputClass}
+            />
+            {errors.width && <p className="mt-1.5 text-xs text-red-600">{errors.width.message}</p>}
+          </div>
+          <div>
+            <input
+              type="number"
+              {...register('height', { setValueAs: dimSetValueAs })}
+              placeholder="Height"
+              max={250}
+              className={inputClass}
+            />
+            {errors.height && <p className="mt-1.5 text-xs text-red-600">{errors.height.message}</p>}
+          </div>
+          <div>
+            <input
+              type="number"
+              {...register('depth', { setValueAs: dimSetValueAs })}
+              placeholder="Depth"
+              max={250}
+              className={inputClass}
+            />
+            {errors.depth && <p className="mt-1.5 text-xs text-red-600">{errors.depth.message}</p>}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor={`${fId}-desc`} className={labelClass}>Project description</label>
+        <textarea
+          id={`${fId}-desc`}
+          {...register('description')}
+          rows={5}
+          placeholder="Tell us what you're after — material preferences, colours, intended use, any reference images or links..."
+          className={`${inputClass} resize-none`}
+        />
+        {errors.description && <p className="mt-1.5 text-xs text-red-600">{errors.description.message}</p>}
+      </div>
+
+      <div>
+        <label htmlFor={`${fId}-file`} className={labelClass}>Design file</label>
+        <label
+          htmlFor={`${fId}-file`}
+          className="mt-1 flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-gray-200 border-dashed text-sm text-zinc-400 font-light cursor-pointer hover:border-emerald-300 hover:text-emerald-600 transition-all"
+        >
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 flex-shrink-0">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          <span>Upload STL, DWG, SLDPRT or 3MF — max 20MB</span>
+        </label>
+        <input
+          type="file"
+          id={`${fId}-file`}
+          ref={fileInputRef}
+          accept=".stl,.dwg,.sldprt,.3mf"
+          className="sr-only"
+        />
+      </div>
+
+      <div className="flex items-center justify-between pt-1">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-8 py-3 bg-zinc-900 text-white text-sm font-medium rounded-xl hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit request'}
+        </button>
+        <Link href="/privacy" className="text-xs text-zinc-400 font-light hover:text-zinc-600 transition-colors">
+          Privacy policy
         </Link>
       </div>
-    </div>
+    </form>
   )
 }
