@@ -485,7 +485,7 @@ function OrderModal({ order, onClose }: { order: Order; onClose: () => void }) {
             {sent ? (
               <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-center">
                 <p className="text-sm font-medium text-emerald-800 mb-1">Message sent</p>
-                <p className="text-xs text-emerald-600">We'll get back to you as soon as possible.</p>
+                <p className="text-xs text-emerald-600">We&apos;ll get back to you as soon as possible.</p>
                 <button
                   type="button"
                   onClick={() => { setSent(false); setSupportOpen(false); setIssueType(''); setSupportMessage('') }}
