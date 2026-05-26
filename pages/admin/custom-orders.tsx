@@ -1,34 +1,27 @@
 import { useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
+import CustomOrderModal, { type CustomOrder } from '@/components/admin/CustomOrderModal'
 import { authFetch } from '@/lib/api/authFetch'
 
-type CustomOrder = {
-  id: number
-  name: string
-  email: string
-  phone: string | null
-  material: string
-  address: string
-  width: number | null
-  height: number | null
-  depth: number | null
-  description: string
-  file_url: string
-  status: string
-  created_at: string
-}
-
-const STATUS_COLORS: Record<string, string> = {
+const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-yellow-50 text-yellow-700',
   completed: 'bg-emerald-50 text-emerald-700',
   in_progress: 'bg-blue-50 text-blue-700',
   cancelled: 'bg-red-50 text-red-700',
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Pending',
+  in_progress: 'In Progress',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+}
+
 export default function AdminCustomOrdersPage() {
   const [orders, setOrders] = useState<CustomOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedOrders, setSelectedOrders] = useState<number[]>([])
+  const [selectedOrder, setSelectedOrder] = useState<CustomOrder | null>(null)
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -37,33 +30,22 @@ export default function AdminCustomOrdersPage() {
       setLoading(true)
       setError(null)
       try {
-        console.log('🔍 [AdminCustomOrders] Fetching custom orders from API...')
         const response = await authFetch('/api/admin/custom-orders')
-
         if (!response.ok) {
-          console.error('❌ [AdminCustomOrders] Error fetching custom orders:', response.status)
-          const errorData = await response
-            .json()
-            .catch(() => ({ error: 'Failed to fetch custom orders' }))
+          const errorData = await response.json().catch(() => ({ error: 'Failed to fetch custom orders' }))
           throw new Error(errorData.error || 'Failed to fetch custom orders')
         }
-
         const data = await response.json()
-        console.log('✅ [AdminCustomOrders] Custom orders fetched successfully:', data?.length || 0)
-
         if (!Array.isArray(data)) {
-          console.warn('⚠️ [AdminCustomOrders] API returned non-array data:', data)
           setOrders([])
           setError('Invalid data format received')
-          setToast({ message: 'Invalid data format received', type: 'error' })
         } else {
-          setOrders(data || [])
+          setOrders(data)
         }
-      } catch (error) {
-        console.error('❌ [AdminCustomOrders] Error:', error)
-        const errorMessage = error instanceof Error ? error.message : 'Failed to load custom orders'
-        setError(errorMessage)
-        setToast({ message: errorMessage, type: 'error' })
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Failed to load custom orders'
+        setError(msg)
+        setToast({ message: msg, type: 'error' })
       } finally {
         setLoading(false)
       }
@@ -71,36 +53,36 @@ export default function AdminCustomOrdersPage() {
     fetchOrders()
   }, [])
 
-  // Bulk select logic
   const allSelected = orders.length > 0 && orders.every((o) => selectedOrders.includes(o.id))
   const toggleSelectAll = () => {
-    if (allSelected) {
-      setSelectedOrders([])
-    } else {
-      setSelectedOrders(orders.map((o) => o.id))
-    }
+    setSelectedOrders(allSelected ? [] : orders.map((o) => o.id))
   }
   const toggleSelectOrder = (id: number) => {
     setSelectedOrders(
       selectedOrders.includes(id) ? selectedOrders.filter((i) => i !== id) : [...selectedOrders, id]
     )
   }
+
   const handleBulkDelete = async () => {
     try {
       for (const id of selectedOrders) {
         const response = await authFetch(`/api/admin/custom-orders/${id}`, { method: 'DELETE' })
-        if (!response.ok) {
-          throw new Error(`Failed to delete order ${id}`)
-        }
+        if (!response.ok) throw new Error(`Failed to delete order ${id}`)
       }
-      setOrders((orders) => orders.filter((o) => !selectedOrders.includes(o.id)))
+      setOrders((prev) => prev.filter((o) => !selectedOrders.includes(o.id)))
       setSelectedOrders([])
       setToast({ message: 'Orders deleted successfully', type: 'success' })
-    } catch (error) {
-      console.error('❌ [AdminCustomOrders] Bulk delete error:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Failed to delete custom orders'
-      setToast({ message: errorMessage, type: 'error' })
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed to delete custom orders'
+      setToast({ message: msg, type: 'error' })
     }
+  }
+
+  const handleUpdated = (id: number, status: string, admin_notes: string) => {
+    setOrders((prev) =>
+      prev.map((o) => (o.id === id ? { ...o, status, admin_notes } : o))
+    )
+    setToast({ message: 'Order updated', type: 'success' })
   }
 
   return (
@@ -110,16 +92,10 @@ export default function AdminCustomOrdersPage() {
         <p className="text-sm text-zinc-600 font-light">Manage custom order requests</p>
       </div>
 
-      {/* Toast Notification */}
       {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type || 'success'}
-          onClose={() => setToast(null)}
-        />
+        <Toast message={toast.message} type={toast.type || 'success'} onClose={() => setToast(null)} />
       )}
 
-      {/* Error State */}
       {error && !loading && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800 font-light">{error}</p>
@@ -133,7 +109,6 @@ export default function AdminCustomOrdersPage() {
         </div>
       )}
 
-      {/* Bulk actions */}
       {selectedOrders.length > 0 && (
         <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-center justify-between">
           <span className="text-sm text-emerald-900 font-light">
@@ -181,7 +156,6 @@ export default function AdminCustomOrdersPage() {
               <th className="px-4 py-3 text-left font-light text-zinc-700">Material</th>
               <th className="px-4 py-3 text-left font-light text-zinc-700">Dimensions (mm)</th>
               <th className="px-4 py-3 text-left font-light text-zinc-700">Description</th>
-              <th className="px-4 py-3 text-left font-light text-zinc-700">File</th>
               <th className="px-4 py-3 text-left font-light text-zinc-700">Status</th>
               <th className="px-4 py-3 text-left font-light text-zinc-700">Submitted</th>
             </tr>
@@ -189,14 +163,14 @@ export default function AdminCustomOrdersPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={9} className="text-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+                <td colSpan={8} className="text-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto" />
                   <p className="text-zinc-600 mt-2 font-light">Loading orders...</p>
                 </td>
               </tr>
             ) : orders.length === 0 ? (
               <tr>
-                <td colSpan={9} className="text-center py-12 text-zinc-500 font-light">
+                <td colSpan={8} className="text-center py-12 text-zinc-500 font-light">
                   No custom orders found.
                 </td>
               </tr>
@@ -204,9 +178,13 @@ export default function AdminCustomOrdersPage() {
               orders.map((order) => (
                 <tr
                   key={order.id}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  onClick={() => setSelectedOrder(order)}
+                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
-                  <td className="px-4 py-3">
+                  <td
+                    className="px-4 py-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <input
                       type="checkbox"
                       checked={selectedOrders.includes(order.id)}
@@ -215,17 +193,10 @@ export default function AdminCustomOrdersPage() {
                     />
                   </td>
                   <td className="px-4 py-3 font-light text-zinc-900">{order.name}</td>
-                  <td className="px-4 py-3">
-                    <a
-                      href={`mailto:${order.email}`}
-                      className="text-emerald-600 hover:text-emerald-700 font-light"
-                    >
-                      {order.email}
-                    </a>
-                  </td>
+                  <td className="px-4 py-3 text-zinc-600 font-light">{order.email}</td>
                   <td className="px-4 py-3 text-zinc-700 font-light">{order.material}</td>
                   <td className="px-4 py-3 text-zinc-700 font-light">
-                    {order.width || '-'} × {order.height || '-'} × {order.depth || '-'}
+                    {order.width ?? '–'} × {order.height ?? '–'} × {order.depth ?? '–'}
                   </td>
                   <td
                     className="px-4 py-3 max-w-xs truncate text-zinc-700 font-light"
@@ -234,22 +205,12 @@ export default function AdminCustomOrdersPage() {
                     {order.description}
                   </td>
                   <td className="px-4 py-3">
-                    <a
-                      href={order.file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-emerald-600 hover:text-emerald-700 font-light"
-                    >
-                      Download
-                    </a>
-                  </td>
-                  <td className="px-4 py-3">
                     <span
                       className={`inline-block px-2 py-1 rounded-full text-xs font-light ${
-                        STATUS_COLORS[order.status] || 'bg-gray-100 text-zinc-800'
+                        STATUS_STYLES[order.status] ?? 'bg-gray-100 text-zinc-800'
                       }`}
                     >
-                      {order.status}
+                      {STATUS_LABELS[order.status] ?? order.status}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-xs text-zinc-600 font-light">
@@ -261,6 +222,14 @@ export default function AdminCustomOrdersPage() {
           </tbody>
         </table>
       </div>
+
+      {selectedOrder && (
+        <CustomOrderModal
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+          onUpdated={handleUpdated}
+        />
+      )}
     </div>
   )
 }

@@ -9,7 +9,6 @@ import {
   X,
 } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
@@ -178,14 +177,14 @@ function ProgressBar({ status }: { status: string }) {
 
       {/* Desktop: full chain */}
       <div className="hidden sm:block w-full overflow-x-auto pb-1">
-        <div className="flex items-start min-w-max gap-0">
+        <div className="flex items-start w-full gap-0">
           {PROGRESS_STEPS.map((step, idx) => {
             const isDone = currentIdx > idx
             const isCurrent = currentIdx === idx
             const { Icon } = step
             return (
-              <div key={step.key} className="flex items-center">
-                <div className="flex flex-col items-center gap-2">
+              <div key={step.key} className="flex items-center flex-1 last:flex-none">
+                <div className="flex flex-col items-center gap-2 flex-shrink-0">
                   <div
                     className={`relative flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-500 ${
                       isDone
@@ -217,7 +216,7 @@ function ProgressBar({ status }: { status: string }) {
                 </div>
                 {idx < PROGRESS_STEPS.length - 1 && (
                   <div
-                    className={`w-10 h-0.5 mx-1 mb-5 flex-shrink-0 transition-colors duration-500 ${
+                    className={`flex-1 h-0.5 mx-1 mb-5 transition-colors duration-500 ${
                       isDone ? 'bg-emerald-400' : 'bg-zinc-200'
                     }`}
                   />
@@ -231,13 +230,53 @@ function ProgressBar({ status }: { status: string }) {
   )
 }
 
+const SUPPORT_ISSUES = [
+  'My Order Status',
+  'Invoice / Documents',
+  'Cancel My Order',
+  'Change of Shipping Address',
+  'My Deliveries',
+  'Other Order Support',
+] as const
+
 function OrderModal({ order, onClose }: { order: Order; onClose: () => void }) {
   const [visible, setVisible] = useState(false)
+  const [supportOpen, setSupportOpen] = useState(false)
+  const [issueType, setIssueType] = useState('')
+  const [supportMessage, setSupportMessage] = useState('')
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [supportError, setSupportError] = useState<string | null>(null)
+  const { user } = useAuth()
 
   const handleClose = useCallback(() => {
     setVisible(false)
     setTimeout(onClose, 280)
   }, [onClose])
+
+  const handleSupportSubmit = async () => {
+    if (!issueType) return
+    setSending(true)
+    setSupportError(null)
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: user?.user_metadata?.full_name || user?.email || 'Customer',
+          email: user?.email || '',
+          subject: `${issueType} — Order #${order.id.slice(-8).toUpperCase()}`,
+          message: supportMessage.trim() || `Issue type: ${issueType}\nOrder: #${order.id.slice(-8).toUpperCase()}`,
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to send')
+      setSent(true)
+    } catch {
+      setSupportError('Something went wrong. Please try again.')
+    } finally {
+      setSending(false)
+    }
+  }
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setVisible(true))
@@ -441,30 +480,88 @@ function OrderModal({ order, onClose }: { order: Order; onClose: () => void }) {
             </div>
           )}
 
-          {/* Contact CTA */}
-          <div className="pt-2 pb-2 border-t border-zinc-100">
-            <p className="text-xs text-zinc-400 mb-3">Need to change or cancel this order?</p>
-            <Link
-              href={`/contact?subject=${encodeURIComponent(`Order #${order.id.slice(-8).toUpperCase()} — change request`)}`}
-              onClick={handleClose}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-900 text-white text-sm font-medium rounded-xl hover:bg-zinc-800 transition-colors"
-            >
-              <svg
-                aria-hidden="true"
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-                />
-              </svg>
-              Contact us about this order
-            </Link>
+          {/* Support panel */}
+          <div className="border-t border-zinc-100 pt-4 pb-2">
+            {sent ? (
+              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-center">
+                <p className="text-sm font-medium text-emerald-800 mb-1">Message sent</p>
+                <p className="text-xs text-emerald-600">We'll get back to you as soon as possible.</p>
+                <button
+                  type="button"
+                  onClick={() => { setSent(false); setSupportOpen(false); setIssueType(''); setSupportMessage('') }}
+                  className="mt-3 text-xs text-emerald-700 hover:text-emerald-900 underline"
+                >
+                  Close
+                </button>
+              </div>
+            ) : !supportOpen ? (
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-zinc-900">Need help on this order?</p>
+                <button
+                  type="button"
+                  onClick={() => setSupportOpen(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white text-xs font-medium rounded-xl hover:bg-zinc-700 transition-colors"
+                >
+                  Contact customer support
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <button
+                  type="button"
+                  onClick={() => { setSupportOpen(false); setIssueType(''); setSupportMessage(''); setSupportError(null) }}
+                  className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-700 transition-colors"
+                >
+                  <ChevronRight className="w-3 h-3 rotate-180" />
+                  Back to Actions
+                </button>
+
+                <div>
+                  <p className="text-sm font-semibold text-zinc-900 mb-0.5">Contact Customer Support</p>
+                  <p className="text-xs text-zinc-400">Please select an issue type to get started on your support options.</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-700 mb-1.5">Select Issue</label>
+                  <select
+                    value={issueType}
+                    onChange={(e) => setIssueType(e.target.value)}
+                    className="w-full border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 bg-white"
+                  >
+                    <option value="">Select One</option>
+                    {SUPPORT_ISSUES.map((issue) => (
+                      <option key={issue} value={issue}>{issue}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {issueType && (
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-700 mb-1.5">Additional details <span className="text-zinc-400 font-normal">(optional)</span></label>
+                    <textarea
+                      value={supportMessage}
+                      onChange={(e) => setSupportMessage(e.target.value)}
+                      rows={3}
+                      placeholder="Tell us more about your issue…"
+                      className="w-full border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 resize-none"
+                    />
+                  </div>
+                )}
+
+                {supportError && (
+                  <p className="text-xs text-red-600">{supportError}</p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleSupportSubmit}
+                  disabled={!issueType || sending}
+                  className="w-full py-2.5 bg-zinc-900 text-white text-sm font-medium rounded-xl hover:bg-zinc-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {sending ? 'Sending…' : 'Send'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
