@@ -52,6 +52,11 @@ type VariantOption = {
   hexColor?: string | null
 }
 
+type SiteSettings = {
+  accordion_materials_printing?: string
+  accordion_delivery_returns?: string
+}
+
 type ProductDetailPageProps = {
   product: ProductNew | null
   variants: ProductVariantNew[]
@@ -65,12 +70,14 @@ type ProductDetailPageProps = {
     max: number
     has_variants: boolean
   }
+  siteSettings: SiteSettings
 }
 
 const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   product,
   variants,
   variantOptions,
+  siteSettings,
 }) => {
   const { addToCart } = useCart()
 
@@ -756,12 +763,14 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                   key: 'materials',
                   title: 'Materials & printing',
                   content:
+                    siteSettings.accordion_materials_printing ??
                     'We print in PLA+ and PETG — both durable, environmentally conscious materials. PLA+ is ideal for decorative and display pieces; PETG is stronger and heat-resistant, suited to functional items. Colours are produced in-house and may vary slightly from on-screen representations.',
                 },
                 {
                   key: 'delivery',
                   title: 'Delivery & returns',
                   content:
+                    siteSettings.accordion_delivery_returns ??
                     'Free UK standard delivery on orders over £30. Items are dispatched within 2–4 business days of ordering. We accept returns on non-personalised items within 14 days of receipt — please contact us to arrange.',
                 },
                 ...(product.customizable
@@ -1105,6 +1114,13 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
         : rawCat
       : { id: null, name: 'Uncategorized', slug: 'uncategorized' }
 
+    const { data: settingsRows } = await supabaseServer
+      .from('site_settings')
+      .select('key, value')
+    const siteSettings: SiteSettings = Object.fromEntries(
+      (settingsRows ?? []).map(({ key, value }: { key: string; value: string }) => [key, value])
+    )
+
     return {
       props: {
         product: { ...product, category: categoryData },
@@ -1119,8 +1135,9 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
           max: maxPrice,
           has_variants: hasVariants,
         },
+        siteSettings,
       },
-      revalidate: 60, // Revalidate every minute
+      revalidate: 60,
     }
   } catch (error) {
     console.error('Error fetching product:', error)

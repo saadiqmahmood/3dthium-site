@@ -34,8 +34,10 @@ Added `mx-auto` to the inner stepper div. The "Order Placed → Printing → Pac
 
 ---
 
-## Priority 5 — Admin-editable product accordion sections
+## ~~Priority 5 — Admin-editable product accordion sections~~ ✅ DONE (pending SQL migration)
 
-"Product details", "Materials & printing", and "Delivery & returns" on the product storefront page are hardcoded strings. Needs DB fields (likely in the `attributes` JSON column), edit UI in the admin product page, and dynamic reads in the storefront.
+Implemented as site-wide settings (client decision). `site_settings` table stores the three accordion values. Admin can edit them at `/admin/site-settings` — changes go live within 60 seconds via ISR. Hardcoded strings remain as fallbacks if DB is empty.
 
-**Files:** `pages/products/[slug].tsx:750–765`, `pages/admin/products/[id].tsx`
+**Requires:** Run `drizzle/migrations/0007_site_settings.sql` in Supabase SQL editor to create the table and seed defaults.
+
+**Files:** `pages/admin/site-settings.tsx`, `pages/api/admin/site-settings.ts`, `pages/api/site-settings.ts`, `pages/products/[slug].tsx`, `components/admin/AdminSidebar.tsx`, `drizzle/migrations/0007_site_settings.sql`
