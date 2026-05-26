@@ -159,19 +159,20 @@ export default function AdminCustomOrdersPage() {
               <th className="px-4 py-3 text-left font-light text-zinc-700">Description</th>
               <th className="px-4 py-3 text-left font-light text-zinc-700">Status</th>
               <th className="px-4 py-3 text-left font-light text-zinc-700">Submitted</th>
+              <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={8} className="text-center py-12">
+                <td colSpan={9} className="text-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto" />
                   <p className="text-zinc-600 mt-2 font-light">Loading orders...</p>
                 </td>
               </tr>
             ) : orders.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center py-12 text-zinc-500 font-light">
+                <td colSpan={9} className="text-center py-12 text-zinc-500 font-light">
                   No custom orders found.
                 </td>
               </tr>
@@ -216,6 +217,15 @@ export default function AdminCustomOrdersPage() {
                   </td>
                   <td className="px-4 py-3 text-xs text-zinc-600 font-light">
                     {new Date(order.created_at).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedOrder(order)}
+                      className="text-emerald-600 hover:text-emerald-700 border border-emerald-300 px-3 py-1 rounded-lg hover:bg-emerald-50 transition-colors text-xs font-light"
+                    >
+                      View Details
+                    </button>
                   </td>
                 </tr>
               ))

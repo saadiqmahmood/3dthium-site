@@ -350,9 +350,10 @@ export default function AdminOrdersPage() {
               paginatedOrders.map((order) => (
                 <tr
                   key={order.id}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  onClick={() => setSelectedOrder(order)}
+                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={selectedOrders.includes(order.id)}
@@ -406,7 +407,7 @@ export default function AdminOrdersPage() {
                   <td className="px-4 py-3 text-zinc-600 text-xs font-light">
                     {new Date(order.created_at).toLocaleString()}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
                     {showDeleted ? (
                       <button
                         type="button"
