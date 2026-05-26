@@ -754,12 +754,6 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
             {(
               [
                 {
-                  key: 'details',
-                  title: 'Product details',
-                  content:
-                    'Each piece is 3D printed to order in the UK using precision FDM technology. Slight layer lines are a natural characteristic of the process. Dimensions vary by size option — refer to the size selector above for available options.',
-                },
-                {
                   key: 'materials',
                   title: 'Materials & printing',
                   content:
