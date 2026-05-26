@@ -87,9 +87,7 @@ export default function ImageManager({
     const fileName = `${Date.now()}-${index}.${fileExt}`
     const filePath = `${categorySlug}/${productSlug}/gallery/${fileName}`
 
-    console.log('📤 Uploading to Supabase:', filePath)
-
-    const { data, error } = await supabase.storage.from('products').upload(filePath, file, {
+    const { error } = await supabase.storage.from('products').upload(filePath, file, {
       cacheControl: '3600',
       upsert: false,
     })
@@ -98,8 +96,6 @@ export default function ImageManager({
       console.error('❌ Upload failed:', error)
       throw new Error(`Upload failed: ${error.message}`)
     }
-
-    console.log('✅ Upload successful:', data.path)
 
     // Get the public URL
     const {
@@ -134,24 +130,14 @@ export default function ImageManager({
       for (let i = 0; i < filesToUpload; i++) {
         const file = files[i]
 
-        if (!file.type.startsWith('image/')) {
-          console.warn(`Skipping non-image file: ${file.name}`)
-          continue
-        }
+        if (!file.type.startsWith('image/')) continue
 
         setUploadProgress(`Processing ${i + 1}/${filesToUpload} images...`)
 
         try {
-          // Step 1: Auto-crop to square
-          console.log(`🔄 Cropping image ${i + 1}:`, file.name)
           const squareFile = await createSquareImage(file)
-
-          // Step 2: Upload to Supabase
-          console.log(`📤 Uploading image ${i + 1}:`, file.name)
           const url = await uploadImageToSupabase(squareFile, i)
-
           newUrls.push(url)
-          console.log(`✅ Image ${i + 1} complete:`, url)
         } catch (error) {
           console.error(`Error processing image ${file.name}:`, error)
           setToast({ message: `Failed to upload ${file.name}: ${error}`, type: 'error' })
@@ -162,7 +148,6 @@ export default function ImageManager({
       if (newUrls.length > 0) {
         // Add new URLs to existing gallery
         onGalleryChange([...galleryImages, ...newUrls])
-        console.log(`✅ Successfully uploaded ${newUrls.length} images`)
       }
     } catch (error) {
       console.error('Gallery upload error:', error)
@@ -269,9 +254,7 @@ export default function ImageManager({
                         console.error('Gallery image load error:', imageUrl)
                         e.currentTarget.style.display = 'none'
                       }}
-                      onLoad={() => {
-                        console.log(`✅ Image ${index + 1} loaded:`, imageUrl.substring(0, 50))
-                      }}
+                      onLoad={() => {}}
                     />
                     {/* Thumbnail Badge */}
                     {index === 0 && (

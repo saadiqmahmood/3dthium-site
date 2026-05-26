@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Spinner from '@/components/ui/Spinner'
 import Toast from '@/components/ui/Toast'
 import { formatMoney } from '@/lib/format/money'
@@ -37,30 +37,23 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
-  useEffect(() => {
-    const fetchMetrics = async () => {
-      setLoading(true)
-      try {
-        console.log('🔍 [AdminDashboard] Fetching metrics from API...')
-        const response = await authFetch('/api/admin/metrics')
-
-        if (!response.ok) {
-          console.error('❌ [AdminDashboard] Error fetching metrics:', response.status)
-          throw new Error('Failed to fetch metrics')
-        }
-
-        const data = await response.json()
-        console.log('✅ [AdminDashboard] Metrics fetched successfully:', data)
-        setMetrics(data)
-      } catch (error) {
-        console.error('❌ [AdminDashboard] Error:', error)
-        setToast({ message: 'Failed to load dashboard data', type: 'error' })
-      } finally {
-        setLoading(false)
-      }
+  const fetchMetrics = useCallback(async () => {
+    setLoading(true)
+    try {
+      const response = await authFetch('/api/admin/metrics')
+      if (!response.ok) throw new Error('Failed to fetch metrics')
+      const data = await response.json()
+      setMetrics(data)
+    } catch {
+      setToast({ message: 'Failed to load dashboard data', type: 'error' })
+    } finally {
+      setLoading(false)
     }
-    fetchMetrics()
   }, [])
+
+  useEffect(() => {
+    fetchMetrics()
+  }, [fetchMetrics])
 
   // Export helpers
   const exportTable = async (table: string) => {
@@ -118,9 +111,9 @@ export default function AdminDashboard() {
 
       if (!response.ok) throw new Error('Import failed')
 
-      window.location.reload()
-    } catch (error) {
-      console.error('❌ [AdminDashboard] Import error:', error)
+      await fetchMetrics()
+      setToast({ message: 'Import successful', type: 'success' })
+    } catch {
       setToast({ message: 'Import failed', type: 'error' })
     }
   }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import CustomOrderModal, { type CustomOrder } from '@/components/admin/CustomOrderModal'
 import { authFetch } from '@/lib/api/authFetch'
@@ -25,33 +25,34 @@ export default function AdminCustomOrdersPage() {
   const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true)
-      setError(null)
-      try {
-        const response = await authFetch('/api/admin/custom-orders')
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Failed to fetch custom orders' }))
-          throw new Error(errorData.error || 'Failed to fetch custom orders')
-        }
-        const data = await response.json()
-        if (!Array.isArray(data)) {
-          setOrders([])
-          setError('Invalid data format received')
-        } else {
-          setOrders(data)
-        }
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : 'Failed to load custom orders'
-        setError(msg)
-        setToast({ message: msg, type: 'error' })
-      } finally {
-        setLoading(false)
+  const fetchOrders = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await authFetch('/api/admin/custom-orders')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to fetch custom orders' }))
+        throw new Error(errorData.error || 'Failed to fetch custom orders')
       }
+      const data = await response.json()
+      if (!Array.isArray(data)) {
+        setOrders([])
+        setError('Invalid data format received')
+      } else {
+        setOrders(data)
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed to load custom orders'
+      setError(msg)
+      setToast({ message: msg, type: 'error' })
+    } finally {
+      setLoading(false)
     }
-    fetchOrders()
   }, [])
+
+  useEffect(() => {
+    fetchOrders()
+  }, [fetchOrders])
 
   const allSelected = orders.length > 0 && orders.every((o) => selectedOrders.includes(o.id))
   const toggleSelectAll = () => {
@@ -101,7 +102,7 @@ export default function AdminCustomOrdersPage() {
           <p className="text-red-800 font-light">{error}</p>
           <button
             type="button"
-            onClick={() => window.location.reload()}
+            onClick={() => fetchOrders()}
             className="mt-2 text-red-600 hover:text-red-700 underline text-sm font-light"
           >
             Retry

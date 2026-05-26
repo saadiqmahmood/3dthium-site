@@ -35,14 +35,7 @@ export default function AccountPage() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   useEffect(() => {
-    console.log('📄 [AccountPage] Component mounted, checking auth state:', {
-      hasUser: !!user,
-      loading,
-      pathname: router.pathname,
-    })
-
     if (!loading && !user) {
-      console.log('🚫 [AccountPage] No user, redirecting to auth')
       router.push('/auth')
     }
   }, [user?.id, loading, router])

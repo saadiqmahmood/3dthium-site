@@ -108,9 +108,6 @@ export default function ImageUpload({
 
         const updatedImages = [...images, ...newImages]
         setImages(updatedImages)
-        console.log(
-          `📤 ImageUpload: Uploading to productSlug: ${productSlug}, ${updatedImages.length} total images`
-        )
         onImagesChange(updatedImages)
       } catch (error) {
         console.error('Upload error:', error)
@@ -250,9 +247,7 @@ export default function ImageUpload({
                       console.error('Image load error:', image)
                       e.currentTarget.style.display = 'none'
                     }}
-                    onLoad={() => {
-                      console.log(`✅ Image loaded:`, image.substring(0, 50))
-                    }}
+                    onLoad={() => {}}
                   />
                   {/* Main Badge */}
                   {images.indexOf(image) === 0 && (

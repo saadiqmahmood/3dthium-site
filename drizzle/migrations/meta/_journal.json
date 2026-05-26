@@ -29,6 +29,41 @@
       "when": 1746144060000,
       "tag": "0003_order_items_fk",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1746144120000,
+      "tag": "0004_cart_items_variant_fk",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1746144180000,
+      "tag": "0005_orders_soft_delete",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1748736000000,
+      "tag": "0006_custom_orders_admin_notes",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1748736060000,
+      "tag": "0007_site_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1748736120000,
+      "tag": "0008_contact_messages",
+      "breakpoints": true
     }
   ]
 }

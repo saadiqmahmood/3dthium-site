@@ -79,8 +79,6 @@ export default function AuthPage() {
     setToast(null)
 
     try {
-      console.log('Attempting auth:', isLogin ? 'signIn' : 'signUp', { email: data.email })
-
       const action = isLogin ? signIn : signUp
       const { error } = await action(data.email, data.password)
 
@@ -88,21 +86,14 @@ export default function AuthPage() {
         let errorMessage = error.message
         if (error.message.includes('Invalid login credentials')) {
           errorMessage = 'Invalid email or password. Please check your credentials and try again.'
-          console.log('Login failed: Invalid credentials')
         } else if (error.message.includes('Email not confirmed')) {
           errorMessage = 'Please check your email and confirm your account before logging in.'
-          console.log('Login failed: Email not confirmed')
         } else if (error.message.includes('User already registered')) {
           errorMessage = 'An account with this email already exists. Please log in instead.'
-          console.log('Signup failed: User already exists')
-        } else {
-          console.error('Unexpected auth error:', error)
         }
         authSetError('root', { message: errorMessage })
         return
       }
-
-      console.log('Auth successful:', isLogin ? 'signIn' : 'signUp')
 
       setToast({
         message: isLogin ? 'Logged in successfully!' : 'Account created successfully!',

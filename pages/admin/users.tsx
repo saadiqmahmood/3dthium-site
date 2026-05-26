@@ -33,16 +33,11 @@ export default function AdminUsersPage() {
     const fetchUsers = async () => {
       setUsersLoading(true)
       try {
-        console.log('🔍 [AdminUsers] Fetching users from API...')
         const response = await authFetch('/api/admin/users')
 
-        if (!response.ok) {
-          console.error('❌ [AdminUsers] Error fetching users:', response.status)
-          throw new Error('Failed to fetch users')
-        }
+        if (!response.ok) throw new Error('Failed to fetch users')
 
         const data = await response.json()
-        console.log('✅ [AdminUsers] Users fetched successfully:', data?.length || 0)
         setUsers(data || [])
       } catch (error) {
         console.error('❌ [AdminUsers] Error:', error)

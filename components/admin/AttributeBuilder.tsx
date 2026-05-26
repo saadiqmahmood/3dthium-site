@@ -636,10 +636,6 @@ export default function AttributeBuilder({
                             productSlug={`${productSlug}-${attr.name.toLowerCase().replace(/\s+/g, '-')}-${option.value.toLowerCase().replace(/\s+/g, '-')}`}
                             initialImages={option.images || []}
                             onImagesChange={(images) => {
-                              console.log(
-                                `📸 Updating images for attr ${attrIdx}, option ${optIdx}:`,
-                                images
-                              )
                               updateOption(attrIdx, optIdx, 'images', images)
                             }}
                             maxImages={5}

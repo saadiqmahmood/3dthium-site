@@ -1,43 +1,47 @@
 # Backlog
 
-## ~~Priority 1 — Apply migration 0005 (deleted orders recovery)~~ ✅ DONE
+## Priority 1 — Admin view for contact/support messages
 
-`deleted_at` column confirmed live in Supabase. Soft-delete (DELETE) and restore (PATCH) are fully wired in the API and admin UI. Applied manually — not tracked in the Drizzle journal (0004 and 0005 missing from `_journal.json`), which is a housekeeping risk if `drizzle-kit migrate` is run but not urgent.
+The support panel on the orders page submits to `contact_messages` in Supabase, but there is no admin UI to read them. Support requests are invisible to the admin.
 
-**Files:** `drizzle/migrations/0005_orders_soft_delete.sql`, `drizzle/migrations/meta/_journal.json`
-
----
-
-## ~~Priority 2 — Custom order fulfillment~~ ✅ DONE
-
-Rows are now clickable — opens a slide-over modal with full order details, status dropdown (pending/in_progress/completed/cancelled), and admin notes textarea. PATCH endpoint added to the API. Saves update the row in-place without a reload.
-
-**Requires:** Run `drizzle/migrations/0006_custom_orders_admin_notes.sql` in Supabase SQL editor to add the `admin_notes` column.
-
-**Files:** `pages/admin/custom-orders.tsx`, `components/admin/CustomOrderModal.tsx`, `pages/api/admin/custom-orders/[id].ts`
+**Needs:** API route `GET /api/admin/contact-messages` + admin page `/admin/messages`.
 
 ---
 
-## ~~Priority 3 — Order support panel (contact workflow)~~ ✅ DONE
+## Priority 2 — Remove console.log from production code
 
-"Contact us about this order" button replaced with a three-state inline panel: collapsed ("Need help?") → form (issue dropdown + optional message textarea) → sent confirmation. Posts to `/api/contact` with the issue type and order ID baked into the subject. No page navigation.
+`console.log` statements scattered across `pages/account.tsx`, `pages/auth/index.tsx`, `pages/success.tsx`, and all admin pages. Leaks internal state in the browser console in production.
 
-**Files:** `pages/orders.tsx`
-
----
-
-## ~~Priority 4 — Order stepper center alignment~~ ✅ DONE
-
-Added `mx-auto` to the inner stepper div. The "Order Placed → Printing → Packaging → Shipped → Delivered" chain now centers on all screen widths.
-
-**Files:** `pages/orders.tsx`
+**Files:** `pages/account.tsx`, `pages/auth/index.tsx`, `pages/success.tsx`, `pages/admin/index.tsx`, `pages/admin/users.tsx`
 
 ---
 
-## ~~Priority 5 — Admin-editable product accordion sections~~ ✅ DONE (pending SQL migration)
+## Priority 3 — Drizzle journal out of sync
 
-Implemented as site-wide settings (client decision). `site_settings` table stores the three accordion values. Admin can edit them at `/admin/site-settings` — changes go live within 60 seconds via ISR. Hardcoded strings remain as fallbacks if DB is empty.
+Migrations 0004–0007 are not tracked in `drizzle/migrations/meta/_journal.json`. Running `npm run db:migrate` will error on already-applied columns.
 
-**Requires:** Run `drizzle/migrations/0007_site_settings.sql` in Supabase SQL editor to create the table and seed defaults.
+**Files:** `drizzle/migrations/meta/_journal.json`
 
-**Files:** `pages/admin/site-settings.tsx`, `pages/api/admin/site-settings.ts`, `pages/api/site-settings.ts`, `pages/products/[slug].tsx`, `components/admin/AdminSidebar.tsx`, `drizzle/migrations/0007_site_settings.sql`
+---
+
+## Priority 4 — Replace window.location.reload() with state resets
+
+Two places use hard page reloads for error recovery instead of re-fetching state: admin dashboard retry button (`pages/admin/index.tsx:121`) and custom orders error state (`pages/admin/custom-orders.tsx`).
+
+**Files:** `pages/admin/index.tsx`, `pages/admin/custom-orders.tsx`
+
+---
+
+## Priority 5 — Products listing page has no ISR
+
+`/products` fetches client-side on every load via `ProductGrid`. No static generation or revalidation at the page level. Fine now but worth addressing before launch.
+
+**Files:** `pages/products/index.tsx`
+
+---
+
+## Deferred — API keys (manual)
+
+Stripe and Shippo are on test keys in `.env.local`. Switch to live keys manually before launch.
+- Stripe: replace `sk_test_` / `pk_test_` keys
+- Shippo: uncomment `shippo_live_` key

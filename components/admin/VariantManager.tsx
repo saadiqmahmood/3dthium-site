@@ -136,8 +136,6 @@ export default function VariantManager({
       stock_quantity: 0, // Print-on-demand
     }
 
-    console.log('🚀 [VARIANT MANAGER] Creating variant:', payload)
-
     try {
       const response = await authFetch(`/api/admin/product-variants/${productId}`, {
         method: 'POST',
@@ -145,11 +143,8 @@ export default function VariantManager({
         body: JSON.stringify(payload),
       })
 
-      console.log('📡 [VARIANT MANAGER] Response status:', response.status)
-
       if (response.ok) {
-        const created = await response.json()
-        console.log('✅ [VARIANT MANAGER] Variant created:', created)
+        await response.json()
         setToast({ message: 'Variant created successfully', type: 'success' })
         // Reset form
         setFormData({

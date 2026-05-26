@@ -28,7 +28,6 @@ export default function SuccessPage() {
   }, [router.query, clearCart])
 
   const handleContinueShopping = () => {
-    console.log('Navigating to home page...')
     try {
       router.push('/')
     } catch (error) {
@@ -39,7 +38,6 @@ export default function SuccessPage() {
   }
 
   const handleContactSupport = () => {
-    console.log('Navigating to contact page...')
     try {
       router.push('/contact')
     } catch (error) {

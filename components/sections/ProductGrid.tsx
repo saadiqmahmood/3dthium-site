@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import ProductCard from '@/components/ui/ProductCard'
 import type { ProductVariantNew } from '@/types'
 
-type ProductNew = {
+export type ProductNew = {
   id: string
   name: string
   description: string
@@ -17,19 +17,24 @@ type ProductNew = {
   created_at: string
 }
 
-type Category = {
+export type Category = {
   id: string
   name: string
   slug: string
   parent_id: string | null
 }
 
-export default function ProductGrid() {
+type Props = {
+  initialProducts?: ProductNew[]
+  initialCategories?: Category[]
+}
+
+export default function ProductGrid({ initialProducts, initialCategories }: Props) {
   const router = useRouter()
-  const [products, setProducts] = useState<ProductNew[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
+  const [products, setProducts] = useState<ProductNew[]>(initialProducts ?? [])
+  const [categories, setCategories] = useState<Category[]>(initialCategories ?? [])
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!initialProducts)
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
@@ -38,6 +43,7 @@ export default function ProductGrid() {
   }, [router.query.cat])
 
   useEffect(() => {
+    if (initialProducts && initialCategories) return
     Promise.all([
       fetch('/api/products').then((r) => r.json()),
       fetch('/api/categories').then((r) => r.json()),
@@ -48,7 +54,7 @@ export default function ProductGrid() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [])
+  }, [initialProducts, initialCategories])
 
   const selectCategory = useCallback(
     (slug: string | null) => {
