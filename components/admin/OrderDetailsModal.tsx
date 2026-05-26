@@ -1,5 +1,6 @@
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { X } from 'lucide-react'
 import { formatMoney } from '@/lib/format/money'
 import type { ProductVariant } from '@/types'
 import { authFetch } from '@/lib/api/authFetch'
@@ -126,6 +127,21 @@ export function OrderDetailsModal({
   const [editableOrderItems, setEditableOrderItems] = useState<OrderItem[]>([])
   const [variantsByProduct, setVariantsByProduct] = useState<Record<string, ProductVariant[]>>({})
   const [orderStatusInput, setOrderStatusInput] = useState('')
+  const [visible, setVisible] = useState(false)
+  const overlayRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    requestAnimationFrame(() => setVisible(true))
+  }, [])
+
+  const handleClose = () => {
+    setVisible(false)
+    setTimeout(onClose, 250)
+  }
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === overlayRef.current) handleClose()
+  }
 
   // Fetch order details when the selected order changes
   useEffect(() => {
@@ -217,7 +233,7 @@ export function OrderDetailsModal({
     })
     setToast({ message: 'Order items saved', type: 'success' })
     onItemsSaved()
-    onClose()
+    handleClose()
   }
 
   const handleUpdateOrderStatus = async () => {
@@ -230,7 +246,7 @@ export function OrderDetailsModal({
     if (res.ok) {
       onStatusUpdated(orderDetails.id, orderStatusInput)
       setToast({ message: 'Status updated', type: 'success' })
-      onClose()
+      handleClose()
     }
   }
 
@@ -239,7 +255,7 @@ export function OrderDetailsModal({
     const res = await authFetch(`/api/admin/orders/${orderDetails.id}`, { method: 'DELETE' })
     if (res.ok) {
       onDeleted(orderDetails.id)
-      onClose()
+      handleClose()
     }
   }
 
@@ -248,345 +264,277 @@ export function OrderDetailsModal({
     : orderDetails?.guest_email
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: Modal backdrop dismiss on click
+    // biome-ignore lint/a11y/noStaticElementInteractions: slide-over backdrop dismiss
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-      onClick={onClose}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') onClose()
-      }}
+      ref={overlayRef}
+      onClick={handleOverlayClick}
+      className={`fixed inset-0 z-50 flex justify-end transition-colors duration-250 ${visible ? 'bg-black/40' : 'bg-transparent'}`}
     >
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: Modal content stop propagation */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: stop propagation */}
       <div
-        className="bg-white rounded-xl shadow-lg p-8 max-w-3xl w-full border border-gray-200 max-h-[80vh] overflow-y-auto"
+        className={`relative w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col transition-transform duration-250 ${visible ? 'translate-x-0' : 'translate-x-full'}`}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
       >
-        <h3 className="text-xl font-light mb-6 text-zinc-900">Order Details</h3>
-
-        {orderDetailsLoading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto" />
-            <p className="text-zinc-600 mt-2 font-light">Loading...</p>
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 flex-shrink-0">
+          <div>
+            <p className="text-xs text-zinc-400 font-light mb-0.5">Order</p>
+            <h2 className="text-lg font-light text-zinc-900 font-mono">{order.id.slice(-12)}</h2>
           </div>
-        ) : orderDetails ? (
-          <>
-            <div className="mb-3 text-zinc-700 font-light">
-              <span className="font-medium">Order ID:</span>{' '}
-              <span className="font-mono text-zinc-900 text-sm">{orderDetails.id}</span>
-            </div>
-            <div className="mb-3 text-zinc-700 font-light">
-              <span className="font-medium">Email:</span>{' '}
-              {orderEmail || <span className="text-zinc-400 italic">Unknown</span>}
-            </div>
-            <div className="mb-3 text-zinc-700 font-light">
-              <span className="font-medium">Total:</span> {formatMoney(orderDetails.total_price)}
-            </div>
-            <div className="mb-3 text-zinc-700 font-light">
-              <span className="font-medium">Status:</span>{' '}
+          <div className="flex items-center gap-3">
+            {orderDetails && (
               <span
-                className={`inline-block px-2 py-1 rounded-full text-xs font-light ${
-                  orderDetails.status === 'processing'
-                    ? 'bg-emerald-50 text-emerald-700'
-                    : orderDetails.status === 'pending'
-                      ? 'bg-yellow-50 text-yellow-700'
-                      : orderDetails.status === 'cancelled'
-                        ? 'bg-red-50 text-red-700'
-                        : 'bg-gray-100 text-zinc-700'
+                className={`text-xs px-2.5 py-1 rounded-full border font-light ${
+                  orderDetails.status === 'pending'
+                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                    : orderDetails.status === 'cancelled'
+                      ? 'bg-red-50 text-red-700 border-red-200'
+                      : orderDetails.status === 'delivered'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-gray-100 text-zinc-700 border-gray-200'
                 }`}
               >
                 {orderDetails.status}
               </span>
-            </div>
-            <div className="mb-4 text-zinc-700 font-light">
-              <span className="font-medium">Created:</span>{' '}
-              {new Date(orderDetails.created_at).toLocaleString()}
-            </div>
+            )}
+            <button
+              type="button"
+              onClick={handleClose}
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
 
-            {/* Shipping Information */}
-            {(orderDetails.shipping_name || orderDetails.shipping_address) && (
-              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h4 className="font-light text-zinc-900 mb-3">Shipping Information</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                  {orderDetails.shipping_name && (
-                    <div className="text-zinc-700 font-light">
-                      <span className="font-medium">Name:</span> {orderDetails.shipping_name}
-                    </div>
-                  )}
-                  {orderDetails.shipping_address && (
-                    <div className="text-zinc-700 font-light">
-                      <span className="font-medium">Address:</span> {orderDetails.shipping_address}
-                    </div>
-                  )}
-                  {orderDetails.shipping_city && (
-                    <div className="text-zinc-700 font-light">
-                      <span className="font-medium">City:</span> {orderDetails.shipping_city}
-                    </div>
-                  )}
-                  {orderDetails.shipping_postcode && (
-                    <div className="text-zinc-700 font-light">
-                      <span className="font-medium">Postcode:</span>{' '}
-                      {orderDetails.shipping_postcode}
-                    </div>
-                  )}
-                  {orderDetails.shipping_phone && (
-                    <div className="text-zinc-700 font-light">
-                      <span className="font-medium">Phone:</span> {orderDetails.shipping_phone}
-                    </div>
-                  )}
-                  {orderDetails.shipping_method && (
-                    <div className="text-zinc-700 font-light">
-                      <span className="font-medium">Method:</span> {orderDetails.shipping_method}
-                    </div>
-                  )}
-                  {orderDetails.shipping_cost && (
-                    <div className="text-zinc-700 font-light">
-                      <span className="font-medium">Cost:</span>{' '}
-                      {formatMoney(orderDetails.shipping_cost)}
-                    </div>
-                  )}
-                  {orderDetails.tracking_number && (
-                    <div className="text-zinc-700 font-light">
-                      <span className="font-medium">Tracking:</span>{' '}
-                      {orderDetails.tracking_url ? (
-                        <a
-                          href={orderDetails.tracking_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-emerald-600 hover:text-emerald-700 font-light"
-                        >
-                          {orderDetails.tracking_number}
-                        </a>
-                      ) : (
-                        <span>{orderDetails.tracking_number}</span>
-                      )}
-                    </div>
-                  )}
-                  {orderDetails.shipped_at && (
-                    <div className="text-zinc-700 font-light">
-                      <span className="font-medium">Shipped:</span>{' '}
-                      {new Date(orderDetails.shipped_at).toLocaleString()}
-                    </div>
-                  )}
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+          {orderDetailsLoading ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
+              <p className="text-zinc-500 mt-3 font-light text-sm">Loading order...</p>
+            </div>
+          ) : orderDetails ? (
+            <>
+              {/* Summary */}
+              <section>
+                <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3">Summary</h3>
+                <div className="bg-zinc-50 rounded-xl p-4 space-y-2.5">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-zinc-500 font-light">Email</span>
+                    <span className="text-zinc-900 font-light">
+                      {orderEmail || <span className="text-zinc-400 italic">Unknown</span>}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-zinc-500 font-light">Total</span>
+                    <span className="text-zinc-900 font-light">{formatMoney(orderDetails.total_price)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-zinc-500 font-light">Placed</span>
+                    <span className="text-zinc-900 font-light">{new Date(orderDetails.created_at).toLocaleString()}</span>
+                  </div>
                 </div>
-                {orderDetails.shipping_label_url && (
-                  <div className="mt-3">
+              </section>
+
+              {/* Shipping */}
+              {(orderDetails.shipping_name || orderDetails.shipping_address) && (
+                <section>
+                  <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3">Shipping</h3>
+                  <div className="bg-zinc-50 rounded-xl p-4 space-y-2.5 text-sm">
+                    {orderDetails.shipping_name && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-500 font-light">Name</span>
+                        <span className="text-zinc-900 font-light">{orderDetails.shipping_name}</span>
+                      </div>
+                    )}
+                    {orderDetails.shipping_address && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-500 font-light">Address</span>
+                        <span className="text-zinc-900 font-light text-right max-w-xs">{orderDetails.shipping_address}{orderDetails.shipping_city ? `, ${orderDetails.shipping_city}` : ''}{orderDetails.shipping_postcode ? ` ${orderDetails.shipping_postcode}` : ''}</span>
+                      </div>
+                    )}
+                    {orderDetails.shipping_phone && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-500 font-light">Phone</span>
+                        <span className="text-zinc-900 font-light">{orderDetails.shipping_phone}</span>
+                      </div>
+                    )}
+                    {orderDetails.shipping_method && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-500 font-light">Method</span>
+                        <span className="text-zinc-900 font-light">{orderDetails.shipping_method}{orderDetails.shipping_cost ? ` · ${formatMoney(orderDetails.shipping_cost)}` : ''}</span>
+                      </div>
+                    )}
+                    {orderDetails.tracking_number && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-500 font-light">Tracking</span>
+                        {orderDetails.tracking_url ? (
+                          <a href={orderDetails.tracking_url} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-700 font-light">
+                            {orderDetails.tracking_number}
+                          </a>
+                        ) : (
+                          <span className="text-zinc-900 font-light">{orderDetails.tracking_number}</span>
+                        )}
+                      </div>
+                    )}
+                    {orderDetails.shipped_at && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-500 font-light">Shipped</span>
+                        <span className="text-zinc-900 font-light">{new Date(orderDetails.shipped_at).toLocaleString()}</span>
+                      </div>
+                    )}
+                  </div>
+                  {orderDetails.shipping_label_url && (
                     <a
                       href={orderDetails.shipping_label_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-light"
+                      className="mt-3 inline-block px-4 py-2 bg-zinc-900 text-white text-sm font-light rounded-xl hover:bg-zinc-700 transition-colors"
                     >
                       View Shipping Label
                     </a>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Order Items */}
-            <div className="mb-6">
-              <h4 className="text-lg font-light text-zinc-900 mb-4">
-                Order Items ({editableOrderItems.length})
-              </h4>
-              <div className="space-y-4">
-                {editableOrderItems.length === 0 ? (
-                  <div className="text-center py-8 text-zinc-500 bg-gray-50 rounded-lg font-light">
-                    No items in this order
-                  </div>
-                ) : (
-                  editableOrderItems.map((item, idx) => {
-                    const productName = item.product_new?.name || item.products?.title || 'Product'
-                    const imageUrl =
-                      item.variant_new?.image_url ||
-                      item.product_variants?.image_url ||
-                      '/no-image.png'
-                    const color = item.variant_new?.color || item.product_variants?.color || null
-                    const size =
-                      ('size' in (item.variant_new || {}) ? item.variant_new?.size : null) ||
-                      item.size ||
-                      null
-                    const material =
-                      ('material' in (item.variant_new || {})
-                        ? item.variant_new?.material
-                        : null) || null
-
-                    return (
-                      <div
-                        key={item.id}
-                        className="flex flex-col sm:flex-row gap-4 p-5 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200 shadow-sm"
-                      >
-                        <div className="relative flex-shrink-0 w-full sm:w-24 h-24 bg-gray-100 rounded-lg overflow-hidden">
-                          <Image
-                            src={imageUrl}
-                            alt={productName}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 640px) 100vw, 96px"
-                          />
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <h5 className="text-base font-light text-zinc-900 mb-3">{productName}</h5>
-
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {color && (
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-light bg-blue-50 text-blue-700 border border-blue-200">
-                                Color: {color}
-                              </span>
-                            )}
-                            {size && (
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-light bg-purple-50 text-purple-700 border border-purple-200">
-                                Size: {size}
-                              </span>
-                            )}
-                            {material && (
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-light bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                Material: {material}
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                              <label
-                                htmlFor={`item-size-${idx}`}
-                                className="block text-xs font-light text-zinc-700 mb-2"
-                              >
-                                Size
-                              </label>
-                              <select
-                                id={`item-size-${idx}`}
-                                value={item.size || ''}
-                                onChange={(e) => handleOrderItemChange(idx, 'size', e.target.value)}
-                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 font-light"
-                              >
-                                {SIZES.map((s) => (
-                                  <option key={s} value={s}>
-                                    {s}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                            <div>
-                              <label
-                                htmlFor={`item-qty-${idx}`}
-                                className="block text-xs font-light text-zinc-700 mb-2"
-                              >
-                                Quantity
-                              </label>
-                              <input
-                                id={`item-qty-${idx}`}
-                                type="number"
-                                min={1}
-                                value={item.quantity}
-                                onChange={(e) =>
-                                  handleOrderItemChange(idx, 'quantity', Number(e.target.value))
-                                }
-                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 font-light"
-                              />
-                            </div>
-                            <div>
-                              <label
-                                htmlFor={`item-variant-${idx}`}
-                                className="block text-xs font-light text-zinc-700 mb-2"
-                              >
-                                Variant
-                              </label>
-                              <select
-                                id={`item-variant-${idx}`}
-                                value={item.variant_id || ''}
-                                onChange={(e) =>
-                                  handleOrderItemChange(idx, 'variant_id', e.target.value)
-                                }
-                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 font-light"
-                              >
-                                {(variantsByProduct[String(item.products?.id)] || []).map(
-                                  (variant) => (
-                                    <option key={variant.id} value={variant.id}>
-                                      {variant.color || 'Default'}
-                                    </option>
-                                  )
-                                )}
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex-shrink-0 text-right">
-                          <p className="text-xl font-light text-zinc-900">
-                            {formatMoney(item.price_at_purchase * item.quantity)}
-                          </p>
-                          <p className="text-xs text-zinc-500 mt-1 font-light">
-                            {item.quantity} × {formatMoney(item.price_at_purchase)}
-                          </p>
-                        </div>
-                      </div>
-                    )
-                  })
-                )}
-              </div>
-              {editableOrderItems.length > 0 && (
-                <button
-                  type="button"
-                  onClick={handleSaveOrderItems}
-                  className="mt-6 w-full sm:w-auto px-6 py-3 bg-emerald-600 text-white font-light rounded-lg hover:bg-emerald-700 transition-colors"
-                >
-                  Save Changes
-                </button>
+                  )}
+                </section>
               )}
-            </div>
 
-            {/* Status + actions */}
-            <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-gray-100">
-              <div>
-                <label
-                  htmlFor="order-status-select"
-                  className="block text-sm font-light text-zinc-700 mb-2"
-                >
-                  Status
-                </label>
+              {/* Order Items */}
+              <section>
+                <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3">
+                  Items ({editableOrderItems.length})
+                </h3>
+                <div className="space-y-3">
+                  {editableOrderItems.length === 0 ? (
+                    <div className="text-center py-8 text-zinc-500 bg-zinc-50 rounded-xl font-light text-sm">
+                      No items in this order
+                    </div>
+                  ) : (
+                    editableOrderItems.map((item, idx) => {
+                      const productName = item.product_new?.name || item.products?.title || 'Product'
+                      const imageUrl = item.variant_new?.image_url || item.product_variants?.image_url || '/no-image.png'
+                      const color = item.variant_new?.color || item.product_variants?.color || null
+                      const size = ('size' in (item.variant_new || {}) ? item.variant_new?.size : null) || item.size || null
+                      const material = ('material' in (item.variant_new || {}) ? item.variant_new?.material : null) || null
+
+                      return (
+                        <div key={item.id} className="flex gap-3 p-4 bg-zinc-50 rounded-xl border border-zinc-100">
+                          <div className="relative flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
+                            <Image src={imageUrl} alt={productName} fill className="object-cover" sizes="64px" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-light text-zinc-900 mb-1">{productName}</p>
+                            <div className="flex flex-wrap gap-1.5 mb-2">
+                              {color && <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-light">Color: {color}</span>}
+                              {size && <span className="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 font-light">Size: {size}</span>}
+                              {material && <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-light">Material: {material}</span>}
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              <div>
+                                <label htmlFor={`item-size-${idx}`} className="block text-xs text-zinc-500 font-light mb-1">Size</label>
+                                <select
+                                  id={`item-size-${idx}`}
+                                  value={item.size || ''}
+                                  onChange={(e) => handleOrderItemChange(idx, 'size', e.target.value)}
+                                  className="w-full border border-zinc-200 rounded-lg px-2 py-1.5 text-xs text-zinc-900 font-light focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                                >
+                                  {SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                              </div>
+                              <div>
+                                <label htmlFor={`item-qty-${idx}`} className="block text-xs text-zinc-500 font-light mb-1">Qty</label>
+                                <input
+                                  id={`item-qty-${idx}`}
+                                  type="number"
+                                  min={1}
+                                  value={item.quantity}
+                                  onChange={(e) => handleOrderItemChange(idx, 'quantity', Number(e.target.value))}
+                                  className="w-full border border-zinc-200 rounded-lg px-2 py-1.5 text-xs text-zinc-900 font-light focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                                />
+                              </div>
+                              <div>
+                                <label htmlFor={`item-variant-${idx}`} className="block text-xs text-zinc-500 font-light mb-1">Variant</label>
+                                <select
+                                  id={`item-variant-${idx}`}
+                                  value={item.variant_id || ''}
+                                  onChange={(e) => handleOrderItemChange(idx, 'variant_id', e.target.value)}
+                                  className="w-full border border-zinc-200 rounded-lg px-2 py-1.5 text-xs text-zinc-900 font-light focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                                >
+                                  {(variantsByProduct[String(item.products?.id)] || []).map((v) => (
+                                    <option key={v.id} value={v.id}>{v.color || 'Default'}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0 text-right">
+                            <p className="text-sm font-light text-zinc-900">{formatMoney(item.price_at_purchase * item.quantity)}</p>
+                            <p className="text-xs text-zinc-400 font-light">{item.quantity} × {formatMoney(item.price_at_purchase)}</p>
+                          </div>
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
+                {editableOrderItems.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleSaveOrderItems}
+                    className="mt-4 px-5 py-2 bg-emerald-600 text-white text-sm font-light rounded-xl hover:bg-emerald-700 transition-colors"
+                  >
+                    Save Item Changes
+                  </button>
+                )}
+              </section>
+
+              {/* Status */}
+              <section>
+                <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3">Update Status</h3>
                 {/* biome-ignore lint/correctness/useUniqueElementIds: Single modal instance */}
                 <select
                   id="order-status-select"
                   value={orderStatusInput}
                   onChange={(e) => setOrderStatusInput(e.target.value)}
-                  className="border border-gray-200 rounded-lg px-4 py-2 w-full text-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 text-sm font-light"
+                  className="w-full border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-900 font-light focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 bg-white"
                 >
-                  {ORDER_STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
-                    </option>
+                  {ORDER_STATUSES.map((s) => (
+                    <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1).replace('_', ' ')}</option>
                   ))}
                 </select>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleUpdateOrderStatus}
-                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-light text-sm"
-                >
-                  Update Status
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteOrder}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-light text-sm"
-                >
-                  Delete Order
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="ml-auto px-4 py-2 bg-white border border-gray-200 text-zinc-700 rounded-lg hover:bg-gray-50 transition-colors font-light text-sm"
-                >
-                  Close
-                </button>
-              </div>
+              </section>
+            </>
+          ) : (
+            <div className="text-center py-16 text-zinc-500 font-light">Order not found.</div>
+          )}
+        </div>
+
+        {/* Footer */}
+        {orderDetails && (
+          <div className="px-6 py-4 border-t border-zinc-100 flex items-center justify-between flex-shrink-0">
+            <button
+              type="button"
+              onClick={handleDeleteOrder}
+              className="px-4 py-2 text-sm text-red-600 font-light border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+            >
+              Delete Order
+            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="px-4 py-2 text-sm text-zinc-600 font-light hover:text-zinc-900 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleUpdateOrderStatus}
+                className="px-5 py-2 bg-emerald-600 text-white text-sm font-light rounded-xl hover:bg-emerald-700 transition-colors"
+              >
+                Update Status
+              </button>
             </div>
-          </>
-        ) : (
-          <div className="text-center py-8 text-zinc-500 font-light">Order not found.</div>
+          </div>
         )}
       </div>
     </div>
