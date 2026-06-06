@@ -25,10 +25,10 @@
 | 2 | `/account/change-email` page | ✅ Done |
 | 3 | Fix reorder (CartContext, not localStorage) | ✅ Done |
 | 4 | Restyle account page to match site palette | ✅ Done |
-| 5 | Display name editing (Supabase user_metadata) | 🟡 Todo |
+| 5 | Display name editing (Supabase user_metadata) | ✅ Done |
 | 6 | Clean up Orders tab (remove dead section, clean link to /orders) | 🟡 Todo |
-| 7 | Saved delivery addresses | 🟢 Todo |
-| 8 | Favourites shortcut card | 🟢 Todo |
+| 7 | Saved delivery addresses | ✅ Done |
+| 8 | Favourites shortcut card | ✅ Done |
 
 ---
 
