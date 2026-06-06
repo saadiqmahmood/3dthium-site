@@ -53,6 +53,7 @@ export default function EditProductPage() {
 
   const [tab, setTab] = useState<'details' | 'variants'>('details')
   const [categories, setCategories] = useState<Category[]>([])
+  const [selectedPrimaryId, setSelectedPrimaryId] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -72,6 +73,23 @@ export default function EditProductPage() {
     galleryImages: [],
   })
   const fId = useId()
+
+  const primaryCategories = categories.filter((c) => c.parent_id === null)
+  const secondaryCategories = categories.filter((c) => c.parent_id === selectedPrimaryId)
+
+  const handlePrimaryChange = (primaryId: string) => {
+    setSelectedPrimaryId(primaryId)
+    const hasChildren = categories.some((c) => c.parent_id === primaryId)
+    set('category_id', hasChildren ? '' : primaryId)
+  }
+
+  // Reverse-lookup: when product loads (or categories load), derive the primary from category_id
+  useEffect(() => {
+    if (!formData.category_id || categories.length === 0) return
+    const cat = categories.find((c) => c.id === formData.category_id)
+    if (!cat) return
+    setSelectedPrimaryId(cat.parent_id ?? cat.id)
+  }, [formData.category_id, categories])
 
   useEffect(() => {
     authFetch('/api/admin/categories')
@@ -312,41 +330,47 @@ export default function EditProductPage() {
                 />
               </div>
 
-              <div>
-                <label
-                  htmlFor={`${fId}-category`}
-                  className="block text-sm font-light text-zinc-700 mb-1"
-                >
-                  Category *
-                </label>
-                <select
-                  id={`${fId}-category`}
-                  value={formData.category_id}
-                  onChange={(e) => set('category_id', e.target.value)}
-                  className={fieldClass('category_id')}
-                >
-                  <option value="">Select a category</option>
-                  {(() => {
-                      const parentMap = Object.fromEntries(
-                        categories.map((c) => [c.id, c.name])
-                      )
-                      return categories
-                        .slice()
-                        .sort((a, b) => {
-                          const aLabel = a.parent_id ? `${parentMap[a.parent_id]} > ${a.name}` : a.name
-                          const bLabel = b.parent_id ? `${parentMap[b.parent_id]} > ${b.name}` : b.name
-                          return aLabel.localeCompare(bLabel)
-                        })
-                        .map((c) => {
-                          const label = c.parent_id ? `${parentMap[c.parent_id]} > ${c.name}` : c.name
-                          return (
-                            <option key={c.id} value={c.id}>
-                              {label}
-                            </option>
-                          )
-                        })
-                    })()}
-                </select>
+              <div className="space-y-2">
+                <div>
+                  <label
+                    htmlFor={`${fId}-category`}
+                    className="block text-sm font-light text-zinc-700 mb-1"
+                  >
+                    Category *
+                  </label>
+                  <select
+                    id={`${fId}-category`}
+                    value={selectedPrimaryId}
+                    onChange={(e) => handlePrimaryChange(e.target.value)}
+                    className={fieldClass('category_id')}
+                  >
+                    <option value="">Select a category</option>
+                    {primaryCategories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                {secondaryCategories.length > 0 && (
+                  <div>
+                    <label
+                      htmlFor={`${fId}-subcategory`}
+                      className="block text-sm font-light text-zinc-700 mb-1"
+                    >
+                      Subcategory *
+                    </label>
+                    <select
+                      id={`${fId}-subcategory`}
+                      value={formData.category_id}
+                      onChange={(e) => set('category_id', e.target.value)}
+                      className={fieldClass('category_id')}
+                    >
+                      <option value="">Select a subcategory</option>
+                      {secondaryCategories.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 {errors.category_id && (
                   <p className="text-red-500 text-xs mt-1">{errors.category_id}</p>
                 )}
