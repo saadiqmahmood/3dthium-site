@@ -37,6 +37,8 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
   const [loading, setLoading] = useState(!initialProducts)
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
+  const searchQuery = typeof router.query.q === 'string' ? router.query.q.trim() : ''
+
   useEffect(() => {
     const cat = router.query.cat
     setSelectedSlug(typeof cat === 'string' ? cat : null)
@@ -60,12 +62,19 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
     (slug: string | null) => {
       setSelectedSlug(slug)
       setSidebarOpen(false)
-      router.replace({ pathname: '/products', query: slug ? { cat: slug } : {} }, undefined, {
-        shallow: true,
-      })
+      const query: Record<string, string> = {}
+      if (slug) query.cat = slug
+      if (searchQuery) query.q = searchQuery
+      router.replace({ pathname: '/products', query }, undefined, { shallow: true })
     },
-    [router]
+    [router, searchQuery]
   )
+
+  const clearSearch = useCallback(() => {
+    const query: Record<string, string> = {}
+    if (selectedSlug) query.cat = selectedSlug
+    router.replace({ pathname: '/products', query }, undefined, { shallow: true })
+  }, [router, selectedSlug])
 
   const topLevel = categories.filter((c) => !c.parent_id)
   const childrenOf = (parentId: string) => categories.filter((c) => c.parent_id === parentId)
@@ -78,15 +87,24 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
 
   const isParentActive = (catId: string) => childrenOf(catId).some((s) => s.slug === selectedSlug)
 
+  const searchFiltered = searchQuery
+    ? products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (p.description ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (p.category?.name ?? '').toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : products
+
   const filteredProducts = selectedSlug
     ? (() => {
         const cat = categories.find((c) => c.slug === selectedSlug)
         const childSlugs = cat && !cat.parent_id ? childrenOf(cat.id).map((c) => c.slug) : []
-        return products.filter(
+        return searchFiltered.filter(
           (p) => p.category.slug === selectedSlug || childSlugs.includes(p.category.slug)
         )
       })()
-    : products
+    : searchFiltered
 
   const sidebarTree = (
     <div className="space-y-0.5">
@@ -205,21 +223,47 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="py-24 text-center">
-              <p className="text-base text-zinc-500">No products found</p>
-              {selectedSlug && (
-                <button
-                  type="button"
-                  onClick={() => selectCategory(null)}
-                  className="mt-4 text-base text-zinc-700 underline underline-offset-2 hover:text-zinc-900"
-                >
-                  View all products
-                </button>
-              )}
+              <p className="text-base text-zinc-500">
+                {searchQuery ? `No results for "${searchQuery}"` : 'No products found'}
+              </p>
+              <div className="flex items-center justify-center gap-4 mt-4">
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="text-base text-zinc-700 underline underline-offset-2 hover:text-zinc-900"
+                  >
+                    Clear search
+                  </button>
+                )}
+                {selectedSlug && (
+                  <button
+                    type="button"
+                    onClick={() => selectCategory(null)}
+                    className="text-base text-zinc-700 underline underline-offset-2 hover:text-zinc-900"
+                  >
+                    View all products
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             <>
               <div className="flex items-center justify-between mb-6 hidden lg:flex">
                 <p className="text-base text-zinc-600">
+                  {searchQuery && (
+                    <span className="mr-3">
+                      Results for <span className="text-zinc-900 font-medium">"{searchQuery}"</span>
+                      <button
+                        type="button"
+                        onClick={clearSearch}
+                        className="ml-2 text-zinc-400 hover:text-zinc-700 transition-colors"
+                        aria-label="Clear search"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
                   {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
                   {selectedSlug && (
                     <button
@@ -227,7 +271,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
                       onClick={() => selectCategory(null)}
                       className="ml-3 text-zinc-400 hover:text-zinc-700 transition-colors"
                     >
-                      Clear ×
+                      Clear filter ×
                     </button>
                   )}
                 </p>

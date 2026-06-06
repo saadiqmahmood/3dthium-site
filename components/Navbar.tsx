@@ -4,6 +4,25 @@ import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
 
+const SearchIcon = () => (
+  <svg
+    aria-hidden="true"
+    focusable="false"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.75"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5"
+  >
+    <title>Search</title>
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-4.35-4.35" />
+  </svg>
+)
+
 const CartIcon = () => (
   <svg
     aria-hidden="true"
@@ -48,9 +67,24 @@ export default function Navbar() {
   const [navCategories, setNavCategories] = useState<
     Array<{ id: string; name: string; slug: string; parent_id: string | null }>
   >([])
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const searchRef = useRef<HTMLInputElement>(null)
   const shopTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const router = useRouter()
   const { user, isAdmin } = useAuth()
+
+  useEffect(() => {
+    if (searchOpen) searchRef.current?.focus()
+  }, [searchOpen])
+
+  const submitSearch = (q: string) => {
+    const trimmed = q.trim()
+    if (!trimmed) return
+    setSearchOpen(false)
+    setSearchQuery('')
+    router.push({ pathname: '/products', query: { q: trimmed } })
+  }
 
   const isActive = (href: string) => {
     if (href === '/') return router.pathname === '/'
@@ -111,161 +145,183 @@ export default function Navbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6">
+
           {/* Mobile row */}
-          <div className="flex justify-between items-center md:hidden">
-            <Link href="/" className="text-xl font-light text-zinc-900 tracking-tight">
-              3Dthium
-            </Link>
-            <div className="flex items-center gap-3">
-              <Link
-                href={{ pathname: '/cart', query: { from: router.asPath } }}
-                className="relative text-zinc-700 hover:text-zinc-900 transition-colors"
-                aria-label={`Cart${totalItems > 0 ? `, ${totalItems} items` : ''}`}
-              >
-                <CartIcon />
-                {totalItems > 0 && <span className={badgeClass}>{totalItems}</span>}
-              </Link>
+          {searchOpen ? (
+            /* Mobile: search takes over the top bar */
+            <form
+              className="flex items-center gap-3 md:hidden"
+              onSubmit={(e) => { e.preventDefault(); submitSearch(searchQuery); setIsOpen(false) }}
+            >
+              <div className="flex-1 flex items-center gap-2 bg-zinc-100 rounded-full px-4 py-2 border border-transparent focus-within:border-emerald-400 transition">
+                <span className="text-zinc-400 flex-shrink-0"><SearchIcon /></span>
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Escape') { setSearchOpen(false); setSearchQuery('') } }}
+                  placeholder="Search products…"
+                  className="flex-1 bg-transparent text-base font-light text-zinc-900 placeholder:text-zinc-400 min-w-0"
+                    style={{ outline: 'none', boxShadow: 'none' }}
+                />
+              </div>
               <button
                 type="button"
-                onClick={() => setIsOpen(!isOpen)}
-                className="p-1.5 rounded text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 transition"
-                aria-label="Toggle Menu"
-                aria-expanded={isOpen}
+                onClick={() => { setSearchOpen(false); setSearchQuery('') }}
+                className="text-zinc-500 hover:text-zinc-900 transition-colors text-base font-light flex-shrink-0"
+                aria-label="Cancel"
               >
-                <svg
-                  aria-hidden="true"
-                  focusable="false"
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  viewBox="0 0 24 24"
-                >
-                  <title>Menu</title>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+                Cancel
               </button>
-            </div>
-          </div>
-
-          {/* Desktop 3-column layout */}
-          <div className="hidden md:flex md:items-center md:w-full">
-            {/* Left: Logo */}
-            <div className="flex-1">
+            </form>
+          ) : (
+            /* Mobile: normal top bar */
+            <div className="flex justify-between items-center md:hidden">
               <Link href="/" className="text-xl font-light text-zinc-900 tracking-tight">
                 3Dthium
               </Link>
-            </div>
-
-            {/* Center: Nav links */}
-            <div className="flex items-center gap-8">
-              <Link href="/" className={linkClass('/')}>
-                Home
-              </Link>
-              {/* biome-ignore lint/a11y/noStaticElementInteractions: hover trigger for dropdown */}
-              <div
-                className="relative"
-                onMouseEnter={handleShopEnter}
-                onMouseLeave={handleShopLeave}
-              >
-                <Link
-                  href="/products"
-                  className={`flex items-center gap-1 ${linkClass('/products')}`}
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen(true)}
+                  className="text-zinc-600 hover:text-zinc-900 transition-colors"
+                  aria-label="Search"
                 >
-                  Shop
-                  <svg
-                    aria-hidden="true"
-                    focusable="false"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className={`w-3 h-3 opacity-50 transition-transform duration-150 ${shopOpen ? 'rotate-180' : ''}`}
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <SearchIcon />
+                </button>
+                <Link
+                  href={{ pathname: '/cart', query: { from: router.asPath } }}
+                  className="relative text-zinc-700 hover:text-zinc-900 transition-colors"
+                  aria-label={`Cart${totalItems > 0 ? `, ${totalItems} items` : ''}`}
+                >
+                  <CartIcon />
+                  {totalItems > 0 && <span className={badgeClass}>{totalItems}</span>}
                 </Link>
-                {shopOpen && navCategories.length > 0 && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50">
-                    <div className="bg-white shadow-2xl min-w-[240px] border border-zinc-100 border-t-[3px] border-t-emerald-500">
-                      <Link
-                        href="/products"
-                        onClick={() => setShopOpen(false)}
-                        className="block px-6 py-3 text-base text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
-                      >
-                        All products
-                      </Link>
-                      <div className="mx-6 border-t border-zinc-100" />
-                      {navCategories
-                        .filter((c) => !c.parent_id)
-                        .map((cat) => (
-                          <Link
-                            key={cat.id}
-                            href={`/products?cat=${cat.slug}`}
-                            onClick={() => setShopOpen(false)}
-                            className="block px-6 py-3 text-base text-zinc-700 hover:text-emerald-600 hover:bg-emerald-50/40 transition-colors"
-                          >
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="p-1.5 rounded text-zinc-700 hover:text-zinc-900 hover:bg-gray-100 transition"
+                  aria-label="Toggle Menu"
+                  aria-expanded={isOpen}
+                >
+                  <svg aria-hidden="true" focusable="false" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <title>Menu</title>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Desktop layout */}
+          {searchOpen ? (
+            /* Desktop: search takes over the center + right */
+            <form
+              className="hidden md:flex md:items-center md:w-full md:gap-4"
+              onSubmit={(e) => { e.preventDefault(); submitSearch(searchQuery) }}
+            >
+              <Link href="/" className="text-xl font-light text-zinc-900 tracking-tight flex-shrink-0">
+                3Dthium
+              </Link>
+              <div className="flex-1 flex items-center gap-3 bg-zinc-100 rounded-full px-5 py-2 border border-transparent focus-within:border-emerald-400 transition mx-6">
+                <span className="text-zinc-400 flex-shrink-0"><SearchIcon /></span>
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Escape') { setSearchOpen(false); setSearchQuery('') } }}
+                  placeholder="Search products…"
+                  className="flex-1 bg-transparent text-base font-light text-zinc-900 placeholder:text-zinc-400 min-w-0"
+                    style={{ outline: 'none', boxShadow: 'none' }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => { setSearchOpen(false); setSearchQuery('') }}
+                className="text-base font-light text-zinc-500 hover:text-zinc-900 transition-colors flex-shrink-0"
+                aria-label="Cancel"
+              >
+                Cancel
+              </button>
+            </form>
+          ) : (
+            /* Desktop: normal 3-column layout */
+            <div className="hidden md:flex md:items-center md:w-full">
+              {/* Left: Logo */}
+              <div className="flex-1">
+                <Link href="/" className="text-xl font-light text-zinc-900 tracking-tight">
+                  3Dthium
+                </Link>
+              </div>
+
+              {/* Center: Nav links */}
+              <div className="flex items-center gap-8">
+                <Link href="/" className={linkClass('/')}>Home</Link>
+                {/* biome-ignore lint/a11y/noStaticElementInteractions: hover trigger for dropdown */}
+                <div className="relative" onMouseEnter={handleShopEnter} onMouseLeave={handleShopLeave}>
+                  <Link href="/products" className={`flex items-center gap-1 ${linkClass('/products')}`}>
+                    Shop
+                    <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`w-3 h-3 opacity-50 transition-transform duration-150 ${shopOpen ? 'rotate-180' : ''}`}>
+                      <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+                    </svg>
+                  </Link>
+                  {shopOpen && navCategories.length > 0 && (
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50">
+                      <div className="bg-white shadow-2xl min-w-[240px] border border-zinc-100 border-t-[3px] border-t-emerald-500">
+                        <Link href="/products" onClick={() => setShopOpen(false)} className="block px-6 py-3 text-base text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors">All products</Link>
+                        <div className="mx-6 border-t border-zinc-100" />
+                        {navCategories.filter((c) => !c.parent_id).map((cat) => (
+                          <Link key={cat.id} href={`/products?cat=${cat.slug}`} onClick={() => setShopOpen(false)} className="block px-6 py-3 text-base text-zinc-700 hover:text-emerald-600 hover:bg-emerald-50/40 transition-colors">
                             {cat.name}
                           </Link>
                         ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-              <Link
-                href="/custom-order"
-                className={`text-base font-light transition-colors px-3.5 py-1 rounded-full border ${
-                  isActive('/custom-order')
-                    ? 'border-emerald-500 text-emerald-600 bg-emerald-50'
-                    : 'border-zinc-300 text-zinc-700 hover:border-emerald-400 hover:text-emerald-600'
-                }`}
-              >
-                Custom Order
-              </Link>
-              <Link href="/about" className={linkClass('/about')}>
-                About
-              </Link>
-              <Link href="/contact" className={linkClass('/contact')}>
-                Contact
-              </Link>
-            </div>
-
-            {/* Right: Cart + Account */}
-            <div className="flex-1 flex items-center justify-end gap-5">
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  className="text-base font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
-                >
-                  Admin
+                  )}
+                </div>
+                <Link href="/custom-order" className={`text-base font-light transition-colors px-3.5 py-1 rounded-full border ${isActive('/custom-order') ? 'border-emerald-500 text-emerald-600 bg-emerald-50' : 'border-zinc-300 text-zinc-700 hover:border-emerald-400 hover:text-emerald-600'}`}>
+                  Custom Order
                 </Link>
-              )}
+                <Link href="/about" className={linkClass('/about')}>About</Link>
+                <Link href="/contact" className={linkClass('/contact')}>Contact</Link>
+              </div>
 
-              <Link
-                href={{ pathname: '/cart', query: { from: router.asPath } }}
-                className="relative text-zinc-700 hover:text-zinc-900 transition-colors"
-                aria-label={`Cart${totalItems > 0 ? `, ${totalItems} items` : ''}`}
-              >
-                <CartIcon />
-                {totalItems > 0 && <span className={badgeClass}>{totalItems}</span>}
-              </Link>
-
-              <Link
-                href={user ? '/account' : '/auth'}
-                className={`transition-colors ${
-                  user
-                    ? 'text-emerald-600 hover:text-emerald-700'
-                    : 'text-zinc-700 hover:text-zinc-900'
-                }`}
-                aria-label={user ? 'My account' : 'Sign in'}
-              >
-                <AccountIcon />
-              </Link>
+              {/* Right: Search + Admin + Cart + Account */}
+              <div className="flex-1 flex items-center justify-end gap-5">
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen(true)}
+                  className="text-zinc-600 hover:text-zinc-900 transition-colors"
+                  aria-label="Search"
+                >
+                  <SearchIcon />
+                </button>
+                {isAdmin && (
+                  <Link href="/admin" className="text-base font-medium text-zinc-500 hover:text-zinc-900 transition-colors">
+                    Admin
+                  </Link>
+                )}
+                <Link
+                  href={{ pathname: '/cart', query: { from: router.asPath } }}
+                  className="relative text-zinc-700 hover:text-zinc-900 transition-colors"
+                  aria-label={`Cart${totalItems > 0 ? `, ${totalItems} items` : ''}`}
+                >
+                  <CartIcon />
+                  {totalItems > 0 && <span className={badgeClass}>{totalItems}</span>}
+                </Link>
+                <Link
+                  href={user ? '/account' : '/auth'}
+                  className={`transition-colors ${user ? 'text-emerald-600 hover:text-emerald-700' : 'text-zinc-700 hover:text-zinc-900'}`}
+                  aria-label={user ? 'My account' : 'Sign in'}
+                >
+                  <AccountIcon />
+                </Link>
+              </div>
             </div>
-          </div>
+          )}
+
         </div>
       </nav>
 
