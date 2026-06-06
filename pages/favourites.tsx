@@ -58,7 +58,7 @@ export default function FavouritesPage() {
             </svg>
             <span className="text-zinc-900 font-semibold">Favourites</span>
           </nav>
-          <h1 className="text-4xl font-bold text-zinc-900 tracking-tight">Favourites</h1>
+          <h1 className="text-4xl font-extrabold text-zinc-900 tracking-tight">Favourites</h1>
         </div>
       </div>
 
@@ -78,7 +78,7 @@ export default function FavouritesPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {products.map((product) => (
               <div key={product.id}>
                 <Link href={`/products/${product.slug}`} className="group block">

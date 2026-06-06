@@ -282,7 +282,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
             <button
               type="button"
               onClick={() => setSortMenuOpen((v) => !v)}
-              className="flex items-center gap-2 text-base font-light text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
+              className="flex items-center gap-2 text-base font-semibold text-zinc-700 px-2 py-2 transition-colors"
             >
               <span>{SORT_OPTIONS.find((o) => o.value === sortParam)?.label ?? 'Sort'}</span>
               <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor" className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${sortMenuOpen ? 'rotate-180' : ''}`}>
@@ -290,24 +290,19 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
               </svg>
             </button>
             {sortMenuOpen && (
-              <div className="absolute right-0 top-full mt-1 bg-white border border-zinc-100 shadow-lg z-20 min-w-[176px]">
+              <div className="absolute right-0 top-full mt-1 bg-white shadow-xl z-20 min-w-[200px] rounded-lg overflow-hidden py-1">
                 {SORT_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
                     type="button"
                     onClick={() => { setSort(opt.value); setSortMenuOpen(false) }}
-                    className={`w-full flex items-center justify-between px-4 py-2.5 text-base font-light text-left transition-colors ${
+                    className={`w-full text-left px-5 py-3 text-base font-light transition-colors ${
                       sortParam === opt.value
-                        ? 'text-emerald-600 bg-emerald-50/50'
-                        : 'text-zinc-700 hover:bg-zinc-50'
+                        ? 'bg-zinc-100 text-zinc-900'
+                        : 'text-zinc-600 hover:bg-zinc-50'
                     }`}
                   >
-                    <span>{opt.label}</span>
-                    {sortParam === opt.value && (
-                      <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-emerald-500 flex-shrink-0">
-                        <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />
-                      </svg>
-                    )}
+                    {opt.label}
                   </button>
                 ))}
               </div>
@@ -316,7 +311,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="flex items-center gap-2 text-base font-light text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
+            className="flex items-center gap-2 text-base font-medium text-zinc-700 px-4 py-2 transition-colors"
           >
             <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
               <path fillRule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.845 1.757l-1.075.859A.75.75 0 0 1 9 17.598V13.49a2.25 2.25 0 0 0-.659-1.59L3.659 7.218A2.25 2.25 0 0 1 3 5.629V3.34a.75.75 0 0 1 .628-.74Z" clipRule="evenodd" />
@@ -400,7 +395,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
                   <button
                     type="button"
                     onClick={() => setSortMenuOpen((v) => !v)}
-                    className="flex items-center gap-2 text-base font-light text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
+                    className="flex items-center gap-2 text-base font-semibold text-zinc-700 px-2 py-2 transition-colors"
                   >
                     <span>{SORT_OPTIONS.find((o) => o.value === sortParam)?.label ?? 'Sort'}</span>
                     <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor" className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${sortMenuOpen ? 'rotate-180' : ''}`}>
@@ -408,31 +403,26 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
                     </svg>
                   </button>
                   {sortMenuOpen && (
-                    <div className="absolute right-0 top-full mt-1 bg-white border border-zinc-100 shadow-lg z-20 min-w-[176px]">
+                    <div className="absolute right-0 top-full mt-1 bg-white shadow-xl z-20 min-w-[200px] rounded-lg overflow-hidden py-1">
                       {SORT_OPTIONS.map((opt) => (
                         <button
                           key={opt.value}
                           type="button"
                           onClick={() => { setSort(opt.value); setSortMenuOpen(false) }}
-                          className={`w-full flex items-center justify-between px-4 py-2.5 text-base font-light text-left transition-colors ${
+                          className={`w-full text-left px-5 py-3 text-base font-light transition-colors ${
                             sortParam === opt.value
-                              ? 'text-emerald-600 bg-emerald-50/50'
-                              : 'text-zinc-700 hover:bg-zinc-50'
+                              ? 'bg-zinc-100 text-zinc-900'
+                              : 'text-zinc-600 hover:bg-zinc-50'
                           }`}
                         >
-                          <span>{opt.label}</span>
-                          {sortParam === opt.value && (
-                            <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-emerald-500 flex-shrink-0">
-                              <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />
-                            </svg>
-                          )}
+                          {opt.label}
                         </button>
                       ))}
                     </div>
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 {filteredProducts.map((product) => (
                   <div key={product.id}>
                     <ProductCard product={product} variants={product.variants} />

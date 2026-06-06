@@ -71,7 +71,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (!variantsByProduct[variant.product_id]) {
           variantsByProduct[variant.product_id] = []
         }
-
         variantsByProduct[variant.product_id].push(variant as ProductVariantNew)
       }
     }

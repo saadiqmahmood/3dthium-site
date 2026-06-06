@@ -66,7 +66,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [shopOpen, setShopOpen] = useState(false)
   const [mobileShopOpen, setMobileShopOpen] = useState(false)
-  const [hoveredParentId, setHoveredParentId] = useState<string | null>(null)
   const [navCategories, setNavCategories] = useState<
     Array<{ id: string; name: string; slug: string; parent_id: string | null }>
   >([])
@@ -122,10 +121,6 @@ export default function Navbar() {
       .catch(() => {})
   }, [])
 
-  useEffect(() => {
-    if (!shopOpen) setHoveredParentId(null)
-  }, [shopOpen])
-
   const handleShopEnter = () => {
     if (shopTimeout.current) clearTimeout(shopTimeout.current)
     setShopOpen(true)
@@ -137,7 +132,6 @@ export default function Navbar() {
 
   const topLevelNavCats = navCategories.filter((c) => !c.parent_id)
   const navChildrenOf = (id: string) => navCategories.filter((c) => c.parent_id === id)
-  const hoveredSubs = hoveredParentId ? navChildrenOf(hoveredParentId) : []
 
   const linkClass = (href: string) =>
     `text-base font-light transition-colors ${
@@ -284,84 +278,22 @@ export default function Navbar() {
               {/* Center: Nav links */}
               <div className="flex items-center gap-8">
                 <Link href="/" className={linkClass('/')}>Home</Link>
-                {/* biome-ignore lint/a11y/noStaticElementInteractions: hover trigger for dropdown */}
-                <div className="relative" onMouseEnter={handleShopEnter} onMouseLeave={handleShopLeave}>
-                  <div className="flex items-center gap-0.5">
-                    <Link href="/products" className={linkClass('/products')}>Shop</Link>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (shopTimeout.current) clearTimeout(shopTimeout.current)
-                        setShopOpen((v) => !v)
-                      }}
-                      aria-label="Toggle shop menu"
-                      className={`p-0.5 transition-colors ${isActive('/products') ? 'text-emerald-500' : 'text-zinc-400 hover:text-zinc-700'}`}
-                    >
-                      <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor" className={`w-3 h-3 transition-transform duration-150 ${shopOpen ? 'rotate-180' : ''}`}>
-                        <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </div>
-                  {shopOpen && navCategories.length > 0 && (
-                    <div className="absolute top-full left-0 pt-3 z-50">
-                      {/* Single container — one shadow, one border, flex stretches both columns to equal height */}
-                      <div className="flex items-stretch bg-white shadow-2xl border border-zinc-100 border-t-[3px] border-t-emerald-500">
-                        {/* Left: top-level categories */}
-                        <div className="w-[220px] py-2">
-                          <Link
-                            href="/products"
-                            onClick={() => setShopOpen(false)}
-                            className="block px-6 py-2.5 text-base text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
-                          >
-                            All products
-                          </Link>
-                          <div className="mx-6 my-1 border-t border-zinc-100" />
-                          {topLevelNavCats.map((cat) => {
-                            const hasSubs = navChildrenOf(cat.id).length > 0
-                            return (
-                              <div key={cat.id} onMouseEnter={() => setHoveredParentId(hasSubs ? cat.id : null)}>
-                                <Link
-                                  href={`/products?cat=${cat.slug}`}
-                                  onClick={() => setShopOpen(false)}
-                                  className={`flex items-center justify-between px-6 py-2.5 text-base transition-colors ${
-                                    hoveredParentId === cat.id
-                                      ? 'text-emerald-600 bg-emerald-50/40'
-                                      : 'text-zinc-700 hover:text-emerald-600 hover:bg-emerald-50/40'
-                                  }`}
-                                >
-                                  <span>{cat.name}</span>
-                                  {hasSubs && (
-                                    <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 opacity-40 flex-shrink-0">
-                                      <path fillRule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-                                    </svg>
-                                  )}
-                                </Link>
-                              </div>
-                            )
-                          })}
-                        </div>
-
-                        {/* Right: subcategories — flex sibling so height and top match automatically */}
-                        {hoveredSubs.length > 0 && (
-                          <div className="w-[200px] border-l border-zinc-100 py-2">
-                            <p className="px-5 pt-1 pb-2 text-xs font-semibold uppercase tracking-widest text-zinc-300">
-                              {topLevelNavCats.find((c) => c.id === hoveredParentId)?.name}
-                            </p>
-                            {hoveredSubs.map((sub) => (
-                              <Link
-                                key={sub.id}
-                                href={`/products?cat=${sub.slug}`}
-                                onClick={() => setShopOpen(false)}
-                                className="block px-5 py-2.5 text-base text-zinc-600 hover:text-emerald-600 hover:bg-emerald-50/40 transition-colors"
-                              >
-                                {sub.name}
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                {/* biome-ignore lint/a11y/noStaticElementInteractions: hover trigger for mega-menu */}
+                <div className="flex items-center gap-0.5" onMouseEnter={handleShopEnter} onMouseLeave={handleShopLeave}>
+                  <Link href="/products" className={linkClass('/products')}>Shop</Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (shopTimeout.current) clearTimeout(shopTimeout.current)
+                      setShopOpen((v) => !v)
+                    }}
+                    aria-label="Toggle shop menu"
+                    className={`p-0.5 transition-colors ${isActive('/products') ? 'text-emerald-500' : 'text-zinc-400 hover:text-zinc-700'}`}
+                  >
+                    <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor" className={`w-3 h-3 transition-transform duration-150 ${shopOpen ? 'rotate-180' : ''}`}>
+                      <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+                    </svg>
+                  </button>
                 </div>
                 <Link href="/custom-order" className={`text-base font-light transition-colors px-3.5 py-1 rounded-full border ${isActive('/custom-order') ? 'border-emerald-500 text-emerald-600 bg-emerald-50' : 'border-zinc-300 text-zinc-700 hover:border-emerald-400 hover:text-emerald-600'}`}>
                   Custom Order
@@ -419,6 +351,65 @@ export default function Navbar() {
           )}
 
         </div>
+
+        {/* Desktop mega-menu — full width, sits below the nav bar */}
+        {shopOpen && navCategories.length > 0 && (
+          // biome-ignore lint/a11y/noStaticElementInteractions: hover keeps menu open
+          <div
+            className="hidden md:block absolute top-full left-0 w-full bg-white border-t border-zinc-100 shadow-lg z-40"
+            onMouseEnter={handleShopEnter}
+            onMouseLeave={handleShopLeave}
+          >
+            <div className="max-w-7xl mx-auto px-6 py-8">
+              <div className="flex gap-14">
+                {topLevelNavCats.map((cat) => {
+                  const subs = navChildrenOf(cat.id)
+                  return (
+                    <div key={cat.id}>
+                      <Link
+                        href={`/products?cat=${cat.slug}`}
+                        onClick={() => setShopOpen(false)}
+                        className="block text-sm font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-700 transition-colors mb-4"
+                      >
+                        {cat.name}
+                      </Link>
+                      <div className="space-y-2.5">
+                        {subs.length > 0 && (
+                          <Link
+                            href={`/products?cat=${cat.slug}`}
+                            onClick={() => setShopOpen(false)}
+                            className="block text-base font-medium text-zinc-700 hover:text-zinc-900 transition-colors"
+                          >
+                            All {cat.name}
+                          </Link>
+                        )}
+                        {subs.map((sub) => (
+                          <Link
+                            key={sub.id}
+                            href={`/products?cat=${sub.slug}`}
+                            onClick={() => setShopOpen(false)}
+                            className="block text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+                          >
+                            {sub.name}
+                          </Link>
+                        ))}
+                        {subs.length === 0 && (
+                          <Link
+                            href={`/products?cat=${cat.slug}`}
+                            onClick={() => setShopOpen(false)}
+                            className="block text-base font-medium text-zinc-700 hover:text-zinc-900 transition-colors"
+                          >
+                            All {cat.name}
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Mobile Menu */}

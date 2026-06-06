@@ -114,7 +114,7 @@ export default function ProductsPage({ initialProducts, initialCategories }: Pro
             </svg>
             <span className="text-zinc-900 font-semibold">Shop</span>
           </nav>
-          <h1 className="text-4xl font-bold text-zinc-900 tracking-tight">Shop</h1>
+          <h1 className="text-4xl font-extrabold text-zinc-900 tracking-tight">Shop</h1>
         </div>
       </div>
       <ProductGrid initialProducts={initialProducts} initialCategories={initialCategories} />

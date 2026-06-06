@@ -621,7 +621,7 @@ export default function OrdersPage() {
     <div className="min-h-screen bg-white">
       <div className="max-w-3xl mx-auto py-24 px-4 sm:px-6">
         <div className="mb-10">
-          <h1 className="text-4xl font-light text-zinc-900 mb-2">My Orders</h1>
+          <h1 className="text-4xl font-bold text-zinc-900 mb-2">My Orders</h1>
           <p className="text-zinc-500">View and track your purchases</p>
         </div>
 

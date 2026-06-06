@@ -92,7 +92,7 @@ export default function CartPage() {
           Continue shopping
         </Link>
 
-        <h1 className="text-3xl font-light text-zinc-900 mb-10">
+        <h1 className="text-3xl font-bold text-zinc-900 mb-10">
           Your Cart{' '}
           {cart.length > 0 && (
             <span className="text-lg text-zinc-400 font-light ml-1">
