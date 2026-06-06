@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
+import { useFavourites } from '@/context/FavouritesContext'
 
 const SearchIcon = () => (
   <svg
@@ -59,6 +60,7 @@ const AccountIcon = () => (
 export default function Navbar() {
   const { cart } = useCart()
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
+  const { favouriteIds } = useFavourites()
   const [isOpen, setIsOpen] = useState(false)
   const [animate, setAnimate] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -191,6 +193,20 @@ export default function Navbar() {
                   <SearchIcon />
                 </button>
                 <Link
+                  href="/favourites"
+                  className="relative text-zinc-600 hover:text-zinc-900 transition-colors"
+                  aria-label="Favourites"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                  {favouriteIds.length > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] min-w-[17px] h-[17px] flex items-center justify-center rounded-full font-medium leading-none">
+                      {favouriteIds.length}
+                    </span>
+                  )}
+                </Link>
+                <Link
                   href={{ pathname: '/cart', query: { from: router.asPath } }}
                   className="relative text-zinc-700 hover:text-zinc-900 transition-colors"
                   aria-label={`Cart${totalItems > 0 ? `, ${totalItems} items` : ''}`}
@@ -303,6 +319,20 @@ export default function Navbar() {
                     Admin
                   </Link>
                 )}
+                <Link
+                  href="/favourites"
+                  className="relative text-zinc-600 hover:text-zinc-900 transition-colors"
+                  aria-label={`Favourites${favouriteIds.length > 0 ? `, ${favouriteIds.length}` : ''}`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                  {favouriteIds.length > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] min-w-[17px] h-[17px] flex items-center justify-center rounded-full font-medium leading-none">
+                      {favouriteIds.length}
+                    </span>
+                  )}
+                </Link>
                 <Link
                   href={{ pathname: '/cart', query: { from: router.asPath } }}
                   className="relative text-zinc-700 hover:text-zinc-900 transition-colors"

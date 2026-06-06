@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import FavouriteButton from '@/components/ui/FavouriteButton'
 import { formatMoney } from '@/lib/format/money'
 import type { ProductVariantNew } from '@/types'
 
@@ -37,6 +38,10 @@ export default function ProductCard({ product }: Props) {
           fill
           className="object-contain transition-transform duration-500 ease-out group-hover:scale-[1.04]"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        />
+        <FavouriteButton
+          productId={product.id}
+          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
         />
       </div>
       <div className="pt-3 pb-1">

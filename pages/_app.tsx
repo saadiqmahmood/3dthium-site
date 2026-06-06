@@ -6,6 +6,7 @@ import AdminLayout from '@/components/admin/AdminLayout'
 import Layout from '@/components/Layout'
 import { AuthProvider } from '@/context/AuthContext'
 import { CartProvider } from '@/context/CartContext'
+import { FavouritesProvider } from '@/context/FavouritesContext'
 import { SupabaseContextProvider } from '@/context/SupabaseContext'
 import { supabase } from '@/lib/supabaseClient'
 
@@ -33,7 +34,9 @@ export default function App({ Component, pageProps }: AppProps) {
     <div className={`${schibsted.variable} font-sans`}>
       <SupabaseContextProvider client={supabase}>
         <AuthProvider>
-          <CartProvider>{content}</CartProvider>
+          <FavouritesProvider>
+            <CartProvider>{content}</CartProvider>
+          </FavouritesProvider>
         </AuthProvider>
       </SupabaseContextProvider>
     </div>

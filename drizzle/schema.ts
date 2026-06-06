@@ -10,6 +10,7 @@ import {
   serial,
   text,
   timestamp,
+  unique,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
@@ -353,6 +354,24 @@ export const orderItemsRelations = relations(orderItems, ({ one }) => ({
     references: [productsNew.id],
   }),
 }))
+
+// ============================================
+// FAVOURITES
+// ============================================
+
+export const userFavourites = pgTable(
+  'user_favourites',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    productId: uuid('product_id').notNull().references(() => productsNew.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    unique('user_favourites_user_product_unq').on(table.userId, table.productId),
+    index('idx_user_favourites_user_id').on(table.userId),
+  ]
+)
 
 // ============================================
 // TYPE EXPORTS

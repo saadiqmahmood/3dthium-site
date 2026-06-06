@@ -38,6 +38,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const searchQuery = typeof router.query.q === 'string' ? router.query.q.trim() : ''
+  const sortParam = typeof router.query.sort === 'string' ? router.query.sort : 'newest'
 
   useEffect(() => {
     const cat = router.query.cat
@@ -58,23 +59,52 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
       .catch(() => setLoading(false))
   }, [initialProducts, initialCategories])
 
+  const buildQuery = useCallback(
+    (overrides: Record<string, string | null>) => {
+      const base: Record<string, string> = {}
+      if (selectedSlug) base.cat = selectedSlug
+      if (searchQuery) base.q = searchQuery
+      if (sortParam !== 'newest') base.sort = sortParam
+      for (const [k, v] of Object.entries(overrides)) {
+        if (v === null) delete base[k]
+        else base[k] = v
+      }
+      return base
+    },
+    [selectedSlug, searchQuery, sortParam]
+  )
+
   const selectCategory = useCallback(
     (slug: string | null) => {
       setSelectedSlug(slug)
       setSidebarOpen(false)
-      const query: Record<string, string> = {}
-      if (slug) query.cat = slug
-      if (searchQuery) query.q = searchQuery
-      router.replace({ pathname: '/products', query }, undefined, { shallow: true })
+      router.replace(
+        { pathname: '/products', query: buildQuery({ cat: slug }) },
+        undefined,
+        { shallow: true }
+      )
     },
-    [router, searchQuery]
+    [router, buildQuery]
   )
 
   const clearSearch = useCallback(() => {
-    const query: Record<string, string> = {}
-    if (selectedSlug) query.cat = selectedSlug
-    router.replace({ pathname: '/products', query }, undefined, { shallow: true })
-  }, [router, selectedSlug])
+    router.replace(
+      { pathname: '/products', query: buildQuery({ q: null }) },
+      undefined,
+      { shallow: true }
+    )
+  }, [router, buildQuery])
+
+  const setSort = useCallback(
+    (sort: string) => {
+      router.replace(
+        { pathname: '/products', query: buildQuery({ sort: sort === 'newest' ? null : sort }) },
+        undefined,
+        { shallow: true }
+      )
+    },
+    [router, buildQuery]
+  )
 
   const topLevel = categories.filter((c) => !c.parent_id)
   const childrenOf = (parentId: string) => categories.filter((c) => c.parent_id === parentId)
@@ -96,7 +126,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
       )
     : products
 
-  const filteredProducts = selectedSlug
+  const categoryFiltered = selectedSlug
     ? (() => {
         const cat = categories.find((c) => c.slug === selectedSlug)
         const childSlugs = cat && !cat.parent_id ? childrenOf(cat.id).map((c) => c.slug) : []
@@ -105,6 +135,12 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
         )
       })()
     : searchFiltered
+
+  const filteredProducts = [...categoryFiltered].sort((a, b) => {
+    if (sortParam === 'price_asc') return a.price_range.min - b.price_range.min
+    if (sortParam === 'price_desc') return b.price_range.min - a.price_range.min
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  })
 
   const sidebarTree = (
     <div className="space-y-0.5">
@@ -183,27 +219,28 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
         <p className="text-base text-zinc-600">
           {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
         </p>
-        <button
-          type="button"
-          onClick={() => setSidebarOpen(true)}
-          className="flex items-center gap-2 text-base font-medium text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
-        >
-          <svg
-            aria-hidden="true"
-            focusable="false"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="w-4 h-4"
+        <div className="flex items-center gap-2">
+          <select
+            value={sortParam}
+            onChange={(e) => setSort(e.target.value)}
+            className="text-sm font-light text-zinc-700 border border-zinc-200 px-3 py-2 bg-white focus:outline-none focus:border-zinc-400 transition-colors"
+            style={{ outline: 'none', boxShadow: 'none' }}
           >
-            <path
-              fillRule="evenodd"
-              d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.845 1.757l-1.075.859A.75.75 0 0 1 9 17.598V13.49a2.25 2.25 0 0 0-.659-1.59L3.659 7.218A2.25 2.25 0 0 1 3 5.629V3.34a.75.75 0 0 1 .628-.74Z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Filter{selectedSlug ? ' (1)' : ''}
-        </button>
+            <option value="newest">Newest</option>
+            <option value="price_asc">Price: low to high</option>
+            <option value="price_desc">Price: high to low</option>
+          </select>
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className="flex items-center gap-2 text-base font-medium text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
+          >
+            <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+              <path fillRule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.845 1.757l-1.075.859A.75.75 0 0 1 9 17.598V13.49a2.25 2.25 0 0 0-.659-1.59L3.659 7.218A2.25 2.25 0 0 1 3 5.629V3.34a.75.75 0 0 1 .628-.74Z" clipRule="evenodd" />
+            </svg>
+            Filter{selectedSlug ? ' (1)' : ''}
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-12 pt-8">
@@ -275,6 +312,16 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
                     </button>
                   )}
                 </p>
+                <select
+                  value={sortParam}
+                  onChange={(e) => setSort(e.target.value)}
+                  className="text-sm font-light text-zinc-700 border border-zinc-200 px-3 py-2 bg-white focus:outline-none focus:border-zinc-400 transition-colors"
+                  style={{ outline: 'none', boxShadow: 'none' }}
+                >
+                  <option value="newest">Newest</option>
+                  <option value="price_asc">Price: low to high</option>
+                  <option value="price_desc">Price: high to low</option>
+                </select>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-px bg-zinc-100">
                 {filteredProducts.map((product) => (
