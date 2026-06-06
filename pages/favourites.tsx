@@ -43,7 +43,7 @@ export default function FavouritesPage() {
         .catch(() => setProducts([]))
         .finally(() => setLoadingProducts(false))
     }
-  }, [authLoading, favsLoading, user, favouriteIds.length])
+  }, [authLoading, favsLoading, user?.id, favouriteIds.length])
 
   const isLoading = authLoading || favsLoading || loadingProducts
 
@@ -78,9 +78,9 @@ export default function FavouritesPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-px bg-zinc-100">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             {products.map((product) => (
-              <div key={product.id} className="bg-white p-5">
+              <div key={product.id}>
                 <Link href={`/products/${product.slug}`} className="group block">
                   <div className="relative aspect-square overflow-hidden bg-zinc-50">
                     {product.thumbnail_url && (
@@ -108,15 +108,6 @@ export default function FavouritesPage() {
                 </Link>
               </div>
             ))}
-            {Array.from({ length: (4 - (products.length % 4)) % 4 }).map((_, i) => (
-              <div key={`placeholder-${i}`} className="bg-white hidden xl:block" />
-            ))}
-            {Array.from({ length: (3 - (products.length % 3)) % 3 }).map((_, i) => (
-              <div key={`placeholder-md-${i}`} className="bg-white hidden md:block xl:hidden" />
-            ))}
-            {products.length % 2 !== 0 && (
-              <div className="bg-white md:hidden" />
-            )}
           </div>
         )}
       </div>

@@ -47,6 +47,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
   const [loading, setLoading] = useState(!initialProducts)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sortMenuOpen, setSortMenuOpen] = useState(false)
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
   const sortRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -137,7 +138,14 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
       .length
   }
 
-  const isParentActive = (catId: string) => childrenOf(catId).some((s) => s.slug === selectedSlug)
+  const toggleExpanded = (catId: string) => {
+    setExpandedCategories((prev) => {
+      const next = new Set(prev)
+      if (next.has(catId)) next.delete(catId)
+      else next.add(catId)
+      return next
+    })
+  }
 
   const searchFiltered = searchQuery
     ? products.filter(
@@ -186,27 +194,52 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
       {topLevel.map((cat) => {
         const subs = childrenOf(cat.id)
         const isActive = selectedSlug === cat.slug
-        const expanded = isActive || isParentActive(cat.id)
+        const expanded = expandedCategories.has(cat.id)
         return (
           <div key={cat.id}>
-            <button
-              type="button"
-              onClick={() => selectCategory(cat.slug)}
-              className={`w-full text-left py-2.5 pr-4 text-base transition-all flex items-center justify-between border-l-2 pl-[14px] ${
+            <div
+              className={`flex items-center border-l-2 pl-[14px] pr-1 transition-all ${
                 isActive
-                  ? 'border-emerald-500 text-emerald-600 font-medium bg-emerald-50/50'
+                  ? 'border-emerald-500 bg-emerald-50/50'
                   : expanded
-                    ? 'border-zinc-200 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-50'
-                    : 'border-transparent text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
+                    ? 'border-zinc-200'
+                    : 'border-transparent'
               }`}
             >
-              <span>{cat.name}</span>
-              {countFor(cat.slug, cat.id) > 0 && (
-                <span className="text-sm text-zinc-400 tabular-nums">
-                  {countFor(cat.slug, cat.id)}
-                </span>
+              <button
+                type="button"
+                onClick={() => selectCategory(cat.slug)}
+                className={`flex-1 text-left py-2.5 text-base transition-all flex items-center gap-2 ${
+                  isActive
+                    ? 'text-emerald-600 font-medium'
+                    : 'text-zinc-600 hover:text-zinc-900'
+                }`}
+              >
+                <span>{cat.name}</span>
+                {countFor(cat.slug, cat.id) > 0 && (
+                  <span className="text-sm text-zinc-400 tabular-nums">
+                    {countFor(cat.slug, cat.id)}
+                  </span>
+                )}
+              </button>
+              {subs.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => toggleExpanded(cat.id)}
+                  aria-label={expanded ? `Collapse ${cat.name}` : `Expand ${cat.name}`}
+                  className="p-1.5 text-zinc-400 hover:text-zinc-700 transition-colors"
+                >
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+                  >
+                    <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+                  </svg>
+                </button>
               )}
-            </button>
+            </div>
             {subs.length > 0 && expanded && (
               <div className="ml-[14px] border-l-2 border-emerald-100 pl-3 pb-1 space-y-0.5">
                 {subs.map((sub) => (
@@ -214,7 +247,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
                     key={sub.id}
                     type="button"
                     onClick={() => selectCategory(sub.slug)}
-                    className={`w-full text-left px-3 py-2 text-sm transition-all flex items-center justify-between ${
+                    className={`w-full text-left px-3 py-2 text-base transition-all flex items-center justify-between ${
                       selectedSlug === sub.slug
                         ? 'text-emerald-600 font-medium'
                         : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
@@ -249,7 +282,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
             <button
               type="button"
               onClick={() => setSortMenuOpen((v) => !v)}
-              className="flex items-center gap-2 text-sm font-light text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
+              className="flex items-center gap-2 text-base font-light text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
             >
               <span>{SORT_OPTIONS.find((o) => o.value === sortParam)?.label ?? 'Sort'}</span>
               <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor" className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${sortMenuOpen ? 'rotate-180' : ''}`}>
@@ -263,7 +296,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
                     key={opt.value}
                     type="button"
                     onClick={() => { setSort(opt.value); setSortMenuOpen(false) }}
-                    className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-light text-left transition-colors ${
+                    className={`w-full flex items-center justify-between px-4 py-2.5 text-base font-light text-left transition-colors ${
                       sortParam === opt.value
                         ? 'text-emerald-600 bg-emerald-50/50'
                         : 'text-zinc-700 hover:bg-zinc-50'
@@ -283,7 +316,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="flex items-center gap-2 text-sm font-light text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
+            className="flex items-center gap-2 text-base font-light text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
           >
             <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
               <path fillRule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.845 1.757l-1.075.859A.75.75 0 0 1 9 17.598V13.49a2.25 2.25 0 0 0-.659-1.59L3.659 7.218A2.25 2.25 0 0 1 3 5.629V3.34a.75.75 0 0 1 .628-.74Z" clipRule="evenodd" />
@@ -367,7 +400,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
                   <button
                     type="button"
                     onClick={() => setSortMenuOpen((v) => !v)}
-                    className="flex items-center gap-2 text-sm font-light text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
+                    className="flex items-center gap-2 text-base font-light text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
                   >
                     <span>{SORT_OPTIONS.find((o) => o.value === sortParam)?.label ?? 'Sort'}</span>
                     <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor" className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${sortMenuOpen ? 'rotate-180' : ''}`}>
@@ -381,7 +414,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
                           key={opt.value}
                           type="button"
                           onClick={() => { setSort(opt.value); setSortMenuOpen(false) }}
-                          className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-light text-left transition-colors ${
+                          className={`w-full flex items-center justify-between px-4 py-2.5 text-base font-light text-left transition-colors ${
                             sortParam === opt.value
                               ? 'text-emerald-600 bg-emerald-50/50'
                               : 'text-zinc-700 hover:bg-zinc-50'
@@ -399,21 +432,12 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-px bg-zinc-100">
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredProducts.map((product) => (
-                  <div key={product.id} className="bg-white p-5">
+                  <div key={product.id}>
                     <ProductCard product={product} variants={product.variants} />
                   </div>
                 ))}
-                {Array.from({ length: (4 - (filteredProducts.length % 4)) % 4 }).map((_, i) => (
-                  <div key={`placeholder-${i}`} className="bg-white hidden xl:block" />
-                ))}
-                {Array.from({ length: (3 - (filteredProducts.length % 3)) % 3 }).map((_, i) => (
-                  <div key={`placeholder-md-${i}`} className="bg-white hidden md:block xl:hidden" />
-                ))}
-                {filteredProducts.length % 2 !== 0 && (
-                  <div className="bg-white md:hidden" />
-                )}
               </div>
             </>
           )}

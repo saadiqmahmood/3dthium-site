@@ -36,7 +36,7 @@ export function FavouritesProvider({ children }: { children: ReactNode }) {
       }
       setLoading(false)
     }
-  }, [authLoading, user])
+  }, [authLoading, user?.id])
 
   const isFavourited = useCallback(
     (productId: string) => favouriteIds.includes(productId),

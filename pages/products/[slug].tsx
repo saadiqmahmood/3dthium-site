@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react'
 import CartToast, { type CartToastItem } from '@/components/ui/CartToast'
 import Toast from '@/components/ui/Toast'
 import { useCart } from '@/context/CartContext'
+import { useFavourites } from '@/context/FavouritesContext'
 import { formatMoney } from '@/lib/format/money'
 import type { ProductVariantNew } from '@/types'
 
@@ -80,6 +81,7 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
   siteSettings,
 }) => {
   const { addToCart } = useCart()
+  const { isFavourited, toggle: toggleFavourite } = useFavourites()
 
   // Variant selection state
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
@@ -645,20 +647,47 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                disabled={variants.length > 0 && !hasCompleteVariantMatch}
-                className={`w-full py-4 px-6 rounded-2xl text-base font-medium transition-all duration-200 ${
-                  variants.length > 0 && !hasCompleteVariantMatch
-                    ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
-                    : 'bg-zinc-900 text-white hover:bg-zinc-800 active:scale-[0.99] shadow-sm hover:shadow-md'
-                }`}
-              >
-                {variants.length > 0 && !hasCompleteVariantMatch
-                  ? 'Select options above'
-                  : 'Add to Cart'}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={variants.length > 0 && !hasCompleteVariantMatch}
+                  className={`flex-1 py-4 px-6 rounded-2xl text-base font-medium transition-all duration-200 ${
+                    variants.length > 0 && !hasCompleteVariantMatch
+                      ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
+                      : 'bg-zinc-900 text-white hover:bg-zinc-800 active:scale-[0.99] shadow-sm hover:shadow-md'
+                  }`}
+                >
+                  {variants.length > 0 && !hasCompleteVariantMatch
+                    ? 'Select options above'
+                    : 'Add to Cart'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => toggleFavourite(product.id)}
+                  aria-label={isFavourited(product.id) ? 'Remove from favourites' : 'Add to favourites'}
+                  className={`flex items-center justify-center w-14 rounded-2xl border transition-all duration-200 ${
+                    isFavourited(product.id)
+                      ? 'border-red-200 bg-red-50 text-red-500'
+                      : 'border-gray-200 text-zinc-400 hover:text-red-400 hover:border-red-200 hover:bg-red-50'
+                  }`}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    className="w-5 h-5"
+                    fill={isFavourited(product.id) ? 'currentColor' : 'none'}
+                    stroke="currentColor"
+                    strokeWidth={isFavourited(product.id) ? 0 : 1.75}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                </button>
+              </div>
 
               {/* Trust strip */}
               <div className="flex items-center justify-center gap-6 text-xs text-zinc-400 font-light pt-1">
