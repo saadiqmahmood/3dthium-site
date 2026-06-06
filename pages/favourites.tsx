@@ -108,6 +108,15 @@ export default function FavouritesPage() {
                 </Link>
               </div>
             ))}
+            {Array.from({ length: (4 - (products.length % 4)) % 4 }).map((_, i) => (
+              <div key={`placeholder-${i}`} className="bg-white hidden xl:block" />
+            ))}
+            {Array.from({ length: (3 - (products.length % 3)) % 3 }).map((_, i) => (
+              <div key={`placeholder-md-${i}`} className="bg-white hidden md:block xl:hidden" />
+            ))}
+            {products.length % 2 !== 0 && (
+              <div className="bg-white md:hidden" />
+            )}
           </div>
         )}
       </div>

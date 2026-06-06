@@ -4,9 +4,13 @@ import ProductCard from '@/components/ui/ProductCard'
 import type { ProductVariantNew } from '@/types'
 
 const SORT_OPTIONS = [
+  { value: 'featured', label: 'Featured' },
+  { value: 'best_selling', label: 'Best Selling' },
   { value: 'newest', label: 'Newest' },
-  { value: 'price_asc', label: 'Price: low to high' },
-  { value: 'price_desc', label: 'Price: high to low' },
+  { value: 'price_asc', label: 'Price: Low → High' },
+  { value: 'price_desc', label: 'Price: High → Low' },
+  { value: 'highest_rated', label: 'Highest Rated' },
+  { value: 'most_popular', label: 'Most Popular' },
 ]
 
 export type ProductNew = {
@@ -56,7 +60,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
   }, [])
 
   const searchQuery = typeof router.query.q === 'string' ? router.query.q.trim() : ''
-  const sortParam = typeof router.query.sort === 'string' ? router.query.sort : 'newest'
+  const sortParam = typeof router.query.sort === 'string' ? router.query.sort : 'featured'
 
   useEffect(() => {
     const cat = router.query.cat
@@ -82,7 +86,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
       const base: Record<string, string> = {}
       if (selectedSlug) base.cat = selectedSlug
       if (searchQuery) base.q = searchQuery
-      if (sortParam !== 'newest') base.sort = sortParam
+      if (sortParam !== 'featured') base.sort = sortParam
       for (const [k, v] of Object.entries(overrides)) {
         if (v === null) delete base[k]
         else base[k] = v
@@ -157,6 +161,8 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
   const filteredProducts = [...categoryFiltered].sort((a, b) => {
     if (sortParam === 'price_asc') return a.price_range.min - b.price_range.min
     if (sortParam === 'price_desc') return b.price_range.min - a.price_range.min
+    // Stubs — fall back to newest until data exists for these
+    // 'featured', 'best_selling', 'highest_rated', 'most_popular'
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   })
 
@@ -399,6 +405,15 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
                     <ProductCard product={product} variants={product.variants} />
                   </div>
                 ))}
+                {Array.from({ length: (4 - (filteredProducts.length % 4)) % 4 }).map((_, i) => (
+                  <div key={`placeholder-${i}`} className="bg-white hidden xl:block" />
+                ))}
+                {Array.from({ length: (3 - (filteredProducts.length % 3)) % 3 }).map((_, i) => (
+                  <div key={`placeholder-md-${i}`} className="bg-white hidden md:block xl:hidden" />
+                ))}
+                {filteredProducts.length % 2 !== 0 && (
+                  <div className="bg-white md:hidden" />
+                )}
               </div>
             </>
           )}
