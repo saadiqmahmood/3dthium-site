@@ -1,7 +1,13 @@
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import ProductCard from '@/components/ui/ProductCard'
 import type { ProductVariantNew } from '@/types'
+
+const SORT_OPTIONS = [
+  { value: 'newest', label: 'Newest' },
+  { value: 'price_asc', label: 'Price: low to high' },
+  { value: 'price_desc', label: 'Price: high to low' },
+]
 
 export type ProductNew = {
   id: string
@@ -36,6 +42,18 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
   const [loading, setLoading] = useState(!initialProducts)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sortMenuOpen, setSortMenuOpen] = useState(false)
+  const sortRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setSortMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const searchQuery = typeof router.query.q === 'string' ? router.query.q.trim() : ''
   const sortParam = typeof router.query.sort === 'string' ? router.query.sort : 'newest'
@@ -220,20 +238,46 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
           {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
         </p>
         <div className="flex items-center gap-2">
-          <select
-            value={sortParam}
-            onChange={(e) => setSort(e.target.value)}
-            className="text-sm font-light text-zinc-700 border border-zinc-200 px-3 py-2 bg-white focus:outline-none focus:border-zinc-400 transition-colors"
-            style={{ outline: 'none', boxShadow: 'none' }}
-          >
-            <option value="newest">Newest</option>
-            <option value="price_asc">Price: low to high</option>
-            <option value="price_desc">Price: high to low</option>
-          </select>
+          {/* Sort dropdown — mobile */}
+          <div ref={sortRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setSortMenuOpen((v) => !v)}
+              className="flex items-center gap-2 text-sm font-light text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
+            >
+              <span>{SORT_OPTIONS.find((o) => o.value === sortParam)?.label ?? 'Sort'}</span>
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor" className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${sortMenuOpen ? 'rotate-180' : ''}`}>
+                <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+              </svg>
+            </button>
+            {sortMenuOpen && (
+              <div className="absolute right-0 top-full mt-1 bg-white border border-zinc-100 shadow-lg z-20 min-w-[176px]">
+                {SORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => { setSort(opt.value); setSortMenuOpen(false) }}
+                    className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-light text-left transition-colors ${
+                      sortParam === opt.value
+                        ? 'text-emerald-600 bg-emerald-50/50'
+                        : 'text-zinc-700 hover:bg-zinc-50'
+                    }`}
+                  >
+                    <span>{opt.label}</span>
+                    {sortParam === opt.value && (
+                      <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-emerald-500 flex-shrink-0">
+                        <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="flex items-center gap-2 text-base font-medium text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
+            className="flex items-center gap-2 text-sm font-light text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
           >
             <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
               <path fillRule="evenodd" d="M2.628 1.601C5.028 1.206 7.49 1 10 1s4.973.206 7.372.601a.75.75 0 0 1 .628.74v2.288a2.25 2.25 0 0 1-.659 1.59l-4.682 4.683a2.25 2.25 0 0 0-.659 1.59v3.037c0 .684-.31 1.33-.845 1.757l-1.075.859A.75.75 0 0 1 9 17.598V13.49a2.25 2.25 0 0 0-.659-1.59L3.659 7.218A2.25 2.25 0 0 1 3 5.629V3.34a.75.75 0 0 1 .628-.74Z" clipRule="evenodd" />
@@ -312,16 +356,42 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
                     </button>
                   )}
                 </p>
-                <select
-                  value={sortParam}
-                  onChange={(e) => setSort(e.target.value)}
-                  className="text-sm font-light text-zinc-700 border border-zinc-200 px-3 py-2 bg-white focus:outline-none focus:border-zinc-400 transition-colors"
-                  style={{ outline: 'none', boxShadow: 'none' }}
-                >
-                  <option value="newest">Newest</option>
-                  <option value="price_asc">Price: low to high</option>
-                  <option value="price_desc">Price: high to low</option>
-                </select>
+                {/* Sort dropdown — desktop */}
+                <div ref={sortRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setSortMenuOpen((v) => !v)}
+                    className="flex items-center gap-2 text-sm font-light text-zinc-700 border border-zinc-200 px-4 py-2 hover:border-zinc-400 transition-colors"
+                  >
+                    <span>{SORT_OPTIONS.find((o) => o.value === sortParam)?.label ?? 'Sort'}</span>
+                    <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor" className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${sortMenuOpen ? 'rotate-180' : ''}`}>
+                      <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                  {sortMenuOpen && (
+                    <div className="absolute right-0 top-full mt-1 bg-white border border-zinc-100 shadow-lg z-20 min-w-[176px]">
+                      {SORT_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => { setSort(opt.value); setSortMenuOpen(false) }}
+                          className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-light text-left transition-colors ${
+                            sortParam === opt.value
+                              ? 'text-emerald-600 bg-emerald-50/50'
+                              : 'text-zinc-700 hover:bg-zinc-50'
+                          }`}
+                        >
+                          <span>{opt.label}</span>
+                          {sortParam === opt.value && (
+                            <svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-emerald-500 flex-shrink-0">
+                              <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-px bg-zinc-100">
                 {filteredProducts.map((product) => (
