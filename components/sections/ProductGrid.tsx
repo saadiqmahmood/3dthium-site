@@ -224,7 +224,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
           ) : filteredProducts.length === 0 ? (
             <div className="py-24 text-center">
               <p className="text-base text-zinc-500">
-                {searchQuery ? `No results for "${searchQuery}"` : 'No products found'}
+                {searchQuery ? <>No results for &ldquo;{searchQuery}&rdquo;</> : 'No products found'}
               </p>
               <div className="flex items-center justify-center gap-4 mt-4">
                 {searchQuery && (
@@ -253,7 +253,7 @@ export default function ProductGrid({ initialProducts, initialCategories }: Prop
                 <p className="text-base text-zinc-600">
                   {searchQuery && (
                     <span className="mr-3">
-                      Results for <span className="text-zinc-900 font-medium">"{searchQuery}"</span>
+                      Results for <span className="text-zinc-900 font-medium">&ldquo;{searchQuery}&rdquo;</span>
                       <button
                         type="button"
                         onClick={clearSearch}
