@@ -133,9 +133,29 @@ export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   authUserId: uuid('auth_user_id').unique(),
   email: text('email'),
+  fullName: text('full_name'),
   isAdmin: boolean('is_admin').notNull().default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
+
+export const userAddresses = pgTable(
+  'user_addresses',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    label: text('label').notNull().default(''),
+    name: text('name').notNull(),
+    line1: text('line1').notNull(),
+    line2: text('line2').notNull().default(''),
+    city: text('city').notNull(),
+    postcode: text('postcode').notNull(),
+    country: text('country').notNull().default('GB'),
+    phone: text('phone').notNull().default(''),
+    isDefault: boolean('is_default').notNull().default(false),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [index('idx_user_addresses_user_id').on(table.userId)]
+)
 
 // ============================================
 // CARTS
@@ -332,6 +352,15 @@ export const cartItemsRelations = relations(cartItems, ({ one }) => ({
   }),
 }))
 
+export const usersRelations = relations(users, ({ many }) => ({
+  addresses: many(userAddresses),
+  favourites: many(userFavourites),
+}))
+
+export const userAddressesRelations = relations(userAddresses, ({ one }) => ({
+  user: one(users, { fields: [userAddresses.userId], references: [users.id] }),
+}))
+
 export const ordersRelations = relations(orders, ({ one, many }) => ({
   user: one(users, {
     fields: [orders.userId],
@@ -402,3 +431,6 @@ export type PromoCode = typeof promoCodes.$inferSelect
 export type NewPromoCode = typeof promoCodes.$inferInsert
 
 export type StripeWebhookEvent = typeof stripeWebhookEvents.$inferSelect
+
+export type UserAddress = typeof userAddresses.$inferSelect
+export type NewUserAddress = typeof userAddresses.$inferInsert

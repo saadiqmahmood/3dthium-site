@@ -6,7 +6,6 @@ import Toast from '@/components/ui/Toast'
 import { useAuth } from '@/context/AuthContext'
 import { useCart, type CartItem } from '@/context/CartContext'
 import { useFavourites } from '@/context/FavouritesContext'
-import { useSupabase } from '@/context/SupabaseContext'
 import { authFetch } from '@/lib/api/authFetch'
 import { formatMoney } from '@/lib/format/money'
 
@@ -72,7 +71,6 @@ export default function AccountPage() {
   const { user, loading, signOut } = useAuth()
   const { addToCart } = useCart()
   const { favouriteIds } = useFavourites()
-  const supabaseCtx = useSupabase()
   const router = useRouter()
   const fId = useId()
 
@@ -88,15 +86,16 @@ export default function AccountPage() {
   // Toast
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
-  // Display name
-  const currentName = (user?.user_metadata?.full_name as string | undefined) ?? ''
+  // Display name (from DB)
+  const [currentName, setCurrentName] = useState('')
   const [editingName, setEditingName] = useState(false)
-  const [nameValue, setNameValue] = useState(currentName)
+  const [nameValue, setNameValue] = useState('')
   const [nameSaving, setNameSaving] = useState(false)
   const nameInputRef = useRef<HTMLInputElement>(null)
 
-  // Addresses
-  const currentAddresses: SavedAddress[] = (user?.user_metadata?.addresses as SavedAddress[] | undefined) ?? []
+  // Addresses (from DB)
+  const [currentAddresses, setCurrentAddresses] = useState<SavedAddress[]>([])
+  const [addressesLoading, setAddressesLoading] = useState(false)
   const [showAddressForm, setShowAddressForm] = useState(false)
   const [editingAddress, setEditingAddress] = useState<SavedAddress | null>(null)
   const [addressForm, setAddressForm] = useState<Omit<SavedAddress, 'id' | 'is_default'>>(BLANK_ADDRESS)
@@ -105,6 +104,21 @@ export default function AccountPage() {
   useEffect(() => { if (!loading && !user) router.push('/auth') }, [user?.id, loading, router])
   useEffect(() => { if (user && section === 'orders' && orders.length === 0) fetchOrders() }, [user?.id, section])
   useEffect(() => { if (editingName) nameInputRef.current?.focus() }, [editingName])
+
+  // Load profile + addresses once authenticated
+  useEffect(() => {
+    if (!user) return
+    authFetch('/api/user/profile')
+      .then((r) => r.json())
+      .then((d) => { const n = d.data?.full_name ?? ''; setCurrentName(n); setNameValue(n) })
+      .catch(() => {})
+    setAddressesLoading(true)
+    authFetch('/api/user/addresses')
+      .then((r) => r.json())
+      .then((d) => setCurrentAddresses(d.data ?? []))
+      .catch(() => {})
+      .finally(() => setAddressesLoading(false))
+  }, [user?.id])
 
   // ── Handlers ──
   const fetchOrders = async () => {
@@ -144,20 +158,17 @@ export default function AccountPage() {
   }
 
   const saveName = async () => {
-    if (!supabaseCtx) return
     setNameSaving(true)
-    const { error } = await supabaseCtx.client.auth.updateUser({ data: { full_name: nameValue.trim() } })
+    const res = await authFetch('/api/user/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ full_name: nameValue.trim() }),
+    })
     setNameSaving(false)
-    if (error) { setToast({ message: error.message, type: 'error' }); return }
+    if (!res.ok) { setToast({ message: 'Failed to update name', type: 'error' }); return }
+    setCurrentName(nameValue.trim())
     setEditingName(false)
     setToast({ message: 'Name updated', type: 'success' })
-  }
-
-  const persistAddresses = async (next: SavedAddress[]) => {
-    if (!supabaseCtx) return false
-    const { error } = await supabaseCtx.client.auth.updateUser({ data: { addresses: next } })
-    if (error) { setToast({ message: error.message, type: 'error' }); return false }
-    return true
   }
 
   const openAddressForm = (addr?: SavedAddress) => {
@@ -174,35 +185,50 @@ export default function AccountPage() {
   const cancelAddressForm = () => { setShowAddressForm(false); setEditingAddress(null); setAddressForm(BLANK_ADDRESS) }
 
   const saveAddress = async () => {
-    if (!addressForm.name.trim() || !addressForm.line1.trim() || !addressForm.city.trim() || !addressForm.postcode.trim()) {
-      setToast({ message: 'Please fill in all required fields', type: 'error' })
+    setAddressSaving(true)
+    const isEditing = !!editingAddress
+    const res = await authFetch(
+      isEditing ? `/api/user/addresses/${editingAddress!.id}` : '/api/user/addresses',
+      {
+        method: isEditing ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(addressForm),
+      }
+    )
+    setAddressSaving(false)
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}))
+      setToast({ message: d?.error?.message ?? 'Failed to save address', type: 'error' })
       return
     }
-    setAddressSaving(true)
-    let next: SavedAddress[]
-    if (editingAddress) {
-      next = currentAddresses.map((a) => a.id === editingAddress.id ? { ...editingAddress, ...addressForm } : a)
-    } else {
-      const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
-      const isFirst = currentAddresses.length === 0
-      next = [...currentAddresses, { id, is_default: isFirst, ...addressForm }]
-    }
-    const ok = await persistAddresses(next)
-    setAddressSaving(false)
-    if (ok) { cancelAddressForm(); setToast({ message: editingAddress ? 'Address updated' : 'Address saved', type: 'success' }) }
+    const { data: saved } = await res.json()
+    setCurrentAddresses((prev) =>
+      isEditing ? prev.map((a) => (a.id === editingAddress!.id ? saved : a)) : [...prev, saved]
+    )
+    cancelAddressForm()
+    setToast({ message: isEditing ? 'Address updated' : 'Address saved', type: 'success' })
   }
 
   const deleteAddress = async (id: string) => {
-    const next = currentAddresses.filter((a) => a.id !== id)
-    if (next.length > 0 && !next.some((a) => a.is_default)) next[0].is_default = true
-    const ok = await persistAddresses(next)
-    if (ok) setToast({ message: 'Address removed', type: 'success' })
+    const res = await authFetch(`/api/user/addresses/${id}`, { method: 'DELETE' })
+    if (!res.ok) { setToast({ message: 'Failed to remove address', type: 'error' }); return }
+    setCurrentAddresses((prev) => {
+      const next = prev.filter((a) => a.id !== id)
+      if (next.length > 0 && !next.some((a) => a.is_default)) next[0].is_default = true
+      return next
+    })
+    setToast({ message: 'Address removed', type: 'success' })
   }
 
   const setDefaultAddress = async (id: string) => {
-    const next = currentAddresses.map((a) => ({ ...a, is_default: a.id === id }))
-    const ok = await persistAddresses(next)
-    if (ok) setToast({ message: 'Default address updated', type: 'success' })
+    const res = await authFetch(`/api/user/addresses/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_default: true }),
+    })
+    if (!res.ok) { setToast({ message: 'Failed to update default', type: 'error' }); return }
+    setCurrentAddresses((prev) => prev.map((a) => ({ ...a, is_default: a.id === id })))
+    setToast({ message: 'Default address updated', type: 'success' })
   }
 
   // ── Loading guard ──
