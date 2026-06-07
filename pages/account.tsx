@@ -1,31 +1,10 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useId, useRef, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useAuth } from '@/context/AuthContext'
-import { useCart, type CartItem } from '@/context/CartContext'
 import { useFavourites } from '@/context/FavouritesContext'
 import { authFetch } from '@/lib/api/authFetch'
-import { formatMoney } from '@/lib/format/money'
-
-// ── Types ──────────────────────────────────────────────────────────
-interface OrderItem {
-  id: string
-  quantity: number
-  size: string | null
-  price_at_purchase: number
-  variant_id: string | null
-  variant_new?: { color: string | null; material: string | null; image_url: string | null }
-  product_new?: { id: string; name: string }
-}
-interface Order {
-  id: string
-  total_price: number
-  status: string
-  created_at: string
-  order_items: OrderItem[]
-}
 type SavedAddress = {
   id: string
   label: string
@@ -55,19 +34,9 @@ function ChevronRight() {
 // ── Page ───────────────────────────────────────────────────────────
 export default function AccountPage() {
   const { user, loading, signOut } = useAuth()
-  const { addToCart } = useCart()
   const { favouriteIds } = useFavourites()
   const router = useRouter()
   const fId = useId()
-
-  // Section
-  const [section, setSection] = useState<'profile' | 'orders'>('profile')
-
-  // Orders
-  const [orders, setOrders] = useState<Order[]>([])
-  const [ordersLoading, setOrdersLoading] = useState(false)
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  const [reorderLoading, setReorderLoading] = useState(false)
 
   // Toast
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -87,7 +56,6 @@ export default function AccountPage() {
   const [addressSaving, setAddressSaving] = useState(false)
 
   useEffect(() => { if (!loading && !user) router.push('/auth') }, [user?.id, loading, router])
-  useEffect(() => { if (user && section === 'orders' && orders.length === 0) fetchOrders() }, [user?.id, section])
   useEffect(() => { if (editingName) nameInputRef.current?.focus() }, [editingName])
 
   // Load profile + addresses once authenticated
@@ -104,42 +72,6 @@ export default function AccountPage() {
   }, [user?.id])
 
   // ── Handlers ──
-  const fetchOrders = async () => {
-    setOrdersLoading(true)
-    try {
-      const res = await authFetch('/api/orders')
-      if (!res.ok) { setToast({ message: 'Failed to load orders', type: 'error' }); return }
-      setOrders(await res.json())
-    } catch { setOrders([]) }
-    finally { setOrdersLoading(false) }
-  }
-
-  const handleReorder = async (order: Order) => {
-    setReorderLoading(true)
-    try {
-      for (const item of order.order_items) {
-        if (!item.product_new?.id) continue
-        const cartItem: CartItem = {
-          product_id: item.product_new.id,
-          variant_id: item.variant_id ?? null,
-          quantity: item.quantity,
-          size: item.size,
-          color: item.variant_new?.color ?? null,
-          material: item.variant_new?.material ?? null,
-          size_display: item.size,
-          color_display: item.variant_new?.color ?? null,
-          material_display: item.variant_new?.material ?? null,
-          price: item.price_at_purchase,
-          name: item.product_new.name,
-          image_url: item.variant_new?.image_url ?? '',
-        }
-        addToCart(cartItem)
-      }
-      setToast({ message: `${order.order_items.length} item${order.order_items.length !== 1 ? 's' : ''} added to your cart`, type: 'success' })
-      setTimeout(() => router.push('/cart'), 1200)
-    } finally { setReorderLoading(false) }
-  }
-
   const saveName = async () => {
     setNameSaving(true)
     const res = await authFetch('/api/user/profile', {
@@ -223,15 +155,8 @@ export default function AccountPage() {
     )
   }
 
-  const tab = (id: 'profile' | 'orders', label: string) => (
-    <button
-      type="button"
-      onClick={() => { setSection(id); setSelectedOrder(null) }}
-      className={`pb-4 text-base transition-colors border-b-2 ${section === id ? 'text-zinc-900 font-medium border-emerald-500' : 'text-zinc-400 font-light border-transparent hover:text-zinc-700'}`}
-    >
-      {label}
-    </button>
-  )
+  const activeTab = 'text-zinc-900 font-medium border-emerald-500'
+  const inactiveTab = 'text-zinc-400 font-light border-transparent hover:text-zinc-700'
 
   const inputClass = 'w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-light text-zinc-900 placeholder:text-zinc-400 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300 focus:outline-none transition-colors'
   const labelClass = 'block text-sm font-light text-zinc-700 mb-1.5'
@@ -262,13 +187,12 @@ export default function AccountPage() {
 
         {/* ── Tabs ── */}
         <div className="flex gap-8 border-b border-zinc-100 mb-10">
-          {tab('profile', 'Profile')}
-          {tab('orders', 'Orders')}
+          <span className={`pb-4 text-base border-b-2 ${activeTab}`}>Profile</span>
+          <Link href="/orders" className={`pb-4 text-base border-b-2 ${inactiveTab}`}>Orders</Link>
         </div>
 
         {/* ════════════════ PROFILE ════════════════ */}
-        {section === 'profile' && (
-          <div className="max-w-xl space-y-10">
+        <div className="max-w-xl space-y-10">
 
             {/* Display name */}
             <div>
@@ -493,171 +417,9 @@ export default function AccountPage() {
               )}
             </div>
           </div>
-        )}
+        </div>
 
-        {/* ════════════════ ORDERS ════════════════ */}
-        {section === 'orders' && (
-          <div>
-            {ordersLoading ? (
-              <div className="text-center py-20">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mx-auto" />
-                <p className="mt-4 text-zinc-600 font-light">Loading orders...</p>
-              </div>
 
-            ) : selectedOrder ? (
-              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8">
-                <button
-                  type="button"
-                  onClick={() => setSelectedOrder(null)}
-                  className="mb-6 text-emerald-400 hover:text-emerald-300 font-light flex items-center gap-2 transition"
-                >
-                  <svg aria-hidden="true" focusable="false" className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Back to Orders
-                </button>
-
-                <div className="flex flex-wrap justify-between items-start gap-4 mb-6 pb-6 border-b border-gray-200">
-                  <div>
-                    <h3 className="text-2xl font-light text-zinc-900 mb-2">
-                      Order #{selectedOrder.id.slice(-8)}
-                    </h3>
-                    <p className="text-base text-zinc-600 font-light">
-                      {new Date(selectedOrder.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric', month: 'long', day: 'numeric',
-                        hour: '2-digit', minute: '2-digit',
-                      })}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className={`inline-flex px-3 py-1.5 text-sm font-medium rounded-lg ${
-                      selectedOrder.status === 'paid'
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                        : selectedOrder.status === 'pending'
-                          ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                          : 'bg-gray-200 text-zinc-600 border border-gray-300'
-                    }`}>
-                      {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
-                    </span>
-                    <p className="text-2xl font-semibold text-zinc-900 mt-2">
-                      {formatMoney(selectedOrder.total_price)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-8">
-                  {selectedOrder.order_items?.map((item) => (
-                    <div key={item.id} className="flex items-center gap-4 p-5 bg-white border border-gray-200 rounded-xl hover:border-gray-300 transition">
-                      <div className="flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                        {item.variant_new?.image_url ? (
-                          <Image width={80} height={80} src={item.variant_new.image_url} alt={item.product_new?.name ?? ''} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-8 h-8 text-gray-300">
-                              <rect width="18" height="18" x="3" y="3" rx="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-zinc-900 mb-2">{item.product_new?.name}</h4>
-                        <div className="flex flex-wrap gap-3 text-base text-zinc-600 font-light">
-                          {item.variant_new?.color && <><span>Color: {item.variant_new.color}</span><span>•</span></>}
-                          {item.size && <><span>Size: {item.size}</span><span>•</span></>}
-                          <span>Qty: {item.quantity}</span>
-                        </div>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="font-semibold text-zinc-900 text-lg">
-                          {formatMoney(item.price_at_purchase * item.quantity)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => handleReorder(selectedOrder)}
-                    disabled={reorderLoading}
-                    className="flex items-center gap-2 bg-zinc-900 text-white px-8 py-3 rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {reorderLoading
-                      ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Adding to Cart...</>
-                      : 'Reorder All Items'}
-                  </button>
-                </div>
-              </div>
-
-            ) : orders.length === 0 ? (
-              <div className="text-center py-20 bg-gray-50 border border-gray-200 rounded-2xl">
-                <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg aria-hidden="true" focusable="false" className="w-10 h-10 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-light text-zinc-900 mb-2">No orders yet</h3>
-                <p className="text-zinc-600 font-light mb-8">Start shopping to see your orders here</p>
-                <button
-                  type="button"
-                  onClick={() => router.push('/products')}
-                  className="bg-zinc-900 text-white px-8 py-3 rounded-lg font-medium hover:bg-zinc-800 transition-colors"
-                >
-                  Browse Products
-                </button>
-              </div>
-
-            ) : (
-              <div className="grid gap-4">
-                {orders.map((order) => (
-                  <button
-                    key={order.id}
-                    type="button"
-                    className="w-full text-left bg-gray-50 border border-gray-200 rounded-2xl p-6 cursor-pointer hover:border-gray-300 transition-all group"
-                    onClick={() => setSelectedOrder(order)}
-                  >
-                    <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
-                      <div>
-                        <h3 className="text-lg font-medium text-zinc-900 mb-1 group-hover:text-emerald-600 transition">
-                          Order #{order.id.slice(-8)}
-                        </h3>
-                        <p className="text-base text-zinc-600 font-light">
-                          {new Date(order.created_at).toLocaleDateString('en-US', {
-                            year: 'numeric', month: 'short', day: 'numeric',
-                          })}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <span className={`inline-flex px-3 py-1.5 text-sm font-medium rounded-lg ${
-                          order.status === 'paid'
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            : order.status === 'pending'
-                              ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                              : 'bg-gray-200 text-zinc-600 border border-gray-300'
-                        }`}>
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </span>
-                        <p className="text-xl font-semibold text-zinc-900">
-                          {formatMoney(order.total_price)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-base text-zinc-600 font-light">
-                      <svg aria-hidden="true" focusable="false" className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
-                      {order.order_items?.length || 0} item{order.order_items?.length !== 1 ? 's' : ''}
-                      <span className="mx-2">•</span>
-                      <span className="text-emerald-600 group-hover:text-emerald-700 transition">View details →</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
