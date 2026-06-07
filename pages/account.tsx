@@ -44,20 +44,6 @@ const BLANK_ADDRESS: Omit<SavedAddress, 'id' | 'is_default'> = {
 }
 
 // ── Sub-components ─────────────────────────────────────────────────
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    paid:      'bg-emerald-50 text-emerald-700 border border-emerald-200',
-    shipped:   'bg-blue-50 text-blue-700 border border-blue-200',
-    pending:   'bg-amber-50 text-amber-700 border border-amber-200',
-    cancelled: 'bg-red-50 text-red-600 border border-red-200',
-  }
-  return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded text-xs font-medium ${map[status] ?? 'bg-zinc-100 text-zinc-600 border border-zinc-200'}`}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
-  )
-}
-
 function ChevronRight() {
   return (
     <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-zinc-300 group-hover:text-emerald-400 transition-colors flex-shrink-0">
