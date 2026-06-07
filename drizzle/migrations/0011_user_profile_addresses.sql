@@ -27,3 +27,8 @@ EXCEPTION WHEN duplicate_object THEN null;
 END $$;
 
 CREATE INDEX IF NOT EXISTS "idx_user_addresses_user_id" ON "user_addresses" ("user_id");
+
+-- RLS: block direct anon/authenticated client access.
+-- Service role key and the direct DATABASE_URL connection used by the
+-- API routes both bypass RLS, so nothing breaks on the server side.
+ALTER TABLE "user_addresses" ENABLE ROW LEVEL SECURITY;
