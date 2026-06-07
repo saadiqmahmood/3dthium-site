@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import { useEffect, useId, useRef, useState } from 'react'
 import Toast from '@/components/ui/Toast'
 import { useAuth } from '@/context/AuthContext'
-import { useFavourites } from '@/context/FavouritesContext'
 import { authFetch } from '@/lib/api/authFetch'
 type SavedAddress = {
   id: string
@@ -34,7 +33,6 @@ function ChevronRight() {
 // ── Page ───────────────────────────────────────────────────────────
 export default function AccountPage() {
   const { user, loading, signOut } = useAuth()
-  const { favouriteIds } = useFavourites()
   const router = useRouter()
   const fId = useId()
 
@@ -238,29 +236,6 @@ export default function AccountPage() {
                 </svg>
                 <span className="text-base font-light text-zinc-700">{user.email}</span>
               </div>
-            </div>
-
-            {/* Favourites shortcut */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">Saved items</p>
-              <Link href="/favourites" className="group flex items-center justify-between bg-white border border-gray-100 rounded-lg shadow-sm px-5 py-4 hover:border-red-200 hover:shadow transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="w-9 h-9 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-red-100 transition-colors">
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-red-500">
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-base font-medium text-zinc-900">My favourites</p>
-                    <p className="text-sm font-light text-zinc-500">
-                      {favouriteIds.length === 0 ? 'No saved items yet' : `${favouriteIds.length} saved item${favouriteIds.length !== 1 ? 's' : ''}`}
-                    </p>
-                  </div>
-                </div>
-                <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-zinc-300 group-hover:text-red-300 transition-colors flex-shrink-0">
-                  <path d="M7.5 5l5 5-5 5" />
-                </svg>
-              </Link>
             </div>
 
             {/* Account settings */}

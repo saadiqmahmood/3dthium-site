@@ -9,6 +9,7 @@ import {
   X,
 } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import Toast from '@/components/ui/Toast'
@@ -620,6 +621,12 @@ export default function OrdersPage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-3xl mx-auto py-24 px-4 sm:px-6">
+        <Link href="/account" className="inline-flex items-center gap-1.5 text-sm font-light text-zinc-400 hover:text-zinc-700 transition-colors mb-8 group">
+          <svg aria-hidden="true" className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to account
+        </Link>
         <div className="mb-10">
           <h1 className="text-4xl font-light text-zinc-900 mb-2">My Orders</h1>
           <p className="text-zinc-500">View and track your purchases</p>
