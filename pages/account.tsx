@@ -513,96 +513,157 @@ export default function AccountPage() {
         {section === 'orders' && (
           <div>
             {ordersLoading ? (
-              <div className="flex items-center justify-center py-24">
-                <div className="w-6 h-6 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin" />
+              <div className="text-center py-20">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mx-auto" />
+                <p className="mt-4 text-zinc-600 font-light">Loading orders...</p>
               </div>
+
             ) : selectedOrder ? (
-              <div>
-                <button type="button" onClick={() => setSelectedOrder(null)} className="inline-flex items-center gap-2 text-sm font-light text-zinc-400 hover:text-zinc-700 transition-colors mb-8 group">
-                  <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 transition-transform group-hover:-translate-x-0.5">
-                    <path d="M12.5 5L7.5 10l5 5" />
+              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8">
+                <button
+                  type="button"
+                  onClick={() => setSelectedOrder(null)}
+                  className="mb-6 text-emerald-400 hover:text-emerald-300 font-light flex items-center gap-2 transition"
+                >
+                  <svg aria-hidden="true" focusable="false" className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
-                  Back to orders
+                  Back to Orders
                 </button>
-                <div className="bg-white border border-gray-100 rounded-lg shadow-sm p-6 mb-4">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-1">Order #{selectedOrder.id.slice(-8).toUpperCase()}</p>
-                      <p className="text-sm font-light text-zinc-500">
-                        {new Date(selectedOrder.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <StatusBadge status={selectedOrder.status} />
-                      <span className="text-xl font-semibold text-zinc-900">{formatMoney(selectedOrder.total_price)}</span>
-                    </div>
+
+                <div className="flex flex-wrap justify-between items-start gap-4 mb-6 pb-6 border-b border-gray-200">
+                  <div>
+                    <h3 className="text-2xl font-light text-zinc-900 mb-2">
+                      Order #{selectedOrder.id.slice(-8)}
+                    </h3>
+                    <p className="text-base text-zinc-600 font-light">
+                      {new Date(selectedOrder.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'long', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit',
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`inline-flex px-3 py-1.5 text-sm font-medium rounded-lg ${
+                      selectedOrder.status === 'paid'
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        : selectedOrder.status === 'pending'
+                          ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                          : 'bg-gray-200 text-zinc-600 border border-gray-300'
+                    }`}>
+                      {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                    </span>
+                    <p className="text-2xl font-semibold text-zinc-900 mt-2">
+                      {formatMoney(selectedOrder.total_price)}
+                    </p>
                   </div>
                 </div>
-                <div className="space-y-3 mb-6">
+
+                <div className="space-y-3 mb-8">
                   {selectedOrder.order_items?.map((item) => (
-                    <div key={item.id} className="bg-white border border-gray-100 rounded-lg shadow-sm p-4 flex items-center gap-4">
-                      <div className="w-16 h-16 bg-zinc-50 border border-zinc-100 rounded-lg overflow-hidden flex-shrink-0">
+                    <div key={item.id} className="flex items-center gap-4 p-5 bg-white border border-gray-200 rounded-xl hover:border-gray-300 transition">
+                      <div className="flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                         {item.variant_new?.image_url ? (
-                          <Image width={64} height={64} src={item.variant_new.image_url} alt={item.product_new?.name ?? ''} className="w-full h-full object-cover" />
+                          <Image width={80} height={80} src={item.variant_new.image_url} alt={item.product_new?.name ?? ''} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6 text-zinc-300">
+                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-8 h-8 text-gray-300">
                               <rect width="18" height="18" x="3" y="3" rx="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                             </svg>
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-base font-medium text-zinc-900 mb-1 truncate">{item.product_new?.name ?? '—'}</p>
-                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm font-light text-zinc-500">
-                          {item.variant_new?.color && <span>{item.variant_new.color}</span>}
-                          {item.size && <span>{item.size}</span>}
-                          <span>Qty {item.quantity}</span>
+                        <h4 className="font-medium text-zinc-900 mb-2">{item.product_new?.name}</h4>
+                        <div className="flex flex-wrap gap-3 text-base text-zinc-600 font-light">
+                          {item.variant_new?.color && <><span>Color: {item.variant_new.color}</span><span>•</span></>}
+                          {item.size && <><span>Size: {item.size}</span><span>•</span></>}
+                          <span>Qty: {item.quantity}</span>
                         </div>
                       </div>
-                      <p className="text-base font-semibold text-zinc-900 flex-shrink-0">{formatMoney(item.price_at_purchase * item.quantity)}</p>
+                      <div className="text-right flex-shrink-0">
+                        <p className="font-semibold text-zinc-900 text-lg">
+                          {formatMoney(item.price_at_purchase * item.quantity)}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
+
                 <div className="flex justify-end">
-                  <button type="button" onClick={() => handleReorder(selectedOrder)} disabled={reorderLoading} className="flex items-center gap-2 bg-emerald-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-                    {reorderLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
-                    Reorder all items
+                  <button
+                    type="button"
+                    onClick={() => handleReorder(selectedOrder)}
+                    disabled={reorderLoading}
+                    className="flex items-center gap-2 bg-zinc-900 text-white px-8 py-3 rounded-lg font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {reorderLoading
+                      ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Adding to Cart...</>
+                      : 'Reorder All Items'}
                   </button>
                 </div>
               </div>
+
             ) : orders.length === 0 ? (
-              <div className="text-center py-24">
-                <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-zinc-400">
-                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><line x1="3" x2="21" y1="6" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" />
+              <div className="text-center py-20 bg-gray-50 border border-gray-200 rounded-2xl">
+                <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg aria-hidden="true" focusable="false" className="w-10 h-10 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                   </svg>
                 </div>
-                <p className="text-base text-zinc-500 font-light mb-1">No orders yet</p>
-                <p className="text-sm text-zinc-400 font-light mb-6">Your completed orders will appear here</p>
-                <Link href="/products" className="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
-                  Browse products
-                </Link>
+                <h3 className="text-xl font-light text-zinc-900 mb-2">No orders yet</h3>
+                <p className="text-zinc-600 font-light mb-8">Start shopping to see your orders here</p>
+                <button
+                  type="button"
+                  onClick={() => router.push('/products')}
+                  className="bg-zinc-900 text-white px-8 py-3 rounded-lg font-medium hover:bg-zinc-800 transition-colors"
+                >
+                  Browse Products
+                </button>
               </div>
+
             ) : (
-              <div className="space-y-3">
+              <div className="grid gap-4">
                 {orders.map((order) => (
-                  <button key={order.id} type="button" onClick={() => setSelectedOrder(order)} className="w-full text-left bg-white border border-gray-100 rounded-lg shadow-sm px-5 py-4 hover:border-emerald-200 hover:shadow transition-all group">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-3 mb-1 flex-wrap">
-                          <p className="text-base font-medium text-zinc-900 group-hover:text-emerald-700 transition-colors">Order #{order.id.slice(-8).toUpperCase()}</p>
-                          <StatusBadge status={order.status} />
-                        </div>
-                        <p className="text-sm font-light text-zinc-400">
-                          {new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          {' · '}{order.order_items?.length ?? 0} item{order.order_items?.length !== 1 ? 's' : ''}
+                  <button
+                    key={order.id}
+                    type="button"
+                    className="w-full text-left bg-gray-50 border border-gray-200 rounded-2xl p-6 cursor-pointer hover:border-gray-300 transition-all group"
+                    onClick={() => setSelectedOrder(order)}
+                  >
+                    <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
+                      <div>
+                        <h3 className="text-lg font-medium text-zinc-900 mb-1 group-hover:text-emerald-600 transition">
+                          Order #{order.id.slice(-8)}
+                        </h3>
+                        <p className="text-base text-zinc-600 font-light">
+                          {new Date(order.created_at).toLocaleDateString('en-US', {
+                            year: 'numeric', month: 'short', day: 'numeric',
+                          })}
                         </p>
                       </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="text-base font-semibold text-zinc-900">{formatMoney(order.total_price)}</span>
-                        <ChevronRight />
+                      <div className="flex items-center gap-4">
+                        <span className={`inline-flex px-3 py-1.5 text-sm font-medium rounded-lg ${
+                          order.status === 'paid'
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            : order.status === 'pending'
+                              ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                              : 'bg-gray-200 text-zinc-600 border border-gray-300'
+                        }`}>
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                        <p className="text-xl font-semibold text-zinc-900">
+                          {formatMoney(order.total_price)}
+                        </p>
                       </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-base text-zinc-600 font-light">
+                      <svg aria-hidden="true" focusable="false" className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                      {order.order_items?.length || 0} item{order.order_items?.length !== 1 ? 's' : ''}
+                      <span className="mx-2">•</span>
+                      <span className="text-emerald-600 group-hover:text-emerald-700 transition">View details →</span>
                     </div>
                   </button>
                 ))}
