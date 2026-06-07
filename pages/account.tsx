@@ -95,7 +95,6 @@ export default function AccountPage() {
 
   // Addresses (from DB)
   const [currentAddresses, setCurrentAddresses] = useState<SavedAddress[]>([])
-  const [addressesLoading, setAddressesLoading] = useState(false)
   const [showAddressForm, setShowAddressForm] = useState(false)
   const [editingAddress, setEditingAddress] = useState<SavedAddress | null>(null)
   const [addressForm, setAddressForm] = useState<Omit<SavedAddress, 'id' | 'is_default'>>(BLANK_ADDRESS)
@@ -112,12 +111,10 @@ export default function AccountPage() {
       .then((r) => r.json())
       .then((d) => { const n = d.data?.full_name ?? ''; setCurrentName(n); setNameValue(n) })
       .catch(() => {})
-    setAddressesLoading(true)
     authFetch('/api/user/addresses')
       .then((r) => r.json())
       .then((d) => setCurrentAddresses(d.data ?? []))
       .catch(() => {})
-      .finally(() => setAddressesLoading(false))
   }, [user?.id])
 
   // ── Handlers ──
