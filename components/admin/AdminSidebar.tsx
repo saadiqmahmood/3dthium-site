@@ -364,6 +364,11 @@ export default function AdminSidebar({ onCollapse }: AdminSidebarProps) {
                 href: '/admin/categories',
                 icon: <TagIcon />,
               },
+              {
+                title: 'Attributes',
+                href: '/admin/attributes',
+                icon: <TagIcon />,
+              },
             ],
           },
         ],
@@ -492,11 +497,6 @@ export default function AdminSidebar({ onCollapse }: AdminSidebarProps) {
                 {section.items.map((item) => {
                   const isOpen = openSections.has(item.title)
                   const isActive = isItemActive(item)
-
-                  // Auto-open sections if they contain active items
-                  if (isActive && item.children && !isOpen) {
-                    setTimeout(() => setOpenSections((prev) => new Set(prev).add(item.title)), 0)
-                  }
 
                   return (
                     <NavItemComponent

@@ -1,18 +1,19 @@
 import Link from 'next/link'
 import type { GetStaticProps } from 'next'
-import ProductGrid, { type ProductNew, type Category } from '@/components/sections/ProductGrid'
+import ProductGrid, { type ProductNew, type Category, type FilterOptions } from '@/components/sections/ProductGrid'
 import { getSupabaseAnon } from '@/lib/supabase/anon'
 import type { ProductVariantNew } from '@/types'
 
 type Props = {
   initialProducts: ProductNew[]
   initialCategories: Category[]
+  initialFilterOptions: FilterOptions
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const supabase = getSupabaseAnon()
 
-  const [productsResult, categoriesResult] = await Promise.all([
+  const [productsResult, categoriesResult, colorGroupsResult, colorsResult, heightsResult, roomsResult] = await Promise.all([
     supabase
       .from('products')
       .select(`
@@ -24,7 +25,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         thumbnail_url,
         customizable,
         created_at,
-        categories!category_id(id, name, slug)
+        categories!category_id(id, name, slug),
+        product_color_options(color_option_id),
+        product_height_options(height_option_id),
+        product_room_options(room_option_id)
       `)
       .eq('is_active', true)
       .order('created_at', { ascending: false }),
@@ -33,6 +37,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       .select('id, name, slug, parent_id')
       .eq('is_active', true)
       .order('sort_order', { ascending: true }),
+    supabase.from('color_groups').select('id, name, sort_order').order('sort_order'),
+    supabase.from('color_options').select('id, group_id, name, hex_color, sort_order').order('sort_order'),
+    supabase.from('height_options').select('id, label, sort_order').order('sort_order'),
+    supabase.from('room_options').select('id, name, sort_order').order('sort_order'),
   ])
 
   const products = productsResult.data ?? []
@@ -76,17 +84,33 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       category: product.categories as unknown as { id: string; name: string; slug: string },
       variants: productVariants,
       price_range: { min: minPrice, max: maxPrice, has_variants: productVariants.length > 0 },
+      color_option_ids: (product.product_color_options ?? []).map(
+        (r: { color_option_id: string }) => r.color_option_id
+      ),
+      height_option_ids: (product.product_height_options ?? []).map(
+        (r: { height_option_id: string }) => r.height_option_id
+      ),
+      room_option_ids: (product.product_room_options ?? []).map(
+        (r: { room_option_id: string }) => r.room_option_id
+      ),
       created_at: product.created_at,
     }
   })
 
+  const initialFilterOptions: FilterOptions = {
+    colorGroups: colorGroupsResult.data ?? [],
+    colors: colorsResult.data ?? [],
+    heights: heightsResult.data ?? [],
+    rooms: roomsResult.data ?? [],
+  }
+
   return {
-    props: { initialProducts, initialCategories: categories as Category[] },
+    props: { initialProducts, initialCategories: categories as Category[], initialFilterOptions },
     revalidate: 60,
   }
 }
 
-export default function ProductsPage({ initialProducts, initialCategories }: Props) {
+export default function ProductsPage({ initialProducts, initialCategories, initialFilterOptions }: Props) {
   return (
     <div className="min-h-screen bg-white">
       <div className="pt-24 pb-8 border-b border-zinc-100">
@@ -117,7 +141,7 @@ export default function ProductsPage({ initialProducts, initialCategories }: Pro
           <h1 className="text-4xl font-extrabold text-zinc-900 tracking-tight">Shop</h1>
         </div>
       </div>
-      <ProductGrid initialProducts={initialProducts} initialCategories={initialCategories} />
+      <ProductGrid initialProducts={initialProducts} initialCategories={initialCategories} initialFilterOptions={initialFilterOptions} />
     </div>
   )
 }

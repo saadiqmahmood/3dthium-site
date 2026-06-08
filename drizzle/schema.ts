@@ -7,6 +7,7 @@ import {
   numeric,
   pgEnum,
   pgTable,
+  primaryKey,
   serial,
   text,
   timestamp,
@@ -99,6 +100,67 @@ export const productVariantsNew = pgTable(
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (table) => [index('idx_variants_product_id').on(table.productId)]
+)
+
+// ============================================
+// FILTER ATTRIBUTES (global colours + heights)
+// ============================================
+
+export const colorGroups = pgTable('color_groups', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name').notNull(),
+  sortOrder: integer('sort_order').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const colorOptions = pgTable('color_options', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  groupId: uuid('group_id').references(() => colorGroups.id, { onDelete: 'set null' }),
+  name: text('name').notNull(),
+  hexColor: varchar('hex_color', { length: 7 }).default('#000000').notNull(),
+  sortOrder: integer('sort_order').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const heightOptions = pgTable('height_options', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  label: text('label').notNull(),
+  sortOrder: integer('sort_order').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const productColorOptions = pgTable(
+  'product_color_options',
+  {
+    productId: uuid('product_id').notNull().references(() => productsNew.id, { onDelete: 'cascade' }),
+    colorOptionId: uuid('color_option_id').notNull().references(() => colorOptions.id, { onDelete: 'cascade' }),
+  },
+  (table) => [primaryKey({ columns: [table.productId, table.colorOptionId] })]
+)
+
+export const productHeightOptions = pgTable(
+  'product_height_options',
+  {
+    productId: uuid('product_id').notNull().references(() => productsNew.id, { onDelete: 'cascade' }),
+    heightOptionId: uuid('height_option_id').notNull().references(() => heightOptions.id, { onDelete: 'cascade' }),
+  },
+  (table) => [primaryKey({ columns: [table.productId, table.heightOptionId] })]
+)
+
+export const roomOptions = pgTable('room_options', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name').notNull(),
+  sortOrder: integer('sort_order').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const productRoomOptions = pgTable(
+  'product_room_options',
+  {
+    productId: uuid('product_id').notNull().references(() => productsNew.id, { onDelete: 'cascade' }),
+    roomOptionId: uuid('room_option_id').notNull().references(() => roomOptions.id, { onDelete: 'cascade' }),
+  },
+  (table) => [primaryKey({ columns: [table.productId, table.roomOptionId] })]
 )
 
 // ============================================
@@ -434,3 +496,15 @@ export type StripeWebhookEvent = typeof stripeWebhookEvents.$inferSelect
 
 export type UserAddress = typeof userAddresses.$inferSelect
 export type NewUserAddress = typeof userAddresses.$inferInsert
+
+export type ColorGroup = typeof colorGroups.$inferSelect
+export type NewColorGroup = typeof colorGroups.$inferInsert
+
+export type ColorOption = typeof colorOptions.$inferSelect
+export type NewColorOption = typeof colorOptions.$inferInsert
+
+export type HeightOption = typeof heightOptions.$inferSelect
+export type NewHeightOption = typeof heightOptions.$inferInsert
+
+export type RoomOption = typeof roomOptions.$inferSelect
+export type NewRoomOption = typeof roomOptions.$inferInsert

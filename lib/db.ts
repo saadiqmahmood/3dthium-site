@@ -13,8 +13,13 @@ if (!process.env.DATABASE_URL) {
 
 const connectionString = process.env.DATABASE_URL
 
-// Disable prefetch as it is not supported for "Transaction" pool mode
-export const client = postgres(connectionString, { prepare: false })
+// Singleton prevents connection exhaustion on Next.js hot reloads in dev.
+// Each module re-evaluation would otherwise create a new pool.
+const g = globalThis as typeof globalThis & { _pgClient?: ReturnType<typeof postgres> }
+if (!g._pgClient) {
+  g._pgClient = postgres(connectionString, { prepare: false, max: 5 })
+}
+export const client = g._pgClient
 
 // Create drizzle instance with schema
 export const db = drizzle(client, { schema })

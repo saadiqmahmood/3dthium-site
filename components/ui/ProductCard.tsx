@@ -20,9 +20,10 @@ type ProductNew = {
 type Props = {
   product: ProductNew
   variants: ProductVariantNew[]
+  priority?: boolean
 }
 
-export default function ProductCard({ product }: Props) {
+export default function ProductCard({ product, priority = false }: Props) {
   const { price_range, base_price } = product
   const isRange = price_range.has_variants && price_range.min !== price_range.max
   const baseAmount = price_range.has_variants ? price_range.min : base_price
@@ -40,6 +41,7 @@ export default function ProductCard({ product }: Props) {
           fill
           className="object-contain transition-transform duration-500 ease-out group-hover:scale-[1.04]"
           sizes="(max-width: 640px) 50vw, 50vw"
+          priority={priority}
         />
         <FavouriteButton
           productId={product.id}

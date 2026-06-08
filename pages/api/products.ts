@@ -28,7 +28,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         categories!category_id(
           name,
           slug
-        )
+        ),
+        product_color_options(color_option_id),
+        product_height_options(height_option_id),
+        product_room_options(room_option_id)
       `)
       .eq('is_active', true)
       .order('created_at', { ascending: false })
@@ -106,6 +109,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           max: maxPrice,
           has_variants: productVariants.length > 0,
         },
+        color_option_ids: (product.product_color_options ?? []).map(
+          (r: { color_option_id: string }) => r.color_option_id
+        ),
+        height_option_ids: (product.product_height_options ?? []).map(
+          (r: { height_option_id: string }) => r.height_option_id
+        ),
+        room_option_ids: (product.product_room_options ?? []).map(
+          (r: { room_option_id: string }) => r.room_option_id
+        ),
         created_at: product.created_at,
       }
     })
