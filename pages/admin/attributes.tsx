@@ -295,7 +295,7 @@ export default function AttributesPage() {
                                 <>
                                   <input
                                     type="color"
-                                    value={colorForm!.hex_color}
+                                    value={/^#[0-9a-fA-F]{6}$/.test(colorForm!.hex_color) ? colorForm!.hex_color : '#000000'}
                                     onChange={(e) => setColorForm({ ...colorForm!, hex_color: e.target.value })}
                                     className="w-10 h-9 rounded border border-gray-200 cursor-pointer p-0.5"
                                   />
@@ -358,7 +358,7 @@ export default function AttributesPage() {
                           <>
                             <input
                               type="color"
-                              value={colorForm.hex_color}
+                              value={/^#[0-9a-fA-F]{6}$/.test(colorForm.hex_color) ? colorForm.hex_color : '#000000'}
                               onChange={(e) => setColorForm({ ...colorForm, hex_color: e.target.value })}
                               className="w-10 h-9 rounded border border-gray-200 cursor-pointer p-0.5"
                             />
@@ -413,7 +413,7 @@ export default function AttributesPage() {
                               <>
                                 <input
                                   type="color"
-                                  value={colorForm!.hex_color}
+                                  value={/^#[0-9a-fA-F]{6}$/.test(colorForm!.hex_color) ? colorForm!.hex_color : '#000000'}
                                   onChange={(e) => setColorForm({ ...colorForm!, hex_color: e.target.value })}
                                   className="w-10 h-9 rounded border border-gray-200 cursor-pointer p-0.5"
                                 />
