@@ -25,5 +25,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     db.select().from(roomOptions).orderBy(asc(roomOptions.sortOrder), asc(roomOptions.createdAt)),
   ])
 
-  return res.status(200).json({ colorGroups: groups, colors, heights, rooms })
+  return res.status(200).json({
+    colorGroups: groups.map((g) => ({ id: g.id, name: g.name, sort_order: g.sortOrder })),
+    colors: colors.map((c) => ({
+      id: c.id,
+      group_id: c.groupId,
+      name: c.name,
+      hex_color: c.hexColor,
+      sort_order: c.sortOrder,
+    })),
+    heights: heights.map((h) => ({ id: h.id, label: h.label, sort_order: h.sortOrder })),
+    rooms: rooms.map((r) => ({ id: r.id, name: r.name, sort_order: r.sortOrder })),
+  })
 }

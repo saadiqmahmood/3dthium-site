@@ -2,6 +2,10 @@ import { useEffect, useId, useRef, useState } from 'react'
 import ImageUpload from './ImageUpload'
 import { authFetch } from '@/lib/api/authFetch'
 
+type LibraryColour = { id: string; name: string; hex_color: string; group_id: string | null }
+type LibraryHeight = { id: string; label: string }
+type LibraryGroup = { id: string; name: string }
+
 type AttributeOption = {
   value: string
   displayName: string
@@ -62,7 +66,21 @@ export default function AttributeBuilder({
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
   const [expandedAttributes, setExpandedAttributes] = useState<Set<number>>(new Set())
+  const [libraryColours, setLibraryColours] = useState<LibraryColour[]>([])
+  const [libraryGroups, setLibraryGroups] = useState<LibraryGroup[]>([])
+  const [libraryHeights, setLibraryHeights] = useState<LibraryHeight[]>([])
   const fId = useId()
+
+  useEffect(() => {
+    authFetch('/api/admin/filter-options')
+      .then((r) => r.json())
+      .then((data) => {
+        setLibraryColours(data.colors ?? [])
+        setLibraryGroups(data.colorGroups ?? [])
+        setLibraryHeights(data.heights ?? [])
+      })
+      .catch(() => {})
+  }, [])
 
   const updateAttributes = (newAttrs: Attribute[]) => {
     isEditingRef.current = true // Mark that we're editing
@@ -134,6 +152,33 @@ export default function AttributeBuilder({
     newAttrs[attrIndex].options.push({
       value: '',
       displayName: '',
+      images: [],
+      priceModifier: 0,
+    })
+    updateAttributes(newAttrs)
+  }
+
+  const addFromLibraryColour = (attrIndex: number, colour: LibraryColour) => {
+    const attr = attributes[attrIndex]
+    if (attr.options.some((o) => o.displayName === colour.name)) return
+    const newAttrs = [...attributes]
+    newAttrs[attrIndex].options.push({
+      value: generateValueFromDisplayName(colour.name, attr.name || 'colour'),
+      displayName: colour.name,
+      hexColor: colour.hex_color,
+      images: [],
+      priceModifier: 0,
+    })
+    updateAttributes(newAttrs)
+  }
+
+  const addFromLibraryHeight = (attrIndex: number, height: LibraryHeight) => {
+    const attr = attributes[attrIndex]
+    if (attr.options.some((o) => o.displayName === height.label)) return
+    const newAttrs = [...attributes]
+    newAttrs[attrIndex].options.push({
+      value: generateValueFromDisplayName(height.label, attr.name || 'height'),
+      displayName: height.label,
       images: [],
       priceModifier: 0,
     })
@@ -520,6 +565,95 @@ export default function AttributeBuilder({
                       + Add Option
                     </button>
                   </div>
+
+                  {/* Library quick-pick */}
+                  {attr.type === 'color' && libraryColours.length > 0 && (
+                    <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-3 space-y-2">
+                      <p className="text-xs font-light text-emerald-700">Pick from colour library — click to add</p>
+                      {libraryGroups.map((group) => {
+                        const cols = libraryColours.filter((c) => c.group_id === group.id)
+                        if (cols.length === 0) return null
+                        return (
+                          <div key={group.id}>
+                            <p className="text-xs text-zinc-400 mb-1">{group.name}</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {cols.map((c) => {
+                                const added = attr.options.some((o) => o.displayName === c.name)
+                                return (
+                                  <button
+                                    key={c.id}
+                                    type="button"
+                                    disabled={added}
+                                    onClick={() => addFromLibraryColour(attrIdx, c)}
+                                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-light transition-all ${
+                                      added
+                                        ? 'border-emerald-300 bg-emerald-100 text-emerald-600 opacity-50 cursor-default'
+                                        : 'border-gray-200 bg-white text-zinc-700 hover:border-emerald-400 hover:bg-white'
+                                    }`}
+                                  >
+                                    <span className="w-3 h-3 rounded-full border border-gray-200 flex-shrink-0" style={{ backgroundColor: c.hex_color }} />
+                                    {c.name}
+                                    {added && <span className="text-emerald-500">✓</span>}
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )
+                      })}
+                      {libraryColours.filter((c) => !c.group_id).length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {libraryColours.filter((c) => !c.group_id).map((c) => {
+                            const added = attr.options.some((o) => o.displayName === c.name)
+                            return (
+                              <button
+                                key={c.id}
+                                type="button"
+                                disabled={added}
+                                onClick={() => addFromLibraryColour(attrIdx, c)}
+                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-light transition-all ${
+                                  added
+                                    ? 'border-emerald-300 bg-emerald-100 text-emerald-600 opacity-50 cursor-default'
+                                    : 'border-gray-200 bg-white text-zinc-700 hover:border-emerald-400 hover:bg-white'
+                                }`}
+                              >
+                                <span className="w-3 h-3 rounded-full border border-gray-200 flex-shrink-0" style={{ backgroundColor: c.hex_color }} />
+                                {c.name}
+                                {added && <span className="text-emerald-500">✓</span>}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {attr.type !== 'color' && libraryHeights.length > 0 && (
+                    <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-3 space-y-2">
+                      <p className="text-xs font-light text-emerald-700">Pick from height library — click to add</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {libraryHeights.map((h) => {
+                          const added = attr.options.some((o) => o.displayName === h.label)
+                          return (
+                            <button
+                              key={h.id}
+                              type="button"
+                              disabled={added}
+                              onClick={() => addFromLibraryHeight(attrIdx, h)}
+                              className={`px-2.5 py-1 rounded-full border text-xs font-light transition-all ${
+                                added
+                                  ? 'border-emerald-300 bg-emerald-100 text-emerald-600 opacity-50 cursor-default'
+                                  : 'border-gray-200 bg-white text-zinc-700 hover:border-emerald-400 hover:bg-white'
+                              }`}
+                            >
+                              {h.label}
+                              {added && <span className="ml-1 text-emerald-500">✓</span>}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   {attr.options.length === 0 && (
                     <div className="border border-dashed border-gray-200 rounded-lg p-4 text-center text-sm text-zinc-600 bg-gray-50">
