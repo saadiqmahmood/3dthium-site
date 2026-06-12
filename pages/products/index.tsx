@@ -13,7 +13,7 @@ type Props = {
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const supabase = getSupabaseAnon()
 
-  const [productsResult, categoriesResult, colorGroupsResult, colorsResult, heightsResult, roomsResult] = await Promise.all([
+  const [productsResult, categoriesResult, colorGroupsResult, colorsResult, heightsResult] = await Promise.all([
     supabase
       .from('products')
       .select(`
@@ -25,10 +25,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         thumbnail_url,
         customizable,
         created_at,
-        categories!category_id(id, name, slug),
-        product_color_options(color_option_id),
-        product_height_options(height_option_id),
-        product_room_options(room_option_id)
+        categories!category_id(id, name, slug)
       `)
       .eq('is_active', true)
       .order('created_at', { ascending: false }),
@@ -40,7 +37,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     supabase.from('color_groups').select('id, name, sort_order').order('sort_order'),
     supabase.from('color_options').select('id, group_id, name, hex_color, sort_order').order('sort_order'),
     supabase.from('height_options').select('id, label, sort_order').order('sort_order'),
-    supabase.from('room_options').select('id, name, sort_order').order('sort_order'),
   ])
 
   const products = productsResult.data ?? []
@@ -48,14 +44,51 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
   const productIds = products.map((p) => p.id)
   let variants: ProductVariantNew[] = []
+  let attrOptions: Array<{ product_id: string; type: string; options: Array<{ display_name: string }> }> = []
 
   if (productIds.length > 0) {
-    const { data: variantData } = await supabase
-      .from('product_variants')
-      .select('id, product_id, size, color, material, price_adjustment, is_available, sku')
-      .in('product_id', productIds)
-      .eq('is_available', true)
-    variants = (variantData as ProductVariantNew[]) ?? []
+    const [variantResult, attrResult] = await Promise.all([
+      supabase
+        .from('product_variants')
+        .select('id, product_id, size, color, material, price_adjustment, is_available, sku')
+        .in('product_id', productIds)
+        .eq('is_available', true),
+      supabase
+        .from('product_attributes')
+        .select('product_id, type, options:product_attribute_options(display_name)')
+        .in('product_id', productIds),
+    ])
+    variants = (variantResult.data as ProductVariantNew[]) ?? []
+    attrOptions = (attrResult.data as typeof attrOptions) ?? []
+  }
+
+  // Build lookup maps: display name → filter option ID
+  const colorNameToId: Record<string, string> = {}
+  for (const c of colorsResult.data ?? []) {
+    colorNameToId[c.name.toLowerCase()] = c.id
+  }
+  const heightLabelToId: Record<string, string> = {}
+  for (const h of heightsResult.data ?? []) {
+    heightLabelToId[h.label.toLowerCase()] = h.id
+  }
+
+  // Derive color/height option IDs per product from attribute options
+  const colorIdsByProduct: Record<string, string[]> = {}
+  const heightIdsByProduct: Record<string, string[]> = {}
+  for (const attr of attrOptions) {
+    const pid = attr.product_id
+    if (!colorIdsByProduct[pid]) colorIdsByProduct[pid] = []
+    if (!heightIdsByProduct[pid]) heightIdsByProduct[pid] = []
+    for (const opt of attr.options) {
+      const name = opt.display_name.toLowerCase()
+      if (attr.type === 'color') {
+        const id = colorNameToId[name]
+        if (id && !colorIdsByProduct[pid].includes(id)) colorIdsByProduct[pid].push(id)
+      } else {
+        const id = heightLabelToId[name]
+        if (id && !heightIdsByProduct[pid].includes(id)) heightIdsByProduct[pid].push(id)
+      }
+    }
   }
 
   const variantsByProduct: Record<string, ProductVariantNew[]> = {}
@@ -84,15 +117,9 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       category: product.categories as unknown as { id: string; name: string; slug: string },
       variants: productVariants,
       price_range: { min: minPrice, max: maxPrice, has_variants: productVariants.length > 0 },
-      color_option_ids: (product.product_color_options ?? []).map(
-        (r: { color_option_id: string }) => r.color_option_id
-      ),
-      height_option_ids: (product.product_height_options ?? []).map(
-        (r: { height_option_id: string }) => r.height_option_id
-      ),
-      room_option_ids: (product.product_room_options ?? []).map(
-        (r: { room_option_id: string }) => r.room_option_id
-      ),
+      color_option_ids: colorIdsByProduct[product.id] ?? [],
+      height_option_ids: heightIdsByProduct[product.id] ?? [],
+      room_option_ids: [],
       created_at: product.created_at,
     }
   })
@@ -101,7 +128,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     colorGroups: colorGroupsResult.data ?? [],
     colors: colorsResult.data ?? [],
     heights: heightsResult.data ?? [],
-    rooms: roomsResult.data ?? [],
+    rooms: [],
   }
 
   return {

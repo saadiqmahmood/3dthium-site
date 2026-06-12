@@ -40,6 +40,39 @@ a {
   }
 }
 
+/* ── Global checkbox styling ────────────────────────────────────── */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 4px;
+  background-color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.15s, background-color 0.15s;
+  position: relative;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #059669;
+  border-color: #059669;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 10 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 4l3 3 5-6' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 65%;
+}
+
+input[type="checkbox"]:hover:not(:checked) {
+  border-color: #6ee7b7;
+}
+
+input[type="checkbox"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* ── Global focus ring ──────────────────────────────────────────── */
 /* Applied to all interactive elements. Individual components may
    override ring colour (e.g., danger buttons use red ring).       */

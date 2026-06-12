@@ -51,6 +51,8 @@ type VariantOption = {
   value: string
   displayName: string
   hexColor?: string | null
+  groupId?: string | null
+  groupName?: string | null
 }
 
 type SiteSettings = {
@@ -64,6 +66,7 @@ type ProductDetailPageProps = {
   variantOptions: {
     sizes: VariantOption[]
     colors: VariantOption[]
+    colorGroups: { id: string; name: string }[]
     materials: VariantOption[]
   }
   priceRange: {
@@ -319,6 +322,38 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
     return variants.some((v) => v.color === selectedColor && v.size === sizeValue)
   }
 
+  const renderColorButton = (colorOption: VariantOption) => {
+    const isDisabled = !isColorAvailable(colorOption.value)
+    const isSelected = selectedColor === colorOption.value
+    const hasSwatch = colorOption.hexColor && colorOption.hexColor.trim() !== ''
+    return (
+      <button
+        type="button"
+        key={colorOption.value}
+        onClick={() => !isDisabled && setSelectedColor(colorOption.value)}
+        disabled={isDisabled}
+        className={`relative flex items-center gap-2 px-3 py-2 rounded-xl border-2 text-sm font-medium transition-all duration-150 ${
+          isSelected
+            ? 'border-zinc-900 bg-zinc-900 text-white'
+            : isDisabled
+              ? 'border-zinc-100 bg-zinc-50 text-zinc-300 cursor-not-allowed'
+              : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400'
+        }`}
+      >
+        <span
+          className={`w-4 h-4 rounded-full flex-shrink-0 ${hasSwatch ? 'ring-1 ring-black/10' : 'bg-zinc-200 ring-1 ring-zinc-300/60'}`}
+          style={hasSwatch ? { backgroundColor: colorOption.hexColor || '#ccc' } : undefined}
+        />
+        {colorOption.displayName}
+        {isDisabled && (
+          <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span className="w-full h-px bg-zinc-300 rotate-[-20deg] absolute" />
+          </span>
+        )}
+      </button>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto pt-24 pb-20 px-6">
@@ -532,57 +567,34 @@ const ProductDetailPage: NextPage<ProductDetailPageProps> = ({
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-wrap gap-3">
-                      {variantOptions.colors.map((colorOption) => {
-                        const isDisabled = !isColorAvailable(colorOption.value)
-                        const isSelected = selectedColor === colorOption.value
-                        const hasSwatch = colorOption.hexColor && colorOption.hexColor.trim() !== ''
-
-                        if (hasSwatch) {
+                    {variantOptions.colorGroups.length > 0 ? (
+                      <div className="space-y-4">
+                        {variantOptions.colorGroups.map((group) => {
+                          const groupColors = variantOptions.colors.filter((c) => c.groupId === group.id)
+                          if (groupColors.length === 0) return null
                           return (
-                            <button
-                              type="button"
-                              key={colorOption.value}
-                              onClick={() => !isDisabled && setSelectedColor(colorOption.value)}
-                              disabled={isDisabled}
-                              title={colorOption.displayName}
-                              className={`relative w-9 h-9 rounded-full transition-all duration-150 ${
-                                isDisabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'
-                              } ${
-                                isSelected
-                                  ? 'ring-2 ring-offset-2 ring-zinc-900 scale-110'
-                                  : 'ring-1 ring-zinc-200 hover:ring-zinc-400 hover:scale-105'
-                              }`}
-                              style={{ backgroundColor: colorOption.hexColor || '#ccc' }}
-                            >
-                              {isDisabled && (
-                                <span className="absolute inset-0 flex items-center justify-center">
-                                  <span className="w-full h-px bg-white/60 rotate-45 absolute" />
-                                </span>
-                              )}
-                            </button>
+                            <div key={group.id}>
+                              <p className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-2">
+                                {group.name}
+                              </p>
+                              <div className="flex flex-wrap gap-3">{groupColors.map(renderColorButton)}</div>
+                            </div>
                           )
-                        }
-
-                        return (
-                          <button
-                            type="button"
-                            key={colorOption.value}
-                            onClick={() => !isDisabled && setSelectedColor(colorOption.value)}
-                            disabled={isDisabled}
-                            className={`px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-all duration-150 ${
-                              isSelected
-                                ? 'border-zinc-900 bg-zinc-900 text-white'
-                                : isDisabled
-                                  ? 'border-zinc-100 bg-zinc-50 text-zinc-300 cursor-not-allowed'
-                                  : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400'
-                            }`}
-                          >
-                            {colorOption.displayName}
-                          </button>
-                        )
-                      })}
-                    </div>
+                        })}
+                        {variantOptions.colors.filter((c) => !c.groupId).length > 0 && (
+                          <div>
+                            <p className="text-xs font-medium text-zinc-400 uppercase tracking-widest mb-2">
+                              Other
+                            </p>
+                            <div className="flex flex-wrap gap-3">
+                              {variantOptions.colors.filter((c) => !c.groupId).map(renderColorButton)}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-3">{variantOptions.colors.map(renderColorButton)}</div>
+                    )}
                   </div>
                 )}
 
@@ -1039,7 +1051,7 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
     }
 
     // Fetch variants and attributes (with their options) in parallel
-    const [variantsResult, attributesResult] = await Promise.all([
+    const [variantsResult, attributesResult, colorLibResult, colorGroupsResult] = await Promise.all([
       supabaseServer
         .from('product_variants')
         .select('*')
@@ -1051,6 +1063,8 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
         .select('*, options:product_attribute_options(*)')
         .eq('product_id', product.id)
         .order('display_order', { ascending: true }),
+      supabaseServer.from('color_options').select('name, group_id').order('sort_order'),
+      supabaseServer.from('color_groups').select('id, name').order('sort_order'),
     ])
 
     const variants = variantsResult.data || []
@@ -1106,23 +1120,48 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
       displayName: valueToDisplayNameMap[value] || value,
     }))
 
-    // For colors, also include hex_color if available
+    // For colors, also include hex_color if available.
+    // Variants may store either the internal slug (opt.value) or the display name (opt.display_name)
+    // as the color field depending on how they were created, so index by both.
     const colorOptionsMap: Record<string, string | null> = {}
     if (attributeOptions.length > 0 && attributes) {
       attributeOptions.forEach((opt) => {
-        // Check if this option belongs to a color attribute
         const attr = attributes.find((a: { id: string; type: string }) => a.id === opt.attribute_id)
-        if (attr?.type === 'color' && uniqueColorValues.includes(opt.value)) {
-          colorOptionsMap[opt.value] = opt.hex_color || null
+        if (attr?.type === 'color') {
+          if (opt.hex_color) {
+            colorOptionsMap[opt.value] = opt.hex_color
+            colorOptionsMap[opt.display_name] = opt.hex_color
+          }
         }
       })
     }
 
-    const colorOptions = uniqueColorValues.map((value) => ({
-      value,
-      displayName: valueToDisplayNameMap[value] || value,
-      hexColor: colorOptionsMap[value] || null,
-    }))
+    const colorLibrary = colorLibResult.data || []
+    const colorGroupsData = colorGroupsResult.data || []
+    const colorNameToGroup: Record<string, { groupId: string; groupName: string } | null> = {}
+    for (const c of colorLibrary as Array<{ name: string; group_id: string | null }>) {
+      const group = c.group_id
+        ? (colorGroupsData as Array<{ id: string; name: string }>).find((g) => g.id === c.group_id) ?? null
+        : null
+      colorNameToGroup[c.name] = group ? { groupId: c.group_id as string, groupName: group.name } : null
+    }
+
+    const colorOptions = uniqueColorValues.map((value) => {
+      const displayName = valueToDisplayNameMap[value] || value
+      const groupInfo = colorNameToGroup[displayName] ?? null
+      return {
+        value,
+        displayName,
+        hexColor: colorOptionsMap[value] ?? colorOptionsMap[displayName] ?? null,
+        groupId: groupInfo?.groupId ?? null,
+        groupName: groupInfo?.groupName ?? null,
+      }
+    })
+
+    const activeGroupIds = new Set(colorOptions.map((c) => c.groupId).filter(Boolean))
+    const colorGroups = (colorGroupsData as Array<{ id: string; name: string }>)
+      .filter((g) => activeGroupIds.has(g.id))
+      .map((g) => ({ id: g.id, name: g.name }))
 
     const materialOptions = uniqueMaterialValues.map((value) => ({
       value,
@@ -1151,6 +1190,7 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
         variantOptions: {
           sizes: sizeOptions,
           colors: colorOptions,
+          colorGroups,
           materials: materialOptions,
         },
         priceRange: {

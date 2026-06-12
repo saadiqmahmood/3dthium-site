@@ -24,12 +24,6 @@ interface FormData {
   galleryImages: string[]
 }
 
-interface FilterOptions {
-  colorGroups: { id: string; name: string }[]
-  colors: { id: string; group_id: string | null; name: string; hex_color: string }[]
-  heights: { id: string; label: string }[]
-  rooms: { id: string; name: string }[]
-}
 
 function generateSlug(name: string) {
   return name
@@ -45,12 +39,6 @@ export default function CreateProductPage() {
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  const [allFilterOptions, setAllFilterOptions] = useState<FilterOptions>({
-    colorGroups: [], colors: [], heights: [], rooms: [],
-  })
-  const [selectedColorIds, setSelectedColorIds] = useState<Set<string>>(new Set())
-  const [selectedHeightIds, setSelectedHeightIds] = useState<Set<string>>(new Set())
-  const [selectedRoomIds, setSelectedRoomIds] = useState<Set<string>>(new Set())
   const [formData, setFormData] = useState<FormData>({
     name: '',
     description: '',
@@ -82,19 +70,7 @@ export default function CreateProductPage() {
       .catch(console.error)
   }, [])
 
-  useEffect(() => {
-    authFetch('/api/admin/filter-options')
-      .then((r) => r.json())
-      .then((data) => setAllFilterOptions({
-        colorGroups: data.colorGroups ?? [],
-        colors: data.colors ?? [],
-        heights: data.heights ?? [],
-        rooms: data.rooms ?? [],
-      }))
-      .catch(console.error)
-  }, [])
-
-  const set = (field: keyof FormData, value: unknown) =>
+  const set =(field: keyof FormData, value: unknown) =>
     setFormData((prev) => ({ ...prev, [field]: value }))
 
   const handleNameChange = (name: string) => {
@@ -146,17 +122,6 @@ export default function CreateProductPage() {
 
       if (response.ok) {
         const newId = json.data?.id ?? json.id
-        if (newId && (selectedColorIds.size > 0 || selectedHeightIds.size > 0 || selectedRoomIds.size > 0)) {
-          await authFetch(`/api/admin/products/${newId}/filter-options`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              color_option_ids: [...selectedColorIds],
-              height_option_ids: [...selectedHeightIds],
-              room_option_ids: [...selectedRoomIds],
-            }),
-          })
-        }
         setToast({ message: 'Product created', type: 'success' })
         setTimeout(() => router.push(`/admin/products/${newId}`), 1000)
       } else {
@@ -307,34 +272,6 @@ export default function CreateProductPage() {
               )}
             </div>
 
-            {allFilterOptions.rooms.length > 0 && (
-              <div className="col-span-2">
-                <label className="block text-sm font-light text-zinc-700 mb-2">Room</label>
-                <div className="flex flex-wrap gap-2">
-                  {allFilterOptions.rooms.map((r) => (
-                    <button
-                      key={r.id}
-                      type="button"
-                      onClick={() =>
-                        setSelectedRoomIds((prev) => {
-                          const next = new Set(prev)
-                          if (next.has(r.id)) next.delete(r.id)
-                          else next.add(r.id)
-                          return next
-                        })
-                      }
-                      className={`px-3 py-1.5 rounded-full border text-xs font-light transition-all ${
-                        selectedRoomIds.has(r.id)
-                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                          : 'border-gray-200 text-zinc-600 hover:border-zinc-300'
-                      }`}
-                    >
-                      {r.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           <div>
@@ -398,125 +335,6 @@ export default function CreateProductPage() {
             </p>
           )}
         </div>
-
-        {/* Filter options */}
-        {(allFilterOptions.colors.length > 0 || allFilterOptions.heights.length > 0) && (
-          <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm space-y-5">
-            <div>
-              <h2 className="text-base font-medium text-zinc-800">Filter options</h2>
-              <p className="text-xs text-zinc-400 font-light mt-1">
-                Select which colours and heights apply to this product so customers can filter by them.
-              </p>
-            </div>
-
-            {allFilterOptions.colors.length > 0 && (
-              <div>
-                <p className="text-sm font-light text-zinc-700 mb-3">Colours</p>
-                <div className="space-y-3">
-                  {allFilterOptions.colorGroups.map((group) => {
-                    const groupColors = allFilterOptions.colors.filter((c) => c.group_id === group.id)
-                    if (groupColors.length === 0) return null
-                    return (
-                      <div key={group.id}>
-                        <p className="text-xs text-zinc-400 mb-2">{group.name}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {groupColors.map((c) => (
-                            <button
-                              key={c.id}
-                              type="button"
-                              onClick={() =>
-                                setSelectedColorIds((prev) => {
-                                  const next = new Set(prev)
-                                  if (next.has(c.id)) next.delete(c.id)
-                                  else next.add(c.id)
-                                  return next
-                                })
-                              }
-                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-light transition-all ${
-                                selectedColorIds.has(c.id)
-                                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                                  : 'border-gray-200 text-zinc-600 hover:border-zinc-300'
-                              }`}
-                            >
-                              <span
-                                className="w-3.5 h-3.5 rounded-full border border-gray-200 flex-shrink-0"
-                                style={{ backgroundColor: c.hex_color }}
-                              />
-                              {c.name}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  })}
-                  {allFilterOptions.colors.filter((c) => !c.group_id).length > 0 && (
-                    <div>
-                      {allFilterOptions.colorGroups.length > 0 && (
-                        <p className="text-xs text-zinc-400 mb-2">Other</p>
-                      )}
-                      <div className="flex flex-wrap gap-2">
-                        {allFilterOptions.colors.filter((c) => !c.group_id).map((c) => (
-                          <button
-                            key={c.id}
-                            type="button"
-                            onClick={() =>
-                              setSelectedColorIds((prev) => {
-                                const next = new Set(prev)
-                                if (next.has(c.id)) next.delete(c.id)
-                                else next.add(c.id)
-                                return next
-                              })
-                            }
-                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-light transition-all ${
-                              selectedColorIds.has(c.id)
-                                ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                                : 'border-gray-200 text-zinc-600 hover:border-zinc-300'
-                            }`}
-                          >
-                            <span
-                              className="w-3.5 h-3.5 rounded-full border border-gray-200 flex-shrink-0"
-                              style={{ backgroundColor: c.hex_color }}
-                            />
-                            {c.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {allFilterOptions.heights.length > 0 && (
-              <div>
-                <p className="text-sm font-light text-zinc-700 mb-3">Heights</p>
-                <div className="flex flex-wrap gap-2">
-                  {allFilterOptions.heights.map((h) => (
-                    <button
-                      key={h.id}
-                      type="button"
-                      onClick={() =>
-                        setSelectedHeightIds((prev) => {
-                          const next = new Set(prev)
-                          if (next.has(h.id)) next.delete(h.id)
-                          else next.add(h.id)
-                          return next
-                        })
-                      }
-                      className={`px-3 py-1.5 rounded-full border text-xs font-light transition-all ${
-                        selectedHeightIds.has(h.id)
-                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                          : 'border-gray-200 text-zinc-600 hover:border-zinc-300'
-                      }`}
-                    >
-                      {h.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
         <div className="flex justify-end">
           <button
