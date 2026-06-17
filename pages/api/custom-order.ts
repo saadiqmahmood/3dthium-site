@@ -28,7 +28,8 @@ const schema = z.object({
         }
       },
       { message: 'file_url must point to Supabase Storage' }
-    ),
+    )
+    .optional(),
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -57,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         height: height ?? null,
         depth: depth ?? null,
         description,
-        file_url,
+        file_url: file_url ?? null,
         status: 'pending',
       },
     ])

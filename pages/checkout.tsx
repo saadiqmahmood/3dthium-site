@@ -55,6 +55,31 @@ export default function CheckoutPage() {
     name: '', street1: '', street2: '', city: '', state: '', zip: '',
     country: 'GB', phone: '', email: '',
   })
+  const [savedAddresses, setSavedAddresses] = useState<Array<{
+    id: string; label: string; name: string; line1: string; line2: string;
+    city: string; postcode: string; country: string; phone: string; is_default: boolean;
+  }>>([])
+  const [selectedSavedId, setSelectedSavedId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!user) return
+    fetch('/api/user/addresses')
+      .then((r) => r.json())
+      .then((data) => {
+        const rows = Array.isArray(data) ? data : (data.data ?? [])
+        setSavedAddresses(rows)
+        const def = rows.find((a: { is_default: boolean }) => a.is_default) ?? rows[0]
+        if (def) {
+          setSelectedSavedId(def.id)
+          setShippingAddress({
+            name: def.name, street1: def.line1, street2: def.line2 ?? '',
+            city: def.city, state: '', zip: def.postcode,
+            country: def.country ?? 'GB', phone: def.phone ?? '', email: user.email ?? '',
+          })
+        }
+      })
+      .catch(() => {})
+  }, [user])
 
   useEffect(() => {
     if (cart.length === 0) return
@@ -279,6 +304,80 @@ export default function CheckoutPage() {
             {shippingStep === 'address' && (
               <div className={cardClass}>
                 <h2 className="text-lg font-semibold text-zinc-900 mb-6">Shipping Address</h2>
+
+                {/* Saved address picker — logged-in users only */}
+                {user && savedAddresses.length > 0 && (
+                  <div className="mb-6">
+                    <p className="text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3">Saved addresses</p>
+                    <div className="space-y-2">
+                      {savedAddresses.map((addr) => {
+                        const isSelected = selectedSavedId === addr.id
+                        return (
+                          <button
+                            key={addr.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedSavedId(addr.id)
+                              setShippingAddress({
+                                name: addr.name, street1: addr.line1, street2: addr.line2 ?? '',
+                                city: addr.city, state: '', zip: addr.postcode,
+                                country: addr.country ?? 'GB', phone: addr.phone ?? '',
+                                email: user.email ?? '',
+                              })
+                            }}
+                            className={`w-full text-left border rounded-xl px-4 py-3 transition-all ${
+                              isSelected
+                                ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-200'
+                                : 'border-gray-200 hover:border-emerald-300 hover:bg-zinc-50'
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
+                                isSelected ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300'
+                              }`}>
+                                {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                              </div>
+                              <div>
+                                {addr.label && <p className="text-xs font-medium text-zinc-400 mb-0.5">{addr.label}</p>}
+                                <p className="text-sm font-medium text-zinc-900">{addr.name}</p>
+                                <p className="text-xs font-light text-zinc-500">
+                                  {[addr.line1, addr.city, addr.postcode].filter(Boolean).join(', ')}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        )
+                      })}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedSavedId(null)
+                          setShippingAddress({ name: '', street1: '', street2: '', city: '', state: '', zip: '', country: 'GB', phone: '', email: user.email ?? '' })
+                        }}
+                        className={`w-full text-left border rounded-xl px-4 py-3 transition-all ${
+                          selectedSavedId === null
+                            ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-200'
+                            : 'border-gray-200 hover:border-emerald-300 hover:bg-zinc-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
+                            selectedSavedId === null ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300'
+                          }`}>
+                            {selectedSavedId === null && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          </div>
+                          <p className="text-sm font-light text-zinc-600">Use a new address</p>
+                        </div>
+                      </button>
+                    </div>
+                    {selectedSavedId !== null && (
+                      <div className="mt-4 border-t border-zinc-100 pt-4">
+                        <p className="text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3">Edit details</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <form onSubmit={handleAddressSubmit} className="space-y-4">
                   <div>
                     <label htmlFor={nameId} className={labelClass}>Full name <span className="text-red-400">*</span></label>

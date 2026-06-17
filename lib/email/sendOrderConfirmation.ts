@@ -1,3 +1,4 @@
+import { Resend } from 'resend'
 import { log } from '@/lib/log'
 import { getSupabaseAdmin } from '@/lib/supabaseClient'
 
@@ -158,12 +159,42 @@ export async function sendOrderConfirmation(
     trackingUrl: (order.tracking_url as string | null) ?? null,
   })
 
-  // TODO: integrate email provider (Resend / SendGrid)
-  // Example with Resend:
-  // const resend = new Resend(process.env.RESEND_API_KEY)
-  // await resend.emails.send({ from: 'orders@3dthium.com', to: customerEmail, subject: `Order Confirmation #${order.id.slice(-8)}`, html })
-  log.info('[email] Order confirmation prepared for:', customerEmail ?? order.user_id)
-  log.debug('[email] HTML length:', html.length)
+  if (!process.env.RESEND_API_KEY) {
+    log.error('[email] RESEND_API_KEY not set — skipping send')
+    return { success: false, error: 'Email provider not configured' }
+  }
 
-  return { success: true, email: customerEmail ?? undefined }
+  const toEmail = customerEmail
+  if (!toEmail) {
+    // logged-in user order — look up email from auth
+    const { data: authUser } = await supabase.auth.admin.getUserById(order.user_id as string)
+    if (!authUser?.user?.email) return { success: false, error: 'No email address for order' }
+    const resend = new Resend(process.env.RESEND_API_KEY)
+    const { error } = await resend.emails.send({
+      from: 'noreply@3dthium.com',
+      to: authUser.user.email,
+      subject: `Order Confirmation #${(order.id as string).slice(-8)}`,
+      html,
+    })
+    if (error) {
+      log.error('[email] Resend error:', error)
+      return { success: false, error: error.message }
+    }
+    log.info('[email] Order confirmation sent to:', authUser.user.email)
+    return { success: true, email: authUser.user.email }
+  }
+
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  const { error } = await resend.emails.send({
+    from: 'noreply@3dthium.com',
+    to: toEmail,
+    subject: `Order Confirmation #${(order.id as string).slice(-8)}`,
+    html,
+  })
+  if (error) {
+    log.error('[email] Resend error:', error)
+    return { success: false, error: error.message }
+  }
+  log.info('[email] Order confirmation sent to:', toEmail)
+  return { success: true, email: toEmail }
 }
