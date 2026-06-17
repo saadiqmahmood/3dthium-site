@@ -13,7 +13,7 @@ type Props = {
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const supabase = getSupabaseAnon()
 
-  const [productsResult, categoriesResult, colorGroupsResult, colorsResult, heightsResult] = await Promise.all([
+  const [productsResult, categoriesResult, colorGroupsResult, colorsResult, heightsResult, roomsResult] = await Promise.all([
     supabase
       .from('products')
       .select(`
@@ -37,6 +37,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     supabase.from('color_groups').select('id, name, sort_order').order('sort_order'),
     supabase.from('color_options').select('id, group_id, name, hex_color, sort_order').order('sort_order'),
     supabase.from('height_options').select('id, label, sort_order').order('sort_order'),
+    supabase.from('room_options').select('id, name, sort_order').order('sort_order'),
   ])
 
   const products = productsResult.data ?? []
@@ -46,8 +47,10 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   let variants: ProductVariantNew[] = []
   let attrOptions: Array<{ product_id: string; type: string; options: Array<{ display_name: string }> }> = []
 
+  let productRoomRows: Array<{ product_id: string; room_option_id: string }> = []
+
   if (productIds.length > 0) {
-    const [variantResult, attrResult] = await Promise.all([
+    const [variantResult, attrResult, roomAssocResult] = await Promise.all([
       supabase
         .from('product_variants')
         .select('id, product_id, size, color, material, price_adjustment, is_available, sku')
@@ -57,9 +60,14 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         .from('product_attributes')
         .select('product_id, type, options:product_attribute_options(display_name)')
         .in('product_id', productIds),
+      supabase
+        .from('product_room_options')
+        .select('product_id, room_option_id')
+        .in('product_id', productIds),
     ])
     variants = (variantResult.data as ProductVariantNew[]) ?? []
     attrOptions = (attrResult.data as typeof attrOptions) ?? []
+    productRoomRows = (roomAssocResult.data as typeof productRoomRows) ?? []
   }
 
   // Build lookup maps: display name → filter option ID
@@ -91,6 +99,12 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     }
   }
 
+  const roomIdsByProduct: Record<string, string[]> = {}
+  for (const row of productRoomRows) {
+    if (!roomIdsByProduct[row.product_id]) roomIdsByProduct[row.product_id] = []
+    roomIdsByProduct[row.product_id].push(row.room_option_id)
+  }
+
   const variantsByProduct: Record<string, ProductVariantNew[]> = {}
   for (const v of variants) {
     if (!variantsByProduct[v.product_id]) variantsByProduct[v.product_id] = []
@@ -119,7 +133,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       price_range: { min: minPrice, max: maxPrice, has_variants: productVariants.length > 0 },
       color_option_ids: colorIdsByProduct[product.id] ?? [],
       height_option_ids: heightIdsByProduct[product.id] ?? [],
-      room_option_ids: [],
+      room_option_ids: roomIdsByProduct[product.id] ?? [],
       created_at: product.created_at,
     }
   })
@@ -128,7 +142,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     colorGroups: colorGroupsResult.data ?? [],
     colors: colorsResult.data ?? [],
     heights: heightsResult.data ?? [],
-    rooms: [],
+    rooms: roomsResult.data ?? [],
   }
 
   return {

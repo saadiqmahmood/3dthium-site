@@ -1,0 +1,66 @@
+import { Resend } from 'resend'
+import { log } from '@/lib/log'
+
+export async function sendTrackingUpdate(opts: {
+  to: string
+  orderRef: string
+  trackingNumber: string
+  trackingUrl: string | null
+  carrier: string | null
+}): Promise<{ success: boolean; error?: string }> {
+  const { to, orderRef, trackingNumber, trackingUrl, carrier } = opts
+
+  if (!process.env.RESEND_API_KEY) {
+    log.error('[email/sendTrackingUpdate] RESEND_API_KEY is not set')
+    return { success: false, error: 'Email provider not configured' }
+  }
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your order has shipped</title>
+</head>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px;background:#f5f5f5">
+  <div style="background:white;border-radius:8px;padding:30px;box-shadow:0 2px 4px rgba(0,0,0,.1)">
+    <div style="text-align:center;margin-bottom:24px;padding-bottom:20px;border-bottom:2px solid #e5e5e5">
+      <div style="font-size:22px;font-weight:600;color:#059669">3Dthium</div>
+    </div>
+    <h2 style="font-size:18px;font-weight:600;color:#1f2937;margin:0 0 12px">Your order is on its way!</h2>
+    <p style="margin:0 0 16px;color:#4b5563">Order <strong>#${orderRef}</strong> has been dispatched${carrier ? ` via ${carrier}` : ''}.</p>
+    <div style="background:#ecfdf5;border-left:4px solid #10b981;border-radius:6px;padding:16px;margin:0 0 24px">
+      <p style="margin:0 0 6px;font-weight:600;color:#065f46">Tracking number</p>
+      <p style="margin:0;font-size:18px;font-weight:700;color:#1f2937;letter-spacing:.05em">${trackingNumber}</p>
+      ${trackingUrl ? `<a href="${trackingUrl}" style="display:inline-block;margin-top:10px;color:#059669;font-weight:600;text-decoration:none">Track your parcel →</a>` : ''}
+    </div>
+    <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e5e5;font-size:12px;color:#6b7280;text-align:center">
+      <p style="margin:0">3Dthium &mdash; Custom 3D Printing</p>
+      <p style="margin:4px 0 0">Questions? Contact us at support@3dthium.com</p>
+    </div>
+  </div>
+</body>
+</html>`.trim()
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY)
+    const { error } = await resend.emails.send({
+      from: 'noreply@3dthium.com',
+      to,
+      subject: `Your order #${orderRef} has shipped`,
+      html,
+    })
+
+    if (error) {
+      log.error('[email/sendTrackingUpdate] Resend error:', error)
+      return { success: false, error: error.message }
+    }
+
+    log.info('[email/sendTrackingUpdate] Sent to:', to)
+    return { success: true }
+  } catch (err) {
+    log.error('[email/sendTrackingUpdate] Unexpected error:', err)
+    return { success: false, error: 'Failed to send email' }
+  }
+}

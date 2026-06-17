@@ -62,6 +62,9 @@ export default function EditProductPage() {
   const [productAttributes, setProductAttributes] = useState<ProductAttribute[]>([])
   const [showGenerator, setShowGenerator] = useState(false)
   const [variantRefreshTrigger, setVariantRefreshTrigger] = useState(0)
+  const [allRooms, setAllRooms] = useState<{ id: string; name: string }[]>([])
+  const [selectedRoomIds, setSelectedRoomIds] = useState<Set<string>>(new Set())
+  const [savingRooms, setSavingRooms] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     name: '',
     description: '',
@@ -160,6 +163,58 @@ export default function EditProductPage() {
       })
       .catch(console.error)
   }, [id])
+
+  useEffect(() => {
+    authFetch('/api/admin/filter-options')
+      .then((r) => r.json())
+      .then((data) => setAllRooms(data.rooms ?? []))
+      .catch(console.error)
+  }, [])
+
+  useEffect(() => {
+    if (!id) return
+    authFetch(`/api/admin/products/${id}/filter-options`)
+      .then((r) => r.json())
+      .then((data) => {
+        const fo = data.data ?? data
+        setSelectedRoomIds(new Set(fo.room_option_ids ?? []))
+      })
+      .catch(console.error)
+  }, [id])
+
+  const toggleRoom = (roomId: string) => {
+    setSelectedRoomIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(roomId)) next.delete(roomId)
+      else next.add(roomId)
+      return next
+    })
+  }
+
+  const handleSaveRooms = async () => {
+    if (!id) return
+    setSavingRooms(true)
+    try {
+      // Fetch existing color/height associations to preserve them
+      const existing = await authFetch(`/api/admin/products/${id}/filter-options`).then((r) => r.json())
+      const fo = existing.data ?? existing
+      const res = await authFetch(`/api/admin/products/${id}/filter-options`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          color_option_ids: fo.color_option_ids ?? [],
+          height_option_ids: fo.height_option_ids ?? [],
+          room_option_ids: Array.from(selectedRoomIds),
+        }),
+      })
+      if (res.ok) setToast({ message: 'Room options saved', type: 'success' })
+      else setToast({ message: 'Failed to save room options', type: 'error' })
+    } catch {
+      setToast({ message: 'Failed to save room options', type: 'error' })
+    } finally {
+      setSavingRooms(false)
+    }
+  }
 
   const set = (field: keyof FormData, value: unknown) =>
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -454,6 +509,36 @@ export default function EditProductPage() {
               <p className="text-red-500 text-xs mt-2">{errors.galleryImages}</p>
             )}
           </div>
+
+          {/* Room filter options */}
+          {allRooms.length > 0 && (
+            <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-medium text-zinc-800">Room filter options</h2>
+                <button
+                  type="button"
+                  onClick={handleSaveRooms}
+                  disabled={savingRooms}
+                  className="px-4 py-1.5 bg-emerald-600 text-white text-sm font-light rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                >
+                  {savingRooms ? 'Saving…' : 'Save rooms'}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                {allRooms.map((room) => (
+                  <label key={room.id} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedRoomIds.has(room.id)}
+                      onChange={() => toggleRoom(room.id)}
+                      className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-200"
+                    />
+                    <span className="text-sm font-light text-zinc-700">{room.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex justify-end">
             <button

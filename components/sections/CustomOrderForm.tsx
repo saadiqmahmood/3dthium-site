@@ -55,37 +55,35 @@ export default function CustomOrderForm() {
     setApiStatus('idle')
 
     const file = fileInputRef.current?.files?.[0]
-    if (!file) {
-      setFileError('Please upload a file.')
-      return
-    }
-    if (file.size > 20 * 1024 * 1024) {
-      setFileError('File size must be 20MB or less.')
-      return
-    }
 
-    let fileUrl = ''
-    try {
-      const filePath = `${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`
-      const { error: uploadError } = await supabase.storage
-        .from('custom-orders')
-        .upload(filePath, file)
-      if (uploadError) {
-        setFileError(uploadError.message || 'File upload failed. Please try again.')
+    let fileUrl: string | undefined
+    if (file) {
+      if (file.size > 20 * 1024 * 1024) {
+        setFileError('File size must be 20MB or less.')
         return
       }
-      const { data: publicUrlData } = supabase.storage.from('custom-orders').getPublicUrl(filePath)
-      fileUrl = publicUrlData.publicUrl
-    } catch (err: unknown) {
-      setFileError(err instanceof Error ? err.message : 'File upload failed. Please try again.')
-      return
+      try {
+        const filePath = `${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`
+        const { error: uploadError } = await supabase.storage
+          .from('custom-orders')
+          .upload(filePath, file)
+        if (uploadError) {
+          setFileError(uploadError.message || 'File upload failed. Please try again.')
+          return
+        }
+        const { data: publicUrlData } = supabase.storage.from('custom-orders').getPublicUrl(filePath)
+        fileUrl = publicUrlData.publicUrl
+      } catch (err: unknown) {
+        setFileError(err instanceof Error ? err.message : 'File upload failed. Please try again.')
+        return
+      }
     }
 
     try {
       const res = await fetch('/api/custom-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, file_url: fileUrl }),
+        body: JSON.stringify({ ...data, ...(fileUrl ? { file_url: fileUrl } : {}) }),
       })
       if (!res.ok) throw new Error('Failed to submit custom order.')
       setApiStatus('success')
@@ -244,7 +242,7 @@ export default function CustomOrderForm() {
       </div>
 
       <div>
-        <label htmlFor={`${fId}-file`} className={labelClass}>Design file</label>
+        <label htmlFor={`${fId}-file`} className={labelClass}>Design file <span className="text-zinc-400 font-light">(optional)</span></label>
         <label
           htmlFor={`${fId}-file`}
           className="mt-1 flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-gray-200 border-dashed text-sm text-zinc-400 font-light cursor-pointer hover:border-emerald-300 hover:text-emerald-600 transition-all"
