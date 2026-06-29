@@ -89,7 +89,7 @@ export function buildOrderConfirmationHtml(data: OrderEmailData): string {
     ${trackingNumber ? `<div class="section"><div class="tracking"><strong>Tracking:</strong><br>${trackingUrl ? `<a href="${trackingUrl}" class="tracking-link">${trackingNumber}</a>` : trackingNumber}</div></div>` : ''}
     <div class="footer">
       <p>Thank you for your order!</p>
-      <p>Questions? Contact us at support@3dthium.com</p>
+      <p>Questions? Contact us at info@3dthium.co.uk</p>
     </div>
   </div>
 </body>
@@ -171,7 +171,7 @@ export async function sendOrderConfirmation(
     if (!authUser?.user?.email) return { success: false, error: 'No email address for order' }
     const resend = new Resend(process.env.RESEND_API_KEY)
     const { error } = await resend.emails.send({
-      from: 'noreply@3dthium.com',
+      from: 'noreply@3dthium.co.uk',
       to: authUser.user.email,
       subject: `Order Confirmation #${(order.id as string).slice(-8)}`,
       html,
@@ -186,7 +186,7 @@ export async function sendOrderConfirmation(
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error } = await resend.emails.send({
-    from: 'noreply@3dthium.com',
+    from: 'noreply@3dthium.co.uk',
     to: toEmail,
     subject: `Order Confirmation #${(order.id as string).slice(-8)}`,
     html,

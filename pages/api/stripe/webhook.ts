@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { buffer } from 'micro'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Stripe from 'stripe'
+import { sendOrderConfirmation } from '../../../lib/email/sendOrderConfirmation'
 import { log } from '../../../lib/log'
 import { applyPromoCode } from '../promo_code/apply'
 import { createLabelForOrder } from '../shipping/label'
@@ -281,6 +282,10 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         log.error('[AutoLabel] Auto label creation failed:', labelResult.error)
       }
     }
+
+    sendOrderConfirmation(order.id).catch((e) =>
+      log.error('[webhook] Order confirmation email failed:', e)
+    )
   } catch (error) {
     log.error('Error processing checkout session:', error)
   }
