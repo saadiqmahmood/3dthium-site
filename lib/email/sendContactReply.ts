@@ -43,11 +43,11 @@ export async function sendContactReply(opts: {
 
   try {
     const { error } = await resend.emails.send({
-      from: 'support@3dthium.com',
+      from: 'info@3dthium.co.uk',
       to,
       subject: replySubject,
       html,
-      replyTo: 'support@3dthium.com',
+      replyTo: 'info@3dthium.co.uk',
     })
 
     if (error) {

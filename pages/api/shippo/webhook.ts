@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { sendTrackingUpdate } from '../../../lib/email/sendTrackingUpdate'
 import { log } from '../../../lib/log'
 
 const supabase = createClient(
@@ -74,6 +75,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     log.debug(`Successfully updated order status to: ${mappedStatus}`)
+
+    if (mappedStatus === 'shipped' && data && data.length > 0) {
+      const orderId = (data[0] as { id: string }).id
+      sendTrackingUpdate(orderId).catch((e) => log.error('[email] trackingUpdate failed:', e))
+    }
+
     res.status(200).json({ success: true, updatedCount: count })
   } catch (err) {
     log.error('Error handling Shippo webhook:', err)

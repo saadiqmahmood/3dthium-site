@@ -1,5 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { requireAdmin } from '@/lib/auth/requireAdmin'
+import { sendCancellation } from '../../../../lib/email/sendCancellation'
+import { sendPrintingStarted } from '../../../../lib/email/sendPrintingStarted'
+import { sendTrackingUpdate } from '../../../../lib/email/sendTrackingUpdate'
 import { log } from '../../../../lib/log'
 import { getSupabaseAdmin } from '../../../../lib/supabaseClient'
 
@@ -105,6 +108,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       case 'PUT': {
         log.debug('[API/admin/orders/[id]] Updating order:', id)
+
+        const { data: currentOrder } = await supabaseAdmin
+          .from('orders')
+          .select('status')
+          .eq('id', id)
+          .single()
+
         const { error: updateError } = await supabaseAdmin
           .from('orders')
           .update(req.body)
@@ -113,6 +123,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (updateError) {
           log.error('[API/admin/orders/[id]] Error updating order:', updateError)
           return res.status(500).json({ error: 'Failed to update order' })
+        }
+
+        const newStatus = req.body.status
+        if (newStatus && newStatus !== currentOrder?.status) {
+          if (newStatus === 'printing') {
+            sendPrintingStarted(id).catch((e) => log.error('[email] printingStarted failed:', e))
+          } else if (newStatus === 'shipped') {
+            sendTrackingUpdate(id).catch((e) => log.error('[email] trackingUpdate failed:', e))
+          } else if (newStatus === 'cancelled' || newStatus === 'refunded') {
+            sendCancellation(id).catch((e) => log.error('[email] cancellation failed:', e))
+          }
         }
 
         log.debug('[API/admin/orders/[id]] Order updated successfully')
