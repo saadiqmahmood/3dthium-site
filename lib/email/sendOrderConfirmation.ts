@@ -164,25 +164,17 @@ export async function sendOrderConfirmation(
     return { success: false, error: 'Email provider not configured' }
   }
 
-  const toEmail = customerEmail
-  if (!toEmail) {
-    // logged-in user order — look up email from auth
-    const { data: authUser } = await supabase.auth.admin.getUserById(order.user_id as string)
-    if (!authUser?.user?.email) return { success: false, error: 'No email address for order' }
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    const { error } = await resend.emails.send({
-      from: 'noreply@3dthium.co.uk',
-      to: authUser.user.email,
-      subject: `Order Confirmation #${(order.id as string).slice(-8)}`,
-      html,
-    })
-    if (error) {
-      log.error('[email] Resend error:', error)
-      return { success: false, error: error.message }
-    }
-    log.info('[email] Order confirmation sent to:', authUser.user.email)
-    return { success: true, email: authUser.user.email }
+  let toEmail: string | null = customerEmail ?? null
+  if (!toEmail && order.user_id) {
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('email')
+      .eq('id', order.user_id)
+      .single()
+    toEmail = userRecord?.email ?? null
   }
+
+  if (!toEmail) return { success: false, error: 'No email address for order' }
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   const { error } = await resend.emails.send({

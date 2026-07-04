@@ -29,8 +29,12 @@ export async function sendTrackingUpdate(
 
   let toEmail: string | null = order.guest_email ?? null
   if (!toEmail && order.user_id) {
-    const { data: authUser } = await supabase.auth.admin.getUserById(order.user_id as string)
-    toEmail = authUser?.user?.email ?? null
+    const { data: userRecord } = await supabase
+      .from('users')
+      .select('email')
+      .eq('id', order.user_id)
+      .single()
+    toEmail = userRecord?.email ?? null
   }
 
   if (!toEmail) return { success: false, error: 'No email address for order' }
