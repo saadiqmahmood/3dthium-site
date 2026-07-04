@@ -157,7 +157,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
           stripe_payment_intent_id: (session.payment_intent as string) || null,
           stripe_customer_id: (session.customer as string) || null,
           shipping_name: shippingAddress?.name || null,
-          shipping_address: shippingAddress?.street1 || null,
+          shipping_address: shippingAddress?.street1
+            ? [shippingAddress.street1, shippingAddress.street2].filter(Boolean).join('\n')
+            : null,
           shipping_city: shippingAddress?.city || null,
           shipping_postcode: shippingAddress?.zip || null,
           shipping_country: shippingAddress?.country || 'GB',
