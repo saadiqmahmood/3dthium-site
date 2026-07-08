@@ -78,7 +78,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (mappedStatus === 'shipped' && data && data.length > 0) {
       const orderId = (data[0] as { id: string }).id
-      sendTrackingUpdate(orderId).catch((e) => log.error('[email] trackingUpdate failed:', e))
+      await sendTrackingUpdate(orderId).catch((e) => log.error('[email] trackingUpdate failed:', e))
     }
 
     res.status(200).json({ success: true, updatedCount: count })

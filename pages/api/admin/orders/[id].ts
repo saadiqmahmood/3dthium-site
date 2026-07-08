@@ -128,11 +128,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const newStatus = req.body.status
         if (newStatus && newStatus !== currentOrder?.status) {
           if (newStatus === 'printing') {
-            sendPrintingStarted(id).catch((e) => log.error('[email] printingStarted failed:', e))
+            await sendPrintingStarted(id).catch((e) =>
+              log.error('[email] printingStarted failed:', e)
+            )
           } else if (newStatus === 'shipped') {
-            sendTrackingUpdate(id).catch((e) => log.error('[email] trackingUpdate failed:', e))
+            await sendTrackingUpdate(id).catch((e) =>
+              log.error('[email] trackingUpdate failed:', e)
+            )
           } else if (newStatus === 'cancelled' || newStatus === 'refunded') {
-            sendCancellation(id).catch((e) => log.error('[email] cancellation failed:', e))
+            await sendCancellation(id).catch((e) => log.error('[email] cancellation failed:', e))
           }
         }
 
