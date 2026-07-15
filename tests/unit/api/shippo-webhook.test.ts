@@ -14,6 +14,17 @@ let mockDbCount = 1
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => ({
     from: vi.fn((table: string) => ({
+      // Pre-flight SELECT to check current order status before updating
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          single: vi.fn(() =>
+            Promise.resolve({
+              data: mockDbCount > 0 ? { id: 'order-1', status: 'pending' } : null,
+              error: null,
+            })
+          ),
+        })),
+      })),
       update: vi.fn((data: { status: string }) => ({
         eq: vi.fn((field: string, value: string) => {
           if (field === 'tracking_number') {
