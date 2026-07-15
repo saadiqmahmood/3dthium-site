@@ -22,11 +22,6 @@ export async function sendTrackingUpdate(
     return { success: false, error: 'Order not found' }
   }
 
-  if (!order.tracking_number) {
-    log.warn('[email/sendTrackingUpdate] No tracking number on order:', orderId)
-    return { success: false, error: 'No tracking number on order' }
-  }
-
   let toEmail: string | null = order.guest_email ?? null
   if (!toEmail && order.user_id) {
     const { data: userRecord } = await supabase
@@ -40,7 +35,7 @@ export async function sendTrackingUpdate(
   if (!toEmail) return { success: false, error: 'No email address for order' }
 
   const orderRef = (order.id as string).slice(-8)
-  const trackingNumber = order.tracking_number as string
+  const trackingNumber = (order.tracking_number as string | null) ?? null
   const trackingUrl = (order.tracking_url as string | null) ?? null
   const carrier = (order.shipping_method as string | null) ?? null
 
@@ -59,11 +54,16 @@ export async function sendTrackingUpdate(
     </div>
     <h2 style="font-size:18px;font-weight:600;color:#1f2937;margin:0 0 12px">Your order is on its way!</h2>
     <p style="margin:0 0 16px;color:#4b5563">Order <strong>#${orderRef}</strong> has been dispatched${carrier ? ` via ${carrier}` : ''}.</p>
+    ${
+      trackingNumber
+        ? `
     <div style="background:#ecfdf5;border-left:4px solid #10b981;border-radius:6px;padding:16px;margin:0 0 24px">
       <p style="margin:0 0 6px;font-weight:600;color:#065f46">Tracking number</p>
       <p style="margin:0;font-size:18px;font-weight:700;color:#1f2937;letter-spacing:.05em">${trackingNumber}</p>
       ${trackingUrl ? `<a href="${trackingUrl}" style="display:inline-block;margin-top:10px;color:#059669;font-weight:600;text-decoration:none">Track your parcel →</a>` : ''}
-    </div>
+    </div>`
+        : ''
+    }
     <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e5e5;font-size:12px;color:#6b7280;text-align:center">
       <p style="margin:0">3Dthium &mdash; Custom 3D Printing</p>
       <p style="margin:4px 0 0">Questions? Contact us at info@3dthium.co.uk</p>

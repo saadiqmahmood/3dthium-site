@@ -55,6 +55,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const mappedStatus = statusMap[trackingStatus] || 'unknown'
     log.debug('Mapped status:', { trackingStatus, mappedStatus })
 
+    // Fetch current status before updating so we only email on a real transition
+    const { data: currentOrder } = await supabase
+      .from('orders')
+      .select('id, status')
+      .eq('tracking_number', trackingNumber)
+      .single()
+
+    const wasAlreadyShipped = currentOrder?.status === 'shipped'
+
     // Update the order in the database
     const { data, error, count } = await supabase
       .from('orders')
@@ -76,7 +85,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     log.debug(`Successfully updated order status to: ${mappedStatus}`)
 
-    if (mappedStatus === 'shipped' && data && data.length > 0) {
+    // Only send email on genuine not-shipped → shipped transition
+    if (mappedStatus === 'shipped' && !wasAlreadyShipped && data && data.length > 0) {
       const orderId = (data[0] as { id: string }).id
       await sendTrackingUpdate(orderId).catch((e) => log.error('[email] trackingUpdate failed:', e))
     }
